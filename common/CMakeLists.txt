@@ -95,7 +95,6 @@ SET(common_headers
 	bodytypes.h
 	breakdowns.h
 	classes.h
-	common_profile.h
 	Condition.h
 	crash.h
 	CRC16.h
