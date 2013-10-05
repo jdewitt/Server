@@ -90,6 +90,10 @@ Client::Client(EQStreamInterface* ieqs)
 	numclients++;
 
 	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		ClientVersionBit = 0;
+	}
 }
 
 Client::~Client() {
@@ -406,6 +410,9 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
 		return false;
 	}
+	if(minilogin)
+	client_list.CLEAdd(id, name, password, 0, ip, true);
+
 	if ((minilogin && (cle = client_list.CheckAuth(id,password,ip))) || (cle = client_list.CheckAuth(id, password)))
 #endif
 	{
@@ -445,16 +452,29 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			safe_delete(pack);
 		}
 
-		if (!pZoning)
-			SendGuildList();
-		SendLogServer();
-		SendApproveWorld();
-		SendEnterWorld(cle->name());
-		SendPostEnterWorld();
-		if (!pZoning) {
+
+		if(ClientVersionBit == 0)
+		{		
+			SendApproveWorld();
+			SendEnterWorld(cle->name());
 			SendExpansionInfo();
 			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+		}
+		else
+		{
+		
+
+			if (!pZoning && ClientVersionBit != 0)
+				SendGuildList();
+			SendLogServer();
+			SendApproveWorld();
+			SendEnterWorld(cle->name());
+			SendPostEnterWorld();
+			if (!pZoning) {
+				SendExpansionInfo();
+				SendCharInfo();
+				database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+			}
 		}
 
 	}
@@ -983,6 +1003,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_WorldComplete:
 		{
 			eqs->Close();
+			return true;
+		}
+		case OP_GuildsList:
+		{
+			if(ClientVersionBit == 0)
+			SendGuildList();
 			return true;
 		}
 		case OP_ZoneChange:

@@ -28,7 +28,7 @@
 
 class LoginServer{
 public:
-	LoginServer(const char*, uint16, const char*, const char*);
+	LoginServer(const char*, uint16, const char*, const char*, uint8);
 	~LoginServer();
 
 	bool InitLoginServer();
@@ -55,6 +55,7 @@ private:
 	uint16	LoginServerPort;
 	char	LoginAccount[32];
 	char	LoginPassword[32];
+	uint8	LoginServerType;
 	bool	CanAccountUpdate;
 
 	Timer statusupdate_timer;

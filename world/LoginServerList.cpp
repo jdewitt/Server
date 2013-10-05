@@ -49,9 +49,9 @@ LoginServerList::LoginServerList() {
 LoginServerList::~LoginServerList() {
 }
 
-void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
+void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password, uint8 Type)
 {
-	LoginServer* loginserver = new LoginServer(iAddress, iPort, Account, Password);
+	LoginServer* loginserver = new LoginServer(iAddress, iPort, Account, Password, Type);
 	list.Insert(loginserver);
 }
 

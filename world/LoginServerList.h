@@ -22,7 +22,7 @@ public:
 	LoginServerList();
 	~LoginServerList();
 
-	void	Add(const char*, uint16, const char*, const char*);
+	void	Add(const char*, uint16, const char*, const char*, uint8);
 	void	InitLoginServer();
 
 	bool	Process();
