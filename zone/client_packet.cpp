@@ -91,6 +91,7 @@ void MapOpcodes() {
 
 	//Now put all the opcodes into their home...
 	//Begin Connecting opcodes:
+	ConnectingOpcodes[OP_DataRate] = &Client::Handle_Connect_OP_SetDataRate;
 	ConnectingOpcodes[OP_ZoneEntry] = &Client::Handle_Connect_OP_ZoneEntry;
 	ConnectingOpcodes[OP_SetServerFilter] = &Client::Handle_Connect_OP_SetServerFilter;
 	ConnectingOpcodes[OP_SendAATable] = &Client::Handle_Connect_OP_SendAATable;
@@ -285,6 +286,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Track] = &Client::Handle_OP_Track;
 	ConnectedOpcodes[OP_TrackUnknown] = &Client::Handle_OP_TrackUnknown;
 	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
+	ConnectedOpcodes[OP_0x2120] = &Client::Handle_0x2120;
 	ConnectedOpcodes[OP_ClientError] = &Client::Handle_OP_ClientError;
 	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
@@ -494,6 +496,13 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	return(true);
 }
 
+void Client::Handle_Connect_OP_SetDataRate(const EQApplicationPacket *app)
+{
+	//Just ignore and prepare for ZoneEntry next for now.
+	return;
+}
+
+
 void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(ClientZoneEntry_Struct))
@@ -508,6 +517,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	ClientVersion = Connection()->ClientVersion();
 	ClientVersionBit = 1 << (ClientVersion - 1);
+
+	if(ClientVersion == EQClientMac)
+		ClientVersionBit = 0;
 
 	// Antighost code
 	// tmp var is so the search doesnt find this object
@@ -622,29 +634,40 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	}
 	safe_delete(outapp);
 
-	// Send Zone Objects
+	// Send Zone Objects + Mac Spawns here
+
 	entity_list.SendZoneObjects(this);
 	SendZonePoints();
-	// Live does this
-	outapp = new EQApplicationPacket(OP_SendAAStats, 0);
-	FastQueuePacket(&outapp);
-
-	// Tell client they can continue we're done
-	outapp = new EQApplicationPacket(OP_ZoneServerReady, 0);
-	FastQueuePacket(&outapp);
-	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-	FastQueuePacket(&outapp);
-
-	if(GetClientVersion() >= EQClientRoF)
+	if(GetClientVersion() == EQClientMac)
 	{
-		outapp = new EQApplicationPacket(OP_ClientReady, 0);
+		entity_list.SendZoneSpawnsBulk(this);
+		// Tell client they can continue we're done
+		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 		FastQueuePacket(&outapp);
 	}
+	// Live does this
+	if(GetClientVersion() > EQClientMac)
+	{
+		outapp = new EQApplicationPacket(OP_SendAAStats, 0);
+		FastQueuePacket(&outapp);
 
-	// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
-	outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+		// Tell client they can continue we're done
+		outapp = new EQApplicationPacket(OP_ZoneServerReady, 0);
+		FastQueuePacket(&outapp);
+		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
+		FastQueuePacket(&outapp);
+
+		if(GetClientVersion() >= EQClientRoF)
+		{
+			outapp = new EQApplicationPacket(OP_ClientReady, 0);
+			FastQueuePacket(&outapp);
+		}
+
+		// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
+		outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 
 	if(strncasecmp(zone->GetShortName(), "bazaar", 6) == 0)
 		SendBazaarWelcome();
@@ -745,6 +768,15 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
 	SpawnMercOnZone();
+
+	//Mac and earlier just skip client connected for some reason...
+	if(GetClientVersionBit() == 0)
+	{
+	conn_state = ClientReadyReceived;
+	CompleteConnect();
+	SendHPUpdate();
+	}
+
 
 	return;
 }
@@ -8086,6 +8118,12 @@ void Client::Handle_0x0193(const EQApplicationPacket *app)
 	// 2 bytes: 00 00
 }
 
+void Client::Handle_0x2120(const EQApplicationPacket *app)
+{
+	// EQMac requires this to be sent on zoning.
+	// 16 bytes: 0xE6, 0x02, 0x10, 0x00, 0x00, 0x00, 0x68, 0x42, 0x00, 0x00, 0xDB, 0xC3, 0xFA, 0xFE, 0x00, 0xC2
+}
+
 void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 {
 	ClientError_Struct* error = (ClientError_Struct*)app->pBuffer;
@@ -8744,6 +8782,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	x_pos		= m_pp.x;
 	y_pos		= m_pp.y;
 	z_pos		= m_pp.z;
+/*	if(ClientVersion == EQClientMac){
+			z_pos = m_pp.z/10;
+	}*/
 	heading		= m_pp.heading;
 	race		= m_pp.race;
 	base_race	= m_pp.race;
@@ -9117,7 +9158,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
-
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
@@ -9158,6 +9198,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	sze->player.spawn.curHp=1;
 	sze->player.spawn.NPC=0;
 	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	sze->player.spawn.zoneID = zone->GetZoneID();
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 	//safe_delete(outapp);

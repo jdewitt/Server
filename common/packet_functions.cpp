@@ -50,6 +50,26 @@ void EncryptProfilePacket(uchar* pBuffer, uint32 size) {
 	}
 }
 
+void EncryptSpawnPacket(EQApplicationPacket* app) {
+	//EncryptSpawnPacket(app->pBuffer, app->size);
+}
+
+void EncryptSpawnPacket(uchar* pBuffer, uint32 size) 
+{
+	EncryptZoneSpawnPacket(pBuffer, size);
+	uint64* data = (uint64*) pBuffer;
+	uint32 len = size >> 3;		// number of int64's
+	uint64 crypt = 0;
+	uint64 next_crypt;
+
+	for (uint32 i=0; i<len; i++) {
+		next_crypt = crypt + data[i] - 0x65e7;
+		data[i] = ((data[i] << 0x09) | (data[i] >> 0x37)) + 0x65E7;
+		data[i] = ((data[i] << 0x0d) | (data[i] >> 0x33)) - crypt;
+		crypt = next_crypt;
+	}
+}
+
 void EncryptZoneSpawnPacket(EQApplicationPacket* app) {
 	//EncryptZoneSpawnPacket(app->pBuffer, app->size);
 }

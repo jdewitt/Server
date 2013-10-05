@@ -2006,6 +2006,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_ski
 		mlog(COMBAT__HITS, "Triggering EVENT_ATTACK due to attack by %s", other->GetName());
 		parse->EventNPC(EVENT_ATTACK, this, other, "", 0);
 	}
+
 	attacked_timer.Start(CombatEventTimer_expire);
 
 	if (!IsEngaged())

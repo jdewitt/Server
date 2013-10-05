@@ -96,5 +96,6 @@ D(OP_DeleteItem)
 D(OP_AugmentItem)
 D(OP_AltCurrencySellSelection)
 D(OP_AltCurrencySell)
+E(OP_MobUpdate)
 #undef E
 #undef D

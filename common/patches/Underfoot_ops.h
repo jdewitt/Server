@@ -124,5 +124,6 @@ D(OP_PetCommands)
 D(OP_BuffRemoveRequest)
 D(OP_AltCurrencySellSelection)
 D(OP_AltCurrencySell)
+E(OP_MobUpdate)
 #undef E
 #undef D

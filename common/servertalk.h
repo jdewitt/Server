@@ -451,15 +451,15 @@ struct ServerLSInfo_Struct {
 };
 
 struct ServerNewLSInfo_Struct {
-	char	name[201];				// name the worldserver wants
-	char	shortname[50];				// shortname the worldserver wants
-	char	remote_address[125];			// DNS address of the server
-	char	local_address[125];			// DNS address of the server
-	char	account[31];			// account name for the worldserver
-	char	password[31];			// password for the name
+	char	name[201];	// name the worldserver wants
+	char	shortname[50];	// shortname the worldserver wants
+	char	remote_address[125];	// DNS address of the server
+	char	local_address[125];	// DNS address of the server
+	char	account[31];	// account name for the worldserver
+	char	password[31];	// password for the name
 	char	protocolversion[25];	// Major protocol version number
-	char	serverversion[64];		// minor server software version number
-	uint8	servertype;				// 0=world, 1=chat, 2=login, 3=MeshLogin
+	char	serverversion[64];	// minor server software version number
+	uint8	servertype;	// 0=world, 1=chat, 2=login, 3=MeshLogin
 };
 
 struct ServerLSAccountUpdate_Struct {			// for updating info on login server

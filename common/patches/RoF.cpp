@@ -2034,11 +2034,11 @@ ENCODE(OP_ZoneSpawns)
 			Position->deltaX = emu->deltaX;
 			Position->deltaHeading = emu->deltaHeading;
 			Position->deltaY = emu->deltaY;
-			Position->y = emu->y;
+			Position->y = FloatToEQ19(emu->y);
 			Position->animation = emu->animation;
-			Position->heading = emu->heading;
-			Position->x = emu->x;
-			Position->z = emu->z;
+			Position->heading = FloatToEQ19(emu->heading);
+			Position->x = FloatToEQ19(emu->x);
+			Position->z = FloatToEQ19(emu->z);
 			Position->deltaZ = emu->deltaZ;
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
@@ -2650,20 +2650,21 @@ ENCODE(OP_DeleteSpawn)
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_MobUpdate) { ENCODE_FORWARD(OP_ClientUpdate); }
 
 ENCODE(OP_ClientUpdate) {
 	ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
 	SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
 	OUT(spawn_id);
-	OUT(x_pos);
-	OUT(delta_x);
-	OUT(delta_y);
-	OUT(z_pos);
-	OUT(delta_heading);
-	OUT(y_pos);
-	OUT(delta_z);
+	eq->x_pos = FloatToEQ19(emu->x_pos);
+	eq->delta_x = NewFloatToEQ13(emu->delta_x);
+	eq->delta_y = NewFloatToEQ13(emu->delta_y);
+	eq->z_pos = FloatToEQ19(emu->z_pos);
+	eq->heading = FloatToEQ19(emu->heading);
+	eq->y_pos = FloatToEQ19(emu->y_pos);
+	eq->delta_z = NewFloatToEQ13(emu->delta_z);
 	OUT(animation);
-	OUT(heading);
+	eq->delta_heading = NewFloatToEQ13(emu->delta_heading);
 	FINISH_ENCODE();
 }
 
@@ -3744,7 +3745,7 @@ ENCODE(OP_ZoneChange)
 	OUT(instanceID);
 	OUT(y);
 	OUT(x);
-	OUT(z)
+	OUT(z);
 	OUT(zone_reason);
 	OUT(success);
 	FINISH_ENCODE();

@@ -11,7 +11,20 @@ EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, O
 	m_opcodes(opcodes)
 {
 	stream = nullptr;	//take the stream.
-	m_stream->SetOpcodeManager(m_opcodes);
+
+	EQStream* m_pStream = (EQStream*)m_stream;
+	m_pStream->SetOpcodeManager(m_opcodes);
+}
+
+EQStreamProxy::EQStreamProxy(EQOldStream *&stream, const StructStrategy *structs, OpcodeManager **opcodes)
+:	m_stream(stream),
+	m_structs(structs),
+	m_opcodes(opcodes)
+{
+	stream = nullptr;	//take the stream.
+
+	EQOldStream* m_pStream = (EQOldStream*)m_stream;
+	m_pStream->SetOpcodeManager(m_opcodes);
 }
 
 EQStreamProxy::~EQStreamProxy() {
@@ -45,7 +58,6 @@ EQApplicationPacket *EQStreamProxy::PopPacket() {
 	EQApplicationPacket *pack = m_stream->PopPacket();
 	if(pack == nullptr)
 		return(nullptr);
-
 	//pass this packet through the struct strategy.
 	m_structs->Decode(pack);
 	return(pack);
@@ -88,13 +100,17 @@ void EQStreamProxy::ReleaseFromUse() {
 
 	//this is so ugly, but I cant think of a better way to deal with
 	//it right now...
-	if(!m_stream->IsInUse()) {
+	if(!IsInUse()) {
 		delete this;
 	}
 }
 
 void EQStreamProxy::RemoveData() {
 	m_stream->RemoveData();
+}
+
+bool EQStreamProxy::IsInUse() {
+	return m_stream->IsInUse();
 }
 
 bool EQStreamProxy::CheckState(EQStreamState state) {

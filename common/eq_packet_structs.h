@@ -339,6 +339,7 @@ union
 	uint32 DestructibleUnk7;
 	uint8 DestructibleUnk8;
 	uint32 DestructibleUnk9;
+	uint32 zoneID; // for mac.
 
 };
 
@@ -356,6 +357,7 @@ struct ClientZoneEntry_Struct {
 /*0000*/	uint32	unknown00;
 /*0004*/	char	char_name[64];			// Character Name
 };
+
 
 /*
 ** Server Zone Entry Struct
@@ -1266,27 +1268,29 @@ struct BecomeCorpse_Struct {
 };
 
 /*
-** Spawn position update
+**  Emu Spawn position update
 **	Struct sent from server->client to update position of
 **	another spawn's position update in zone (whether NPC or PC)
+**   
+**  This is modified to support multiple client versions in encodes.
 **
 */
 struct PlayerPositionUpdateServer_Struct
 {
 /*0000*/ uint16		spawn_id;
-/*0002*/ int32		delta_heading:10,	// change in heading
-					x_pos:19,			// x coord
-					padding0002:3;		// ***Placeholder
-/*0006*/ int32		y_pos:19,			// y coord
-					animation:10,		// animation
-					padding0006:3;		// ***Placeholder
-/*0010*/ int32		z_pos:19,			// z coord
-					delta_y:13;			// change in y
-/*0014*/ int32		delta_x:13,			// change in x
-					heading:12,			// heading
-					padding0014:7;		// ***Placeholder
-/*0018*/ int32		delta_z:13,			// change in z
-					padding0018:19;		// ***Placeholder
+/*0002*/ float		delta_heading;	// change in heading
+		 float		x_pos;			// x coord
+		 uint32		padding0002;		// ***Placeholder
+/*0006*/ float		y_pos;			// y coord
+		 int32		animation;		// animation
+		 int32		padding0006;		// ***Placeholder
+/*0010*/ float		z_pos;			// z coord
+		 float		delta_y;			// change in y
+/*0014*/ float		delta_x;			// change in x
+		 int32		heading;			// heading
+		 int32		padding0014;		// ***Placeholder
+/*0018*/ float		delta_z;			// change in z
+		 int32		padding0018;		// ***Placeholder
 /*0022*/
 };
 

@@ -29,9 +29,8 @@ uint64 rorl(uint64 in, uint8 bits);
 void EncryptProfilePacket(EQApplicationPacket* app);
 void EncryptProfilePacket(uchar* pBuffer, uint32 size);
 
-#define EncryptSpawnPacket EncryptZoneSpawnPacket
-//void EncryptSpawnPacket(EQApplicationPacket* app);
-//void EncryptSpawnPacket(uchar* pBuffer, uint32 size);
+void EncryptSpawnPacket(EQApplicationPacket* app);
+void EncryptSpawnPacket(uchar* pBuffer, uint32 size);
 
 void EncryptZoneSpawnPacket(EQApplicationPacket* app);
 void EncryptZoneSpawnPacket(uchar* pBuffer, uint32 size);

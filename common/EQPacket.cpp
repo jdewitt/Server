@@ -507,3 +507,335 @@ void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {
 //	DumpPacketAscii(app->pBuffer, app->size);
 }
 
+EQOldPacket::EQOldPacket(const unsigned char *buf, uint32 len)
+{
+	// Clear Fields
+	Clear();
+}
+
+EQOldPacket::EQOldPacket()
+{
+	// Clear Fields
+	Clear();
+}
+
+// Destructor
+// deletes pExtra
+EQOldPacket::~EQOldPacket()
+{
+	_log(NET__DEBUG, "Killing old packet"); 
+	if (pExtra)
+	{
+		safe_delete(pExtra);//delete pExtra;
+	}
+}
+
+
+// CRC Table generation code
+uint32 EQOldPacket::RoL(uint32 in, uint32 bits) 
+{
+	uint32 temp, out;
+
+	temp = in;
+	temp >>= (32 - bits);
+	out = in;
+	out <<= bits;
+	out |= temp;
+
+	return out;
+}
+			
+uint32 EQOldPacket::CRCLookup(uchar idx) 
+{
+
+	if (idx == 0)
+	{
+		return 0x00000000;
+	}
+			    
+	if (idx == 1)
+	{
+		return 0x77073096;
+	}
+			    
+	if (idx == 2)
+	{
+		return RoL(CRCLookup(1), 1);
+	}
+			     
+	if (idx == 4)
+	{
+		return 0x076DC419;
+	}
+			    
+	for (uchar b=7; b>0; b--)
+	{
+		uchar bv = 1 << b;
+			    
+		if (!(idx ^ bv)) 
+		{
+			/* bit is only one set */
+			return ( RoL(CRCLookup (4), b - 2) );
+		}
+
+		if (idx&bv) 
+		{
+			/* bit is set */
+			return( CRCLookup(bv) ^ CRCLookup(idx&(bv - 1)) );
+		}
+	}
+
+	//Failure
+	return false;
+}
+
+uint32 EQOldPacket::GenerateCRC(uint32 b, uint32 bufsize, uchar *buf) 
+{
+	uint32 CRC = (b ^ 0xFFFFFFFF), bufremain = bufsize;
+	uchar  *bufptr = buf;
+
+	while (bufremain--) 
+	{
+		CRC = CRCLookup((uchar)(*(bufptr++)^ (CRC&0xFF))) ^ (CRC >> 8);
+	}
+			  
+	return (htonl (CRC ^ 0xFFFFFFFF));
+}
+
+void EQOldPacket::DecodePacket(uint16 length, uchar *pPacket)
+{
+	// Local variables
+	uint16 *intptr   = (uint16*) pPacket;
+	uint16  size     = 0;
+			    
+	// Start Processing
+
+	if (length < 10) // Adding checks for illegal packets, so we dont read beyond the buffer
+	{                //      Minimum normal packet length is 10
+	//	cerr << "EQPacket.cpp: Illegal packet length" << endl;
+		return;      // TODO: Do we want to check crc checksum on the incoming packets?
+	}           
+
+	HDR = *((EQPACKET_HDR_INFO*)intptr++);
+	size+=2;
+
+	dwSEQ = ntohs(*intptr++);
+	size+=2;
+			    
+
+	/************ CHECK ACK FIELDS ************/
+	//Common ACK Response
+	if(HDR.b2_ARSP)
+	{
+		dwARSP = ntohs(*intptr++);
+		size+=2;
+	}
+	// Dont know what this HDR.b4_Unknown data is, gets sent when there is packetloss
+	bool bDumpPacket = false;
+	if (HDR.b4_Unknown)
+	{
+		// cout << "DEBUG: HDR.b4_Unknown" << endl;
+		// DumpPacket(pPacket, length);
+		size++; // One unknown byte
+		intptr = (uint16*)&pPacket[size]; // Stepping intptr half a step...
+		bDumpPacket = true;
+	}
+	/*
+		See comment above about HDR.b4.
+		Same story with b5, b6, b7, but they're 2, 4 and 8 bytes respectively.
+	*/
+	if (HDR.b5_Unknown)
+	{
+		// cout << "DEBUG: HDR.b5_Unknown" << endl;
+		bDumpPacket = true;
+		size += 2; // 2 unknown bytes
+		intptr++;
+	}
+	if (HDR.b6_Unknown)
+	{
+		// cout << "DEBUG: HDR.b6_Unknown" << endl;
+		bDumpPacket = true;
+		size += 4; // 4 unknown bytes
+		intptr += 2;
+	}
+	if (HDR.b7_Unknown)
+	{
+		//cout << "DEBUG: HDR.b7_Unknown" << endl;
+		bDumpPacket = true;
+		size += 8; // 8 unknown bytes
+		intptr += 4;
+	}
+			    
+	//Common  ACK Request
+	if(HDR.a1_ARQ)
+	{
+		dwARQ = ntohs(*intptr++);
+		size+=2;
+	}
+	/************ END CHECK ACK FIELDS ************/
+
+
+
+	/************ CHECK FRAGMENTS ************/
+	if(HDR.a3_Fragment)
+	{ 
+		if (length < 16) // Adding checks for illegal packets, so we dont read beyond the buffer
+		{
+			return;
+		}
+		size += 6;
+		pPacket += size;
+
+		//Extract frag info.
+		fraginfo.dwSeq    = ntohs(*intptr++);
+		fraginfo.dwCurr   = ntohs(*intptr++);
+		fraginfo.dwTotal  = ntohs(*intptr++);
+	}
+	/************ END CHECK FRAGMENTS ************/
+			    
+
+
+	/************ CHECK ACK SEQUENCE ************/
+	if(HDR.a4_ASQ && HDR.a1_ARQ)
+	{
+		dbASQ_high = ((char*)intptr)[0];
+		dbASQ_low  = ((char*)intptr)[1];
+		intptr++;
+		size+=2;
+	}
+	else
+	{
+		if(HDR.a4_ASQ)
+		{
+			dbASQ_high = ((char*)intptr)[0]; intptr = (uint16*)&pPacket[size+1]; //This better?
+			size+=1;
+		}
+	}
+	/************ END CHECK ACK SEQUENCE ************/
+			    
+	/************ GET OPCODE/EXTRACT DATA ************/
+				
+	if(length-size > 4 && !(HDR.a2_Closing && HDR.a6_Closing))
+	{
+		/************ Extract applayer ************/
+		if(!fraginfo.dwCurr) //OPCODE only included in first fragment!
+		{
+			dwOpCode = ntohs(*intptr++);
+			size += 2;
+		}
+
+		dwExtraSize = length - size - 4;
+		if (length < size + 4)
+		{
+			dwExtraSize = 0;    
+		}
+		if (dwExtraSize > 0)    
+		{
+			pExtra      = new uchar[dwExtraSize];
+			memcpy((void*)pExtra, (void*) intptr, dwExtraSize);
+		}
+	}
+	else
+	{   /************ PURE ACK ************/
+		dwOpCode    = 0;
+
+		pExtra      = 0;
+		dwExtraSize = 0;
+	}
+	/************ END GET OPCODE/EXTRA DATA ************/
+
+
+/************ END PROCESSING ************/
+}
+
+uchar* EQOldPacket::ReturnPacket(uint16 *dwLength)
+{
+	*dwLength = 0;
+	/************ ALLOCATE MEMORY ************/
+	uint32 length = 18 + dwExtraSize + 4;
+	uchar *pPacket = new uchar[length];
+	uint16 *temp    = (uint16*)pPacket;
+			    
+
+	/************ SET INFO BYTES ************/
+	temp[0] = *((uint16*)&HDR);
+	temp[1] = ntohs(dwSEQ);
+
+	temp      += 2;
+	*dwLength += 4;
+	/************ END SET INFO ************/
+
+	/************ PUT ACK FIELDS ************/
+	if(HDR.b2_ARSP)
+	{
+		temp[0] = ntohs(dwARSP);
+		temp++;
+		*dwLength+=2;
+	}
+			    
+	if(HDR.a1_ARQ)
+	{
+		temp[0] = ntohs(dwARQ);
+		temp++;
+		*dwLength+=2;
+	}
+	/************ END PUT ACK FIELDS ************/
+
+
+	/************ GET FRAGMENT INFORMATION ************/
+	if(HDR.a3_Fragment)
+	{
+		temp[0] = ntohs(fraginfo.dwSeq);
+		temp[1] = ntohs(fraginfo.dwCurr);
+		temp[2] = ntohs(fraginfo.dwTotal);
+
+		*dwLength   += 6;
+		temp        += 3;
+	}
+	/************ END FRAGMENT INFO ************/
+
+	/************ PUT ACKSEQ FIELD ************/
+	if(HDR.a4_ASQ && HDR.a1_ARQ)
+	{
+		((char*)temp)[0] = dbASQ_high;
+		((char*)temp)[1] = dbASQ_low;
+
+		*dwLength   += 2;
+		temp++;
+	}
+	else
+	{
+		if(HDR.a4_ASQ)
+		{
+			((char*)temp++)[0] = dbASQ_high;
+			(*dwLength)++;
+		}
+	}
+	/************ END PUT ACKSEQ FIELD ************/
+
+	/************ CHECK FOR PURE ACK == NO OPCODE ************/
+	if(dwOpCode)
+	{
+		temp[0] = ntohs(dwOpCode);
+		temp++;
+
+		*dwLength+=2;
+	}
+	if(pExtra)
+	{
+		memcpy((void*) temp, (void*)pExtra, dwExtraSize);
+		*dwLength += dwExtraSize;
+	}
+	/************ END CHECK FOR PURE ACK == NO OPCODE ************/
+
+			    
+	/************ CALCULATE CHECKSUM ************/
+			    
+	uchar* temp2 = ((uchar*)pPacket)+*dwLength;
+	((uint32*)temp2)[0] = GenerateCRC(0, *dwLength, (uchar*)pPacket);
+	*dwLength+=4;
+
+	/************ END CALCULATE CHECKSUM ************/
+
+	return(pPacket);
+}

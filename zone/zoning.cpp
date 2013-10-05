@@ -50,8 +50,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	uint16 target_zone_id = 0;
 	uint16 target_instance_id = zc->instanceID;
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		target_instance_id = 0;
+	}
 	ZonePoint* zone_point = nullptr;
-
 	//figure out where they are going.
 	if(zc->zoneID == 0) {
 		//client dosent know where they are going...
@@ -87,7 +90,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				//unable to find a zone point... is there anything else
 				//that can be a valid un-zolicited zone request?
 
-				CheatDetected(MQZone, zc->x, zc->y, zc->z);
+				//EQMac ChangeZone doesn't have coords.
+				if(eqs->ClientVersion() != EQClientMac)
+				{
+					CheatDetected(MQZone, zc->x, zc->y, zc->z);
+				}
 				Message(13, "Invalid unsolicited zone request.");
 				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
 				SendZoneCancel(zc);
@@ -122,7 +129,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
 				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
-				CheatDetected(MQGate, zc->x, zc->y, zc->z);
+				//EQMac ChangeZone doesn't have coords.
+				if(eqs->ClientVersion() != EQClientMac)
+				{
+					CheatDetected(MQGate, zc->x, zc->y, zc->z);
+				}
 				SendZoneCancel(zc);
 				return;
 			}
@@ -317,6 +328,15 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		int8 eqmacunknown[16] = {0xE6, 0x02, 0x10, 0x00, 0x00, 0x00, 0x68, 0x42, 0x00, 0x00, 0xDB, 0xC3, 0xFA, 0xFE, 0x00, 0xC2};
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_0x2120, sizeof(eqmacunknown));
+		memcpy(outapp->pBuffer, eqmacunknown, sizeof(eqmacunknown));
+		outapp->priority = 6;
+		FastQueuePacket(&outapp);
+	}
+
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
 }
@@ -329,7 +349,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//dont clear aggro until the zone is successful
 	entity_list.RemoveFromHateLists(this);
-
+	 
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
@@ -466,6 +486,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 }
 
 void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
+
 	bool ReadyToZone = true;
 	int iZoneNameLength = 0;
 	const char*	pShortZoneName = nullptr;
@@ -545,75 +566,144 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	if(ReadyToZone) {
 		zone_mode = zm;
+		//Find equivelent for EQMac
 		if(zm == ZoneToBindPoint) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
-			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
+			if(eqs->ClientVersion() == EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-			// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
-			//
-			if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
-				gmg->bind_zone_id = 0;
+				strcpy(gmg->charname,this->name);
+				strcpy(gmg->gmname,this->name);
+				gmg->zoneID = zoneID;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 			else
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
+				ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
+
+				// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
+				//
+				if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
+					gmg->bind_zone_id = 0;
+				else
 				gmg->bind_zone_id = zoneID;
 
-			gmg->x = x;
-			gmg->y = y;
-			gmg->z = z;
-			gmg->heading = heading;
-			strcpy(gmg->zone_name, pZoneName);
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				gmg->heading = heading;
+				strcpy(gmg->zone_name, pZoneName);
 
-			outapp->priority = 6;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
-			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
+			if(eqs->ClientVersion() == EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-			gmg->zone_id = zoneID;
-			gmg->x = x;
-			gmg->y = y;
-			gmg->z = z;
-			gmg->heading = heading;
-			gmg->instance_id = instance_id;
-			gmg->type = 0x01;				//an observed value, not sure of meaning
+				strcpy(gmg->charname,this->name);
+				strcpy(gmg->gmname,this->name);
+				gmg->zoneID = zoneID;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
 
-			outapp->priority = 6;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
+			else
+			{
+			
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+				RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
+
+				gmg->zone_id = zoneID;
+
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				gmg->heading = heading;
+				gmg->instance_id = instance_id;
+				gmg->type = 0x01;				//an observed value, not sure of meaning
+
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 		}
 		else if(zm == EvacToSafeCoords) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
-			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
+			if(eqs->ClientVersion() == EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-			// if we are in the same zone we want to evac to, client will not send OP_ZoneChange back to do an actual
-			// zoning of the client, so we have to send a viable zoneid that the client *could* zone to to make it believe
-			// we are leaving the zone, even though we are not. We have to do this because we are missing the correct op code
-			// and struct that should be used for evac/succor.
-			// 213 is Plane of War
-			// 76 is orignial Plane of Hate
-			// WildcardX 27 January 2008. Tested this for 6.2 and Titanium clients.
+				strcpy(gmg->charname,this->name);
+				strcpy(gmg->gmname,this->name);
+				if(this->GetZoneID() == 1)
+					gmg->zoneID = 2;
+				else if(this->GetZoneID() == 2)
+					gmg->zoneID = 1;
+				else
+					gmg->zoneID = 1;
 
-			if(this->GetZoneID() == 1)
-				gmg->zone_id = 2;
-			else if(this->GetZoneID() == 2)
-				gmg->zone_id = 1;
-			else
-				gmg->zone_id = 1;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
 
-			gmg->x = x;
-			gmg->y = y;
-			gmg->z = z;
-			gmg->heading = heading;
-			gmg->instance_id = instance_id;
-			gmg->type = 0x01;				// '0x01' was an observed value for the type field, not sure of meaning
+				// we hide the real zoneid we want to evac/succor to here
+				zonesummon_id = zoneID;
 
-			// we hide the real zoneid we want to evac/succor to here
-			zonesummon_id = zoneID;
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
+			else {
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+				RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
-			outapp->priority = 6;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
+				// if we are in the same zone we want to evac to, client will not send OP_ZoneChange back to do an actual
+				// zoning of the client, so we have to send a viable zoneid that the client *could* zone to to make it believe
+				// we are leaving the zone, even though we are not. We have to do this because we are missing the correct op code
+				// and struct that should be used for evac/succor.
+				// 213 is Plane of War
+				// 76 is orignial Plane of Hate
+				// WildcardX 27 January 2008. Tested this for 6.2 and Titanium clients.
+
+
+				if(this->GetZoneID() == 1)
+					gmg->zone_id = 2;
+				else if(this->GetZoneID() == 2)
+					gmg->zone_id = 1;
+				else
+					gmg->zone_id = 1;
+
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				gmg->heading = heading;
+				gmg->instance_id = instance_id;
+				gmg->type = 0x01;				// '0x01' was an observed value for the type field, not sure of meaning
+
+				// we hide the real zoneid we want to evac/succor to here
+				zonesummon_id = zoneID;
+
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 		}
 		else {
 			if(zoneID == GetZoneID()) {
@@ -627,19 +717,36 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				SendPosition();
 			}
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
-			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
+			if(eqs->ClientVersion() == EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-			gmg->zone_id = zoneID;
-			gmg->x = x;
-			gmg->y = y;
-			gmg->z = z;
-			gmg->heading = heading;
-			gmg->instance_id = instance_id;
-			gmg->type = 0x01;	//an observed value, not sure of meaning
-			outapp->priority = 6;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
+				strcpy(gmg->charname,this->name);
+				strcpy(gmg->gmname,this->name);
+				gmg->zoneID = zoneID;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
+			else {
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+				RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
+
+				gmg->zone_id = zoneID;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				gmg->heading = heading;
+				gmg->instance_id = instance_id;
+				gmg->type = 0x01;	//an observed value, not sure of meaning
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 		}
 
 		_log(NET__DEBUG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
@@ -662,6 +769,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	safe_delete_array(pZoneName);
 }
+
 
 void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id) {
 	if(zone_id == 0)

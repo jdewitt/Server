@@ -576,6 +576,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("Sound", static_cast<int>(OP_Sound)),
 			luabind::value("0x0193", static_cast<int>(OP_0x0193)),
 			luabind::value("0x0347", static_cast<int>(OP_0x0347)),
+			luabind::value("0x2120", static_cast<int>(OP_0x2120)),
 			luabind::value("WorldComplete", static_cast<int>(OP_WorldComplete)),
 			luabind::value("MobRename", static_cast<int>(OP_MobRename)),
 			luabind::value("TaskDescription", static_cast<int>(OP_TaskDescription)),

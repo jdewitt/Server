@@ -17,6 +17,7 @@
 #include "../common/misc.h"
 #include "../common/Condition.h"
 #include "../common/timer.h"
+#include "queue.h"
 
 #define FLAG_COMPRESSED	0x01
 #define FLAG_ENCODED	0x04
@@ -28,6 +29,51 @@
 #define RETRANSMIT_TIMEOUT_MAX 5000
 #define AVERAGE_DELTA_MAX 2500
 #define RETRANSMIT_ACKED_PACKETS true
+
+#define PM_ACTIVE    0 // Comment: manager is up and running
+#define PM_FINISHING 1 // Comment: manager received closing bits and is going to send final packet
+#define PM_FINISHED  2 // Comment: manager has sent closing bits back to client
+
+
+template <typename type>                    // LO_BYTE
+type  LO_BYTE (type a) {return (a&=0xff);}  
+template <typename type>                    // HI_BYTE 
+type  HI_BYTE (type a) {return (a&=0xff00);} 
+template <typename type>                    // LO_WORD
+type  LO_WORD (type a) {return (a&=0xffff);}  
+template <typename type>                    // HI_WORD 
+type  HI_WORD (type a) {return (a&=0xffff0000);} 
+template <typename type>                    // HI_LOSWAPshort
+type  HI_LOSWAPshort (type a) {return (LO_BYTE(a)<<8) | (HI_BYTE(a)>>8);}  
+template <typename type>                    // HI_LOSWAPlong
+type  HI_LOSWAPlong (type a) {return (LO_WORD(a)<<16) | (HIWORD(a)>>16);}  
+
+#define EQOLDSTREAM_OUTBOUD_THRESHOLD 9
+
+// Added struct
+typedef struct
+{
+	uchar*  buffer;
+	uint16   size;
+}MySendPacketStruct;
+
+
+struct ACK_INFO
+{
+	ACK_INFO() 
+	{
+		// Set properties to 0
+		dwARQ = 0;
+		dbASQ_high = dbASQ_low = 0;
+		dwGSQ = 0; 
+	}
+
+	int16   dwARQ;			// Comment: Current request ack
+	int16   dbASQ_high : 8;	//TODO: What is this one?
+	int16	dbASQ_low  : 8;	//TODO: What is this one?
+	int16   dwGSQ;			// Comment: Main sequence number SHORT#2
+
+};
 
 #pragma pack(1)
 struct SessionRequest {
@@ -67,6 +113,67 @@ class OpcodeManager;
 //class EQStreamFactory;
 class EQStreamPair;
 class EQRawApplicationPacket;
+
+class Fragment
+{
+public:
+	Fragment();
+	~Fragment();
+
+	void SetData(uchar* d, uint32 s);
+
+	uchar* GetData() 
+	{
+		return this->data;
+	}
+
+	uint32  GetSize() 
+	{ 
+		return this->size; 
+	}
+
+private:
+	uchar*	data;
+	uint32	size;
+};
+
+class FragmentGroup
+{
+public:
+	FragmentGroup(uint16 seq, uint16 opcode, uint16 num_fragments);
+	~FragmentGroup();
+
+	void Add(uint16 frag_id, uchar* data, uint32 size);
+	uchar* AssembleData(uint32* size);
+
+	uint16 GetSeq()
+	{
+		return seq;
+	}
+
+	uint16 GetOpcode()
+	{
+		return opcode;
+	}
+
+private:
+	uint16 seq;				// Sequence number
+	uint16 opcode;			// Fragment group's opcode
+	uint16 num_fragments;	//TODO: What is this one?
+	Fragment* fragment;		//TODO: What is this one?
+};
+
+
+class FragmentGroupList
+{
+public:
+	void Add(FragmentGroup* add_group);
+	FragmentGroup* Get(int16 find_seq);
+	void Remove(int16 remove_seq);
+
+private:
+	std::vector<FragmentGroup*> fragment_group_list;
+};
 
 class EQStream : public EQStreamInterface {
 	friend class EQStreamPair;	//for collector.
@@ -214,7 +321,7 @@ class EQStream : public EQStreamInterface {
 		void Write(int eq_fd);
 
 		//
-		inline bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); return flag; }
+		virtual bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); return flag; }
 		inline void PutInUse() { MInUse.lock(); active_users++; MInUse.unlock(); }
 
 		inline EQStreamState GetState() { EQStreamState s; MState.lock(); s=State; MState.unlock(); return s; }
@@ -278,6 +385,170 @@ class EQStream : public EQStreamInterface {
 		} MatchState;
 		MatchState CheckSignature(const Signature *sig);
 
+};
+
+
+class EQOldStream : public EQStreamInterface {
+	friend class EQStreamPair;	//for collector.
+	friend class EQStream;
+
+	public:
+		EQOldStream();
+		EQOldStream(sockaddr_in in, int fd_sock);
+		~EQOldStream();
+
+	protected:
+		Mutex MResendQueue;
+		Mutex MOutboundQueue;
+		Mutex MInboundQueue;
+		uint32 remote_ip;
+		uint16 remote_port;
+		EQStreamState State;
+		Mutex MState;
+		EQStreamType StreamType;
+
+		uint8 active_users;	//how many things are actively using this
+		Mutex MInUse;
+
+	public:
+		bool IsTooMuchPending()
+		{
+			return (packetspending > EQOLDSTREAM_OUTBOUD_THRESHOLD) ? true : false;
+		}
+
+		int16 PacketsPending()
+		{
+			return packetspending;
+		}
+
+		void SetDebugLevel(int8 set_level)
+		{
+			debug_level = set_level;
+		}
+
+		void LogPackets(bool logging) 
+		{
+			LOG_PACKETS = logging; 
+		}
+				
+		// parce/make packets
+		void ParceEQPacket(uint16 dwSize, uchar* pPacket);
+		void MakeEQPacket(EQProtocolPacket* app, bool ack_req=true); //Make a fragment eq packet and put them on the SQUEUE/RSQUEUE
+
+		// Add ack to packet if requested
+		void AddAck(EQOldPacket *pack)
+		{
+			if(CACK.dwARQ)
+			{       
+				pack->HDR.b2_ARSP = 1;          //Set ack response field
+				pack->dwARSP = CACK.dwARQ;      //ACK current ack number.
+				CACK.dwARQ = 0;
+			}
+		}
+		// Timer Functions
+				
+		//Check all class timers and call proper functions
+		void CheckTimers(void); 
+
+		int CheckActive(void) 
+		{ 
+			if(pm_state == CLOSED)
+			{
+				return(0);
+			}
+			else
+			{
+				return(1);
+			}
+		}
+
+		virtual void Close();
+
+		// Incomming / Outgoing Ack's
+		void IncomingARSP(uint16 dwARSP); 
+		void IncomingARQ(uint16 dwARQ);
+		void OutgoingARQ(uint16 dwARQ);
+		void OutgoingARSP();
+
+		void InboundQueueClear();
+		void OutboundQueueClear();
+		void PacketQueueClear();
+
+		MyQueue<MySendPacketStruct>			  SendQueue;	//Store packets thats on the send que
+		MyQueue<EQRawApplicationPacket>           OutQueue;	//parced packets ready to go out of this class
+
+
+	private:
+		bool ProcessPacket(EQOldPacket* pack, bool from_buffer=false);
+		void CheckBufferedPackets();
+
+		FragmentGroupList fragment_group_list;
+		MyQueue<EQOldPacket> ResendQueue; //Resend queue
+		std::vector<EQOldPacket *> buffered_packets; // Buffer of incoming packets
+
+		ACK_INFO    SACK; //Server -> client info.
+		ACK_INFO    CACK; //Client -> server info.
+		int16       dwLastCACK;
+
+
+		Timer* no_ack_received_timer;
+		Timer* no_ack_sent_timer;
+		Timer* keep_alive_timer;
+
+
+		EQStreamState    pm_state;  //manager state 
+		uint16  dwFragSeq;   //current fragseq
+		int8 debug_level;
+		bool LOG_PACKETS;
+		bool bTimeout;
+		bool bTimeoutTrigger;
+		bool isWriting;
+		int16	packetspending;
+		OpcodeManager **OpMgr;
+		int listening_socket;
+
+		Mutex MRate;
+		int32 RateThreshold;
+		int32 DecayRate;
+
+		uint32 LastPacket;
+		Mutex MVarlock;
+
+	public:
+		//interface used by application (EQStreamInterface)
+		virtual void QueuePacket(const EQApplicationPacket *p, bool ack_req=true);
+		virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true);
+		virtual EQApplicationPacket *PopPacket();
+		virtual uint32 GetRemoteIP() const { return remote_ip; }
+		virtual uint16 GetRemotePort() const { return remote_port; }
+		virtual void ReleaseFromUse() { MInUse.lock(); if(active_users > 0) active_users--; MInUse.unlock(); }
+		virtual void RemoveData() { InboundQueueClear(); OutboundQueueClear(); PacketQueueClear(); /*if (CombinedAppPacket) delete CombinedAppPacket;*/ }
+		virtual bool CheckState(EQStreamState state) { return GetState() == state; }
+		virtual std::string Describe() const { return("Direct EQOldStream"); }
+		virtual bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); if(IsWriting()) return true; return flag; }
+		bool IsWriting() { return isWriting; }
+		void SetWriting(bool var) { isWriting = var; } 
+		inline void PutInUse() { MInUse.lock(); active_users++; MInUse.unlock(); }
+		inline EQStreamState GetState() { EQStreamState s; MState.lock(); s=pm_state; MState.unlock(); return s; }
+		void	SendPacketQueue(bool Block = true);
+		void	ReceiveData(uchar* buf, int len);
+		void SetStreamType(EQStreamType t);
+		inline const EQStreamType GetStreamType() const { return StreamType; }
+		static const char *StreamTypeString(EQStreamType t);
+		virtual bool IsOldStream()			const { return true; }
+		EQStream::MatchState CheckSignature(const EQStream::Signature *sig);
+		bool HasOutgoingData();
+		bool CheckClosed() { return GetState()==CLOSED; }
+		void Process(const unsigned char *data, const uint32 length);
+		void CheckTimeout(uint32 now, uint32 timeout=30);
+		void SetState(EQStreamState state);
+		void SetLastPacketTime(uint32 t) {LastPacket=t;}
+		bool Stale(uint32 now, uint32 timeout=30) { return (LastPacket && (now-LastPacket) > timeout); }
+		void SetOpcodeManager(OpcodeManager **opm) { OpMgr = opm; }
+		void _SendDisconnect();
+		void SetTimeOut(bool time) { bTimeout = time; }
+		bool GetTimeOut() { return bTimeout; }
+		
 };
 
 #endif

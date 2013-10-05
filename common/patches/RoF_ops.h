@@ -158,5 +158,6 @@ D(OP_GuildStatus)
 D(OP_Trader)
 D(OP_GMLastName)
 D(OP_RezzAnswer)
+E(OP_MobUpdate)
 #undef E
 #undef D

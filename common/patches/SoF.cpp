@@ -11,6 +11,7 @@
 #include "../Item.h"
 #include "SoF_structs.h"
 #include "../rulesys.h"
+#include "../MiscFunctions.h"
 
 #include <iostream>
 #include <sstream>
@@ -869,15 +870,15 @@ ENCODE(OP_ZoneSpawns) {
 		eq->targetable = 1; //New Field - Toggle Targetable on or off - 0 = off, 1 = on
 		eq->NPC = emu->NPC;
 		eq->targetable_with_hotkey = 1;//New Field - Toggle Targetable on or off - 0 = off, 1 = on
-		eq->x = emu->x;
+		eq->x = FloatToEQ19(emu->x);
 		eq->deltaX = emu->deltaX;
 		eq->deltaY = emu->deltaY;
-		eq->z = emu->z;
+		eq->z = FloatToEQ19(emu->z);
 		eq->deltaHeading = emu->deltaHeading;
-		eq->y = emu->y;
+		eq->y = FloatToEQ19(emu->y);
 		eq->deltaZ = emu->deltaZ;
 		eq->animation = emu->animation;
-		eq->heading = emu->heading;
+		eq->heading = FloatToEQ19(emu->heading);
 		eq->spawnId = emu->spawnId;
 		eq->nonvisible = 0;
 		strcpy(eq->name, emu->name);
@@ -1298,19 +1299,21 @@ ENCODE(OP_Illusion) {
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_MobUpdate) { ENCODE_FORWARD(OP_ClientUpdate); }
+
 ENCODE(OP_ClientUpdate) {
 	ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
 	SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
 	OUT(spawn_id);
-	OUT(x_pos);
-	OUT(delta_x);
-	OUT(delta_y);
-	OUT(z_pos);
-	OUT(delta_heading);
-	OUT(y_pos);
-	OUT(delta_z);
+	eq->x_pos = FloatToEQ19(emu->x_pos);
+	eq->delta_x = NewFloatToEQ13(emu->delta_x);
+	eq->delta_y = NewFloatToEQ13(emu->delta_y);
+	eq->z_pos = FloatToEQ19(emu->z_pos);
+	eq->heading = FloatToEQ19(emu->heading);
+	eq->y_pos = FloatToEQ19(emu->y_pos);
+	eq->delta_z = NewFloatToEQ13(emu->delta_z);
 	OUT(animation);
-	OUT(heading);
+	eq->delta_heading = NewFloatToEQ13(emu->delta_heading);
 	FINISH_ENCODE();
 }
 

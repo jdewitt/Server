@@ -30,6 +30,12 @@ class EQStreamFactory : private Timeoutable {
 		std::map<std::string,EQStream *> Streams;
 		Mutex MStreams;
 
+		Mutex MWritingStreams;
+
+		std::queue<EQOldStream *> NewOldStreams;
+
+		std::map<std::string,EQOldStream *> OldStreams;
+
 		virtual void CheckTimeout();
 
 		Timer *DecayTimer;
@@ -42,6 +48,9 @@ class EQStreamFactory : private Timeoutable {
 
 		EQStream *Pop();
 		void Push(EQStream *s);
+
+		EQOldStream *PopOld();
+		void PushOld(EQOldStream *s);
 
 		bool Open();
 		bool Open(unsigned long port) { Port=port; return Open(); }

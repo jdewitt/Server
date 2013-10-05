@@ -36,6 +36,7 @@ public:
 	virtual const uint32 GetBytesSentPerSecond() const { return 0; }
 	virtual const uint32 GetBytesRecvPerSecond() const { return 0; }
 	virtual const EQClientVersion ClientVersion() const { return EQClientUnknown; }
+	virtual bool IsInUse() = 0;
 };
 
 #endif /*EQSTREAMINTF_H_*/

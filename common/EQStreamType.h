@@ -8,7 +8,8 @@ typedef enum {
 	ZoneStream,
 	ChatOrMailStream,
 	ChatStream,
-	MailStream
+	MailStream,
+	OldStream
 } EQStreamType;
 
 

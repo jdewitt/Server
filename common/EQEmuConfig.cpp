@@ -71,6 +71,10 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 		text=ParseTextBlock(sub_ele,"password",true);
 		if (text)
 			LoginPassword=text;
+
+		text=ParseTextBlock(sub_ele,"type",true);
+		if (text)
+			LoginType=atoi(text);
 	} else {
 		char	str[32];
 		do {
@@ -93,6 +97,10 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 				text=ParseTextBlock(sub_ele,"password",true);
 				if (text)
 					loginconfig->LoginPassword=text;
+				
+				text=ParseTextBlock(sub_ele,"type",true);
+				if (text)
+					loginconfig->LoginType=atoi(text);
 				loginlist.Insert(loginconfig);
 			}
 		} while(sub_ele);
@@ -330,6 +338,8 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const {
 		return(LoginPassword);
 	if(var_name == "LoginPort")
 		return(itoa(LoginPort));
+	if(var_name == "LoginType")
+		return(itoa(LoginType));
 	if(var_name == "Locked")
 		return(Locked?"true":"false");
 	if(var_name == "WorldTCPPort")
@@ -412,6 +422,7 @@ void EQEmuConfig::Dump() const
 	std::cout << "LoginAccount = " << LoginAccount << std::endl;
 	std::cout << "LoginPassword = " << LoginPassword << std::endl;
 	std::cout << "LoginPort = " << LoginPort << std::endl;
+	std::cout << "LoginType = " << LoginType << std::endl;
 	std::cout << "Locked = " << Locked << std::endl;
 	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
 	std::cout << "WorldIP = " << WorldIP << std::endl;

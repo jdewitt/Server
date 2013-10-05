@@ -32,5 +32,8 @@ D(OP_WhoAllRequest)
 D(OP_ReadBook)
 D(OP_FaceChange)
 D(OP_WearChange)
+E(OP_MobUpdate)
+E(OP_ClientUpdate)
+D(OP_ClientUpdate)
 #undef E
 #undef D

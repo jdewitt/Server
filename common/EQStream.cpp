@@ -841,23 +841,11 @@ void EQStream::Write(int eq_fd)
 
 void EQStream::WritePacket(int eq_fd, EQProtocolPacket *p)
 {
-uint32 length;
-sockaddr_in address;
+	uint32 length;
+	sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr=remote_ip;
 	address.sin_port=remote_port;
-#ifdef NOWAY
-	uint32 ip=address.sin_addr.s_addr;
-	cout << "Sending to: "
-		<< (int)*(unsigned char *)&ip
-		<< "." << (int)*((unsigned char *)&ip+1)
-		<< "." << (int)*((unsigned char *)&ip+2)
-		<< "." << (int)*((unsigned char *)&ip+3)
-		<< "," << (int)ntohs(address.sin_port) << "(" << p->size << ")" << endl;
-
-	p->DumpRaw();
-	cout << "-------------" << endl;
-#endif
 	length=p->serialize(buffer);
 	if (p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
 		if (compressed) {
@@ -1149,6 +1137,8 @@ uint32 newlength=0;
 	} else {
 		_log(NET__DEBUG, _L "Incoming packet failed checksum" __L);
 		_hex(NET__NET_CREATE_HEX, buffer, length);
+		_SendDisconnect();
+		SetState(CLOSED);
 	}
 }
 
@@ -1288,6 +1278,7 @@ void EQStream::SetStreamType(EQStreamType type)
 			break;
 		case ZoneStream:
 		case WorldStream:
+		case OldStream:
 		default:
 			app_opcode_size=2;
 			compressed=true;
@@ -1295,6 +1286,11 @@ void EQStream::SetStreamType(EQStreamType type)
 			_log(NET__NET_TRACE, _L "World/Zone stream has app opcode size %d, is compressed, and is not encoded." __L, app_opcode_size);
 			break;
 	}
+}
+
+const char *EQOldStream::StreamTypeString(EQStreamType t)
+{
+	return "OldStream";
 }
 
 const char *EQStream::StreamTypeString(EQStreamType t)
@@ -1481,3 +1477,1015 @@ EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
 	return(res);
 }
 
+Fragment::Fragment()
+{
+	data = 0;
+	size = 0;
+	memset(this->data, 0, this->size);
+}
+
+Fragment::~Fragment()
+{
+	safe_delete_array(data);
+}
+
+void Fragment::SetData(uchar* d, uint32 s)
+{
+	safe_delete_array(data);
+	size = s;
+	data = new uchar[s];
+	memcpy(data, d, s);
+}
+
+FragmentGroup::FragmentGroup(uint16 seq, uint16 opcode, uint16 num_fragments)
+{
+	this->seq = seq;
+	this->opcode = opcode;
+	this->num_fragments = num_fragments;
+	fragment = new Fragment[num_fragments];
+}
+
+FragmentGroup::~FragmentGroup()
+{
+	safe_delete_array(fragment);//delete[] fragment;
+}
+
+void FragmentGroup::Add(uint16 frag_id, uchar* data, uint32 size)
+{
+	//The frag_id references a fragment within the group
+	if(frag_id < num_fragments)
+	{
+		fragment[frag_id].SetData(data, size);
+	}
+	//The frag_id is attempting to reference an element outside the bounds of the group array
+	else
+	{
+		return;
+	}
+}
+
+uchar* FragmentGroup::AssembleData(uint32* size)
+{
+	uchar* buf;
+	uchar* p;
+	int i;
+
+	*size = 0;	
+	for(i=0; i<num_fragments; i++)
+	{
+		*size+=fragment[i].GetSize();		
+	}
+	buf = new uchar[*size];
+	p = buf;
+	for(i=0; i<num_fragments; i++)
+	{
+		memcpy(p, fragment[i].GetData(), fragment[i].GetSize());
+		p += fragment[i].GetSize();
+	}
+
+	return buf;
+}
+
+
+void FragmentGroupList::Add(FragmentGroup* add_group)
+{
+	fragment_group_list.push_back(add_group);
+}
+
+FragmentGroup* FragmentGroupList::Get(int16 find_seq)
+{
+	std::vector<FragmentGroup*>::iterator iterator;
+	iterator = fragment_group_list.begin();
+
+	while(iterator != fragment_group_list.end())
+	{
+		if ((*iterator)->GetSeq() == find_seq)
+		{
+			return (*iterator);
+		}
+		iterator++;
+	}
+	return 0;
+}
+
+void FragmentGroupList::Remove(int16 remove_seq)
+{
+	std::vector<FragmentGroup*>::iterator iterator;
+	iterator = fragment_group_list.begin();
+
+	while(iterator != fragment_group_list.end())
+	{
+		if ((*iterator)->GetSeq() == remove_seq)
+		{
+			fragment_group_list.erase(iterator);
+			return;
+		}
+		iterator++;
+	}
+}
+
+EQOldStream::EQOldStream(sockaddr_in in, int fd_sock)
+{
+	pm_state = ESTABLISHED;
+	dwLastCACK = 0;
+	dwFragSeq  = 0;
+	listening_socket = fd_sock;
+			    
+	no_ack_received_timer = new Timer(500);
+	no_ack_sent_timer = new Timer(500);
+	bTimeout = false;
+	bTimeoutTrigger = false;
+
+	/* 
+		on a normal server there is always data getting sent 
+		so the packetloss indicator in eq stays at 0%
+
+		This timer will send dummy data if nothing has been sent
+		in 1000ms. This is not needed. When the client doesnt
+		get any data it will send a special ack request to ask
+		if we are still alive. The eq client will show around 40%
+		packetloss at this time. It is not real packetloss. Its
+		just thinking there is packetloss since no data is sent.
+		The EQ servers doesnt have a timer like this one.
+
+		short version: This timer is not needed, it just keeps
+		the green bar green.
+	*/
+	keep_alive_timer = new Timer(1000);
+
+	no_ack_received_timer->Disable();
+	no_ack_sent_timer->Disable();
+
+	debug_level = 0;
+	LOG_PACKETS = false;
+	isWriting = false;
+	OpMgr = nullptr;
+	remote_ip = in.sin_addr.S_un.S_addr; 
+	remote_port = in.sin_port;
+	packetspending = 0;
+	active_users = 0;
+	LastPacket=0;
+	RateThreshold=RATEBASE/250;
+	DecayRate=DECAYBASE/250;
+	bTimeoutTrigger = false;
+}
+
+EQOldStream::EQOldStream()
+{
+	pm_state = ESTABLISHED;
+	dwLastCACK = 0;
+	dwFragSeq  = 0;
+	listening_socket = 0;		    
+	no_ack_received_timer = new Timer(500);
+	no_ack_sent_timer = new Timer(500);
+	bTimeout = false;
+	bTimeoutTrigger = false;
+	/* 
+		on a normal server there is always data getting sent 
+		so the packetloss indicator in eq stays at 0%
+
+		This timer will send dummy data if nothing has been sent
+		in 1000ms. This is not needed. When the client doesnt
+		get any data it will send a special ack request to ask
+		if we are still alive. The eq client will show around 40%
+		packetloss at this time. It is not real packetloss. Its
+		just thinking there is packetloss since no data is sent.
+		The EQ servers doesnt have a timer like this one.
+
+		short version: This timer is not needed, it just keeps
+		the green bar green.
+	*/
+	keep_alive_timer = new Timer(1000);
+
+	no_ack_received_timer->Disable();
+	no_ack_sent_timer->Disable();
+
+	debug_level = 0;
+	LOG_PACKETS = false;
+	OpMgr = nullptr;
+	remote_ip = 0; 
+	remote_port = 0;
+	packetspending = 0;
+	active_users = 0;
+	LastPacket=0;
+	isWriting = false;
+	RateThreshold=RATEBASE/250;
+	DecayRate=DECAYBASE/250;
+}
+
+EQOldStream::~EQOldStream()
+{
+	_log(NET__DEBUG, "Killing EQOldStream");
+	safe_delete(no_ack_received_timer);//delete no_ack_received_timer;
+	safe_delete(no_ack_sent_timer);//delete no_ack_sent_timer;
+	safe_delete(keep_alive_timer);//delete keep_alive_timer;
+	_log(NET__DEBUG, "Killing outbound packet queue");
+	OutboundQueueClear();
+	InboundQueueClear();
+	PacketQueueClear();
+	SetState(CLOSED);
+}
+
+void EQOldStream::IncomingARSP(uint16 dwARSP) 
+{ 
+	MOutboundQueue.lock();
+	EQOldPacket* pack = 0;
+	while (!ResendQueue.empty() && dwARSP - ResendQueue.top()->dwARQ >= 0)
+	{
+		pack = ResendQueue.pop();
+		packetspending--;
+		safe_delete(pack);
+	}
+	if (ResendQueue.empty())
+	{
+		no_ack_received_timer->Disable();
+	}
+	MOutboundQueue.unlock();
+}
+
+void EQOldStream::IncomingARQ(uint16 dwARQ) 
+{
+	CACK.dwARQ = dwARQ;
+	dwLastCACK = dwARQ;
+			    
+	if (!no_ack_sent_timer->Enabled())
+	{
+		no_ack_sent_timer->Start(500); // Agz: If we dont get any outgoing packet we can put an 
+		// ack response in before 500ms has passed we send a pure ack response        if (debug_level >= 2)
+//            cout << Timer::GetCurrentTime() << " no_ack_sent_timer->Start(500)" << endl;
+	}
+}
+
+void EQOldStream::OutgoingARQ(uint16 dwARQ)   //An ack request is sent
+{
+	if(!no_ack_received_timer->Enabled())
+	{
+		no_ack_received_timer->Start(500);
+//        if (debug_level >= 2)
+//            cout << Timer::GetCurrentTime() << " no_ack_received_timer->Start(500)" << "ARQ:" << (unsigned short) dwARQ << endl;
+	}
+}
+
+void EQOldStream::OutgoingARSP(void)
+{
+	no_ack_sent_timer->Disable(); // Agz: We have sent the ack response
+//    if (debug_level >= 2)
+//        cout << Timer::GetCurrentTime() << " no_ack_sent_timer->Disable()" << endl;
+}
+
+/************ PARCE A EQPACKET ************/
+void EQOldStream::ParceEQPacket(uint16 dwSize, uchar* pPacket)
+{
+	if(pm_state != EQStreamState::ESTABLISHED)
+		return;
+			        
+	MInboundQueue.lock();
+	/************ DECODE PACKET ************/
+	EQOldPacket* pack = new EQOldPacket(pPacket, dwSize);
+	pack->DecodePacket(dwSize, pPacket);
+	if (ProcessPacket(pack, false))
+	{
+		safe_delete(pack);//delete pack;
+	}
+	CheckBufferedPackets();
+	MInboundQueue.unlock();
+}
+
+/*
+	Return true if its safe to delete this packet now, if we buffer it return false
+	this way i can skip memcpy the packet when buffering it
+*/
+bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
+{
+	/************ CHECK FOR ACK/SEQ RESET ************/ 
+	if(pack->HDR.a5_SEQStart)
+	{
+		//      cout << "resetting SACK.dwGSQ1" << endl;
+		//      SACK.dwGSQ      = 0;            //Main sequence number SHORT#2
+		dwLastCACK      = pack->dwARQ-1;//0;
+		//      CACK.dwGSQ = 0xFFFF; changed next if to else instead
+	}
+	// Agz: Moved this, was under packet resend before..., later changed to else statement...
+	else if( (pack->dwSEQ - CACK.dwGSQ) <= 0 && !from_buffer)  // Agz: if from the buffer i ignore sequence number..
+	{
+		return true; //Invalid packet
+	}
+	CACK.dwGSQ = pack->dwSEQ; //Get current sequence #.
+
+	/************ Process ack responds ************/
+	// Quagmire: Moved this to above "ack request" checking in case the packet is dropped in there
+	if(pack->HDR.b2_ARSP)
+		IncomingARSP(pack->dwARSP);
+	/************ End process ack rsp ************/
+
+	// Does this packet contain an ack request?
+	if(pack->HDR.a1_ARQ)
+	{
+		// Is this packet a packet we dont want now, but will need later?
+		if(pack->dwARQ - dwLastCACK > 1 && pack->dwARQ - dwLastCACK < 16) // Agz: Added 16 limit
+		{
+			// Debug check, if we want to buffer a packet we got from the buffer something is wrong...
+			if (from_buffer)
+			{
+				//cerr << "ERROR: Rebuffering a packet in EQPacketManager::ProcessPacket" << endl;
+			}
+			std::vector<EQOldPacket*>::iterator iterator;
+			iterator = buffered_packets.begin();
+			while(iterator != buffered_packets.end())
+			{
+				if ((*iterator)->dwARQ == pack->dwARQ)
+				{
+					return true; // This packet was already buffered
+				}
+				iterator++;
+			}
+
+			buffered_packets.push_back(pack);
+			return false;
+		}
+		// Is this packet a resend we have already processed?
+		if(pack->dwARQ - dwLastCACK <= 0)
+		{
+			no_ack_sent_timer->Trigger(); // Added to make sure we send a new ack respond
+			return true;
+		}
+	}
+
+	/************ START ACK REQ CHECK ************/
+	if (pack->HDR.a1_ARQ || pack->HDR.b0_SpecARQ)
+		IncomingARQ(pack->dwARQ);   
+	if (pack->HDR.b0_SpecARQ) // Send the ack reponse right away
+		no_ack_sent_timer->Trigger();
+	/************ END ACK REQ CHECK ************/
+
+	/************ CHECK FOR THREAD TERMINATION ************/
+	if(pack->HDR.a2_Closing && pack->HDR.a6_Closing)
+	{
+		if(!pm_state)
+		{
+			pm_state = CLOSING;
+			_SendDisconnect(); // Agz: Added a close packet
+		}
+	}
+	/************ END CHECK THREAD TERMINATION ************/
+
+	/************ Get ack sequence number ************/
+	if(pack->HDR.a4_ASQ)
+		CACK.dbASQ_high = pack->dbASQ_high;
+
+	if(pack->HDR.a1_ARQ)
+		CACK.dbASQ_low = pack->dbASQ_low;
+	/************ End get ack seq num ************/
+
+	/************ START FRAGMENT CHECK ************/
+	/************ IF - FRAGMENT ************/
+	if(pack->HDR.a3_Fragment) 
+	{
+		FragmentGroup* fragment_group = 0;
+		fragment_group = fragment_group_list.Get(pack->fraginfo.dwSeq);
+
+		// If we dont have a fragment group with the right sequence number, create a new one
+		if (fragment_group == 0)
+		{
+			fragment_group = new FragmentGroup(pack->fraginfo.dwSeq,pack->dwOpCode, pack->fraginfo.dwTotal);
+			fragment_group_list.Add(fragment_group);
+		}
+
+		// Add this fragment to the fragment group
+		fragment_group->Add(pack->fraginfo.dwCurr, pack->pExtra,pack->dwExtraSize);
+
+		// If we have all the fragments to complete this group
+		if(pack->fraginfo.dwCurr == (pack->fraginfo.dwTotal - 1) )
+		{
+			//Collect fragments and put them as one packet on the OutQueue
+			uchar* buf = new uchar[8192];
+			uint32 sizep = 0;
+			buf = fragment_group->AssembleData(&sizep);
+			EQRawApplicationPacket *app = new EQRawApplicationPacket(fragment_group->GetOpcode(), buf, sizep);
+			OutQueue.push(app);
+			return true;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	/************ ELSE - NO FRAGMENT ************/
+	else 
+	{
+		EQRawApplicationPacket *app = new EQRawApplicationPacket(pack->dwOpCode ,pack->pExtra, pack->dwExtraSize);   
+		_log(NET__DEBUG, "Received old opcode - 0x%x", app->GetRawOpcode());
+		OutQueue.push(app);
+		return true;
+	}
+	/************ END FRAGMENT CHECK ************/
+
+	return true;
+}
+
+void EQOldStream::CheckBufferedPackets()
+{
+	MOutboundQueue.lock();
+// Should use a hash table or sorted list instead....
+	int num=0; // Counting buffered packets for debug output
+	std::vector<EQOldPacket*>::iterator iterator;
+	iterator = buffered_packets.begin();
+	while(iterator != buffered_packets.end())
+	{
+		// Check if we have a packet we want already buffered
+		if ((*iterator)->dwARQ - dwLastCACK == 1)
+		{
+			ProcessPacket((*iterator), true);
+			iterator = buffered_packets.erase(iterator);
+		}
+		else
+		{
+		iterator++;
+		}
+	}
+	MOutboundQueue.unlock();
+}
+
+/************************************************************************/
+/************ Make an EQ packet and put it to the send queue ************/
+/* 
+	APP->size == 0 && app->pBuffer == NULL if no data.
+
+	Agz: set ack_req = false if you dont want this packet to require an ack
+	response from the client, this menas this packet may get lost and not
+	resent. This is used by the EQ servers for HP and position updates among 
+	other things. WARNING: I havent tested this yet.
+*/
+void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
+{
+	int16 restore_op = 0x0000;
+
+	/************ PM STATE = NOT ACTIVE ************/
+	if(pm_state == CLOSING)
+	{
+		EQOldPacket *pack = new EQOldPacket();
+
+		pack->dwSEQ = SACK.dwGSQ++; // Agz: Added this commented rest    
+		if(pack->dwSEQ == 0xFFFF)
+		{
+		SACK.dwGSQ = 1;
+		pack->dwSEQ = 1;
+		}	  
+		pack->HDR.a6_Closing    = 1;// Agz: Lets try to uncomment this line again
+		pack->HDR.a2_Closing    = 1;// and this
+		pack->HDR.a1_ARQ        = 1;// and this
+//      pack->dwARQ             = 1;// and this, no that was not too good
+		pack->dwARQ             = SACK.dwARQ;// try this instead
+
+		//AddAck(pack);
+		MySendPacketStruct *p = new MySendPacketStruct;
+
+		p->buffer = pack->ReturnPacket(&p->size);
+		SendQueue.push(p);
+		SACK.dwGSQ++; 
+		safe_delete(pack);//delete pack;
+
+		return;
+	}
+
+	// Agz:Moved this to after finish check
+	if(app == NULL)
+	{
+		//cout << "EQPacketManager::MakeEQPacket app == NULL" << endl;
+		return;
+	}
+	bool bFragment= false; //This is set later on if fragseq should be increased at the end.
+
+	/************ IF opcode is == 0xFFFF it is a request for pure ack creation ************/
+	if(app->GetRawOpcode() == 0xFFFF)
+	{
+		EQOldPacket *pack = new EQOldPacket();
+
+		if(!SACK.dwGSQ)
+		{
+//          pack->HDR.a5_SEQStart   = 1; // Agz: hmmm, yes commenting this makes the client connect to zone
+											//      server work and the world server doent seem to care either way
+			SACK.dwARQ              = rand()%0x3FFF;//Current request ack
+			SACK.dbASQ_high         = 1;            //Current sequence number
+			SACK.dbASQ_low          = 0;            //Current sequence number
+		}
+		MySendPacketStruct *p = new MySendPacketStruct;
+		pack->HDR.b2_ARSP    = 1;
+		pack->dwARSP         = dwLastCACK;//CACK.dwARQ;
+		pack->dwSEQ = SACK.dwGSQ++;
+		if(pack->dwSEQ == 0xFFFF)
+		{
+			SACK.dwGSQ = 1;
+			pack->dwSEQ = 1;
+		}
+		p->buffer = pack->ReturnPacket(&p->size);
+		SendQueue.push(p);  
+
+		no_ack_sent_timer->Disable();
+		safe_delete(pack);//delete pack;
+
+		return;
+	}
+
+	/************ CHECK PACKET MANAGER STATE ************/
+	int fragsleft = (app->size >> 9) + 1;
+
+	if(pm_state == EQStreamState::ESTABLISHED)
+	/************ PM STATE = ACTIVE ************/
+	{
+		while(fragsleft--)
+		{
+			EQOldPacket *pack = new EQOldPacket();
+			MySendPacketStruct *p = new MySendPacketStruct;
+			if(!SACK.dwGSQ)
+			{
+				pack->HDR.a5_SEQStart   = 1;
+				SACK.dwARQ              = rand()%0x3FFF;//Current request ack
+				SACK.dbASQ_high         = 1;            //Current sequence number
+				SACK.dbASQ_low          = 0;            //Current sequence number   
+			}
+
+			AddAck(pack);
+
+			//IF NON PURE ACK THEN ALWAYS INCLUDE A ACKSEQ              // Agz: Not anymore... Always include ackseq if not a fragmented packet
+			if ((app->size >> 9) == 0 || fragsleft == (app->size >> 9)) // If this will be a fragmented packet, only include ackseq in first fragment
+				pack->HDR.a4_ASQ = 1;                                   // This is what the eq servers does
+
+			/************ Caculate the next ACKSEQ/acknumber ************/
+			/************ Check if its a static ackseq ************/
+			if( HI_BYTE(app->GetRawOpcode()) == 0x2000)
+			{
+				if(app->size == 15)
+					pack->dbASQ_low = 0xb2;
+				else
+					pack->dbASQ_low = 0xa1;
+
+			}
+			/************ Normal ackseq ************/
+			else
+			{
+				//If not pure ack and opcode != 0x20XX then
+				if (ack_req) // If the caller of this function wants us to put an ack request on this packet
+				{
+					pack->HDR.a1_ARQ = 1;
+					pack->dwARQ      = SACK.dwARQ;
+				}
+
+				if(pack->HDR.a1_ARQ && pack->HDR.a4_ASQ)
+				{
+					pack->dbASQ_low  = SACK.dbASQ_low;
+					pack->dbASQ_high = SACK.dbASQ_high;
+				}
+				else
+				{
+					if(pack->HDR.a4_ASQ)
+					{
+						pack->dbASQ_high = SACK.dbASQ_high;
+					}
+				}
+			}
+
+			/************ Check if this packet should contain op ************/
+			if(app->GetRawOpcode())
+			{
+				pack->dwOpCode = app->GetRawOpcode();
+				restore_op =  app->GetRawOpcode(); // Agz: I'm reusing messagees when sending to multiple clients.
+				app->opcode = 0; //Only first fragment contains op
+			}
+			/************ End opcode check ************/
+
+			/************ SHOULD THIS PACKET BE SENT AS A FRAGMENT ************/
+			if((app->size >> 9))
+			{
+				bFragment = true;
+				pack->HDR.a3_Fragment = 1;
+			}
+			/************ END FRAGMENT CHECK ************/
+
+			if(app->size && app->pBuffer)
+			{
+				if(pack->HDR.a3_Fragment)
+				{
+					// If this is the last packet in the fragment group
+					if(!fragsleft)
+					{
+						// Calculate remaining bytes for this fragment
+						pack->dwExtraSize = app->size-510-512*((app->size/512)-1);
+					}
+					else
+					{
+						if(fragsleft == (app->size >> 9))
+						{
+							pack->dwExtraSize = 510; // The first packet in a fragment group has 510 bytes for data
+
+						}
+						else
+						{
+							pack->dwExtraSize = 512; // Other packets in a fragment group has 512 bytes for data
+						}
+					}
+					pack->fraginfo.dwCurr = (app->size >> 9) - fragsleft;
+					pack->fraginfo.dwSeq  = dwFragSeq;
+					pack->fraginfo.dwTotal= (app->size >> 9) + 1;
+				}
+				else
+				{
+					pack->dwExtraSize = (uint16)app->size;
+				}
+
+				pack->pExtra = new uchar[pack->dwExtraSize];
+				memcpy((void*)pack->pExtra, (void*)app->pBuffer, pack->dwExtraSize);
+				app->pBuffer += pack->dwExtraSize; //Increase counter
+			}       
+
+			/******************************************/
+			/*********** !PACKET GENERATED! ***********/
+			/******************************************/
+			            
+			/************ Update timers ************/
+			if(pack->HDR.a1_ARQ)
+			{
+				if (debug_level >= 5)
+				{
+				//	cout << "OutgoingARQ pack->dwARQ:" << (unsigned short)pack->dwARQ << " SACK.dwARQ:" << (unsigned short)SACK.dwARQ << endl;
+				}
+				OutgoingARQ(pack->dwARQ);
+				ResendQueue.push(pack);
+				packetspending++;
+				SACK.dwARQ++;
+			}
+			    
+			if(pack->HDR.b2_ARSP)
+			{
+				OutgoingARSP();
+			}
+
+			keep_alive_timer->Start();
+			/************ End update timers ************/
+			                    
+			pack->dwSEQ = SACK.dwGSQ++;
+			if(pack->dwSEQ == 0xFFFF)
+			{
+			pack->dwSEQ = 1;
+			SACK.dwGSQ = 1;
+			}
+			p->buffer = pack->ReturnPacket(&p->size);
+			SendQueue.push(p);
+			    
+			if(pack->HDR.a4_ASQ)
+				SACK.dbASQ_low++;
+						
+			if (!pack->HDR.a1_ARQ) 
+			{
+				// Quag: need to delete it since didnt get on the resend queue
+				safe_delete(pack);//delete pack;
+			}
+		}//end while
+
+		if(bFragment)
+		{
+			dwFragSeq++;
+		}
+		app->pBuffer -= app->size; //Restore ptr.
+		app->opcode = restore_op;
+			        
+	} //end if
+}
+
+void EQOldStream::CheckTimers(void)
+{
+	bool setClosing = false;
+	MOutboundQueue.lock();
+	/************ When did we last get a packet? ************/
+
+
+	/************ Should packets be resent? ************/
+	if (no_ack_received_timer->Check())
+	{
+		EQOldPacket* pack;
+		MyQueue<EQOldPacket> q;
+		while(pack = ResendQueue.pop())
+		{
+			packetspending--;
+			q.push(pack);
+			MySendPacketStruct *p = new MySendPacketStruct;
+			pack->dwSEQ = SACK.dwGSQ++;
+			if(pack->dwSEQ == 0xFFFF)
+			{
+			SACK.dwGSQ = 1;
+			pack->dwSEQ = 1;
+			}
+			p->buffer = pack->ReturnPacket(&p->size);
+			SendQueue.push(p);
+		}
+		while(pack = q.pop())
+		{
+			ResendQueue.push(pack);
+			packetspending++;
+			if(++pack->resend_count > 15) {
+				pm_state = CLOSING;
+				MakeEQPacket(0);
+			}
+		}
+		no_ack_received_timer->Start(1000);
+	}
+	/************ Should a pure ack be sent? ************/
+	if (no_ack_sent_timer->Check() || keep_alive_timer->Check())
+	{
+		EQProtocolPacket app(0xFFFF, NULL, 0);
+		MakeEQPacket(&app);
+	}
+	MOutboundQueue.unlock();
+}
+
+void EQOldStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
+{
+	MOutboundQueue.lock();
+	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
+
+	if(p == nullptr)
+		return;
+
+	if(OpMgr == nullptr || *OpMgr == nullptr) {
+		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping.");
+		delete p;
+		return;
+	}
+	uint16 opcode = (*OpMgr)->EmuToEQ(p->emu_opcode);
+	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, p->pBuffer, p->size);
+	MakeEQPacket( pack2, ack_req);
+	delete p;
+	delete pack2;
+	MOutboundQueue.unlock();
+}
+
+void EQOldStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
+{
+	MOutboundQueue.lock();
+	EQApplicationPacket *pack=*p;
+	*p = nullptr;		//clear caller's pointer.. effectively takes ownership
+
+	if(pack == nullptr)
+		return;
+
+	if(OpMgr == nullptr || *OpMgr == nullptr) {
+		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping.");
+		delete pack;
+		return;
+	}
+
+	uint16 opcode = (*OpMgr)->EmuToEQ(pack->emu_opcode);
+
+	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
+
+	if(p == nullptr)
+		return;
+
+	if(OpMgr == nullptr || *OpMgr == nullptr) {
+		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping.");
+		delete p;
+		return;
+	}
+	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, pack->pBuffer, pack->size);
+
+	_log(NET__DEBUG, "Sending old opcode 0x%x", opcode);
+	MakeEQPacket(pack2, ack_req);
+	delete pack;
+	delete pack2;
+	MOutboundQueue.unlock();
+}
+
+EQApplicationPacket *EQOldStream::PopPacket()
+{
+	EQRawApplicationPacket *p=nullptr;
+
+	MInboundQueue.lock();
+	if (!OutQueue.empty()) {
+		p=OutQueue.pop();
+	}
+	MInboundQueue.unlock();
+
+
+	if(p)
+	{
+		if(p->GetRawOpcode() == 0 || p->GetRawOpcode() == 0xFFFF)
+		safe_delete(p);
+	}
+	//resolve the opcode if we can. do not resolve protocol packets in oldstreams
+	if(p) {
+		if(OpMgr != nullptr && *OpMgr != nullptr && p->GetRawOpcode() != 0 && p->GetRawOpcode() != 0xFFFF) {
+			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->GetRawOpcode());
+			p->SetOpcode(emu_op);
+		}
+	}
+
+	return p;
+}
+
+
+void EQOldStream::InboundQueueClear()
+{
+EQRawApplicationPacket *p=nullptr;
+
+	_log(NET__APP_TRACE, _L "Clearing inbound queue" __L);
+
+	MInboundQueue.lock();
+	while (p = OutQueue.pop()) {
+		safe_delete(p);
+	}
+	MInboundQueue.unlock();
+}
+
+void EQOldStream::OutboundQueueClear()
+{
+	MySendPacketStruct *p=nullptr;
+
+	_log(NET__APP_TRACE, _L "Clearing outbound queue" __L);
+
+	MOutboundQueue.lock();
+	while (p = SendQueue.pop()) {
+		MySendPacketStruct *p = SendQueue.pop();
+		safe_delete_array(p->buffer);
+		p->size = 0;
+		p = 0;
+	}
+	MOutboundQueue.unlock();
+}
+
+void EQOldStream::PacketQueueClear()
+{
+	EQOldPacket* p = nullptr;
+	_log(NET__APP_TRACE, _L "Clearing resend queue" __L);
+
+	MOutboundQueue.lock();
+	while (ResendQueue.pop()) {
+		EQOldPacket* p = ResendQueue.pop();
+		safe_delete(p);
+	}
+	MOutboundQueue.unlock();
+}
+
+void EQOldStream::ReceiveData(uchar* buf, int len)
+{
+	ParceEQPacket(len, buf);
+}
+
+void EQOldStream::SendPacketQueue(bool Block)
+{
+	// Get first send packet on queue and send it!
+	MySendPacketStruct* p = 0;    
+	sockaddr_in to;	
+	memset((char *) &to, 0, sizeof(to));
+	to.sin_family = AF_INET;
+	to.sin_port = remote_port;
+	to.sin_addr.s_addr = remote_ip;
+	MOutboundQueue.lock();
+	while(p = SendQueue.pop())
+	{
+		sendto(listening_socket, (char *) p->buffer, p->size, 0, (sockaddr*)&to, sizeof(to));
+		safe_delete_array(p->buffer);
+		p->size = 0;
+		p = 0;
+	}
+	// ************ Processing finished ************ //
+	MOutboundQueue.unlock();
+	//see if we need to send our disconnect and finish our close
+	if(SendQueue.empty() && OutQueue.empty()) {
+		//no more data to send
+		if(CheckState(CLOSING)) {
+			_log(NET__DEBUG, _L "All outgoing data flushed, closing stream." __L );
+			//we are waiting for the queues to empty, now we can do our disconnect.
+			//this packet will not actually go out until the next call to Write().
+			_SendDisconnect();
+			SetState(DISCONNECTING);
+		}
+	}
+
+}
+
+bool EQOldStream::HasOutgoingData()
+{
+bool flag;
+
+	//once closed, we have nothing more to say
+	if(CheckClosed())
+		return(false);
+
+	MOutboundQueue.lock();
+	flag=(!SendQueue.empty());
+	MOutboundQueue.unlock();
+	return flag;
+}
+
+
+void EQOldStream::CheckTimeout(uint32 now, uint32 timeout) {
+bool outgoing_data = HasOutgoingData();	//up here to avoid recursive locking
+
+	EQStreamState orig_state = GetState();
+	if (orig_state == CLOSING && !outgoing_data) {
+		_log(NET__NET_TRACE, _L "Out of data in closing state, disconnecting." __L);
+		_SendDisconnect();
+		SetState(DISCONNECTING);
+	} else if (LastPacket && (now-LastPacket) > timeout) {
+		switch(orig_state) {
+		case CLOSING:
+			//if we time out in the closing state, they are not acking us, just give up
+			_log(NET__DEBUG, _L "Timeout expired in closing state. Moving to closed state." __L);
+			_SendDisconnect();
+			SetState(CLOSED);
+			break;
+		case DISCONNECTING:
+			//we timed out waiting for them to send us the disconnect reply, just give up.
+			_log(NET__DEBUG, _L "Timeout expired in disconnecting state. Moving to closed state." __L);
+			SetState(CLOSED);
+			break;
+		case CLOSED:
+			_log(NET__DEBUG, _L "Timeout expired in closed state??" __L);
+			break;
+		case ESTABLISHED:
+			//we timed out during normal operation. Try to be nice about it.
+			//we will almost certainly time out again waiting for the disconnect reply, but oh well.
+			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
+			_SendDisconnect();
+			SetState(DISCONNECTING);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void EQOldStream::SetState(EQStreamState state) {
+	MState.lock();
+	_log(NET__NET_TRACE, _L "Changing state from %d to %d" __L, pm_state, state);
+	pm_state=state;
+	MState.unlock();
+}
+
+void EQOldStream::SetStreamType(EQStreamType type)
+{
+	_log(NET__NET_TRACE, _L "Changing stream type from %s to %s" __L, StreamTypeString(StreamType), StreamTypeString(type));
+	StreamType=type;
+}
+
+//this could be expanded to check more than the fitst opcode if
+//we needed more complex matching
+EQStream::MatchState EQOldStream::CheckSignature(const EQStream::Signature *sig) {
+	EQRawApplicationPacket *p = nullptr;
+	EQStream::MatchState res = EQStream::MatchState::MatchNotReady;
+
+	MInboundQueue.lock();
+	if (!OutQueue.empty()) {
+		//this is already getting hackish...
+		p = OutQueue.top();
+		if(sig->ignore_eq_opcode != 0 && p->GetRawOpcode() == sig->ignore_eq_opcode) {
+			if(OutQueue.empty()) {
+				p = nullptr;
+			}
+		}
+		if(p == nullptr) {
+			//first opcode is ignored, and nothing else remains... keep waiting
+		} else if(p->GetRawOpcode() == sig->first_eq_opcode) {
+			//opcode matches, check length..
+			if(p->size == sig->first_length) {
+				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x and length matched %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				res = EQStream::MatchState::MatchSuccessful;
+			} else if(sig->first_length == 0) {
+				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x and length (%d) is ignored", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size);
+				res = EQStream::MatchState::MatchSuccessful;
+			} else {
+				//opcode matched but length did not.
+				_log(NET__IDENT_TRACE, "%s:%d: First opcode matched 0x%x, but length %d did not match expected %d", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), sig->first_eq_opcode, p->size, sig->first_length);
+				res = EQStream::MatchState::MatchFailed;
+			}
+		} else {
+			//first opcode did not match..
+			_log(NET__IDENT_TRACE, "%s:%d: First opcode 0x%x did not match expected 0x%x", long2ip(GetRemoteIP()).c_str(), ntohs(GetRemotePort()), p->GetRawOpcode(), sig->first_eq_opcode);
+			res = EQStream::MatchState::MatchFailed;
+		}
+	}
+	MInboundQueue.unlock();
+
+	return(res);
+}
+
+void EQOldStream::_SendDisconnect()
+{
+	if(CheckClosed())
+		return;
+
+	MakeEQPacket(0);
+
+}
+void EQOldStream::Close() {
+	if(HasOutgoingData()) {
+		//there is pending data, wait for it to go out.
+		_log(NET__DEBUG, _L "Stream requested to Close(), but there is pending data, waiting for it." __L);
+		SetState(CLOSING);
+	} else {
+		//otherwise, we are done, we can drop immediately.
+		_SendDisconnect();
+		_log(NET__DEBUG, _L "Stream closing immediate due to Close()" __L);
+		SetState(DISCONNECTING);
+	}
+}

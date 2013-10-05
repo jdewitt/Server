@@ -722,10 +722,10 @@ bool Client::Process() {
 			if (mygroup)
 			{
 				if (!zoning) {
-					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
+					entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
 					mygroup->DelMember(this);
 				} else {
-					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
+					entity_list.MessageGroup(this,true,15,"%s left the zone.",GetName());
 					mygroup->MemberZoned(this);
 				}
 
@@ -755,7 +755,7 @@ bool Client::Process() {
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
-		Message(0, "Your enemies have forgotten you!");
+		Message(0,"Your enemies have forgotten you!");
 	}
 
 	return ret;
@@ -1708,7 +1708,6 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			{
 				return;
 			}
-
 			SetSkill(skill, t_level);
 		} else {
 			switch(skill) {

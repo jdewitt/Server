@@ -879,10 +879,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
-	ns->spawn.heading	= FloatToEQ19(heading);
-	ns->spawn.x			= FloatToEQ19(x_pos);//((int32)x_pos)<<3;
-	ns->spawn.y			= FloatToEQ19(y_pos);//((int32)y_pos)<<3;
-	ns->spawn.z			= FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	ns->spawn.heading	= heading;
+	ns->spawn.x			= x_pos;//((int32)x_pos)<<3;
+	ns->spawn.y			= y_pos;//((int32)y_pos)<<3;
+	ns->spawn.z			= z_pos;//((int32)z_pos)<<3;
 	ns->spawn.spawnId	= GetID();
 	ns->spawn.curHp	= static_cast<uint8>(GetHPRatio());
 	ns->spawn.max_hp	= 100;		//this field needs a better name
@@ -893,7 +893,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
 	ns->spawn.deity		= deity;
-	ns->spawn.animation	= 0;
+	ns->spawn.animation	= animation;
 	ns->spawn.findable	= findable?1:0;
 	ns->spawn.light		= light;
 	ns->spawn.showhelm = 1;
@@ -1169,7 +1169,7 @@ void Mob::SendHPUpdate()
 // this one just warps the mob to the current location
 void Mob::SendPosition()
 {
-	EQApplicationPacket* app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	EQApplicationPacket* app = new EQApplicationPacket(OP_MobUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
 	move_tic_count = 0;
@@ -1179,7 +1179,7 @@ void Mob::SendPosition()
 
 // this one is for mobs on the move, with deltas - this makes them walk
 void Mob::SendPosUpdate(uint8 iSendToSelf) {
-	EQApplicationPacket* app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	EQApplicationPacket* app = new EQApplicationPacket(OP_MobUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdate(spu);
 
@@ -1207,15 +1207,16 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
-	spu->delta_x	= NewFloatToEQ13(0);
-	spu->delta_y	= NewFloatToEQ13(0);
-	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(heading);
+	spu->spawn_id	= GetID();
+	spu->x_pos		= x_pos;
+	spu->y_pos		= y_pos;
+	spu->z_pos		= z_pos;
+	spu->delta_x	= 0;
+	spu->delta_y	= 0;
+	spu->delta_z	= 0;
+	spu->heading	= heading;
 	spu->animation	= 0;
-	spu->delta_heading = NewFloatToEQ13(0);
+	spu->delta_heading = 0;
 	spu->padding0002	=0;
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
@@ -1226,13 +1227,13 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(x_pos);
-	spu->y_pos		= FloatToEQ19(y_pos);
-	spu->z_pos		= FloatToEQ19(z_pos);
-	spu->delta_x	= NewFloatToEQ13(delta_x);
-	spu->delta_y	= NewFloatToEQ13(delta_y);
-	spu->delta_z	= NewFloatToEQ13(delta_z);
-	spu->heading	= FloatToEQ19(heading);
+	spu->x_pos		= x_pos;
+	spu->y_pos		= y_pos;
+	spu->z_pos		= z_pos;
+	spu->delta_x	= delta_x;
+	spu->delta_y	= delta_y;
+	spu->delta_z	= delta_z;
+	spu->heading	= heading;
 	spu->padding0002	=0;
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
@@ -1241,7 +1242,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 		spu->animation = animation;
 	else
 		spu->animation	= pRunAnimSpeed;//animation;
-	spu->delta_heading = NewFloatToEQ13(static_cast<float>(delta_heading));
+	spu->delta_heading =static_cast<float>(delta_heading);
 }
 
 void Mob::ShowStats(Client* client)
@@ -4037,13 +4038,13 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		double new_y = pushback * cos(double(look_heading * 3.141592 / 180.0));
 
 		spu->spawn_id	= GetID();
-		spu->x_pos		= FloatToEQ19(GetX());
-		spu->y_pos		= FloatToEQ19(GetY());
-		spu->z_pos		= FloatToEQ19(GetZ());
-		spu->delta_x	= NewFloatToEQ13(static_cast<float>(new_x));
-		spu->delta_y	= NewFloatToEQ13(static_cast<float>(new_y));
-		spu->delta_z	= NewFloatToEQ13(static_cast<float>(pushup));
-		spu->heading	= FloatToEQ19(GetHeading());
+		spu->x_pos		= GetX();
+		spu->y_pos		= GetY();
+		spu->z_pos		= GetZ();
+		spu->delta_x	= static_cast<float>(new_x);
+		spu->delta_y	= static_cast<float>(new_y);
+		spu->delta_z	= static_cast<float>(pushup);
+		spu->heading	= GetHeading();
 		spu->padding0002	=0;
 		spu->padding0006	=7;
 		spu->padding0014	=0x7f;

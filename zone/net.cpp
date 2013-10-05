@@ -328,6 +328,7 @@ int main(int argc, char** argv) {
 	UpdateWindowTitle();
 	bool worldwasconnected = worldserver.Connected();
 	EQStream* eqss;
+	EQOldStream* eqoss;
 	EQStreamInterface *eqsi;
 	Timer temp_timer(10);
 	temp_timer.Start();
@@ -359,6 +360,17 @@ int main(int argc, char** argv) {
 			in.s_addr = eqss->GetRemoteIP();
 			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
 			stream_identifier.AddStream(eqss);	//takes the stream
+		}
+
+		//check the factory for any new incoming streams.
+		while ((eqoss = eqsf.PopOld())) {
+			//pull the stream out of the factory and give it to the stream identifier
+			//which will figure out what patch they are running, and set up the dynamic
+			//structures and opcodes for that patch.
+			struct in_addr	in;
+			in.s_addr = eqoss->GetRemoteIP();
+			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqoss->GetRemotePort()));
+			stream_identifier.AddOldStream(eqoss);	//takes the stream
 		}
 
 		//give the stream identifier a chance to do its work....

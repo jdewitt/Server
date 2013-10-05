@@ -1435,7 +1435,7 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
-	std::map<uint32,NPCType *>::iterator itr;
+std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
 	// Refresh npctable, getting current info from database.

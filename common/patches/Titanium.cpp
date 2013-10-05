@@ -7,6 +7,7 @@
 #include "../crc32.h"
 #include "../races.h"
 
+#include "../MiscFunctions.h"
 #include "../eq_packet_structs.h"
 #include "../StringUtil.h"
 #include "../Item.h"
@@ -504,15 +505,15 @@ ENCODE(OP_ZoneSpawns) {
 		eq->findable = emu->findable;
 //		eq->unknown0089[5] = emu->unknown0089[5];
 		eq->deltaHeading = emu->deltaHeading;
-		eq->x = emu->x;
+		eq->x = FloatToEQ19(emu->x);
 //		eq->padding0054 = emu->padding0054;
-		eq->y = emu->y;
+		eq->y = FloatToEQ19(emu->y);
 		eq->animation = emu->animation;
 //		eq->padding0058 = emu->padding0058;
-		eq->z = emu->z;
+		eq->z = FloatToEQ19(emu->z);
 		eq->deltaY = emu->deltaY;
 		eq->deltaX = emu->deltaX;
-		eq->heading = emu->heading;
+		eq->heading = FloatToEQ19(emu->heading);
 //		eq->padding0066 = emu->padding0066;
 		eq->deltaZ = emu->deltaZ;
 //		eq->padding0070 = emu->padding0070;
@@ -1363,6 +1364,42 @@ DECODE(OP_LFGuild)
 	memcpy(emu, eq, sizeof(structs::LFGuild_PlayerToggle_Struct));
 	memset(emu->Unknown612, 0, sizeof(emu->Unknown612));
 
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_MobUpdate) { ENCODE_FORWARD(OP_ClientUpdate); }
+
+ENCODE(OP_ClientUpdate) {
+	ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
+	SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::PlayerPositionUpdateServer_Struct);
+	OUT(spawn_id);
+	eq->x_pos = FloatToEQ19(emu->x_pos);
+	eq->delta_x = NewFloatToEQ13(emu->delta_x);
+	eq->delta_y = NewFloatToEQ13(emu->delta_y);
+	eq->z_pos = FloatToEQ19(emu->z_pos);
+	eq->heading = FloatToEQ19(emu->heading);
+	eq->y_pos = FloatToEQ19(emu->y_pos);
+	eq->delta_z = NewFloatToEQ13(emu->delta_z);
+	OUT(animation);
+	eq->delta_heading = NewFloatToEQ13(emu->delta_heading);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_ClientUpdate) {
+    // for some odd reason, there is an extra byte on the end of this on occasion..
+	DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
+	SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
+	IN(spawn_id);
+	IN(sequence);
+	IN(x_pos);
+	IN(y_pos);
+	IN(z_pos);
+	IN(heading);
+	IN(delta_x);
+	IN(delta_y);
+	IN(delta_z);
+	IN(delta_heading);
+	IN(animation);
 	FINISH_DIRECT_DECODE();
 }
 

@@ -435,8 +435,12 @@ void Client::SendLogoutPackets() {
 	ct->action = groupActUpdate;
 	FastQueuePacket(&outapp);
 
-	outapp = new EQApplicationPacket(OP_PreLogoutReply);
-	FastQueuePacket(&outapp);
+	//Don't send for now until we can figure out what the Mac equivelent is.
+	if(eqs->ClientVersion() != EQClientMac)
+	{
+		outapp = new EQApplicationPacket(OP_PreLogoutReply); 
+		FastQueuePacket(&outapp);
+	}
 
 }
 

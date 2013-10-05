@@ -325,7 +325,6 @@ void WorldServer::Process() {
 					if(ztz->ignorerestrictions == 3)
 						entity->CastToClient()->GoToSafeCoords(ztz->requested_zone_id, ztz->requested_instance_id);
 				}
-
 				outapp->priority = 6;
 				entity->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);

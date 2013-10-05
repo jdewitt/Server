@@ -49,5 +49,8 @@ D(OP_InspectRequest)
 D(OP_InspectAnswer)
 D(OP_WearChange)
 D(OP_LFGuild)
+E(OP_MobUpdate)
+E(OP_ClientUpdate)
+D(OP_ClientUpdate)
 #undef E
 #undef D
