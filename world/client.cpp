@@ -90,10 +90,6 @@ Client::Client(EQStreamInterface* ieqs)
 	numclients++;
 
 	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
-	if(eqs->ClientVersion() == EQClientMac)
-	{
-		ClientVersionBit = 0;
-	}
 }
 
 Client::~Client() {
@@ -453,7 +449,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		}
 
 
-		if(ClientVersionBit == 0)
+		if(ClientVersionBit == 1)
 		{		
 			SendApproveWorld();
 			SendEnterWorld(cle->name());
@@ -462,14 +458,12 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		}
 		else
 		{
-		
-
 			if (!pZoning && ClientVersionBit != 0)
 				SendGuildList();
-			SendLogServer();
-			SendApproveWorld();
-			SendEnterWorld(cle->name());
-			SendPostEnterWorld();
+				SendLogServer();
+				SendApproveWorld();
+				SendEnterWorld(cle->name());
+				SendPostEnterWorld();
 			if (!pZoning) {
 				SendExpansionInfo();
 				SendCharInfo();
@@ -1007,9 +1001,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_GuildsList:
 		{
-			if(ClientVersionBit == 0)
-			SendGuildList();
-			return true;
+			if(ClientVersionBit == 1)
+				SendGuildList();
+				return true;
 		}
 		case OP_ZoneChange:
 		{

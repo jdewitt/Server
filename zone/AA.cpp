@@ -1054,7 +1054,7 @@ void Client::BuyAA(AA_Action* action)
 		m_pp.aapoints -= real_cost;
 
 		Save();
-		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
+		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 8) && (aa2->hotkey_sid == 4294967295u))
 			&& ((aa2->max_level == (cur_level+1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);
 			SendAA(aa2->sof_next_id);
@@ -1322,9 +1322,9 @@ void Client::SendAA(uint32 id, int seq) {
 			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
 			if (saa_next &&
-				(((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
-				|| ((GetClientVersionBit() == 8) && (saa_next->clientver > 5))
-				|| ((GetClientVersionBit() == 16) && (saa_next->clientver > 6)))){
+				(((GetClientVersionBit() == 8) && (saa_next->clientver > 4))
+				|| ((GetClientVersionBit() == 16) && (saa_next->clientver > 5))
+				|| ((GetClientVersionBit() == 32) && (saa_next->clientver > 6)))){
 				saa->next_id=0xFFFFFFFF;
 			}
 		}

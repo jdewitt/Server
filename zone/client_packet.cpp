@@ -514,12 +514,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	conn_state = ReceivedZoneEntry;
 
-
 	ClientVersion = Connection()->ClientVersion();
 	ClientVersionBit = 1 << (ClientVersion - 1);
-
-	if(ClientVersion == EQClientMac)
-		ClientVersionBit = 0;
 
 	// Antighost code
 	// tmp var is so the search doesnt find this object
@@ -770,13 +766,12 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	SpawnMercOnZone();
 
 	//Mac and earlier just skip client connected for some reason...
-	if(GetClientVersionBit() == 0)
+	if(GetClientVersionBit() == 1)
 	{
-	conn_state = ClientReadyReceived;
-	CompleteConnect();
-	SendHPUpdate();
+		conn_state = ClientReadyReceived;
+		CompleteConnect();
+		SendHPUpdate();
 	}
-
 
 	return;
 }
