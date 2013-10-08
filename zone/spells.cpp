@@ -3562,13 +3562,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	cd->spellid = action->spell;
 	cd->sequence = action->sequence;
 	cd->damage = 0;
+	mlog(SPELLS__CASTING, "target: %i, source: %i, type: %i, spellid: %i, sequence: %i, damage: %i", cd->target, cd->source, cd->type, cd->spellid, cd->sequence, cd->damage);
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 	{
 		entity_list.QueueCloseClients(spelltar, message_packet, false, 200, 0, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
-
 	mlog(SPELLS__CASTING, "Cast of %d by %s on %s complete successfully.", spell_id, GetName(), spelltar->GetName());
 
 	return true;

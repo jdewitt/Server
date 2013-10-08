@@ -264,18 +264,42 @@ struct MemorizeSpell_Struct
 	uint32 scribing;		// Comment:  1 if memorizing a spell, set to 0 if scribing to book 
 }; 
 
-struct CastOn_Struct 
+/*
+** Battle Code
+** Length: 24 Bytes
+** OpCode: 5820
+*/
+struct CombatDamage_Struct
 {
-/*00*/	uint32	target_id;			// Comment: Spell Targets ID 
-/*02*/	uint32	source_id;			// Comment: Spell Caster ID
-/*04*/	uint8	source_level;		// Comment: Spell Casters Level
-/*05*/	uint8	unknown1[4];		// Comment: Unknown -> needs confirming 
-/*09*/	uint8	unknown_zero1[7];	// Comment: Unknown -> needs confirming -> (orginal comment: lol) <- lol 
+/*000*/	uint16	target;
+/*002*/	uint16	source;
+/*004*/	uint8	type;
+/*005*/	uint8	unknown005;
+/*006*/	uint16	spellid;
+/*008*/	uint32	damage;
+/*012*/	uint8	unknown4[12];
+};
+
+// solar: this is what causes the caster to animate and the target to
+// get the particle effects around them when a spell is cast
+// also causes a buff icon
+
+struct Action_Struct
+{
+/*00*/	int32	target;			// Comment: Spell Targets ID 
+/*02*/	int32	source;			// Comment: Spell Caster ID
+/*04*/	int8	level;		// Comment: Spell Casters Level
+		int8	unknown1;
+		int8    unknown2;
+/*05*/	int8	unknown3;		// Comment: Unknown -> needs confirming 
+		int8	instrument_mod;
+/*09*/	int8	unknown_zero1[7];	// Comment: Unknown -> needs confirming -> (orginal comment: lol) <- lol 
 /*16*/	float	heading;			// Comment: Heading of Who? Caster or Target? Needs confirming
-/*20*/	uint8	unknown_zero2[4];	// Comment: Unknown -> needs confirming
-/*24*/	uint32	action;				// Comment: Unknown -> needs confirming -> Which action target or caster does maybe?
-/*28*/	uint16	spell_id;			// Comment: Spell ID of the Spell being casted? Needs Confirming
-/*30*/	uint8	unknown2[2];		// Comment: Unknown -> needs confirming
+/*20*/	int8	unknown_zero2[4];	// Comment: Unknown -> needs confirming
+/*24*/	int32	type;				// Comment: Unknown -> needs confirming -> Which action target or caster does maybe?
+/*28*/	int16	spell;			// Comment: Spell ID of the Spell being casted? Needs Confirming
+/*30*/	int8	unknown5;		// Comment: Unknown -> needs confirming
+/*31*/	int8	buff_unknown;
 };
 
 struct InterruptCast_Struct
@@ -306,12 +330,12 @@ struct BeginCast_Struct
 
 struct Buff_Struct
 {
-	uint32	target_id;		// Comment: Unknown -> needs confirming -> Target of the Buff
+	uint32	entityid;		// Comment: Unknown -> needs confirming -> Target of the Buff
 	uint32	b_unknown1;		// Comment: Unknown -> needs confirming
-	uint16	spell_id;		// Comment: Unknown -> needs confirming -> Spell ID?
+	uint16	spellid;		// Comment: Unknown -> needs confirming -> Spell ID?
 	uint32	b_unknown2;		// Comment: Unknown -> needs confirming
 	uint16	b_unknown3;		// Comment: Unknown -> needs confirming
-	uint32	buff_slot;		// Comment: Unknown -> needs confirming -> Which buff slot on the target maybe?
+	uint32	slotid;		// Comment: Unknown -> needs confirming -> Which buff slot on the target maybe?
 };
 
 #define SLOT_ITEMSPELL		10		// Cofruben: we right clicked into a clickable item which allow us casting some spell.
@@ -339,13 +363,13 @@ struct SpawnAppearance_Struct
 
 // Length: 24
 struct SpellBuffFade_Struct {
-/*000*/ uint32  playerid;       // Comment: Id of the player
+/*000*/ uint32  entityid;       // Comment: Id of the player
 /*004*/	uint8	unknown000[4];	// Comment: 
 /*008*/	uint16	spellid;		// Comment: 
 /*010*/	uint8	unknown010[6];	// Comment: 
 /*016*/	uint8	slotid;			// Comment:  Buff slot # on the client
 /*017*/	uint8	unknown017[3];	// Comment: 
-/*020*/	uint8	fade;			// Comment: 01 = true
+/*020*/	uint8	bufffade;			// Comment: 01 = true
 /*021*/	uint8	unknown[3];		// Comment: 
 };
 
@@ -648,22 +672,7 @@ struct Attack_Struct
 /*04*/ uint8    type;			// Comment: 
 /*05*/ uint8    a_unknown2[7];	// Comment: ***Placeholder};
 };
-/*
-** Battle Code
-** Length: 24 Bytes
-** OpCode: 5820
-*/
-struct Action_Struct
-{
-	// len = 24
-/*000*/	uint16	target;
-/*002*/	uint16	source;
-/*004*/	uint8	type;
-/*005*/	uint8	unknown005;
-/*006*/	uint16	spell;
-/*008*/	int32	damage;
-/*012*/	uint8	unknown4[12];
-};
+
 
 /************************************************************** 
 Consider_Struct - neorab 9/23/2007 

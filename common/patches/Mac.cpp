@@ -183,14 +183,10 @@ ENCODE(OP_PlayerProfile) {
 	//	OUT(hungerlevel);
 	for(r = 0; r < 15; r++) {
 		eq->buffs[r].visable = (emu->buffs[r].spellid != 0xFFFF || emu->buffs[r].spellid != 0) ? 2 : 0;
-		//OUT(buffs[r].slotid);
 		OUT(buffs[r].level);
 		OUT(buffs[r].bard_modifier);
-		//OUT(buffs[r].effect);
 		OUT(buffs[r].spellid);
 		OUT(buffs[r].duration);
-		//OUT(buffs[r].counters);
-		//OUT(buffs[r].player_id);
 	}
 //	OUT_array(recastTimers, structs::MAX_RECAST_TYPES);
 //	OUT(endurance);
@@ -878,6 +874,102 @@ ENCODE(OP_CancelTrade)
 	eq->fromid = emu->fromid;
 	eq->action = emu->action;
 	memset(eq->unknown1337,0x00,sizeof(eq->unknown1337));
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_MemorizeSpell) {
+	SETUP_DIRECT_ENCODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
+	OUT(slot);
+	OUT(spell_id);
+	OUT(scribing);
+	FINISH_ENCODE();	
+}
+
+DECODE(OP_MemorizeSpell) {
+	DECODE_LENGTH_EXACT(structs::MemorizeSpell_Struct);
+	SETUP_DIRECT_DECODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
+	IN(slot);
+	IN(spell_id);
+	IN(scribing);
+	FINISH_DIRECT_DECODE();	
+}
+
+ENCODE(OP_Buff) {
+	SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct);
+	OUT(entityid);
+	eq->unknown000[0] = 0x02;
+	eq->unknown000[1] = 0x07;
+	eq->unknown000[2] = 0x0A;
+	OUT(spellid);
+	OUT(slotid);
+	OUT(bufffade);
+	FINISH_ENCODE();	
+}
+
+DECODE(OP_Buff) {
+	DECODE_LENGTH_EXACT(structs::Buff_Struct);
+	SETUP_DIRECT_DECODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct);
+	IN(entityid);
+	IN(spellid);
+	IN(slotid);
+	IN(bufffade);
+	FINISH_DIRECT_DECODE();	
+}
+
+ENCODE(OP_BeginCast)
+{
+	SETUP_DIRECT_ENCODE(BeginCast_Struct, structs::BeginCast_Struct);
+	OUT(spell_id);
+	OUT(caster_id);
+	OUT(cast_time);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_CastSpell)
+{
+	SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
+	OUT(slot);
+	OUT(spell_id);
+	OUT(inventoryslot);
+	OUT(target_id);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_CastSpell) {
+	DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+	SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
+	IN(slot);
+	IN(spell_id);
+	IN(inventoryslot);
+	IN(target_id);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_Action) {
+	SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
+	int k = 0;
+	eq->target=emu->target;
+	eq->source=emu->source;
+	eq->type=emu->type;
+	eq->spellid = 278;
+	OUT(damage);
+	for(k = 0; k < 12; k++) {
+			eq->unknown4[k] = 0x00;
+		}
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_Damage) {
+	SETUP_DIRECT_ENCODE(Action_Struct, structs::Action_Struct);
+	eq->target = emu->target;
+	eq->source = emu->source;
+	eq->level = emu->level;
+	eq->unknown2 = 0;
+	eq->instrument_mod = 0;
+	eq->type = 0xE7;
+	eq->spell=0;
+	eq->unknown5 = 0x00;
+	eq->buff_unknown=0x00;
 	FINISH_ENCODE();
 }
 
