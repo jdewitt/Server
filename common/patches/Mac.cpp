@@ -516,16 +516,16 @@ DECODE(OP_TargetCommand)
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_Consider)
+ENCODE(OP_Consider)
 {
-	SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
+	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
 	IN(playerid);
 	IN(targetid);               
 	IN(faction);                
 	IN(level);                  
 	IN(cur_hp);                  
 	IN(max_hp);   
-	FINISH_DIRECT_DECODE();
+	FINISH_ENCODE();
 }
 
 DECODE(OP_SetServerFilter)
@@ -945,31 +945,33 @@ DECODE(OP_CastSpell) {
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_Action) {
+ENCODE(OP_Damage) {
+	ENCODE_LENGTH_EXACT(CombatDamage_Struct);
 	SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
-	int k = 0;
-	eq->target=emu->target;
-	eq->source=emu->source;
-	eq->type=emu->type;
-	eq->spellid = 278;
+	OUT(target);
+	OUT(source);
+	OUT(type);
+	OUT(spellid);
 	OUT(damage);
-	for(k = 0; k < 12; k++) {
-			eq->unknown4[k] = 0x00;
-		}
+	OUT(unknown11);
+	OUT(sequence);
+	OUT(unknown19);
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_Damage) {
+ENCODE(OP_Action) {
+	ENCODE_LENGTH_EXACT(Action_Struct);
 	SETUP_DIRECT_ENCODE(Action_Struct, structs::Action_Struct);
-	eq->target = emu->target;
-	eq->source = emu->source;
-	eq->level = emu->level;
-	eq->unknown2 = 0;
-	eq->instrument_mod = 0;
-	eq->type = 0xE7;
-	eq->spell=0;
-	eq->unknown5 = 0x00;
-	eq->buff_unknown=0x00;
+	OUT(target);
+	OUT(source);
+	OUT(level);
+	eq->unknown6 = 0x41; //Think this is target level.
+	OUT(instrument_mod);
+	OUT(bard_focus_id);
+	OUT(sequence);
+	OUT(type);
+	OUT(spell);
+	OUT(buff_unknown);
 	FINISH_ENCODE();
 }
 

@@ -264,42 +264,41 @@ struct MemorizeSpell_Struct
 	uint32 scribing;		// Comment:  1 if memorizing a spell, set to 0 if scribing to book 
 }; 
 
-/*
-** Battle Code
-** Length: 24 Bytes
-** OpCode: 5820
-*/
 struct CombatDamage_Struct
 {
 /*000*/	uint16	target;
 /*002*/	uint16	source;
 /*004*/	uint8	type;
-/*005*/	uint8	unknown005;
 /*006*/	uint16	spellid;
+		uint8   unknown;
 /*008*/	uint32	damage;
-/*012*/	uint8	unknown4[12];
+/*012*/	uint32	unknown11;
+/*016*/ uint32  sequence;
+/*020*/ uint32  unknown19;
 };
 
 // solar: this is what causes the caster to animate and the target to
 // get the particle effects around them when a spell is cast
 // also causes a buff icon
-
 struct Action_Struct
 {
-/*00*/	int32	target;			// Comment: Spell Targets ID 
-/*02*/	int32	source;			// Comment: Spell Caster ID
-/*04*/	int8	level;		// Comment: Spell Casters Level
-		int8	unknown1;
-		int8    unknown2;
-/*05*/	int8	unknown3;		// Comment: Unknown -> needs confirming 
-		int8	instrument_mod;
-/*09*/	int8	unknown_zero1[7];	// Comment: Unknown -> needs confirming -> (orginal comment: lol) <- lol 
-/*16*/	float	heading;			// Comment: Heading of Who? Caster or Target? Needs confirming
-/*20*/	int8	unknown_zero2[4];	// Comment: Unknown -> needs confirming
-/*24*/	int32	type;				// Comment: Unknown -> needs confirming -> Which action target or caster does maybe?
-/*28*/	int16	spell;			// Comment: Spell ID of the Spell being casted? Needs Confirming
-/*30*/	int8	unknown5;		// Comment: Unknown -> needs confirming
-/*31*/	int8	buff_unknown;
+/*00*/	uint16	target;			// Comment: Spell Targets ID 
+/*02*/	uint16	source;			// Comment: Spell Caster ID
+/*04*/	uint8	level;		// Comment: Spell Casters Level
+		uint8	unknown5;
+		uint8   unknown6;  //0x41
+/*07*/	uint8	unknown7;		// Comment: Unknown -> needs confirming 
+/*08*/	uint8	instrument_mod;
+/*09*/	uint32  bard_focus_id; //Seriously doubt this client uses it
+/*13*/	uint8	unknown_zero1[3];	// Comment: Unknown -> needs confirming -> (orginal comment: lol) <- lol 
+/*16*/	uint32	sequence;			// Comment: Heading of Who? Caster or Target? Needs confirming
+/*20*/	uint8	unknown_zero2[4];	// Comment: Unknown -> needs confirming
+/*24*/	uint32	type;				// Comment: Unknown -> needs confirming -> Which action target or caster does maybe?
+/*28*/	uint16	unknown28;			// Comment: Spell ID of the Spell being casted? Needs Confirming
+/*30*/	uint16	spell;		// Comment: Unknown -> needs confirming
+/*32*/	uint8	unknown32;		//0x00
+/*33*/  uint8	buff_unknown;
+/*34*/	uint16  unknown34;
 };
 
 struct InterruptCast_Struct
