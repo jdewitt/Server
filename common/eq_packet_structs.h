@@ -2526,12 +2526,32 @@ struct Door_Struct
 /*0080*/
 };
 
-
+struct OldDoor_Struct
+{
+/*0000*/ char    name[16];            // Filename of Door // Was 10char long before... added the 6 in the next unknown to it: Daeken M. BlackBlade
+/*0016*/ float   yPos;               // y loc
+/*0020*/ float   xPos;               // x loc
+/*0024*/ float   zPos;               // z loc
+/*0028*/ float	 heading;
+/*0032*/ uint32  incline;
+/*0036*/ uint16	 size;
+/*0038*/ uint8	 doorid;             // door's id #
+/*0039*/ uint8	 opentype;
+/*0040*/ uint8	 doorIsOpen;
+/*0041*/ uint16	 inverted;		//FFFF
+/*0043*/ uint16	 parameter; 
+/*0045*/ uint8	 unknown[2];
+};
 
 struct DoorSpawns_Struct {
 	struct Door_Struct doors[0];
 };
 
+struct OldDoorSpawns_Struct	//SEQ
+{
+	uint16 count;            
+	struct Door_Struct doors[0];
+};
 /*
  OP Code: Op_ClickDoor
  Size:		16

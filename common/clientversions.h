@@ -8,6 +8,7 @@ static const uint32 BIT_SoF = 8;
 static const uint32 BIT_SoD = 16;
 static const uint32 BIT_Underfoot = 32;
 static const uint32 BIT_RoF = 64;
+static const uint32 BIT_Client62AndTitanium = 6;
 static const uint32 BIT_TitaniumAndEarlier = 7;
 static const uint32 BIT_SoFAndLater = 0xFFFFFFF8;
 static const uint32 BIT_SoDAndLater = 0xFFFFFFF0;

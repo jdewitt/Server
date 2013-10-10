@@ -539,36 +539,6 @@ DECODE(OP_SetServerFilter)
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_SpawnDoor) {
-	SETUP_VAR_ENCODE(Door_Struct);
-	int door_count = __packet->size/sizeof(Door_Struct);
-	int total_length = door_count * sizeof(structs::Door_Struct);
-	ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
-	int r;
-	for(r = 0; r < door_count; r++) {
-		strcpy(eq[r].name, emu[r].name);
-		eq[r].xPos = emu[r].xPos;
-		eq[r].yPos = emu[r].yPos;
-		eq[r].zPos = emu[r].zPos;
-		eq[r].heading = emu[r].heading;
-		eq[r].incline = emu[r].incline;
-		eq[r].size = emu[r].size;
-		eq[r].doorid = emu[r].doorId;
-		eq[r].opentype = emu[r].opentype;
-		eq[r].doorIsOpen = emu[r].state_at_spawn;
-		eq[r].inverted = emu[r].invert_state;
-		eq[r].parameter = emu[r].door_param;
-	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket();
-	outapp->SetOpcode(OP_SpawnDoor);
-	outapp->pBuffer = new uchar[total_length];
-	outapp->size = DeflatePacket((unsigned char*)__packet->pBuffer, door_count * sizeof(structs::Door_Struct), outapp->pBuffer, __packet->size);
-	dest->FastQueuePacket(&outapp);
-	delete[] __emu_buffer;
-	delete __packet;
-}
-
 ENCODE(OP_ZoneSpawns){
 
 	//consume the packet
@@ -679,6 +649,12 @@ ENCODE(OP_ZoneSpawns){
 //		eq->unknown0328 = emu->unknown0328;
 		//eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
+		if(emu->class_ > 19 || emu->class_ < 35)
+			emu->class_ = emu->class_-3;
+		if(emu->class_ == 40)
+			emu->class_ = 16;
+		if(emu->class_ == 41)
+			emu->class_ = 32;
 		eq->class_ = emu->class_;
 		eq->eyecolor2 = emu->eyecolor2;
 //		eq->unknown0333 = emu->unknown0333;
@@ -802,6 +778,12 @@ ENCODE(OP_NewSpawn) {
 //		eq->unknown0328 = emu->unknown0328;
 		//eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
+		if(emu->class_ > 19 || emu->class_ < 35)
+			emu->class_ = emu->class_-3;
+		if(emu->class_ == 40)
+			emu->class_ = 16;
+		if(emu->class_ == 41)
+			emu->class_ = 32;
 		eq->class_ = emu->class_;
 		eq->eyecolor2 = emu->eyecolor2;
 //		eq->unknown0333 = emu->unknown0333;
@@ -886,12 +868,8 @@ DECODE(OP_MemorizeSpell) {
 ENCODE(OP_Buff) {
 	SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct);
 	OUT(entityid);
-	eq->unknown000[0] = 0x02;
-	eq->unknown000[1] = 0x07;
-	eq->unknown000[2] = 0x0A;
 	OUT(spellid);
 	OUT(slotid);
-	OUT(bufffade);
 	FINISH_ENCODE();	
 }
 
@@ -901,7 +879,6 @@ DECODE(OP_Buff) {
 	IN(entityid);
 	IN(spellid);
 	IN(slotid);
-	IN(bufffade);
 	FINISH_DIRECT_DECODE();	
 }
 
@@ -990,6 +967,24 @@ ENCODE(OP_Consider) {
 	FINISH_ENCODE();
 }
 
+
+DECODE(OP_ClickDoor) {
+	DECODE_LENGTH_EXACT(structs::ClickDoor_Struct);
+	SETUP_DIRECT_DECODE(ClickDoor_Struct, structs::ClickDoor_Struct);
+	IN(doorid);
+	IN(item_id);
+	IN(player_id);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_InterruptCast) {
+	ENCODE_LENGTH_EXACT(InterruptCast_Struct);
+	SETUP_DIRECT_ENCODE(InterruptCast_Struct, structs::InterruptCast_Struct);
+	OUT(spawnid);
+	OUT(messageid);
+	eq->message[0] = emu->message[0];
+	FINISH_ENCODE();
+}
 } //end namespace Mac
 
 

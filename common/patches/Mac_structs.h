@@ -302,8 +302,8 @@ struct Action_Struct
 
 struct InterruptCast_Struct
 {
-	uint16	spawnid;		// Comment: ID of Spell Caster
-	uint16	unknown1;		// Comment: Unknown -> needs confirming -> placeholder?
+	uint16	messageid;		// Comment: ID of Spell Caster
+	uint16	spawnid;		// Comment: Unknown -> needs confirming -> placeholder?
 	char	message[0];		// Comment: Unknown -> needs confirming -> Message of what? the spell cast text?
 };
 
@@ -359,16 +359,17 @@ struct SpawnAppearance_Struct
 /*0004*/ uint32 parameter;         // Type of data sent
 };
 
-// Length: 24
+// Length: 20
 struct SpellBuffFade_Struct {
-/*000*/ uint32  entityid;       // Comment: Id of the player
-/*004*/	uint8	unknown000[4];	// Comment: 
-/*008*/	uint16	spellid;		// Comment: 
-/*010*/	uint8	unknown010[6];	// Comment: 
-/*016*/	uint8	slotid;			// Comment:  Buff slot # on the client
-/*017*/	uint8	unknown017[3];	// Comment: 
-/*020*/	uint8	bufffade;			// Comment: 01 = true
-/*021*/	uint8	unknown[3];		// Comment: 
+	uint32	entityid;		// Comment: Unknown -> needs confirming -> Target of the Buff
+	uint16  unknown1;
+	uint16  spellid;
+	uint32	unknown2;		// Comment: Unknown -> needs confirming -> Spell ID?
+	uint8	slotid;		// Comment: Unknown -> needs confirming
+	uint8    unknown3;
+	uint16   unknown4;
+	uint16	unknown5;		// Comment: Unknown -> needs confirming -> Which buff slot on the target maybe?
+	uint16  unknown6;
 };
 
 /*
@@ -1801,7 +1802,7 @@ struct Door_Struct
 /*0020*/ float   xPos;               // x loc
 /*0024*/ float   zPos;               // z loc
 /*0028*/ float	 heading;
-/*0032*/ float   incline;
+/*0032*/ uint32  incline;
 /*0036*/ uint16	 size;
 /*0038*/ uint8	 doorid;             // door's id #
 /*0039*/ uint8	 opentype;
@@ -1907,8 +1908,8 @@ struct DoorSpawns_Struct	//SEQ
 struct ClickDoor_Struct {
 	uint8	doorid;
 	uint8	unknown[3];
-	uint16	keyid;
-	uint16	playerid;
+	uint16	item_id;
+	uint16	player_id;
 };
 
 struct DoorOpen_Struct {

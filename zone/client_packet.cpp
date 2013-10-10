@@ -623,19 +623,29 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 	EQApplicationPacket* outapp = new EQApplicationPacket;
 
-	// Send Zone Doors
-	if(entity_list.MakeDoorSpawnPacket(outapp, this))
+	if(GetClientVersion() > EQClientMac)
 	{
-		QueuePacket(outapp);
+		// Send Zone Doors
+		if(entity_list.MakeDoorSpawnPacket(outapp, this))
+		{
+			QueuePacket(outapp);
+		}
+		safe_delete(outapp);
 	}
-	safe_delete(outapp);
 
 	// Send Zone Objects + Mac Spawns here
 
 	entity_list.SendZoneObjects(this);
 	SendZonePoints();
+
 	if(GetClientVersion() == EQClientMac)
 	{
+		if(entity_list.SendZoneDoorsBulk(outapp, this))
+		{
+			QueuePacket(outapp);
+		}
+		safe_delete(outapp);
+
 		entity_list.SendZoneSpawnsBulk(this);
 		// Tell client they can continue we're done
 		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
@@ -5045,10 +5055,9 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
-
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) app->pBuffer;
 	uint32 spid = sbf->spellid;
-	mlog(SPELLS__BUFFS, "Client requested that buff with spell id %d be canceled.", spid);
+	mlog(SPELLS__BUFFS, "Client requested that buff with spell id %d be canceled. effect: %d slotid: %d slot: %d duration: %d level: %d", sbf->spellid, sbf->effect, sbf->slotid, sbf->slot, sbf->duration, sbf->level);
 
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and

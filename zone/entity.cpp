@@ -795,6 +795,73 @@ Object* EntityList::FindNearbyObject(float x, float y, float z, float radius)
 	return nullptr;
 }
 
+bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
+
+	uint32 mask_test = client->GetClientVersionBit();
+	int count = 0;
+	uchar buffer1[sizeof(OldDoor_Struct)];
+	uchar buffer2[7000];
+	int16 length = 0;
+
+	LinkedListIterator<Doors*> iterator(door_list);
+
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		if((iterator.GetData()->GetClientVersionMask() & mask_test) && strlen(iterator.GetData()->GetDoorName()) > 3)
+		{
+			count++;
+		}
+		iterator.Advance();
+	}
+
+	if(count == 0 || count > 500)
+	{
+		return false;
+	}
+
+	count = 0;
+	Doors *door;
+	OldDoor_Struct* nd = (OldDoor_Struct*)buffer1;
+	memset(nd,0,sizeof(OldDoor_Struct));
+
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		door = iterator.GetData();
+		if(door && (door->GetClientVersionMask() & mask_test) && strlen(door->GetDoorName()) > 3)
+		{
+			memcpy(nd->name, door->GetDoorName(), 16);
+			nd->xPos = door->GetX();
+			nd->yPos = door->GetY();
+			nd->zPos = door->GetZ();
+			nd->heading = door->GetHeading();
+			nd->incline = door->GetIncline();
+			nd->size = door->GetSize();
+			nd->doorid = door->GetDoorID();
+			nd->opentype = door->GetOpenType();
+			nd->doorIsOpen = door->GetInvertState() ? !door->IsDoorOpen() : door->IsDoorOpen();
+			nd->inverted = door->GetInvertState();
+			nd->parameter = door->GetDoorParam();
+			
+			memcpy(buffer2+length,buffer1,44);
+			length = length + 44;
+
+			count++;
+		}
+		iterator.Advance();
+	}
+		
+	app->SetOpcode(OP_SpawnDoor);
+	app->pBuffer = new uchar[7000];
+	length = DeflatePacket(buffer2,length,app->pBuffer+2,7000);
+	app->size = length+2;
+	OldDoorSpawns_Struct* ds = (OldDoorSpawns_Struct*)app->pBuffer;
+
+	ds->count = count;
+	_log(ZONE__INIT,"%i Doors successfully spawned.",count);
+	return true;
+}
 
 bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket* app, Client *client)
 {

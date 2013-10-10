@@ -1510,8 +1510,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		{
 			bool ValidStartZone = false;
 
-			if(ClientVersionBit & BIT_TitaniumAndEarlier)
-				ValidStartZone = database.GetStartZone(&pp, cc);
+			if(ClientVersionBit & BIT_Client62AndTitanium)
+				ValidStartZone = database.GetStartZone(&pp, cc);			
 			else
 				ValidStartZone = database.GetStartZoneSoF(&pp, cc);
 
