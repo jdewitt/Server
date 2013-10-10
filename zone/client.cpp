@@ -1175,71 +1175,87 @@ void Client::Message(uint32 type, const char* message, ...) {
 	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
 		return;
 
-	va_list argptr;
-	char *buffer = new char[4096];
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
-	va_end(argptr);
+		va_list argptr;
+		char *buffer = new char[4096];
+		va_start(argptr, message);
+		vsnprintf(buffer, 4096, message, argptr);
+		va_end(argptr);
 
-	size_t len = strlen(buffer);
+		size_t len = strlen(buffer);
 
-	//client dosent like our packet all the time unless
-	//we make it really big, then it seems to not care that
-	//our header is malformed.
-	//len = 4096 - sizeof(SpecialMesg_Struct);
+		//client dosent like our packet all the time unless
+		//we make it really big, then it seems to not care that
+		//our header is malformed.
+		//len = 4096 - sizeof(SpecialMesg_Struct);
 
-	uint32 len_packet = sizeof(SpecialMesg_Struct)+len;
-	EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-	sm->header[0] = 0x00; // Header used for #emote style messages..
-	sm->header[1] = 0x00; // Play around with these to see other types
-	sm->header[2] = 0x00;
-	sm->msg_type = type;
-	memcpy(sm->message, buffer, len+1);
+		uint32 len_packet = sizeof(SpecialMesg_Struct)+len;
+		EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+		SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
+		sm->header[0] = 0x00; // Header used for #emote style messages..
+		sm->header[1] = 0x00; // Play around with these to see other types
+		sm->header[2] = 0x00;
+		sm->msg_type = type;
+		memcpy(sm->message, buffer, len+1);
 
-	FastQueuePacket(&app);
+		FastQueuePacket(&app);
 
-	safe_delete_array(buffer);
+		safe_delete_array(buffer);
+
 }
 
 void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 
-	// npcnames longer than 60 characters crash the client when they log back in
-	const int MaxNPCNameLength = 60;
 	// I assume there is an upper safe limit on the message length. Don't know what it is, but 4000 doesn't crash
 	// the client.
 	const int MaxMessageLength = 4000;
-
-	char OutNPCName[MaxNPCNameLength+1];
 	char OutMessage[MaxMessageLength+1];
 
 	// Apparently Visual C++ snprintf is not C99 compliant and doesn't put the null terminator
 	// in if the formatted string >= the maximum length, so we put it in.
 	//
-	snprintf(OutNPCName, MaxNPCNameLength, "%s", npcname); OutNPCName[MaxNPCNameLength]='\0';
 	snprintf(OutMessage, MaxMessageLength, "%s", message); OutMessage[MaxMessageLength]='\0';
 
-	uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
-	EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
+	if(GetClientVersion() != EQClientMac)
+	{
+		// npcnames longer than 60 characters crash the client when they log back in
+		const int MaxNPCNameLength = 60;
+		char OutNPCName[MaxNPCNameLength+1];
+		snprintf(OutNPCName, MaxNPCNameLength, "%s", npcname); OutNPCName[MaxNPCNameLength]='\0';
+		uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
+		EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+		SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
 
-	sm->header[0] = 0;
-	sm->header[1] = 2;
-	sm->header[2] = 0;
-	sm->msg_type = 0x0a;
-	sm->target_spawn_id = GetID();
+		sm->header[0] = 0;
+		sm->header[1] = 2;
+		sm->header[2] = 0;
+		sm->msg_type = 0x0a;
+		sm->target_spawn_id = GetID();
 
-	char *dest = &sm->sayer[0];
+		char *dest = &sm->sayer[0];
 
-	memcpy(dest, OutNPCName, strlen(OutNPCName) + 1);
+		memcpy(dest, OutNPCName, strlen(OutNPCName) + 1);
 
-	dest = dest + strlen(OutNPCName) + 13;
+		dest = dest + strlen(OutNPCName) + 13;
 
-	memcpy(dest, OutMessage, strlen(OutMessage) + 1);
+		memcpy(dest, OutMessage, strlen(OutMessage) + 1);
 
-	QueuePacket(app);
+		QueuePacket(app);
 
-	safe_delete(app);
+		safe_delete(app);
+	}
+	//EQMac SpecialMesg works for Message but not here (end result of quest say) No clue why, but workaround for now.
+	else
+	{
+		uint32 len_packet = sizeof(OldSpecialMesg_Struct) + strlen(OutMessage) + 1;
+		EQApplicationPacket* app = new EQApplicationPacket(OP_OldSpecialMesg, len_packet);
+		OldSpecialMesg_Struct* sm=(OldSpecialMesg_Struct*)app->pBuffer;
+
+		sm->msg_type = 0x0a;
+		memcpy(sm->message, OutMessage, strlen(OutMessage) + 1);
+
+		QueuePacket(app);
+		safe_delete(app);
+	}
 }
 
 void Client::SetMaxHP() {

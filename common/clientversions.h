@@ -23,7 +23,7 @@ typedef enum {
 	EQClientSoF,
 	EQClientSoD,
 	EQClientUnderfoot,
-	EQClientRoF
+	EQClientRoF,
 } EQClientVersion;
 
 #endif /* CLIENTVERSIONS_H */

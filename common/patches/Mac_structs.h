@@ -269,12 +269,11 @@ struct CombatDamage_Struct
 /*000*/	uint16	target;
 /*002*/	uint16	source;
 /*004*/	uint8	type;
-/*006*/	uint16	spellid;
-		uint8   unknown;
-/*008*/	uint32	damage;
-/*012*/	uint32	unknown11;
-/*016*/ uint32  sequence;
-/*020*/ uint32  unknown19;
+/*005*/	uint8	unknown5;
+/*006*/	uint16  spellid;
+/*008*/	int32	damage;
+/*012*/	uint8	unknown12[12];
+
 };
 
 // solar: this is what causes the caster to animate and the target to
@@ -504,7 +503,7 @@ struct ChannelMessage_Struct
 /*064*/	char	sender[64];			// The senders name (len might be wrong)
 /*128*/	uint16	language;			// Language
 /*130*/	uint16	chan_num;			// Channel
-/*132*/	uint8	cm_unknown4[2];		// ***Placeholder
+/*132*/	uint16	cm_unknown4;		// ***Placeholder
 /*134*/	uint16	skill_in_language;	// The players skill in this language? might be wrong
 /*136*/	char	message[0];			// Variable length message
 };
@@ -672,40 +671,16 @@ struct Attack_Struct
 /*05*/ uint8    a_unknown2[7];	// Comment: ***Placeholder};
 };
 
-
-/************************************************************** 
-Consider_Struct - neorab 9/23/2007 
-
-OPCODE - 0x3721 
-
-Used by the client to request consider information from server 
-and by server to return consider information to client.  The 
-unworthy code was never used live as far as I know.  Set it to 
-anything but 0 and when the con is "green" the message is that 
-the mob "would not make a worthy opponent."  When the con is 
-"yellow" the little message is removed completely.  The two 
-before it are padding that I think is used for sending data to 
-the server, but we don't need it and we don't use it going out. 
-
-At some point, unknown_c was level, cur_hp and max_hp.  After 
-testing this many many times, I found that those three values 
-make no difference.  The level for the consider is taken from 
-the data in update structs and spawn_struct.  I verified that 
-the HP items make no difference as well.  The two unknown_a(b) 
-are padding around the player and target id.  It has been 
-verified that they are not used as part of the IDs as I thought 
-they were originally. 
-
-***************************************************************/ 
-
-struct Consider_Struct{
+struct Consider_Struct
+{
 /*000*/ uint16	playerid;               // PlayerID
 /*002*/ uint16	targetid;               // TargetID
 /*004*/ uint32	faction;                // Faction
 /*008*/ uint32	level;                  // Level
-/*012*/ int32	cur_hp;                  // Current Hitpoints
-/*016*/ int32	max_hp;                  // Maximum Hitpoints
-/*020*/ uint8	unknown3[4];
+/*016*/ int32	cur_hp;			// Current Hitpoints
+/*020*/ int32	max_hp;			// Maximum Hitpoints
+/*024*/ uint8	pvpcon;			// Pvp con flag 0/1
+/*025*/ uint8	unknown3[3];
 };
 
 struct ConsentRequest_Struct

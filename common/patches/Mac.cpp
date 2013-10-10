@@ -406,7 +406,7 @@ ENCODE(OP_SpecialMesg) {
 	uint32 __i = 0; 
 	__i++; /* to shut up compiler */
 	
-	int msglen = __packet->size - sizeof(SpecialMesg_Struct);
+	int msglen = __packet->size - sizeof(structs::SpecialMesg_Struct);
 	int len = sizeof(structs::SpecialMesg_Struct) + msglen + 1;
 	__packet->pBuffer = new unsigned char[len]; 
 	__packet->size = len; 
@@ -516,17 +516,6 @@ DECODE(OP_TargetCommand)
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_Consider)
-{
-	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
-	IN(playerid);
-	IN(targetid);               
-	IN(faction);                
-	IN(level);                  
-	IN(cur_hp);                  
-	IN(max_hp);   
-	FINISH_ENCODE();
-}
 
 DECODE(OP_SetServerFilter)
 {
@@ -953,9 +942,9 @@ ENCODE(OP_Damage) {
 	OUT(type);
 	OUT(spellid);
 	OUT(damage);
-	OUT(unknown11);
-	OUT(sequence);
-	OUT(unknown19);
+	//OUT(unknown11);
+	//OUT(sequence);
+	//OUT(unknown19);
 	FINISH_ENCODE();
 }
 
@@ -972,6 +961,32 @@ ENCODE(OP_Action) {
 	OUT(type);
 	OUT(spell);
 	OUT(buff_unknown);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_Consider) {
+	DECODE_LENGTH_EXACT(structs::Consider_Struct);
+	SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
+	IN(playerid);
+	IN(targetid);
+	IN(faction);
+	IN(level);
+	IN(cur_hp);
+	IN(max_hp);
+	IN(pvpcon);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_Consider) {
+	ENCODE_LENGTH_EXACT(Consider_Struct);
+	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
+	OUT(playerid);
+	OUT(targetid);
+	OUT(faction);
+	OUT(level);
+	OUT(cur_hp);
+	OUT(max_hp);
+	OUT(pvpcon);
 	FINISH_ENCODE();
 }
 

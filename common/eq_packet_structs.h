@@ -1120,6 +1120,12 @@ struct SpecialMesg_Struct
 /*24*/	char	message[1];				// What is being said?
 };
 
+struct OldSpecialMesg_Struct
+{
+/*0000*/ uint32 msg_type;		// Comment: Type of message
+/*0004*/ char  message[0];		// Comment: Message, followed by four bytes?
+};
+
 /*
 ** When somebody changes what they're wearing or give a pet a weapon (model changes)
 ** Length: 19 Bytes
@@ -1236,10 +1242,10 @@ struct Consider_Struct{
 /*000*/ uint32	playerid;		// PlayerID
 /*004*/ uint32	targetid;		// TargetID
 /*008*/ uint32	faction;		// Faction
-/*0012*/ uint32	level;			// Level
+/*012*/ uint32	level;			// Level
 /*016*/ int32	cur_hp;			// Current Hitpoints
 /*020*/ int32	max_hp;			// Maximum Hitpoints
-/*024*/ uint8 pvpcon;			// Pvp con flag 0/1
+/*024*/ uint8	pvpcon;			// Pvp con flag 0/1
 /*025*/ uint8	unknown3[3];
 };
 
