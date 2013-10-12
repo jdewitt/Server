@@ -985,6 +985,31 @@ ENCODE(OP_InterruptCast) {
 	eq->message[0] = emu->message[0];
 	FINISH_ENCODE();
 }
+
+
+
+DECODE(OP_GMEndTraining) {
+	DECODE_LENGTH_EXACT(structs::GMTrainEnd_Struct);
+	SETUP_DIRECT_DECODE(GMTrainEnd_Struct, structs::GMTrainEnd_Struct);
+	IN(npcid);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
+ENCODE(OP_ItemPacket) {
+/*	//consume the packet
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	//store away the emu struct
+	unsigned char *__emu_buffer = in->pBuffer;
+	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
+	*/
+}
+
+ENCODE(OP_CharInventory){
+}
+
 } //end namespace Mac
 
 

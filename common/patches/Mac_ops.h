@@ -38,5 +38,11 @@ E(OP_Damage)
 E(OP_Action)
 D(OP_ClickDoor)
 E(OP_InterruptCast)
+//D(OP_GMTraining)
+//E(OP_GMTraining)
+D(OP_GMEndTraining)
+E(OP_ItemPacket)
+E(OP_ItemLinkResponse)
+E(OP_CharInventory)
 #undef E
 #undef D

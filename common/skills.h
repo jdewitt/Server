@@ -98,7 +98,7 @@ typedef enum {
 	GENERIC_TRADESKILL		= 75
 } SkillType;
 
-#define HIGHEST_SKILL	FRENZY
+#define HIGHEST_SKILL	TAUNT
 
 #endif
 
