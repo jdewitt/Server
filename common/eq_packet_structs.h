@@ -590,13 +590,15 @@ uint8	charges;
 uint8	unknown02[13];
 };
 
-struct GMTrainee_Struct
-{
-	/*000*/ uint32 npcid;
-	/*004*/ uint32 playerid;
-	/*008*/ uint32 skills[73];
-	/*300*/ uint8 unknown300[148];
-	/*448*/
+struct GMTrainee_Struct{
+     //       uint16 unknown0; //Always seems to be 0x9c 0x40
+	/*002*/ uint16 npcid;
+			uint16 playerid;
+	/*004*/ uint16 skills[73];
+	/*004*/ uint8  unknown[54];
+			uint16 unknown1;
+			uint8  unknown2;
+			uint8  ending[37];
 };
 
 struct GMTrainEnd_Struct

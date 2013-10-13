@@ -286,7 +286,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Track] = &Client::Handle_OP_Track;
 	ConnectedOpcodes[OP_TrackUnknown] = &Client::Handle_OP_TrackUnknown;
 	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
-	ConnectedOpcodes[OP_0x2120] = &Client::Handle_0x2120;
 	ConnectedOpcodes[OP_ClientError] = &Client::Handle_OP_ClientError;
 	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
@@ -8120,12 +8119,6 @@ void Client::Handle_0x0193(const EQApplicationPacket *app)
 	// Not sure what this opcode does. It started being sent when OP_ClientUpdate was
 	// changed to pump OP_ClientUpdate back out instead of OP_MobUpdate
 	// 2 bytes: 00 00
-}
-
-void Client::Handle_0x2120(const EQApplicationPacket *app)
-{
-	// EQMac requires this to be sent on zoning.
-	// 16 bytes: 0xE6, 0x02, 0x10, 0x00, 0x00, 0x00, 0x68, 0x42, 0x00, 0x00, 0xDB, 0xC3, 0xFA, 0xFE, 0x00, 0xC2
 }
 
 void Client::Handle_OP_ClientError(const EQApplicationPacket *app)

@@ -985,6 +985,120 @@ ENCODE(OP_InterruptCast) {
 	eq->message[0] = emu->message[0];
 	FINISH_ENCODE();
 }
+
+
+
+DECODE(OP_GMEndTraining) {
+	DECODE_LENGTH_EXACT(structs::GMTrainEnd_Struct);
+	SETUP_DIRECT_DECODE(GMTrainEnd_Struct, structs::GMTrainEnd_Struct);
+	IN(npcid);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
+ENCODE(OP_ItemPacket) {
+	//consume the packet
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	//store away the emu struct
+	unsigned char *__emu_buffer = in->pBuffer;
+	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
+	InternalSerializedItem_Struct *int_struct=(InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
+
+	const ItemInst * item = (const ItemInst *)int_struct->inst;
+	
+	if(item)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPacket,sizeof(structs::Item_Struct));
+
+		if(old_item_pkt->PacketType == ItemPacketSummonItem)
+			outapp->SetOpcode(OP_SummonedItem);
+		else
+			outapp->SetOpcode(OP_ItemPacket);
+
+		outapp->size=sizeof(structs::Item_Struct);
+		structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
+
+		myitem->Charges = item->GetCharges();
+		myitem->equipSlot = item->GetCurrentSlot();
+
+		strcpy(myitem->Name,item->GetItem()->Name);
+		strcpy(myitem->Lore,item->GetItem()->Lore);       
+		strcpy(myitem->IDfile,item->GetItem()->IDFile);  
+//		strcpy(myitem->Filename,item->GetItem()->Filename);
+		myitem->Weight = item->GetItem()->Weight;      
+		myitem->NoRent = item->GetItem()->NoRent;         
+		myitem->NoDrop = item->GetItem()->NoDrop;         
+		myitem->Size = item->GetItem()->Size;           
+		//myitem->Type = item->GetItem()->Type;
+		myitem->ID = item->GetItem()->ID;        
+		myitem->Icon = item->GetItem()->Icon;       
+		myitem->Slots = item->GetItem()->Slots;  
+		myitem->Price = item->GetItem()->Price;  
+		myitem->AStr = item->GetItem()->AStr;           
+		myitem->ASta = item->GetItem()->ASta;           
+		myitem->ACha = item->GetItem()->ACha;           
+		myitem->ADex = item->GetItem()->ADex;           
+		myitem->AInt = item->GetItem()->AInt;           
+		myitem->AAgi = item->GetItem()->AAgi;           
+		myitem->AWis = item->GetItem()->AWis;           
+		myitem->MR = item->GetItem()->MR;             
+		myitem->FR = item->GetItem()->FR;             
+		myitem->CR = item->GetItem()->CR;             
+		myitem->DR = item->GetItem()->DR;             
+		myitem->PR = item->GetItem()->PR;             
+		myitem->HP = item->GetItem()->HP;             
+		myitem->Mana = item->GetItem()->Mana;           
+		myitem->AC = item->GetItem()->AC;		
+		myitem->MaxCharges = item->GetItem()->MaxCharges;    
+		//myitem->GMFlag = item->GetItem()->GMFlag;         
+		myitem->Light = item->GetItem()->Light;          
+		myitem->Delay = item->GetItem()->Delay;          
+		myitem->Damage = item->GetItem()->Damage;         
+		myitem->ClickType = item->GetItem()->Click.Type;      
+		myitem->Range = item->GetItem()->Range;          
+		myitem->ItemType = item->GetItem()->ItemType;          
+		myitem->Magic = item->GetItem()->Magic;          
+		myitem->ClickLevel = item->GetItem()->Click.Level;     
+		myitem->Material = item->GetItem()->Material;   
+		myitem->Color = item->GetItem()->Color;    
+		myitem->ClickEffect = item->GetItem()->Click.Effect;    
+		myitem->Classes = item->GetItem()->Classes;  
+		myitem->Races = item->GetItem()->Races;  
+		myitem->Stackable = item->GetItem()->Stackable;      
+		myitem->Clicklevel2 = item->GetItem()->Click.Level2;    
+		myitem->StackSize = item->GetItem()->StackSize;             
+		myitem->ProcType = item->GetItem()->Proc.Type;      
+		myitem->ProcEffect = item->GetItem()->Proc.Effect;
+		myitem->CastTime_ = item->GetItem()->CastTime_;  
+		myitem->SkillModType = item->GetItem()->SkillModType;
+		myitem->SkillModValue = item->GetItem()->SkillModValue;
+		myitem->BaneDmgRace = item->GetItem()->BaneDmgRace;
+		myitem->BaneDmgBody = item->GetItem()->BaneDmgBody;
+		myitem->BaneDmgAmt = item->GetItem()->BaneDmgAmt;
+		myitem->RecLevel = item->GetItem()->RecLevel;       
+		myitem->RecSkill = item->GetItem()->RecSkill;   
+		myitem->ElemDmgType = item->GetItem()->ElemDmgType; 
+		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
+		myitem->ReqLevel = item->GetItem()->ReqLevel; 
+		myitem->FocusEffect = item->GetItem()->Focus.Effect;
+//		myitem->BagSlots = item->GetItem()->BagSlots;         
+//		myitem->BagSize = item->GetItem()->BagSize;    
+//		myitem->BagWR = item->GetItem()->BagWR; 
+		
+		if(outapp->size != 360)
+			_log(ZONE__INIT,"Invalid size on OP_ItemPacket packet. Expected: 360, Got: %i", outapp->size);
+
+		DumpPacket(outapp);
+		dest->FastQueuePacket(&outapp);
+		delete[] __emu_buffer;
+	}
+}
+
+ENCODE(OP_CharInventory){
+}
+
 } //end namespace Mac
 
 

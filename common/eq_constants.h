@@ -552,8 +552,7 @@ static const uint8 SkillDamageTypes[HIGHEST_SKILL+1] = {
 	/* PERCUSSION_INSTRUMENTS */ SpellDamageType,
 	/* INTIMIDATION */ DamageTypeUnknown,
 	/* BERSERKING */ DamageTypeUnknown,
-	/* TAUNT */ DamageTypeUnknown,
-	/* FRENZY */ 74
+	/* TAUNT */  73
 };
 
 // Indexing positions into item material arrays

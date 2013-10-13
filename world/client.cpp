@@ -680,7 +680,11 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 		safe_delete(outapp);
 	}
 	else
+	{
+		if(ClientVersionBit & BIT_Client62AndTitanium)
+			StartInTutorial = true;
 		SendCharInfo();
+	}
 
 	return true;
 }
@@ -723,7 +727,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if(!pZoning && ew->return_home)
+	if(!pZoning && ew->return_home && !ew->tutorial)
 	{
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
@@ -737,7 +741,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if(cs->gohome[x] == 1)
 				{
 					home_enabled = true;
-					return true;
+					break;
 				}
 			}
 		}
@@ -769,7 +773,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if(cs->tutorial[x] == 1)
 				{
 					tutorial_enabled = true;
-					return true;
+					break;
 				}
 			}
 		}
