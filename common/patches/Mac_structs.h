@@ -880,7 +880,7 @@ struct Item_Struct
 /*0175*/ int8      NoRent;          // Nosave flag 1=normal, 0=nosave, -1=spell?
 /*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
 /*0177*/ uint8     Size;            // Size of item
-/*0178*/ int8      ItemType;
+/*0178*/ int8      Type;
 /*0179*/ uint8     unknown0178;     // ***Placeholder
 /*0180*/ uint16    ID;         // Unique Item number
 /*0182*/ uint16    Icon;         // Icon Number
@@ -912,7 +912,7 @@ struct Item_Struct
 /*0250*/ uint8     Damage;           // Weapon Damage
 /*0251*/ int8      ClickType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
 /*0252*/ uint8     Range;            // Range of weapon
-/*0253*/ uint8     Skill;            // Skill of this weapon, refer to weaponskill chart
+/*0253*/ uint8     ItemType;            // Skill of this weapon, refer to weaponskill chart
 /*0254*/ int8      Magic;            // Magic flag
                         //   00  (0000)  =   ???
                         //   01  (0001)  =  magic
@@ -932,29 +932,34 @@ struct Item_Struct
 /*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)
 /*0277*/ uint8    Clicklevel2;            // Casting level
 /*0278*/ int8     StackSize;          // Number of items in stack
-/*0278*/ int8     Charges;         // Number of charges (-1 = unlimited)
-/*0279*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
-	     uint16   ProcEffect;         // spellId of special effect
-	     uint8    unknown0282[10]; // ***Placeholder 0288
-	     uint32   CastTime_;        // Cast time of clicky item in miliseconds
-	     uint8    unknown0296[16]; // ***Placeholder
-	     uint16   SkillModType;
-	     int16    SkillModValuet;
-	     int16    BaneDMGRace;
-	     int16    BaneDMGBody;
+/*0279*/ int8     Charges;         // Number of charges (-1 = unlimited)
+/*0280*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
+/*0281*/ uint16   ProcEffect;         // spellId of special effect
+/*0283*/ uint8    unknown0282[10]; // ***Placeholder 0288
+/*0293*/ uint32   CastTime_;        // Cast time of clicky item in miliseconds
+/*0297*/ uint8    unknown0296[16]; // ***Placeholder
+/*0313*/ uint16   SkillModType;
+/*0315*/ int16    SkillModValue;
+/*0317*/ int16    BaneDmgRace;
+/*0319*/ int16    BaneDmgBody;
 			 // 1 Humanoid, 2 Lycanthrope, 3 Undead, 4 Giant, 5 Construct, 6 Extraplanar, 7 Magical
-	     uint8    BaneDMGAmt;
-	     uint8    unknown0316[3];
-	     uint8    RecLevel;         // max should be 65
-	     uint8    RecSkill;         // Max should be 252
-	     uint8    unknown0325[2];
-	     uint8    ElemDmgType; 
+/*0321*/ uint8    BaneDmgAmt;
+/*0322*/ uint8    unknown0316[3];
+/*0325*/ uint8    RecLevel;         // max should be 65
+/*0326*/ uint8    RecSkill;         // Max should be 252
+/*0327*/ uint8    unknown0325[2];
+/*0329*/ uint8    ElemDmgType; 
 			// 1 Magic, 2 Fire, 3 Cold, 4 Poison, 5 Disease
-	     uint8    ElemDmgAmt;
-	     uint8    unknown0330[22];
-	     uint8    ReqLevel; // Required level
-	     uint8    unknown0352[5];
-/*0358*/ int16    FocusEffect;
+/*0330*/ uint8    ElemDmgAmt;
+/*0331*/ uint8    unknown0330[22];
+/*0353*/ uint8    ReqLevel; // Required level
+/*0354*/ uint8    unknown0352[5];
+/*0359*/ uint8    FocusEffect;  //Was int16
+};
+
+struct leftover_items
+{
+
 /*0228*/ int8     unknown0172[6];      // ***Placeholder
 /*0234*/ char     Filename[15];            // Filename of book text on server
 /*0249*/ int8     unknown0190[15];    // ***Placeholder

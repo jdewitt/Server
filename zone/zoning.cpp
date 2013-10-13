@@ -328,14 +328,14 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 
-	if(eqs->ClientVersion() == EQClientMac)
+/*	if(eqs->ClientVersion() == EQClientMac)
 	{
 		int8 eqmacunknown[16] = {0xE6, 0x02, 0x10, 0x00, 0x00, 0x00, 0x68, 0x42, 0x00, 0x00, 0xDB, 0xC3, 0xFA, 0xFE, 0x00, 0xC2};
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_0x2120, sizeof(eqmacunknown));
 		memcpy(outapp->pBuffer, eqmacunknown, sizeof(eqmacunknown));
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-	}
+	}*/
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
