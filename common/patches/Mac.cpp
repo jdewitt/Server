@@ -147,7 +147,7 @@ ENCODE(OP_PlayerProfile) {
 
 	OUT(deity);
 	//OUT(intoxication);
-	//OUT_array(spellSlotRefresh, structs::MAX_PP_MEMSPELL);
+	//OUT_array(spellSlotRefresh, 8);
 	//OUT(abilitySlotRefresh);
 //	OUT(unknown0166[4]);
 	OUT(haircolor);
@@ -179,8 +179,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT(copper_cursor);
 	OUT_array(skills, 75);
 	//OUT(toxicity);
-	//OUT(thirstlevel);
-	//	OUT(hungerlevel);
+	OUT(thirst_level);
+	OUT(hunger_level);
 	for(r = 0; r < 15; r++) {
 		eq->buffs[r].visable = (emu->buffs[r].spellid != 0xFFFF || emu->buffs[r].spellid != 0) ? 2 : 0;
 		OUT(buffs[r].level);
@@ -1012,6 +1012,7 @@ ENCODE(OP_ItemPacket) {
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPacket,sizeof(structs::Item_Struct));
 
+		outapp->SetOpcode(OP_Unknown);
 		if(old_item_pkt->PacketType == ItemPacketSummonItem)
 			outapp->SetOpcode(OP_SummonedItem);
 		else
@@ -1021,7 +1022,7 @@ ENCODE(OP_ItemPacket) {
 		structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
 
 		myitem->Charges = item->GetCharges();
-		myitem->equipSlot = item->GetCurrentSlot();
+		myitem->equipSlot = int_struct->slot_id;
 
 		strcpy(myitem->Name,item->GetItem()->Name);
 		strcpy(myitem->Lore,item->GetItem()->Lore);       
@@ -1090,6 +1091,8 @@ ENCODE(OP_ItemPacket) {
 		if(outapp->size != 360)
 			_log(ZONE__INIT,"Invalid size on OP_ItemPacket packet. Expected: 360, Got: %i", outapp->size);
 
+		_log(ZONE__INIT,"I sent you a %s it's in slot: %i with charges: %i", myitem->Name, myitem->equipSlot, myitem->Charges);
+
 		DumpPacket(outapp);
 		dest->FastQueuePacket(&outapp);
 		delete[] __emu_buffer;
@@ -1097,6 +1100,132 @@ ENCODE(OP_ItemPacket) {
 }
 
 ENCODE(OP_CharInventory){
+
+	//consume the packet
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	//store away the emu struct
+	unsigned char *__emu_buffer = in->pBuffer;
+
+	int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
+	if(itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
+		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+		delete in;
+		return;
+	}
+
+	int pisize = sizeof(structs::PlayerItems_Struct) + (250 * sizeof(structs::PlayerItemsPacket_Struct));
+	structs::PlayerItems_Struct* pi = (structs::PlayerItems_Struct*) new uchar[pisize];
+	memset(pi, 0, pisize);
+
+	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
+	//do the transform...
+	int r;
+	for(r = 0; r < itemcount; r++, eq++) {
+
+		const ItemInst * sm_item = (const ItemInst *)eq->inst;
+
+		pi->packets[r].item.equipSlot = eq->slot_id;
+		pi->packets[r].item.Charges = sm_item->GetCharges();
+
+		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
+		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
+		strcpy(pi->packets[r].item.IDfile,sm_item->GetItem()->IDFile);  
+//		strcpy(pi->packets[r].item.Filename,sm_item->GetItem()->Filename);
+		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
+		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
+		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
+		pi->packets[r].item.Size = sm_item->GetItem()->Size;           
+		//pi->packets[r].item.Type = sm_item->GetItem()->Type;
+		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
+		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
+		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
+		pi->packets[r].item.Price = sm_item->GetItem()->Price;  
+		pi->packets[r].item.AStr = sm_item->GetItem()->AStr;           
+		pi->packets[r].item.ASta = sm_item->GetItem()->ASta;           
+		pi->packets[r].item.ACha = sm_item->GetItem()->ACha;           
+		pi->packets[r].item.ADex = sm_item->GetItem()->ADex;           
+		pi->packets[r].item.AInt = sm_item->GetItem()->AInt;           
+		pi->packets[r].item.AAgi = sm_item->GetItem()->AAgi;           
+		pi->packets[r].item.AWis = sm_item->GetItem()->AWis;           
+		pi->packets[r].item.MR = sm_item->GetItem()->MR;             
+		pi->packets[r].item.FR = sm_item->GetItem()->FR;             
+		pi->packets[r].item.CR = sm_item->GetItem()->CR;             
+		pi->packets[r].item.DR = sm_item->GetItem()->DR;             
+		pi->packets[r].item.PR = sm_item->GetItem()->PR;             
+		pi->packets[r].item.HP = sm_item->GetItem()->HP;             
+		pi->packets[r].item.Mana = sm_item->GetItem()->Mana;           
+		pi->packets[r].item.AC = sm_item->GetItem()->AC;		
+		pi->packets[r].item.MaxCharges = sm_item->GetItem()->MaxCharges;    
+		//pi->packets[r].item.GMFlag = sm_item->GetItem()->GMFlag;         
+		pi->packets[r].item.Light = sm_item->GetItem()->Light;          
+		pi->packets[r].item.Delay = sm_item->GetItem()->Delay;          
+		pi->packets[r].item.Damage = sm_item->GetItem()->Damage;         
+		pi->packets[r].item.ClickType = sm_item->GetItem()->Click.Type;      
+		pi->packets[r].item.Range = sm_item->GetItem()->Range;          
+		pi->packets[r].item.ItemType = sm_item->GetItem()->ItemType;          
+		pi->packets[r].item.Magic = sm_item->GetItem()->Magic;          
+		pi->packets[r].item.ClickLevel = sm_item->GetItem()->Click.Level;     
+		pi->packets[r].item.Material = sm_item->GetItem()->Material;   
+		pi->packets[r].item.Color = sm_item->GetItem()->Color;    
+		pi->packets[r].item.ClickEffect = sm_item->GetItem()->Click.Effect;    
+		pi->packets[r].item.Classes = sm_item->GetItem()->Classes;  
+		pi->packets[r].item.Races = sm_item->GetItem()->Races;  
+		pi->packets[r].item.Stackable = sm_item->GetItem()->Stackable;      
+		pi->packets[r].item.Clicklevel2 = sm_item->GetItem()->Click.Level2;    
+		pi->packets[r].item.StackSize = sm_item->GetItem()->StackSize;             
+		pi->packets[r].item.ProcType = sm_item->GetItem()->Proc.Type;      
+		pi->packets[r].item.ProcEffect = sm_item->GetItem()->Proc.Effect;
+		pi->packets[r].item.CastTime_ = sm_item->GetItem()->CastTime_;  
+		pi->packets[r].item.SkillModType = sm_item->GetItem()->SkillModType;
+		pi->packets[r].item.SkillModValue = sm_item->GetItem()->SkillModValue;
+		pi->packets[r].item.BaneDmgRace = sm_item->GetItem()->BaneDmgRace;
+		pi->packets[r].item.BaneDmgBody = sm_item->GetItem()->BaneDmgBody;
+		pi->packets[r].item.BaneDmgAmt = sm_item->GetItem()->BaneDmgAmt;
+		pi->packets[r].item.RecLevel = sm_item->GetItem()->RecLevel;       
+		pi->packets[r].item.RecSkill = sm_item->GetItem()->RecSkill;   
+		pi->packets[r].item.ElemDmgType = sm_item->GetItem()->ElemDmgType; 
+		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
+		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
+		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
+//		pi->packets[r].item.BagSlots = sm_item->GetItem()->BagSlots;         
+//		pi->packets[r].item.BagSize = sm_item->GetItem()->BagSize;    
+//		pi->packets[r].item.BagWR = sm_item->GetItem()->BagWR; 
+
+		//_log(ZONE__INIT,"Your %s (%i) is item # %i to be deflated. It is in slot %i with charges %i", pi->packets[r].item.Name, pi->packets[r].item.ID, r, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
+	}
+	int32 length = 5000;
+	int buffer = 2;
+
+	//_log(ZONE__INIT,"Sent %i items", itemcount);
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, length);
+	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, pi->count * sizeof(structs::PlayerItemsPacket_Struct), &outapp->pBuffer[buffer], length-buffer);
+	structs::PlayerItems_Struct* inven = (structs::PlayerItems_Struct*) outapp->pBuffer;
+	inven->count = itemcount;
+
+	dest->FastQueuePacket(&outapp);
+	delete[] __emu_buffer;
+	
+}
+
+ENCODE(OP_ShopRequest)
+{
+	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+	OUT(npcid);
+	OUT(playerid);
+	OUT(command);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_ShopRequest) {
+	DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
+	SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+	IN(npcid);
+	IN(playerid);
+	IN(command);
+	FINISH_DIRECT_DECODE();
 }
 
 } //end namespace Mac

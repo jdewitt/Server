@@ -3282,6 +3282,18 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
+	if(eqs->ClientVersion() == EQClientMac){
+		if(mi->to_slot == mi->from_slot)
+		{
+			return;
+		}
+		if(mi->to_slot==SLOT_INVALID)
+		{
+			Handle_OP_DeleteItem(app);
+			return;
+		}
+	}
+
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
 		if(mi->from_slot != mi->to_slot && (mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
@@ -3327,7 +3339,17 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { SwapItemResync(mi); }
+	if(eqs->ClientVersion() == EQClientMac){
+		if(mi->from_slot == SLOT_CHARM)
+			mi->from_slot = SLOT_CURSOR;
+
+		if(mi->to_slot == SLOT_CHARM)
+			mi->to_slot = SLOT_CURSOR;
+	}
+
+	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
+		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probablt SwapItem(mi)");
+		SwapItemResync(mi); }
 
 	return;
 }
@@ -4675,7 +4697,13 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	
 	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
+	if(eqs->ClientVersion() == EQClientMac){
+		if(alc->from_slot=SLOT_CHARM)
+			alc->from_slot=SLOT_CURSOR;
+	}
+
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
 		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
@@ -9235,6 +9263,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Character Inventory Packet
 	//this is not quite where live sends inventory, they do it after tribute
 	if (loaditems) {//dont load if a length error occurs
+		if(eqs->ClientVersion() == EQClientMac)
+			BulkSendItems();
 		BulkSendInventoryItems();
 
 		// Send stuff on the cursor which isnt sent in bulk

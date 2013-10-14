@@ -905,7 +905,7 @@ struct Item_Struct
 /*0240*/ int16     HP;               // Hitpoints
 /*0242*/ int16     Mana;             // Mana
 /*0244*/ int16     AC;				 // Armor Class
-/*0246*/ uint8     MaxCharges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
+/*0246*/ uint8     Charges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
 /*0247*/ int8      GMFlag;           // GM flag 0  - normal item, -1 - gm item (Sept 25, 2002)
 /*0248*/ uint8     Light;            // Light effect of this item
 /*0249*/ uint8     Delay;            // Weapon Delay
@@ -932,7 +932,7 @@ struct Item_Struct
 /*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)
 /*0277*/ uint8    Clicklevel2;            // Casting level
 /*0278*/ int8     StackSize;          // Number of items in stack
-/*0279*/ int8     Charges;         // Number of charges (-1 = unlimited)
+/*0279*/ int8     MaxCharges;         // Number of charges (-1 = unlimited)
 /*0280*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
 /*0281*/ uint16   ProcEffect;         // spellId of special effect
 /*0283*/ uint8    unknown0282[10]; // ***Placeholder 0288
@@ -1256,9 +1256,10 @@ struct TimeOfDay_Struct
 };
 
 struct Merchant_Click_Struct {
-/*000*/ uint16	entityid;			// Merchant NPC's entity id
+/*000*/ uint16	npcid;			// Merchant NPC's entity id
 /*002*/ uint16	playerid;
-/*004*/ uint8	unknown[8]; /*
+		uint8   command;
+/*004*/ uint8	unknown[7]; /*
 0 is e7 from 01 to // MAYBE SLOT IN PURCHASE
 1 is 03
 2 is 00
@@ -2369,8 +2370,8 @@ struct PlayerProfile_Struct
 /*2968*/	uint32	copper_cursor;
 /*2972*/	uint8	unknown2972[16];	// ***Placeholder
 /*2988*/	uint16	skills[75];			// Player Skills
-/*3138*/	uint32	hungerlevel;		// Probably wrong, previously was in the spot where skills should be.
-/*3142*/	uint32	thirstlevel;		// Probably wrong, previously was in the spot where skills should be.
+/*3138*/	uint32	hunger_level;		// Probably wrong, previously was in the spot where skills should be.
+/*3142*/	uint32	thirst_level;		// Probably wrong, previously was in the spot where skills should be.
 /*3146*/	uint8	unknown3144[202];
 /*3348*/	uint8	autosplit;
 /*3349*/	uint8	unknown3449[95];

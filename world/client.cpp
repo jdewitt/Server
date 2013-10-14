@@ -681,8 +681,6 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 	else
 	{
-		if(ClientVersionBit & BIT_Client62AndTitanium)
-			StartInTutorial = true;
 		SendCharInfo();
 	}
 
