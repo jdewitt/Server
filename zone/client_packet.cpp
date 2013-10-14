@@ -1911,6 +1911,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		return;
 	}
 	Consume_Struct* pcs = (Consume_Struct*)app->pBuffer;
+	_log(ZONE__INIT, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
 	if(pcs->type == 0x01)
 	{
 		if(m_pp.hunger_level > 6000)
@@ -3282,17 +3283,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	if(eqs->ClientVersion() == EQClientMac){
-		if(mi->to_slot == mi->from_slot)
-		{
-			return;
-		}
-		if(mi->to_slot==SLOT_INVALID)
-		{
-			Handle_OP_DeleteItem(app);
-			return;
-		}
-	}
+	_log(ZONE__INIT, ", 062 Test! MoveItem. To: %i From: %i Charges %i", mi->to_slot, mi->from_slot, mi->number_in_stack);
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -3338,14 +3329,6 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
-
-	if(eqs->ClientVersion() == EQClientMac){
-		if(mi->from_slot == SLOT_CHARM)
-			mi->from_slot = SLOT_CURSOR;
-
-		if(mi->to_slot == SLOT_CHARM)
-			mi->to_slot = SLOT_CURSOR;
-	}
 
 	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
 		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probablt SwapItem(mi)");
@@ -4699,10 +4682,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 
 	
 	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
-	if(eqs->ClientVersion() == EQClientMac){
-		if(alc->from_slot=SLOT_CHARM)
-			alc->from_slot=SLOT_CURSOR;
-	}
+	_log(ZONE__INIT, ", 062 Test! DeleteItem. To: %i From: %i Charges %i", alc->to_slot, alc->from_slot, alc->number_in_stack);
 
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {

@@ -905,7 +905,7 @@ struct Item_Struct
 /*0240*/ int16     HP;               // Hitpoints
 /*0242*/ int16     Mana;             // Mana
 /*0244*/ int16     AC;				 // Armor Class
-/*0246*/ uint8     Charges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
+/*0246*/ uint8     MaxCharges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
 /*0247*/ int8      GMFlag;           // GM flag 0  - normal item, -1 - gm item (Sept 25, 2002)
 /*0248*/ uint8     Light;            // Light effect of this item
 /*0249*/ uint8     Delay;            // Weapon Delay
@@ -923,7 +923,7 @@ struct Item_Struct
 /*0256*/ uint8    Material;         // Material?
 /*0257*/ uint8    unknown0258[3];   // ***Placeholder
 /*0260*/ uint32   Color;            // Amounts of RGB in original color
-/*0264*/ uint8    unknown0264[2];   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
+/*0264*/ uint16   Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
 /*0266*/ uint16   ClickEffect;         // SpellID of special effect
 /*0268*/ uint16   Classes;          // Classes that can use this item
 /*0270*/ uint8    unknown0270[2];   // ***Placeholder
@@ -931,11 +931,11 @@ struct Item_Struct
 /*0274*/ int8     unknown0274[2];   // ***Placeholder
 /*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)
 /*0277*/ uint8    Clicklevel2;            // Casting level
-/*0278*/ int8     StackSize;          // Number of items in stack
-/*0279*/ int8     MaxCharges;         // Number of charges (-1 = unlimited)
+/*0278*/ int16     Charges;          // Number of items in stack
+/*0279*/ int16     StackSize;         // Number of charges (-1 = unlimited)
 /*0280*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
 /*0281*/ uint16   ProcEffect;         // spellId of special effect
-/*0283*/ uint8    unknown0282[10]; // ***Placeholder 0288
+/*0283*/ uint8    unknown0282[8]; // ***Placeholder 0288
 /*0293*/ uint32   CastTime_;        // Cast time of clicky item in miliseconds
 /*0297*/ uint8    unknown0296[16]; // ***Placeholder
 /*0313*/ uint16   SkillModType;
@@ -1016,11 +1016,11 @@ enum HOWCONSUMEDTYPE: uint32
 
 struct Consume_Struct
 {
-/*0000*/ uint32 slot;						// Comment: slot the food/drink is being consumed from
-/*0004*/ HOWCONSUMEDTYPE auto_consumed;		// Comment: 
-/*0008*/ uint8  c_unknown1[4];				// Comment: 
-/*0012*/ CONSUMETYPE  Type;				// Comment: 
-/*0013*/ uint8  unknown13[3];				// Comment: 
+/*0000*/ uint32 slot;
+/*0004*/ uint32 auto_consumed; // 0xffffffff when auto eating e7030000 when right click
+/*0008*/ uint8 c_unknown1[4];
+/*0012*/ uint8 type; // 0x01=Food 0x02=Water
+/*0013*/ uint8 unknown13[3];
 };
 
 struct MoveItem_Struct

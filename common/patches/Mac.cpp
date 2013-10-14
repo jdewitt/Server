@@ -1169,6 +1169,7 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ClickLevel = sm_item->GetItem()->Click.Level;     
 		pi->packets[r].item.Material = sm_item->GetItem()->Material;   
 		pi->packets[r].item.Color = sm_item->GetItem()->Color;    
+		pi->packets[r].item.Deity = sm_item->GetItem()->Deity;   
 		pi->packets[r].item.ClickEffect = sm_item->GetItem()->Click.Effect;    
 		pi->packets[r].item.Classes = sm_item->GetItem()->Classes;  
 		pi->packets[r].item.Races = sm_item->GetItem()->Races;  
@@ -1209,6 +1210,22 @@ ENCODE(OP_CharInventory){
 	
 }
 
+DECODE(OP_MoveItem)
+{
+	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+	if(eq->to_slot == 0)
+		emu->to_slot=30;
+	else
+		emu->to_slot=eq->to_slot;
+	if(eq->from_slot == 0)
+		emu->from_slot=30;
+	else
+		emu->from_slot=eq->from_slot;
+	IN(number_in_stack);
+	FINISH_DIRECT_DECODE();
+}
+
 ENCODE(OP_ShopRequest)
 {
 	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
@@ -1216,6 +1233,15 @@ ENCODE(OP_ShopRequest)
 	OUT(npcid);
 	OUT(playerid);
 	OUT(command);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_Stamina)
+{
+	ENCODE_LENGTH_EXACT(Stamina_Struct);
+	SETUP_DIRECT_ENCODE(Stamina_Struct, structs::Stamina_Struct);
+	OUT(food);
+	OUT(water);
 	FINISH_ENCODE();
 }
 
