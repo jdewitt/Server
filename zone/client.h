@@ -1395,6 +1395,7 @@ private:
 
 
 	void	BulkSendInventoryItems();
+	void	BulkSendItems();
 
 	faction_map factionvalues;
 

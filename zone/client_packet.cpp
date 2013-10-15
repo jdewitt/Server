@@ -1911,6 +1911,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		return;
 	}
 	Consume_Struct* pcs = (Consume_Struct*)app->pBuffer;
+	_log(ZONE__INIT, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
 	if(pcs->type == 0x01)
 	{
 		if(m_pp.hunger_level > 6000)
@@ -3282,6 +3283,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
+	_log(ZONE__INIT, ", 062 Test! MoveItem. To: %i From: %i Charges %i", mi->to_slot, mi->from_slot, mi->number_in_stack);
+
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
 		if(mi->from_slot != mi->to_slot && (mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
@@ -3327,7 +3330,9 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { SwapItemResync(mi); }
+	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
+		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probablt SwapItem(mi)");
+		SwapItemResync(mi); }
 
 	return;
 }
@@ -4675,7 +4680,10 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	
 	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
+	_log(ZONE__INIT, ", 062 Test! DeleteItem. To: %i From: %i Charges %i", alc->to_slot, alc->from_slot, alc->number_in_stack);
+
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
 		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
@@ -9235,6 +9243,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Character Inventory Packet
 	//this is not quite where live sends inventory, they do it after tribute
 	if (loaditems) {//dont load if a length error occurs
+		if(eqs->ClientVersion() == EQClientMac)
+			BulkSendItems();
 		BulkSendInventoryItems();
 
 		// Send stuff on the cursor which isnt sent in bulk

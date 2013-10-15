@@ -44,5 +44,9 @@ D(OP_GMEndTraining)
 E(OP_ItemPacket)
 E(OP_ItemLinkResponse)
 E(OP_CharInventory)
+E(OP_ShopRequest)
+D(OP_ShopRequest)
+D(OP_MoveItem)
+E(OP_Stamina)
 #undef E
 #undef D
