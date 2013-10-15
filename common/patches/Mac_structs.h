@@ -1634,7 +1634,7 @@ struct BookText_Struct {
 // or in our case, the 'name' column in our books table.
 struct BookRequest_Struct {
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
-	char txtfile[12];
+	char txtfile[1]; // Variable
 };
 
 // 6-01-08 - Wizzel

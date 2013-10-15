@@ -900,13 +900,29 @@ void Client::BulkSendInventoryItems() {
 		}
 	}
 
-	// Shared Bank items
-	for(slot_id = 2500; slot_id <= 2501; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if(inst) {
-			std::string packet = inst->Serialize(slot_id);
-			ser_items[i++] = packet;
-			size += packet.length();
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		//Items in containers
+		for (slot_id=2031; slot_id<=2110; slot_id++) {
+			const ItemInst* inst = m_inv[slot_id];
+			if(inst) {
+				std::string packet = inst->Serialize(slot_id);
+				ser_items[i++] = packet;
+				size += packet.length();
+			}
+		}	
+	}
+
+	if(eqs->ClientVersion() > EQClientMac)
+	{
+		// Shared Bank items
+		for(slot_id = 2500; slot_id <= 2501; slot_id++) {
+			const ItemInst* inst = m_inv[slot_id];
+			if(inst) {
+				std::string packet = inst->Serialize(slot_id);
+				ser_items[i++] = packet;
+				size += packet.length();
+			}
 		}
 	}
 
@@ -950,8 +966,8 @@ void Client::BulkSendItems()
 		}
 	}
 
-	// Shared Bank items
-	for (slot_id=2500; slot_id<=2501; slot_id++) {
+		// Bank items
+	for (slot_id=2031; slot_id<=2110; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);

@@ -649,13 +649,14 @@ ENCODE(OP_ZoneSpawns){
 //		eq->unknown0328 = emu->unknown0328;
 		//eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
-		if(emu->class_ > 19 || emu->class_ < 35)
-			emu->class_ = emu->class_-3;
-		if(emu->class_ == 40)
-			emu->class_ = 16;
-		if(emu->class_ == 41)
-			emu->class_ = 32;
-		eq->class_ = emu->class_;
+		if(emu->class_ > 19 && emu->class_ < 35)
+			eq->class_ = emu->class_-3;
+		else if(emu->class_ == 40)
+			eq->class_ = 16;
+		else if(emu->class_ == 41)
+			eq->class_ = 32;
+		else 
+			eq->class_ = emu->class_;
 		eq->eyecolor2 = emu->eyecolor2;
 //		eq->unknown0333 = emu->unknown0333;
 	//	eq->flymode = emu->flymode;
@@ -778,13 +779,14 @@ ENCODE(OP_NewSpawn) {
 //		eq->unknown0328 = emu->unknown0328;
 		//eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
-		if(emu->class_ > 19 || emu->class_ < 35)
-			emu->class_ = emu->class_-3;
-		if(emu->class_ == 40)
-			emu->class_ = 16;
-		if(emu->class_ == 41)
-			emu->class_ = 32;
-		eq->class_ = emu->class_;
+		if(emu->class_ > 19 && emu->class_ < 35)
+			eq->class_ = emu->class_-3;
+		else if(emu->class_ == 40)
+			eq->class_ = 16;
+		else if(emu->class_ == 41)
+			eq->class_ = 32;
+		else 
+			eq->class_ = emu->class_;
 		eq->eyecolor2 = emu->eyecolor2;
 //		eq->unknown0333 = emu->unknown0333;
 	//	eq->flymode = emu->flymode;
@@ -1025,12 +1027,15 @@ ENCODE(OP_ItemPacket) {
 		outapp->size=sizeof(structs::Item_Struct);
 		structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
 
-		if(item->GetItem()->MaxCharges > 1)
-			myitem->Charges = item->GetCharges();
-		else
-			myitem->StackSize = item->GetCharges();
+		if(old_item_pkt->PacketType != ItemPacketSummonItem)
+		{
+			if(item->GetItem()->MaxCharges > 1)
+				myitem->Charges = item->GetCharges();
+			else
+				myitem->StackSize = item->GetCharges();
+		}
 
-		if(int_struct->slot_id >= 251 && int_struct->slot_id <= 330)
+		if((int_struct->slot_id >= 251 && int_struct->slot_id <= 330) || (int_struct->slot_id >= 2031 && int_struct->slot_id <= 2110))
 			myitem->equipSlot = int_struct->slot_id-1;
 		else
 			myitem->equipSlot = int_struct->slot_id;
@@ -1153,7 +1158,7 @@ ENCODE(OP_CharInventory){
 		else
 			pi->packets[r].item.StackSize = sm_item->GetCharges();
 
-		if(sm_item->GetCurrentSlot() >= 251 && sm_item->GetCurrentSlot() <= 330)
+		if((sm_item->GetCurrentSlot() >= 251 && sm_item->GetCurrentSlot() <= 330) || (sm_item->GetCurrentSlot() >= 2031 && sm_item->GetCurrentSlot() <= 2110))
 			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot()-1;
 		else
 			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot();
@@ -1254,14 +1259,14 @@ DECODE(OP_MoveItem)
 
 	if(eq->to_slot == 0)
 		emu->to_slot=30;
-	else if(eq->to_slot >= 250 && eq->to_slot <= 329) 
+	else if((eq->to_slot >= 250 && eq->to_slot <= 329) || (eq->to_slot >= 2030 && eq->to_slot <= 2109)) 
 		emu->to_slot = eq->to_slot+1;
 	else
 		emu->to_slot=eq->to_slot;
 
 	if(eq->from_slot == 0)
 		emu->from_slot=30;
-	else if(eq->from_slot >= 250 && eq->from_slot <= 329) 
+	else if((eq->from_slot >= 250 && eq->from_slot <= 329) || (eq->from_slot >= 2030 && eq->from_slot <= 2109)) 
 		emu->from_slot = eq->from_slot+1;
 	else
 		emu->from_slot=eq->from_slot;
