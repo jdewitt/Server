@@ -943,9 +943,9 @@ struct Item_Struct
 			/*0228*/ int8     unknown0228[40];     // ***Placeholder
 			/*0268*/ uint8	  BagType;
 			/*0269*/ uint8    BagSlots;        // number of slots in container
-			/*0270*/ int8     BagWR;     // ***Placeholder
+			/*0270*/ int8     IsBagOpen;     // ***Placeholder
 			/*0271*/ int8     BagSize;    // Maximum size item container can hold
-			/*0272*/ uint8    unknown0274; // % weight reduction of container
+			/*0272*/ uint8    BagWR; // % weight reduction of container
 			/*0273*/ uint8    unknown0275[4];     // ***Placeholder
 		} container;
 	};
@@ -974,7 +974,7 @@ struct Item_Struct
 	/*0330*/ uint8    unknown0330[22];
 	/*0352*/ uint8    ReqLevel; // Required level
 	/*0353*/ uint8    unknown0353[5];
-	/*0358*/ uint16   FocusEffect; 
+	/*0358*/ uint16   FocusEffect;  //Confirmed
 };
 
 struct PlayerItemsPacket_Struct {
