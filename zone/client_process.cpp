@@ -2372,3 +2372,15 @@ void Client::SendGuildLFGuildStatus()
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+
+void Client::SendNewZone(NewZone_Struct newzone_data, char* name)
+{
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	NewZone_Struct* nz = (NewZone_Struct*)outapp->pBuffer;
+	memcpy(outapp->pBuffer, &zone->newzone_data, sizeof(NewZone_Struct));
+	strcpy(nz->char_name, name);
+
+	_log(ZONE__INIT, "NewZone data for %s (%i). Underworld: %f max_z: %f", zone->newzone_data.zone_short_name, zone->newzone_data.zone_id, zone->newzone_data.underworld, zone->newzone_data.max_z);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}

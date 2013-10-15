@@ -368,7 +368,7 @@ ENCODE(OP_NewZone) {
 	OUT(safe_x);
 	OUT(safe_z);
 	OUT(max_z);
-	OUT(underworld);
+	eq->underworld=emu->underworld;
 	OUT(minclip);
 	OUT(maxclip);
 	FINISH_ENCODE();	
@@ -1015,61 +1015,80 @@ ENCODE(OP_ItemPacket) {
 		outapp->SetOpcode(OP_Unknown);
 		if(old_item_pkt->PacketType == ItemPacketSummonItem)
 			outapp->SetOpcode(OP_SummonedItem);
+		else if(item->GetItem()->ItemClass == 1)
+			outapp->SetOpcode(OP_ContainerPacket);
+		else if(item->GetItem()->ItemClass == 2)
+			outapp->SetOpcode(OP_BookPacket);
 		else
 			outapp->SetOpcode(OP_ItemPacket);
 
 		outapp->size=sizeof(structs::Item_Struct);
 		structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
 
-		myitem->Charges = item->GetCharges();
+		if(item->GetItem()->MaxCharges > 1)
+			myitem->Charges = item->GetCharges();
+		else
+			myitem->StackSize = item->GetCharges();
 		myitem->equipSlot = int_struct->slot_id;
+		myitem->ItemClass = item->GetItem()->ItemClass;
+
+		if(item->GetItem()->ItemClass == 1){
+			myitem->container.BagType = item->GetItem()->BagType; 
+			myitem->container.BagSlots = item->GetItem()->BagSlots;         
+			myitem->container.BagSize = item->GetItem()->BagSize;    
+			myitem->container.BagWR = item->GetItem()->BagWR; 
+		}
+		else if(item->GetItem()->ItemClass == 2){
+			strcpy(myitem->book.Filename,item->GetItem()->Filename);
+			myitem->book.Book = item->GetItem()->Book;         
+			myitem->book.BookType = item->GetItem()->BookType; 
+		}
 
 		strcpy(myitem->Name,item->GetItem()->Name);
 		strcpy(myitem->Lore,item->GetItem()->Lore);       
-		strcpy(myitem->IDfile,item->GetItem()->IDFile);  
-//		strcpy(myitem->Filename,item->GetItem()->Filename);
+		strcpy(myitem->IDfile,item->GetItem()->IDFile);  	
 		myitem->Weight = item->GetItem()->Weight;      
 		myitem->NoRent = item->GetItem()->NoRent;         
 		myitem->NoDrop = item->GetItem()->NoDrop;         
 		myitem->Size = item->GetItem()->Size;           
-		//myitem->Type = item->GetItem()->Type;
 		myitem->ID = item->GetItem()->ID;        
 		myitem->Icon = item->GetItem()->Icon;       
 		myitem->Slots = item->GetItem()->Slots;  
 		myitem->Price = item->GetItem()->Price;  
-		myitem->AStr = item->GetItem()->AStr;           
-		myitem->ASta = item->GetItem()->ASta;           
-		myitem->ACha = item->GetItem()->ACha;           
-		myitem->ADex = item->GetItem()->ADex;           
-		myitem->AInt = item->GetItem()->AInt;           
-		myitem->AAgi = item->GetItem()->AAgi;           
-		myitem->AWis = item->GetItem()->AWis;           
-		myitem->MR = item->GetItem()->MR;             
-		myitem->FR = item->GetItem()->FR;             
-		myitem->CR = item->GetItem()->CR;             
-		myitem->DR = item->GetItem()->DR;             
-		myitem->PR = item->GetItem()->PR;             
-		myitem->HP = item->GetItem()->HP;             
-		myitem->Mana = item->GetItem()->Mana;           
-		myitem->AC = item->GetItem()->AC;		
-		myitem->MaxCharges = item->GetItem()->MaxCharges;    
-		//myitem->GMFlag = item->GetItem()->GMFlag;         
-		myitem->Light = item->GetItem()->Light;          
-		myitem->Delay = item->GetItem()->Delay;          
-		myitem->Damage = item->GetItem()->Damage;         
-		myitem->ClickType = item->GetItem()->Click.Type;      
-		myitem->Range = item->GetItem()->Range;          
-		myitem->ItemType = item->GetItem()->ItemType;          
-		myitem->Magic = item->GetItem()->Magic;          
-		myitem->ClickLevel = item->GetItem()->Click.Level;     
-		myitem->Material = item->GetItem()->Material;   
-		myitem->Color = item->GetItem()->Color;    
-		myitem->ClickEffect = item->GetItem()->Click.Effect;    
-		myitem->Classes = item->GetItem()->Classes;  
-		myitem->Races = item->GetItem()->Races;  
-		myitem->Stackable = item->GetItem()->Stackable;      
+		myitem->common.AStr = item->GetItem()->AStr;           
+		myitem->common.ASta = item->GetItem()->ASta;           
+		myitem->common.ACha = item->GetItem()->ACha;           
+		myitem->common.ADex = item->GetItem()->ADex;           
+		myitem->common.AInt = item->GetItem()->AInt;           
+		myitem->common.AAgi = item->GetItem()->AAgi;           
+		myitem->common.AWis = item->GetItem()->AWis;           
+		myitem->common.MR = item->GetItem()->MR;             
+		myitem->common.FR = item->GetItem()->FR;             
+		myitem->common.CR = item->GetItem()->CR;             
+		myitem->common.DR = item->GetItem()->DR;             
+		myitem->common.PR = item->GetItem()->PR;             
+		myitem->common.HP = item->GetItem()->HP;             
+		myitem->common.Mana = item->GetItem()->Mana;           
+		myitem->common.AC = item->GetItem()->AC;		
+		myitem->common.MaxCharges = item->GetItem()->MaxCharges;    
+		//myitem->common.GMFlag = item->GetItem()->GMFlag;         
+		myitem->common.Light = item->GetItem()->Light;          
+		myitem->common.Delay = item->GetItem()->Delay;          
+		myitem->common.Damage = item->GetItem()->Damage;         
+		myitem->common.ClickType = item->GetItem()->Click.Type;      
+		myitem->common.Range = item->GetItem()->Range;          
+		myitem->common.ItemType = item->GetItem()->ItemType;          
+		myitem->common.Magic = item->GetItem()->Magic;          
+		myitem->common.ClickLevel = item->GetItem()->Click.Level;     
+		myitem->common.Material = item->GetItem()->Material;   
+		myitem->common.Deity = item->GetItem()->Deity; 
+		myitem->common.Color = item->GetItem()->Color;    
+		myitem->common.ClickEffect = item->GetItem()->Click.Effect;    
+		myitem->common.Classes = item->GetItem()->Classes;  
+		myitem->common.Races = item->GetItem()->Races;  
+		myitem->common.Stackable = item->GetItem()->Stackable;      
 		myitem->Clicklevel2 = item->GetItem()->Click.Level2;    
-		myitem->StackSize = item->GetItem()->StackSize;             
+//		myitem->StackSize = item->GetItem()->StackSize;             
 		myitem->ProcType = item->GetItem()->Proc.Type;      
 		myitem->ProcEffect = item->GetItem()->Proc.Effect;
 		myitem->CastTime_ = item->GetItem()->CastTime_;  
@@ -1084,9 +1103,6 @@ ENCODE(OP_ItemPacket) {
 		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
 		myitem->ReqLevel = item->GetItem()->ReqLevel; 
 		myitem->FocusEffect = item->GetItem()->Focus.Effect;
-//		myitem->BagSlots = item->GetItem()->BagSlots;         
-//		myitem->BagSize = item->GetItem()->BagSize;    
-//		myitem->BagWR = item->GetItem()->BagWR; 
 		
 		if(outapp->size != 360)
 			_log(ZONE__INIT,"Invalid size on OP_ItemPacket packet. Expected: 360, Got: %i", outapp->size);
@@ -1126,56 +1142,68 @@ ENCODE(OP_CharInventory){
 
 		const ItemInst * sm_item = (const ItemInst *)eq->inst;
 
-		pi->packets[r].item.equipSlot = eq->slot_id;
-		pi->packets[r].item.Charges = sm_item->GetCharges();
+		if(sm_item->GetItem()->MaxCharges > 1)
+			pi->packets[r].item.Charges = sm_item->GetCharges();
+		else
+			pi->packets[r].item.StackSize = sm_item->GetCharges();
+		pi->packets[r].item.ItemClass = sm_item->GetItem()->ItemClass;
+
+		if(sm_item->GetItem()->ItemClass == 1){
+			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
+			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
+			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
+			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
+		}
+		else if(sm_item->GetItem()->ItemClass == 2){
+			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
+			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
+			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
+		}
 
 		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
 		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
 		strcpy(pi->packets[r].item.IDfile,sm_item->GetItem()->IDFile);  
-//		strcpy(pi->packets[r].item.Filename,sm_item->GetItem()->Filename);
 		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
 		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
 		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
 		pi->packets[r].item.Size = sm_item->GetItem()->Size;           
-		//pi->packets[r].item.Type = sm_item->GetItem()->Type;
 		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
 		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
 		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
 		pi->packets[r].item.Price = sm_item->GetItem()->Price;  
-		pi->packets[r].item.AStr = sm_item->GetItem()->AStr;           
-		pi->packets[r].item.ASta = sm_item->GetItem()->ASta;           
-		pi->packets[r].item.ACha = sm_item->GetItem()->ACha;           
-		pi->packets[r].item.ADex = sm_item->GetItem()->ADex;           
-		pi->packets[r].item.AInt = sm_item->GetItem()->AInt;           
-		pi->packets[r].item.AAgi = sm_item->GetItem()->AAgi;           
-		pi->packets[r].item.AWis = sm_item->GetItem()->AWis;           
-		pi->packets[r].item.MR = sm_item->GetItem()->MR;             
-		pi->packets[r].item.FR = sm_item->GetItem()->FR;             
-		pi->packets[r].item.CR = sm_item->GetItem()->CR;             
-		pi->packets[r].item.DR = sm_item->GetItem()->DR;             
-		pi->packets[r].item.PR = sm_item->GetItem()->PR;             
-		pi->packets[r].item.HP = sm_item->GetItem()->HP;             
-		pi->packets[r].item.Mana = sm_item->GetItem()->Mana;           
-		pi->packets[r].item.AC = sm_item->GetItem()->AC;		
-		pi->packets[r].item.MaxCharges = sm_item->GetItem()->MaxCharges;    
-		//pi->packets[r].item.GMFlag = sm_item->GetItem()->GMFlag;         
-		pi->packets[r].item.Light = sm_item->GetItem()->Light;          
-		pi->packets[r].item.Delay = sm_item->GetItem()->Delay;          
-		pi->packets[r].item.Damage = sm_item->GetItem()->Damage;         
-		pi->packets[r].item.ClickType = sm_item->GetItem()->Click.Type;      
-		pi->packets[r].item.Range = sm_item->GetItem()->Range;          
-		pi->packets[r].item.ItemType = sm_item->GetItem()->ItemType;          
-		pi->packets[r].item.Magic = sm_item->GetItem()->Magic;          
-		pi->packets[r].item.ClickLevel = sm_item->GetItem()->Click.Level;     
-		pi->packets[r].item.Material = sm_item->GetItem()->Material;   
-		pi->packets[r].item.Color = sm_item->GetItem()->Color;    
-		pi->packets[r].item.Deity = sm_item->GetItem()->Deity;   
-		pi->packets[r].item.ClickEffect = sm_item->GetItem()->Click.Effect;    
-		pi->packets[r].item.Classes = sm_item->GetItem()->Classes;  
-		pi->packets[r].item.Races = sm_item->GetItem()->Races;  
-		pi->packets[r].item.Stackable = sm_item->GetItem()->Stackable;      
-		pi->packets[r].item.Clicklevel2 = sm_item->GetItem()->Click.Level2;    
-		pi->packets[r].item.StackSize = sm_item->GetItem()->StackSize;             
+		pi->packets[r].item.common.AStr = sm_item->GetItem()->AStr;           
+		pi->packets[r].item.common.ASta = sm_item->GetItem()->ASta;           
+		pi->packets[r].item.common.ACha = sm_item->GetItem()->ACha;           
+		pi->packets[r].item.common.ADex = sm_item->GetItem()->ADex;           
+		pi->packets[r].item.common.AInt = sm_item->GetItem()->AInt;           
+		pi->packets[r].item.common.AAgi = sm_item->GetItem()->AAgi;           
+		pi->packets[r].item.common.AWis = sm_item->GetItem()->AWis;           
+		pi->packets[r].item.common.MR = sm_item->GetItem()->MR;             
+		pi->packets[r].item.common.FR = sm_item->GetItem()->FR;             
+		pi->packets[r].item.common.CR = sm_item->GetItem()->CR;             
+		pi->packets[r].item.common.DR = sm_item->GetItem()->DR;             
+		pi->packets[r].item.common.PR = sm_item->GetItem()->PR;             
+		pi->packets[r].item.common.HP = sm_item->GetItem()->HP;             
+		pi->packets[r].item.common.Mana = sm_item->GetItem()->Mana;           
+		pi->packets[r].item.common.AC = sm_item->GetItem()->AC;		
+		pi->packets[r].item.common.MaxCharges = sm_item->GetItem()->MaxCharges;    
+		//pi->packets[r].item.common.GMFlag = sm_item->GetItem()->GMFlag;         
+		pi->packets[r].item.common.Light = sm_item->GetItem()->Light;          
+		pi->packets[r].item.common.Delay = sm_item->GetItem()->Delay;          
+		pi->packets[r].item.common.Damage = sm_item->GetItem()->Damage;         
+		pi->packets[r].item.common.ClickType = sm_item->GetItem()->Click.Type;      
+		pi->packets[r].item.common.Range = sm_item->GetItem()->Range;          
+		pi->packets[r].item.common.ItemType = sm_item->GetItem()->ItemType;          
+		pi->packets[r].item.common.Magic = sm_item->GetItem()->Magic;          
+		pi->packets[r].item.common.ClickLevel = sm_item->GetItem()->Click.Level;     
+		pi->packets[r].item.common.Material = sm_item->GetItem()->Material;   
+		pi->packets[r].item.common.Color = sm_item->GetItem()->Color;    
+		pi->packets[r].item.common.Deity = sm_item->GetItem()->Deity;   
+		pi->packets[r].item.common.ClickEffect = sm_item->GetItem()->Click.Effect;    
+		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
+		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
+		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable;      
+		pi->packets[r].item.Clicklevel2 = sm_item->GetItem()->Click.Level2;             
 		pi->packets[r].item.ProcType = sm_item->GetItem()->Proc.Type;      
 		pi->packets[r].item.ProcEffect = sm_item->GetItem()->Proc.Effect;
 		pi->packets[r].item.CastTime_ = sm_item->GetItem()->CastTime_;  
@@ -1190,9 +1218,6 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
-//		pi->packets[r].item.BagSlots = sm_item->GetItem()->BagSlots;         
-//		pi->packets[r].item.BagSize = sm_item->GetItem()->BagSize;    
-//		pi->packets[r].item.BagWR = sm_item->GetItem()->BagWR; 
 
 		//_log(ZONE__INIT,"Your %s (%i) is item # %i to be deflated. It is in slot %i with charges %i", pi->packets[r].item.Name, pi->packets[r].item.ID, r, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
 	}
@@ -1226,16 +1251,6 @@ DECODE(OP_MoveItem)
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_ShopRequest)
-{
-	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
-	SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-	OUT(npcid);
-	OUT(playerid);
-	OUT(command);
-	FINISH_ENCODE();
-}
-
 ENCODE(OP_Stamina)
 {
 	ENCODE_LENGTH_EXACT(Stamina_Struct);
@@ -1245,13 +1260,14 @@ ENCODE(OP_Stamina)
 	FINISH_ENCODE();
 }
 
-DECODE(OP_ShopRequest) {
-	DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
-	SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-	IN(npcid);
-	IN(playerid);
-	IN(command);
-	FINISH_DIRECT_DECODE();
+ENCODE(OP_HPUpdate)
+{
+	ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct);
+	SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct, structs::SpawnHPUpdate_Struct);
+	OUT(spawn_id);
+	OUT(cur_hp);
+	OUT(max_hp);
+	FINISH_ENCODE();
 }
 
 } //end namespace Mac

@@ -241,19 +241,20 @@ struct NewZone_Struct
 /*0387*/	uint8	unknown387;
 /*0388*/	float	fog_minclip[4];			// Where the fog begins (lowest clip setting). Repeated over 4 floats. (confirmed: Wizzel)
 /*0404*/	float	fog_maxclip[4];			// Where the fog ends (highest clip setting). Repeated over 4 floats. (confirmed: Wizzel)	
-/*0420*/	float	gravity;				// CD CC CC 3E Can't move if incorrect
+/*0420*/	float	gravity;
 /*0424*/	uint8	time_type;
-/*0425*/	uint8	unknown425[49];
-/*0474*/	uint8	sky;
-/*0475*/	uint8	zone_exp_multiplier;
-/*0492*/	float	safe_y;
-/*0496*/	float	safe_x;
-/*0500*/	float	safe_z;
-/*0504*/	float	max_z;
-/*0508*/	float	underworld;
-/*0512*/	float	minclip;				// Minimum View Distance
-/*0516*/	float	maxclip;				// Maximum View DIstance
-/*0520*/	uint8	unknown_end[52];		// ***Placeholder
+/*0425*/	uint8	unknown360[49];
+/*0474*/	uint8	sky;					// Sky Type
+/*0475*/	uint8	unknown331[9];			// ***Placeholder
+/*0484*/	float	zone_exp_multiplier;	// Experience Multiplier
+/*0488*/	float	safe_y;					// Zone Safe Y
+/*0492*/	float	safe_x;					// Zone Safe X
+/*0496*/	float	safe_z;					// Zone Safe Z
+/*0500*/	float	max_z;					// Guessed
+/*0504*/	float	underworld;				// Underworld, min z (Not Sure?)
+/*0508*/	float	minclip;				// Minimum View Distance
+/*0512*/	float	maxclip;				// Maximum View DIstance
+/*0516*/	uint8	unknown_end[56];		// ***Placeholder
 };
 
 
@@ -873,102 +874,107 @@ struct ExpUpdate_Struct
 #define SHORT_CONTAINER_ITEM_STRUCT_SIZE 276
 struct Item_Struct
 {
-/*0000*/ char      Name[64];        // Name of item
-/*0064*/ char      Lore[80];        // Lore text
-/*0144*/ char      IDfile[30];       // This is the filename of the item graphic when held/worn.
-/*0174*/ uint8	   Weight;          // Weight of item
-/*0175*/ int8      NoRent;          // Nosave flag 1=normal, 0=nosave, -1=spell?
-/*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
-/*0177*/ uint8     Size;            // Size of item
-/*0178*/ int8      Type;
-/*0179*/ uint8     unknown0178;     // ***Placeholder
-/*0180*/ uint16    ID;         // Unique Item number
-/*0182*/ uint16    Icon;         // Icon Number
-/*0184*/ int16     equipSlot;       // Current Equip slot
-/*0186*/ uint8     unknwn0186[2];   // Equip slot cont.?
-/*0188*/ uint32    Slots;  // Slots where this item goes
-/*0192*/ int32     Price;            // Item cost in copper
-/*0196*/ uint8     unknown0196[32]; // ***Placeholder
-// 0228- have different meanings depending on flags
-/*0228*/ int8      AStr;              // Strength
-/*0229*/ int8      ASta;              // Stamina
-/*0230*/ int8      ACha;              // Charisma
-/*0231*/ int8      ADex;              // Dexterity
-/*0232*/ int8      AInt;              // Intelligence
-/*0233*/ int8      AAgi;              // Agility
-/*0234*/ int8      AWis;              // Wisdom
-/*0235*/ int8      MR;               // Magic Resistance
-/*0236*/ int8      FR;               // Fire Resistance
-/*0237*/ int8      CR;               // Cold Resistance
-/*0238*/ int8      DR;               // Disease Resistance
-/*0239*/ int8      PR;               // Poison Resistance
-/*0240*/ int16     HP;               // Hitpoints
-/*0242*/ int16     Mana;             // Mana
-/*0244*/ int16     AC;				 // Armor Class
-/*0246*/ uint8     MaxCharges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
-/*0247*/ int8      GMFlag;           // GM flag 0  - normal item, -1 - gm item (Sept 25, 2002)
-/*0248*/ uint8     Light;            // Light effect of this item
-/*0249*/ uint8     Delay;            // Weapon Delay
-/*0250*/ uint8     Damage;           // Weapon Damage
-/*0251*/ int8      ClickType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
-/*0252*/ uint8     Range;            // Range of weapon
-/*0253*/ uint8     ItemType;            // Skill of this weapon, refer to weaponskill chart
-/*0254*/ int8      Magic;            // Magic flag
-                        //   00  (0000)  =   ???
-                        //   01  (0001)  =  magic
-                        //   12  (1100)  =   ???
-                        //   14  (1110)  =   ???
-                        //   15  (1111)  =   ???
-/*0255*/ int8     ClickLevel;           // Casting level
-/*0256*/ uint8    Material;         // Material?
-/*0257*/ uint8    unknown0258[3];   // ***Placeholder
-/*0260*/ uint32   Color;            // Amounts of RGB in original color
-/*0264*/ uint16   Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
-/*0266*/ uint16   ClickEffect;         // SpellID of special effect
-/*0268*/ uint16   Classes;          // Classes that can use this item
-/*0270*/ uint8    unknown0270[2];   // ***Placeholder
-/*0272*/ uint16   Races;            // Races that can use this item
-/*0274*/ int8     unknown0274[2];   // ***Placeholder
-/*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)
-/*0277*/ uint8    Clicklevel2;            // Casting level
-/*0278*/ int16     Charges;          // Number of items in stack
-/*0279*/ int16     StackSize;         // Number of charges (-1 = unlimited)
-/*0280*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
-/*0281*/ uint16   ProcEffect;         // spellId of special effect
-/*0283*/ uint8    unknown0282[8]; // ***Placeholder 0288
-/*0293*/ uint32   CastTime_;        // Cast time of clicky item in miliseconds
-/*0297*/ uint8    unknown0296[16]; // ***Placeholder
-/*0313*/ uint16   SkillModType;
-/*0315*/ int16    SkillModValue;
-/*0317*/ int16    BaneDmgRace;
-/*0319*/ int16    BaneDmgBody;
-			 // 1 Humanoid, 2 Lycanthrope, 3 Undead, 4 Giant, 5 Construct, 6 Extraplanar, 7 Magical
-/*0321*/ uint8    BaneDmgAmt;
-/*0322*/ uint8    unknown0316[3];
-/*0325*/ uint8    RecLevel;         // max should be 65
-/*0326*/ uint8    RecSkill;         // Max should be 252
-/*0327*/ uint8    unknown0325[2];
-/*0329*/ uint8    ElemDmgType; 
-			// 1 Magic, 2 Fire, 3 Cold, 4 Poison, 5 Disease
-/*0330*/ uint8    ElemDmgAmt;
-/*0331*/ uint8    unknown0330[22];
-/*0353*/ uint8    ReqLevel; // Required level
-/*0354*/ uint8    unknown0352[5];
-/*0359*/ uint8    FocusEffect;  //Was int16
-};
-
-struct leftover_items
-{
-
-/*0228*/ int8     unknown0172[6];      // ***Placeholder
-/*0234*/ char     Filename[15];            // Filename of book text on server
-/*0249*/ int8     unknown0190[15];    // ***Placeholder
-/*0228*/ int8     unknown0212[41];     // ***Placeholder
-/*0269*/ uint8    BagSlots;        // number of slots in container
-/*0270*/ int8     unknown0214;     // ***Placeholder
-/*0271*/ int8     BagSize;    // Maximum size item container can hold
-/*0272*/ uint8    BagWR; // % weight reduction of container
-/*0273*/ uint8    unknown0273[3];     // ***Placeholder
+	/*0000*/ char      Name[64];        // Name of item
+	/*0064*/ char      Lore[80];        // Lore text
+	/*0144*/ char      IDfile[30];       // This is the filename of the item graphic when held/worn.
+	/*0174*/ uint8	   Weight;          // Weight of item
+	/*0175*/ int8      NoRent;          // Nosave flag 1=normal, 0=nosave, -1=spell?
+	/*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
+	/*0177*/ uint8     Size;            // Size of item
+	/*0178*/ int8      ItemClass;
+	/*0179*/ uint8     unknown0179;     // ***Placeholder
+	/*0180*/ uint16    ID;         // Unique Item number
+	/*0182*/ uint16    Icon;         // Icon Number
+	/*0184*/ int16     equipSlot;       // Current Equip slot
+	/*0186*/ uint8     unknown0186[2];   // Equip slot cont.?
+	/*0188*/ uint32    Slots;  // Slots where this item goes
+	/*0192*/ int32     Price;            // Item cost in copper
+	/*0196*/ uint8     unknown0196[32]; // ***Placeholder
+	union
+	{
+		struct
+		{
+			// 0228- have different meanings depending on flags
+			/*0228*/ int8      AStr;              // Strength
+			/*0229*/ int8      ASta;              // Stamina
+			/*0230*/ int8      ACha;              // Charisma
+			/*0231*/ int8      ADex;              // Dexterity
+			/*0232*/ int8      AInt;              // Intelligence
+			/*0233*/ int8      AAgi;              // Agility
+			/*0234*/ int8      AWis;              // Wisdom
+			/*0235*/ int8      MR;               // Magic Resistance
+			/*0236*/ int8      FR;               // Fire Resistance
+			/*0237*/ int8      CR;               // Cold Resistance
+			/*0238*/ int8      DR;               // Disease Resistance
+			/*0239*/ int8      PR;               // Poison Resistance
+			/*0240*/ int16     HP;               // Hitpoints
+			/*0242*/ int16     Mana;             // Mana
+			/*0244*/ int16     AC;				 // Armor Class
+			/*0246*/ uint8     MaxCharges;       // Maximum number of charges, for rechargable? (Sept 25, 2002)
+			/*0247*/ int8      GMFlag;           // GM flag 0  - normal item, -1 - gm item (Sept 25, 2002)
+			/*0248*/ uint8     Light;            // Light effect of this item
+			/*0249*/ uint8     Delay;            // Weapon Delay
+			/*0250*/ uint8     Damage;           // Weapon Damage
+			/*0251*/ int8      ClickType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
+			/*0252*/ uint8     Range;            // Range of weapon
+			/*0253*/ uint8     ItemType;            // Skill of this weapon, refer to weaponskill chart
+			/*0254*/ int8      Magic;            // Magic flag
+			/*0255*/ int8     ClickLevel;           // Casting level
+			/*0256*/ uint8    Material;         // Material?
+			/*0257*/ uint8    unknown0257[3];   // ***Placeholder
+			/*0260*/ uint32   Color;            // Amounts of RGB in original color
+			/*0264*/ uint16   Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
+			/*0266*/ uint16   ClickEffect;         // SpellID of special effect
+			/*0268*/ uint16   Classes;          // Classes that can use this item
+			/*0270*/ uint8    unknown0270[2];   // ***Placeholder
+			/*0272*/ uint16   Races;            // Races that can use this item
+			/*0274*/ int8     unknown0274[2];   // ***Placeholder
+			/*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)			
+		} common; 
+		struct
+		{
+			/*0228*/ int16	  Book;	
+			/*0230*/ int16    BookType;      // ***Placeholder
+			/*0232*/ char     Filename[30];            // Filename of book text on server
+			/*0262*/ int8     unknown0262[15];    // ***Placeholder
+		} book;
+		struct
+		{
+			/*0228*/ int8     unknown0228[42];     // ***Placeholder
+			/*0270*/ uint8	  BagType;
+			/*0271*/ uint8    BagSlots;        // number of slots in container
+			/*0272*/ int8     BagWR;     // ***Placeholder
+			/*0273*/ int8     BagSize;    // Maximum size item container can hold
+			/*0274*/ uint8    unknown0274; // % weight reduction of container
+			/*0275*/ uint8    unknown0275[2];     // ***Placeholder
+		} container;
+	};
+	/*0277*/ uint8    Clicklevel2;            // Casting level
+	union
+	{
+		/*0278*/ int8    Charges;         // Number of charges (-1 = unlimited)
+		/*0278*/ int8    StackSize;          // Number of items in stack
+	};
+	/*0279*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
+	/*0281*/ uint16   ProcEffect;         // spellId of special effect
+	/*0282*/ uint8    unknown0282[10]; // ***Placeholder 0288
+	/*0292*/ uint32   CastTime_;        // Cast time of clicky item in miliseconds
+	/*0296*/ uint8    unknown0296[16]; // ***Placeholder
+	/*0312*/ uint16   SkillModType;
+	/*0314*/ int16    SkillModValue;
+	/*0316*/ int16    BaneDmgRace;
+	/*0318*/ int16    BaneDmgBody;
+	/*0320*/ uint8    BaneDmgAmt;
+	/*0321*/ uint8    unknown0321[3];
+	/*0324*/ uint8    RecLevel;         // max should be 65
+	/*0325*/ uint8    RecSkill;         // Max should be 252
+	/*0326*/ uint8    unknown0326[2];
+	/*0328*/ uint8    ElemDmgType; 
+	/*0329*/ uint8    ElemDmgAmt;
+	/*0330*/ uint8    unknown0330[22];
+	/*0352*/ uint8    ReqLevel; // Required level
+	/*0353*/ uint8    unknown0353[5];
+	/*0358*/ uint16   FocusEffect; 
 };
 
 struct PlayerItemsPacket_Struct {

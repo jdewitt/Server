@@ -372,8 +372,8 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_AltCurrencyPurchase] = &Client::Handle_OP_AltCurrencyPurchase;
 	ConnectedOpcodes[OP_AltCurrencyReclaim] = &Client::Handle_OP_AltCurrencyReclaim;
 	ConnectedOpcodes[OP_AltCurrencySell] = &Client::Handle_OP_AltCurrencySell;
-	ConnectedOpcodes[OP_CrystalReclaim] = &Client::Handle_OP_CrystalReclaim;
-	ConnectedOpcodes[OP_CrystalCreate] = &Client::Handle_OP_CrystalCreate;
+	//ConnectedOpcodes[OP_CrystalReclaim] = &Client::Handle_OP_CrystalReclaim;
+	//ConnectedOpcodes[OP_CrystalCreate] = &Client::Handle_OP_CrystalCreate;
 	ConnectedOpcodes[OP_LFGuild] = &Client::Handle_OP_LFGuild;
 	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
@@ -639,6 +639,8 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 	if(GetClientVersion() == EQClientMac)
 	{
+		SendNewZone(zone->newzone_data, m_pp.name);
+
 		if(entity_list.SendZoneDoorsBulk(outapp, this))
 		{
 			QueuePacket(outapp);
@@ -9202,7 +9204,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	FillSpawnStruct(&sze->player,CastToMob());
 	sze->player.spawn.curHp=1;
 	sze->player.spawn.NPC=0;
-	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 	sze->player.spawn.zoneID = zone->GetZoneID();
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
@@ -12887,7 +12889,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 	}
 }
 
-void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app) {
+/*void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app) {
 	uint32 ebon = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
 	uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
 	if((ebon + radiant) > 0) {
@@ -12928,7 +12930,7 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 			SendCrystalCounts();
 		}
 	}
-}
+}*/
 
 void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 {

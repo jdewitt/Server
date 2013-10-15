@@ -1088,6 +1088,7 @@ public:
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
+	void SendNewZone(NewZone_Struct newzone_data, char* name);
 	inline bool XTargettingAvailable() const { return ((ClientVersionBit & BIT_UnderfootAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
