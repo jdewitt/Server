@@ -867,6 +867,19 @@ void Client::BulkSendInventoryItems() {
 		}
 	}
 
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		//Items in containers
+		for (slot_id=251; slot_id<=330; slot_id++) {
+			const ItemInst* inst = m_inv[slot_id];
+			if(inst) {
+				std::string packet = inst->Serialize(slot_id);
+				ser_items[i++] = packet;
+				size += packet.length();
+			}
+		}	
+	}
+
 	// Power Source
 	if(GetClientVersion() >= EQClientSoF) {
 		const ItemInst* inst = m_inv[9999];
@@ -920,6 +933,15 @@ void Client::BulkSendItems()
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
 		}
 	}
+
+	//Items in containers
+		for (slot_id=251; slot_id<=330; slot_id++) {
+		const ItemInst* inst = m_inv[slot_id];
+		if (inst){
+			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
+		}
+	}
+
 	// Bank items
 	for (slot_id=2000; slot_id<=2015; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];

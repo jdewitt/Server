@@ -1029,32 +1029,14 @@ ENCODE(OP_ItemPacket) {
 			myitem->Charges = item->GetCharges();
 		else
 			myitem->StackSize = item->GetCharges();
-		myitem->equipSlot = int_struct->slot_id;
+
+		if(int_struct->slot_id >= 251 && int_struct->slot_id <= 330)
+			myitem->equipSlot = int_struct->slot_id-1;
+		else
+			myitem->equipSlot = int_struct->slot_id;
+
 		myitem->ItemClass = item->GetItem()->ItemClass;
 
-		if(item->GetItem()->ItemClass == 1){
-			myitem->container.BagType = item->GetItem()->BagType; 
-			myitem->container.BagSlots = item->GetItem()->BagSlots;         
-			myitem->container.BagSize = item->GetItem()->BagSize;    
-			myitem->container.BagWR = item->GetItem()->BagWR; 
-		}
-		else if(item->GetItem()->ItemClass == 2){
-			strcpy(myitem->book.Filename,item->GetItem()->Filename);
-			myitem->book.Book = item->GetItem()->Book;         
-			myitem->book.BookType = item->GetItem()->BookType; 
-		}
-
-		strcpy(myitem->Name,item->GetItem()->Name);
-		strcpy(myitem->Lore,item->GetItem()->Lore);       
-		strcpy(myitem->IDfile,item->GetItem()->IDFile);  	
-		myitem->Weight = item->GetItem()->Weight;      
-		myitem->NoRent = item->GetItem()->NoRent;         
-		myitem->NoDrop = item->GetItem()->NoDrop;         
-		myitem->Size = item->GetItem()->Size;           
-		myitem->ID = item->GetItem()->ID;        
-		myitem->Icon = item->GetItem()->Icon;       
-		myitem->Slots = item->GetItem()->Slots;  
-		myitem->Price = item->GetItem()->Price;  
 		myitem->common.AStr = item->GetItem()->AStr;           
 		myitem->common.ASta = item->GetItem()->ASta;           
 		myitem->common.ACha = item->GetItem()->ACha;           
@@ -1086,7 +1068,31 @@ ENCODE(OP_ItemPacket) {
 		myitem->common.ClickEffect = item->GetItem()->Click.Effect;    
 		myitem->common.Classes = item->GetItem()->Classes;  
 		myitem->common.Races = item->GetItem()->Races;  
-		myitem->common.Stackable = item->GetItem()->Stackable;      
+		myitem->common.Stackable = item->GetItem()->Stackable;
+
+		if(item->GetItem()->ItemClass == 1){
+			myitem->container.BagType = item->GetItem()->BagType; 
+			myitem->container.BagSlots = item->GetItem()->BagSlots;         
+			myitem->container.BagSize = item->GetItem()->BagSize;    
+			myitem->container.BagWR = item->GetItem()->BagWR; 
+		}
+		else if(item->GetItem()->ItemClass == 2){
+			strcpy(myitem->book.Filename,item->GetItem()->Filename);
+			myitem->book.Book = item->GetItem()->Book;         
+			myitem->book.BookType = item->GetItem()->BookType; 
+		}
+
+		strcpy(myitem->Name,item->GetItem()->Name);
+		strcpy(myitem->Lore,item->GetItem()->Lore);       
+		strcpy(myitem->IDfile,item->GetItem()->IDFile);  	
+		myitem->Weight = item->GetItem()->Weight;      
+		myitem->NoRent = item->GetItem()->NoRent;         
+		myitem->NoDrop = item->GetItem()->NoDrop;         
+		myitem->Size = item->GetItem()->Size;           
+		myitem->ID = item->GetItem()->ID;        
+		myitem->Icon = item->GetItem()->Icon;       
+		myitem->Slots = item->GetItem()->Slots;  
+		myitem->Price = item->GetItem()->Price;        
 		myitem->Clicklevel2 = item->GetItem()->Click.Level2;    
 //		myitem->StackSize = item->GetItem()->StackSize;             
 		myitem->ProcType = item->GetItem()->Proc.Type;      
@@ -1146,31 +1152,14 @@ ENCODE(OP_CharInventory){
 			pi->packets[r].item.Charges = sm_item->GetCharges();
 		else
 			pi->packets[r].item.StackSize = sm_item->GetCharges();
+
+		if(sm_item->GetCurrentSlot() >= 251 && sm_item->GetCurrentSlot() <= 330)
+			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot()-1;
+		else
+			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot();
+
 		pi->packets[r].item.ItemClass = sm_item->GetItem()->ItemClass;
 
-		if(sm_item->GetItem()->ItemClass == 1){
-			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
-			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
-			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
-			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
-		}
-		else if(sm_item->GetItem()->ItemClass == 2){
-			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
-			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
-			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
-		}
-
-		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
-		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
-		strcpy(pi->packets[r].item.IDfile,sm_item->GetItem()->IDFile);  
-		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
-		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
-		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
-		pi->packets[r].item.Size = sm_item->GetItem()->Size;           
-		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
-		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
-		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
-		pi->packets[r].item.Price = sm_item->GetItem()->Price;  
 		pi->packets[r].item.common.AStr = sm_item->GetItem()->AStr;           
 		pi->packets[r].item.common.ASta = sm_item->GetItem()->ASta;           
 		pi->packets[r].item.common.ACha = sm_item->GetItem()->ACha;           
@@ -1202,7 +1191,31 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.common.ClickEffect = sm_item->GetItem()->Click.Effect;    
 		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
 		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
-		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable;      
+		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable; 
+
+		if(sm_item->GetItem()->ItemClass == 1){
+			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
+			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
+			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
+			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
+		}
+		else if(sm_item->GetItem()->ItemClass == 2){
+			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
+			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
+			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
+		}
+
+		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
+		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
+		strcpy(pi->packets[r].item.IDfile,sm_item->GetItem()->IDFile);  
+		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
+		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
+		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
+		pi->packets[r].item.Size = sm_item->GetItem()->Size;           
+		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
+		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
+		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
+		pi->packets[r].item.Price = sm_item->GetItem()->Price;       
 		pi->packets[r].item.Clicklevel2 = sm_item->GetItem()->Click.Level2;             
 		pi->packets[r].item.ProcType = sm_item->GetItem()->Proc.Type;      
 		pi->packets[r].item.ProcEffect = sm_item->GetItem()->Proc.Effect;
@@ -1241,12 +1254,18 @@ DECODE(OP_MoveItem)
 
 	if(eq->to_slot == 0)
 		emu->to_slot=30;
+	else if(eq->to_slot >= 250 && eq->to_slot <= 329) 
+		emu->to_slot = eq->to_slot+1;
 	else
 		emu->to_slot=eq->to_slot;
+
 	if(eq->from_slot == 0)
 		emu->from_slot=30;
+	else if(eq->from_slot >= 250 && eq->from_slot <= 329) 
+		emu->from_slot = eq->from_slot+1;
 	else
 		emu->from_slot=eq->from_slot;
+
 	IN(number_in_stack);
 	FINISH_DIRECT_DECODE();
 }
@@ -1269,6 +1288,55 @@ ENCODE(OP_HPUpdate)
 	OUT(max_hp);
 	FINISH_ENCODE();
 }
+
+DECODE(OP_Consume) {
+	DECODE_LENGTH_EXACT(structs::Consume_Struct);
+	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
+
+	if(eq->slot >= 250 && eq->slot <= 329)
+		emu->slot = eq->slot+1;
+	else
+		emu->slot = eq->slot;
+	OUT(type);
+	OUT(auto_consumed);
+
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ReadBook) {
+
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	unsigned char *__emu_buffer = in->pBuffer;
+
+	BookText_Struct *emu_BookText_Struct = (BookText_Struct *)__emu_buffer;
+
+	in->size = sizeof(structs::BookText_Struct) + strlen(emu_BookText_Struct->booktext);
+
+	in->pBuffer = new unsigned char[in->size];
+
+	structs::BookText_Struct *eq_BookText_Struct = (structs::BookText_Struct*)in->pBuffer;
+
+	eq_BookText_Struct->type = emu_BookText_Struct->type;
+	strcpy(eq_BookText_Struct->booktext, emu_BookText_Struct->booktext);
+
+	delete[] __emu_buffer;
+
+	dest->FastQueuePacket(&in, ack_req);
+
+}
+
+DECODE(OP_ReadBook) {
+	DECODE_LENGTH_ATLEAST(structs::BookRequest_Struct);
+	SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
+
+	IN(type);
+	strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
+
+	FINISH_DIRECT_DECODE();
+}
+
 
 } //end namespace Mac
 

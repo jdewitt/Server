@@ -47,5 +47,8 @@ E(OP_CharInventory)
 D(OP_MoveItem)
 E(OP_Stamina)
 E(OP_HPUpdate)
+D(OP_Consume)
+E(OP_ReadBook)
+D(OP_ReadBook)
 #undef E
 #undef D

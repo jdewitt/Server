@@ -933,20 +933,20 @@ struct Item_Struct
 		} common; 
 		struct
 		{
-			/*0228*/ int16	  Book;	
-			/*0230*/ int16    BookType;      // ***Placeholder
-			/*0232*/ char     Filename[30];            // Filename of book text on server
-			/*0262*/ int8     unknown0262[15];    // ***Placeholder
+			/*0228*/ int16	  BookType;	
+			/*0230*/ int8     Book;      // ***Placeholder
+			/*0231*/ char     Filename[30];            // Filename of book text on server
+			/*0261*/ int8     unknown0262[16];    // ***Placeholder
 		} book;
 		struct
 		{
-			/*0228*/ int8     unknown0228[42];     // ***Placeholder
-			/*0270*/ uint8	  BagType;
-			/*0271*/ uint8    BagSlots;        // number of slots in container
-			/*0272*/ int8     BagWR;     // ***Placeholder
-			/*0273*/ int8     BagSize;    // Maximum size item container can hold
-			/*0274*/ uint8    unknown0274; // % weight reduction of container
-			/*0275*/ uint8    unknown0275[2];     // ***Placeholder
+			/*0228*/ int8     unknown0228[40];     // ***Placeholder
+			/*0268*/ uint8	  BagType;
+			/*0269*/ uint8    BagSlots;        // number of slots in container
+			/*0270*/ int8     BagWR;     // ***Placeholder
+			/*0271*/ int8     BagSize;    // Maximum size item container can hold
+			/*0272*/ uint8    unknown0274; // % weight reduction of container
+			/*0273*/ uint8    unknown0275[4];     // ***Placeholder
 		} container;
 	};
 	/*0277*/ uint8    Clicklevel2;            // Casting level
@@ -1624,17 +1624,17 @@ struct GMEmoteZone_Struct
 // This is where the Text is sent to the client.
 // Use ` as a newline character in the text.
 // Variable length.
-struct BookText_Struct 
-{
-	char* booktext;		// Comment: Variable Length
+struct BookText_Struct {
+	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
+	char booktext[1]; // Variable Length
 };
 
 // This is the request to read a book.
 // This is just a "text file" on the server
 // or in our case, the 'name' column in our books table.
-struct BookRequest_Struct 
-{
-	char txtfile[14]; // Comment: 
+struct BookRequest_Struct {
+	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
+	char txtfile[12];
 };
 
 // 6-01-08 - Wizzel

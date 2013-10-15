@@ -415,7 +415,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	#if EQDEBUG >= 9
-		std::cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << std::endl;
+//		std::cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << std::endl;
 	#endif
 
 	#ifdef SOLAR
@@ -3333,7 +3333,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
 	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probablt SwapItem(mi)");
+		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probably SwapItem(mi)");
 		SwapItemResync(mi); }
 
 	return;
