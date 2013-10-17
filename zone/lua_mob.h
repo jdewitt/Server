@@ -315,7 +315,6 @@ public:
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
 	void WearChange(int material_slot, int texture, uint32 color);
 	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
-	void RemoveNimbusEffect(int effect_id);
 	bool IsRunning();
 	void SetRunning(bool running);
 	void SetBodyType(int new_body, bool overwrite_orig);

@@ -207,15 +207,26 @@ void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		Message(0, "No such item: %i", item_id);
 		return;
 	} else {
-		// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
-		// removed  && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
-		if (charges <= 0 && item->Stackable) { 
-			charges = 1;
-		// if the charges is -1, then no charge value was passed in set to max charges
-		} else if(charges == -1) {
-			charges = item->MaxCharges;
-		// in any other situation just use charges as passed
+		// If we're here we can assume these are new items. So, If we're 0 or -x we want
+		// to get the item's max count. In the DB, a better term for charges is quantity,
+		// as the field controls both charges and stacked quantites.
+		if (charges <= 0){
+			//Item does not have charges and is not stackable (Normal item.)
+			if (item->MaxCharges < 1 && (item->StackSize < 1 || !item->Stackable)) { 
+				charges = 1;
+			}
+			//Item is not stackable, but has to use charges.
+			else if(item->StackSize < 1 || !item->Stackable) 
+			{
+				charges = item->MaxCharges;
+			}
+			//Due to the previous checks, item has to stack.
+			else
+			{
+				charges = item->StackSize;
+			}
 		}
+		// Charges are 1 or higher, go with it.
 	}
 	// Checking to see if the Item is lore or not.
 	bool foundlore = CheckLoreConflict(item);

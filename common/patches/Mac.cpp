@@ -6,21 +6,21 @@
 #include "../crc32.h"
 
 #include "../eq_packet_structs.h"
+#include "../packet_dump_file.h"
 #include "../MiscFunctions.h"
 #include "../packet_functions.h"
 #include "../StringUtil.h"
 #include "../Item.h"
 #include "Mac_structs.h"
 #include "../rulesys.h"
-#include "../database.h"
-
-Database database;
 
 namespace Mac {
 
 static const char *name = "Mac";
 static OpcodeManager *opcodes = NULL;
 static Strategy struct_strategy;
+
+//char *WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type = 0);
 
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
@@ -708,7 +708,7 @@ ENCODE(OP_NewSpawn) {
 		//eq->face = emu->face;
 		strncpy(eq->name, emu->name, 64);
 		eq->deity = emu->deity;
-//		eq->unknown0073 = emu->unknown0073;
+//		eq->unknown0073 = emu->unknown0073
 		eq->size = emu->size;
 //		eq->unknown0079 = emu->unknown0079;
 		eq->NPC = emu->NPC;
@@ -1017,6 +1017,8 @@ ENCODE(OP_ItemPacket) {
 		outapp->SetOpcode(OP_Unknown);
 		if(old_item_pkt->PacketType == ItemPacketSummonItem)
 			outapp->SetOpcode(OP_SummonedItem);
+		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
+			outapp->SetOpcode(OP_TradeItemPacket);
 		else if(item->GetItem()->ItemClass == 1)
 			outapp->SetOpcode(OP_ContainerPacket);
 		else if(item->GetItem()->ItemClass == 2)
@@ -1025,23 +1027,57 @@ ENCODE(OP_ItemPacket) {
 			outapp->SetOpcode(OP_ItemPacket);
 
 		outapp->size=sizeof(structs::Item_Struct);
-		structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
-
-		if(old_item_pkt->PacketType != ItemPacketSummonItem)
-		{
-			if(item->GetItem()->MaxCharges > 1)
-				myitem->Charges = item->GetCharges();
-			else
-				myitem->StackSize = item->GetCharges();
-		}
+        structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
+		
+		//structs::Item_Struct* weasel = (structs::Item_Struct*) outapp->pBuffer;
+		//_log(ZONE__INIT,"About to weasel in itempacket. Item: %s in slot: %i", item->GetItem()->Name, int_struct->slot_id);
+		//WeaselTheJuice((ItemInst*)int_struct->inst,int_struct->slot_id,&outapp);
 
 		if((int_struct->slot_id >= 251 && int_struct->slot_id <= 330) || (int_struct->slot_id >= 2031 && int_struct->slot_id <= 2110))
 			myitem->equipSlot = int_struct->slot_id-1;
-		else
+        else
 			myitem->equipSlot = int_struct->slot_id;
 
 		myitem->ItemClass = item->GetItem()->ItemClass;
+		strcpy(myitem->Name,item->GetItem()->Name);
+		strcpy(myitem->Lore,item->GetItem()->Lore);       
+		strcpy(myitem->IDFile,item->GetItem()->IDFile);  
+		myitem->Weight = item->GetItem()->Weight;      
+		myitem->NoRent = item->GetItem()->NoRent;         
+		myitem->NoDrop = item->GetItem()->NoDrop;         
+		myitem->Size = item->GetItem()->Size;           
+		myitem->ID = item->GetItem()->ID;        
+		myitem->Icon = item->GetItem()->Icon;       
+		myitem->Slots = item->GetItem()->Slots;  
+		myitem->Price = item->GetPrice(); 
+		myitem->Charges = item->GetCharges();     
+		myitem->SellRate = item->GetItem()->SellRate;
+		myitem->CastTime = item->GetItem()->CastTime;  
+		myitem->SkillModType = item->GetItem()->SkillModType;
+		myitem->SkillModValue = item->GetItem()->SkillModValue;
+		myitem->BaneDmgRace = item->GetItem()->BaneDmgRace;
+		myitem->BaneDmgBody = item->GetItem()->BaneDmgBody;
+		myitem->BaneDmgAmt = item->GetItem()->BaneDmgAmt;
+		myitem->RecLevel = item->GetItem()->RecLevel;       
+		myitem->RecSkill = item->GetItem()->RecSkill;   
+		myitem->ElemDmgType = item->GetItem()->ElemDmgType; 
+		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
+		myitem->ReqLevel = item->GetItem()->ReqLevel; 
+		myitem->FocusEffect = item->GetItem()->Focus.Effect;
 
+		if(item->GetItem()->ItemClass == 1){
+			myitem->container.BagType = item->GetItem()->BagType; 
+			myitem->container.BagSlots = item->GetItem()->BagSlots;         
+			myitem->container.BagSize = item->GetItem()->BagSize;    
+			myitem->container.BagWR = item->GetItem()->BagWR; 
+		}
+		else if(item->GetItem()->ItemClass == 2){
+			strcpy(myitem->book.Filename,item->GetItem()->Filename);
+			myitem->book.Book = item->GetItem()->Book;         
+			myitem->book.BookType = item->GetItem()->BookType; 
+		}
+		else
+		{
 		myitem->common.AStr = item->GetItem()->AStr;           
 		myitem->common.ASta = item->GetItem()->ASta;           
 		myitem->common.ACha = item->GetItem()->ACha;           
@@ -1058,71 +1094,80 @@ ENCODE(OP_ItemPacket) {
 		myitem->common.Mana = item->GetItem()->Mana;           
 		myitem->common.AC = item->GetItem()->AC;		
 		myitem->common.MaxCharges = item->GetItem()->MaxCharges;    
-		//myitem->common.GMFlag = item->GetItem()->GMFlag;         
 		myitem->common.Light = item->GetItem()->Light;          
 		myitem->common.Delay = item->GetItem()->Delay;          
-		myitem->common.Damage = item->GetItem()->Damage;         
-		myitem->common.ClickType = item->GetItem()->Click.Type;      
+		myitem->common.Damage = item->GetItem()->Damage;               
 		myitem->common.Range = item->GetItem()->Range;          
 		myitem->common.ItemType = item->GetItem()->ItemType;          
 		myitem->common.Magic = item->GetItem()->Magic;          
-		myitem->common.ClickLevel = item->GetItem()->Click.Level;     
 		myitem->common.Material = item->GetItem()->Material;   
-		myitem->common.Deity = item->GetItem()->Deity; 
 		myitem->common.Color = item->GetItem()->Color;    
-		myitem->common.ClickEffect = item->GetItem()->Click.Effect;    
+		myitem->common.Deity = item->GetItem()->Deity;   
 		myitem->common.Classes = item->GetItem()->Classes;  
 		myitem->common.Races = item->GetItem()->Races;  
-		myitem->common.Stackable = item->GetItem()->Stackable;
-
-		if(item->GetItem()->ItemClass == 1){
-			myitem->container.BagType = item->GetItem()->BagType; 
-			myitem->container.BagSlots = item->GetItem()->BagSlots;         
-			myitem->container.BagSize = item->GetItem()->BagSize;    
-			myitem->container.BagWR = item->GetItem()->BagWR; 
+		myitem->common.Stackable = item->GetItem()->Stackable; 
 		}
-		else if(item->GetItem()->ItemClass == 2){
-			strcpy(myitem->book.Filename,item->GetItem()->Filename);
-			myitem->book.Book = item->GetItem()->Book;         
-			myitem->book.BookType = item->GetItem()->BookType; 
+		if(item->GetItem()->Click.Effect > 0){
+			myitem->common.Effect1 = item->GetItem()->Click.Effect;
+			myitem->Effect2 = item->GetItem()->Click.Effect; 
+			myitem->EffectType2 = item->GetItem()->Click.Type;  
+			myitem->common.EffectType1 = item->GetItem()->Click.Type;
+			if(item->GetItem()->Click.Level > 0)
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Click.Level; 
+				myitem->EffectLevel2 = item->GetItem()->Click.Level;
+			}
+			else
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Click.Level2; 
+				myitem->EffectLevel2 = item->GetItem()->Click.Level2;  
+			}
+		}
+		else if(item->GetItem()->Scroll.Effect > 0){
+			myitem->common.Effect1 = item->GetItem()->Scroll.Effect;
+			myitem->Effect2 = item->GetItem()->Scroll.Effect; 
+			myitem->EffectType2 = item->GetItem()->Scroll.Type;  
+			myitem->common.EffectType1 = item->GetItem()->Scroll.Type;
+			if(item->GetItem()->Scroll.Level > 0)
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Scroll.Level; 
+				myitem->EffectLevel2 = item->GetItem()->Scroll.Level;
+			}
+			else
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Scroll.Level2; 
+				myitem->EffectLevel2 = item->GetItem()->Scroll.Level2;  
+			}
+		}
+		else if(item->GetItem()->Proc.Effect > 0){
+			myitem->common.Effect1 = item->GetItem()->Proc.Effect;
+			myitem->Effect2 = item->GetItem()->Proc.Effect; 
+			myitem->EffectType2 = item->GetItem()->Proc.Type;  
+			myitem->common.EffectType1 = item->GetItem()->Proc.Type;
+			if(item->GetItem()->Proc.Level > 0)
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Proc.Level; 
+				myitem->EffectLevel2 = item->GetItem()->Proc.Level;
+			}
+			else
+			{
+				myitem->common.EffectLevel1 = item->GetItem()->Proc.Level2; 
+				myitem->EffectLevel2 = item->GetItem()->Proc.Level2;  
+			}
 		}
 
-		strcpy(myitem->Name,item->GetItem()->Name);
-		strcpy(myitem->Lore,item->GetItem()->Lore);       
-		strcpy(myitem->IDfile,item->GetItem()->IDFile);  	
-		myitem->Weight = item->GetItem()->Weight;      
-		myitem->NoRent = item->GetItem()->NoRent;         
-		myitem->NoDrop = item->GetItem()->NoDrop;         
-		myitem->Size = item->GetItem()->Size;           
-		myitem->ID = item->GetItem()->ID;        
-		myitem->Icon = item->GetItem()->Icon;       
-		myitem->Slots = item->GetItem()->Slots;  
-		myitem->Price = item->GetItem()->Price;        
-		myitem->Clicklevel2 = item->GetItem()->Click.Level2;    
-//		myitem->StackSize = item->GetItem()->StackSize;             
-		myitem->ProcType = item->GetItem()->Proc.Type;      
-		myitem->ProcEffect = item->GetItem()->Proc.Effect;
-		myitem->CastTime_ = item->GetItem()->CastTime_;  
-		myitem->SkillModType = item->GetItem()->SkillModType;
-		myitem->SkillModValue = item->GetItem()->SkillModValue;
-		myitem->BaneDmgRace = item->GetItem()->BaneDmgRace;
-		myitem->BaneDmgBody = item->GetItem()->BaneDmgBody;
-		myitem->BaneDmgAmt = item->GetItem()->BaneDmgAmt;
-		myitem->RecLevel = item->GetItem()->RecLevel;       
-		myitem->RecSkill = item->GetItem()->RecSkill;   
-		myitem->ElemDmgType = item->GetItem()->ElemDmgType; 
-		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
-		myitem->ReqLevel = item->GetItem()->ReqLevel; 
-		myitem->FocusEffect = item->GetItem()->Focus.Effect;
-		
 		if(outapp->size != 360)
 			_log(ZONE__INIT,"Invalid size on OP_ItemPacket packet. Expected: 360, Got: %i", outapp->size);
 
-		_log(ZONE__INIT,"I sent you a %s it's in slot: %i with charges: %i", myitem->Name, myitem->equipSlot, myitem->Charges);
+		char* packet_dump = "packet_dump.txt";
+		FileDumpPacketHex(packet_dump, outapp);
+
+		//_log(ZONE__INIT,"I sent you a %s it's in slot: %i with charges: %i", myitem->Name, myitem->equipSlot, myitem->Charges);
 
 		DumpPacket(outapp);
 		dest->FastQueuePacket(&outapp);
 		delete[] __emu_buffer;
+
 	}
 }
 
@@ -1149,22 +1194,60 @@ ENCODE(OP_CharInventory){
 	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
 	//do the transform...
 	int r;
+	//std::string weasel_string;
 	for(r = 0; r < itemcount; r++, eq++) {
 
 		const ItemInst * sm_item = (const ItemInst *)eq->inst;
 
-		if(sm_item->GetItem()->MaxCharges > 1)
-			pi->packets[r].item.Charges = sm_item->GetCharges();
-		else
-			pi->packets[r].item.StackSize = sm_item->GetCharges();
+	//	_log(ZONE__INIT,"About to weasel in inventory.");
+	//	char* weasel=WeaselTheJuice(sm_item,eq->slot_id);
+	//	weasel_string.append(weasel);
 
-		if((sm_item->GetCurrentSlot() >= 251 && sm_item->GetCurrentSlot() <= 330) || (sm_item->GetCurrentSlot() >= 2031 && sm_item->GetCurrentSlot() <= 2110))
-			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot()-1;
-		else
-			pi->packets[r].item.equipSlot = sm_item->GetCurrentSlot();
+		if((eq->slot_id >= 251 && eq->slot_id <= 330) || (eq->slot_id >= 2031 && eq->slot_id <= 2110))
+			pi->packets[r].item.equipSlot = eq->slot_id-1;
+        else
+			pi->packets[r].item.equipSlot = eq->slot_id;
 
 		pi->packets[r].item.ItemClass = sm_item->GetItem()->ItemClass;
+		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
+		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
+		strcpy(pi->packets[r].item.IDFile,sm_item->GetItem()->IDFile);  
+		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
+		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
+		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
+		pi->packets[r].item.Size = sm_item->GetItem()->Size;           
+		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
+		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
+		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
+		pi->packets[r].item.Price = sm_item->GetPrice(); 
+		pi->packets[r].item.Charges = sm_item->GetCharges();     
+		pi->packets[r].item.SellRate = sm_item->GetItem()->SellRate;
+		pi->packets[r].item.CastTime = sm_item->GetItem()->CastTime;  
+		pi->packets[r].item.SkillModType = sm_item->GetItem()->SkillModType;
+		pi->packets[r].item.SkillModValue = sm_item->GetItem()->SkillModValue;
+		pi->packets[r].item.BaneDmgRace = sm_item->GetItem()->BaneDmgRace;
+		pi->packets[r].item.BaneDmgBody = sm_item->GetItem()->BaneDmgBody;
+		pi->packets[r].item.BaneDmgAmt = sm_item->GetItem()->BaneDmgAmt;
+		pi->packets[r].item.RecLevel = sm_item->GetItem()->RecLevel;       
+		pi->packets[r].item.RecSkill = sm_item->GetItem()->RecSkill;   
+		pi->packets[r].item.ElemDmgType = sm_item->GetItem()->ElemDmgType; 
+		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
+		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
+		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
 
+		if(sm_item->GetItem()->ItemClass == 1){
+			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
+			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
+			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
+			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
+		}
+		else if(sm_item->GetItem()->ItemClass == 2){
+			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
+			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
+			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
+		}
+		else
+		{
 		pi->packets[r].item.common.AStr = sm_item->GetItem()->AStr;           
 		pi->packets[r].item.common.ASta = sm_item->GetItem()->ASta;           
 		pi->packets[r].item.common.ACha = sm_item->GetItem()->ACha;           
@@ -1181,38 +1264,122 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.common.Mana = sm_item->GetItem()->Mana;           
 		pi->packets[r].item.common.AC = sm_item->GetItem()->AC;		
 		pi->packets[r].item.common.MaxCharges = sm_item->GetItem()->MaxCharges;    
-		//pi->packets[r].item.common.GMFlag = sm_item->GetItem()->GMFlag;         
 		pi->packets[r].item.common.Light = sm_item->GetItem()->Light;          
 		pi->packets[r].item.common.Delay = sm_item->GetItem()->Delay;          
-		pi->packets[r].item.common.Damage = sm_item->GetItem()->Damage;         
-		pi->packets[r].item.common.ClickType = sm_item->GetItem()->Click.Type;      
+		pi->packets[r].item.common.Damage = sm_item->GetItem()->Damage;               
 		pi->packets[r].item.common.Range = sm_item->GetItem()->Range;          
 		pi->packets[r].item.common.ItemType = sm_item->GetItem()->ItemType;          
 		pi->packets[r].item.common.Magic = sm_item->GetItem()->Magic;          
-		pi->packets[r].item.common.ClickLevel = sm_item->GetItem()->Click.Level;     
 		pi->packets[r].item.common.Material = sm_item->GetItem()->Material;   
 		pi->packets[r].item.common.Color = sm_item->GetItem()->Color;    
 		pi->packets[r].item.common.Deity = sm_item->GetItem()->Deity;   
-		pi->packets[r].item.common.ClickEffect = sm_item->GetItem()->Click.Effect;    
 		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
 		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
 		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable; 
-
-		if(sm_item->GetItem()->ItemClass == 1){
-			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
-			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
-			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
-			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
 		}
-		else if(sm_item->GetItem()->ItemClass == 2){
-			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
-			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
-			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
+		if(sm_item->GetItem()->Click.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Click.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Click.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Click.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Click.Type;
+			if(sm_item->GetItem()->Click.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Click.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Click.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Click.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Click.Level2;  
+			}
+		}
+		else if(sm_item->GetItem()->Scroll.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Scroll.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Scroll.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Scroll.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Scroll.Type;
+			if(sm_item->GetItem()->Scroll.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Scroll.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Scroll.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Scroll.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Scroll.Level2;  
+			}
+		}
+		else if(sm_item->GetItem()->Proc.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Proc.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Proc.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Proc.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Proc.Type;
+			if(sm_item->GetItem()->Proc.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Proc.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Proc.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Proc.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Proc.Level2;  
+			}
 		}
 
+	}
+	int32 length = 5000;
+	int buffer = 2;
+
+//	memcpy(pi->packets,weasel_string.c_str(),weasel_string.length());
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, length);
+	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, itemcount * sizeof(structs::PlayerItemsPacket_Struct), &outapp->pBuffer[buffer], length-buffer);
+	pi->count = itemcount;
+
+	dest->FastQueuePacket(&outapp);
+	delete[] __emu_buffer;
+	
+}
+
+ENCODE(OP_ShopInventoryPacket)
+{
+	//TODO: Add opcode field to InternalSerializedItem_Struct to combine this with OP_CharInventory as it's the same function :I
+	//consume the packet
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	//store away the emu struct
+	unsigned char *__emu_buffer = in->pBuffer;
+
+	int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
+	if(itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
+		_log(ZONE__INIT, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+		delete in;
+		return;
+	}
+
+	int pisize = sizeof(structs::MerchantItems_Struct) + (80 * sizeof(structs::MerchantItemsPacket_Struct));
+	structs::MerchantItems_Struct* pi = (structs::MerchantItems_Struct*) new uchar[pisize];
+	memset(pi, 0, pisize);
+
+	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
+	//do the transform...
+	//std::string weasel_string;
+	int r = 0;
+	for(r = 0; r < itemcount; r++, eq++) {
+
+		const ItemInst * sm_item = (const ItemInst *)eq->inst;
+
+	//	_log(ZONE__INIT,"About to weasel in merchant.");
+	//	char* weasel=WeaselTheJuice(sm_item,r,1);
+	//	weasel_string.append(weasel);
+
+//_log(ZONE__INIT, "About to start copying items to struct %s in merchant slot: %i with price: %i with charges: %i", sm_item->GetItem()->Name, r, sm_item->GetPrice(), sm_item->GetCharges());
+		pi->packets[r].itemtype = sm_item->GetItem()->ItemClass;
+		pi->packets[r].item.equipSlot = sm_item->GetMerchantSlot();
+		pi->packets[r].item.ItemClass = sm_item->GetItem()->ItemClass;
 		strcpy(pi->packets[r].item.Name,sm_item->GetItem()->Name);
 		strcpy(pi->packets[r].item.Lore,sm_item->GetItem()->Lore);       
-		strcpy(pi->packets[r].item.IDfile,sm_item->GetItem()->IDFile);  
+		strcpy(pi->packets[r].item.IDFile,sm_item->GetItem()->IDFile);  
 		pi->packets[r].item.Weight = sm_item->GetItem()->Weight;      
 		pi->packets[r].item.NoRent = sm_item->GetItem()->NoRent;         
 		pi->packets[r].item.NoDrop = sm_item->GetItem()->NoDrop;         
@@ -1220,11 +1387,13 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ID = sm_item->GetItem()->ID;        
 		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
 		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
-		pi->packets[r].item.Price = sm_item->GetItem()->Price;       
-		pi->packets[r].item.Clicklevel2 = sm_item->GetItem()->Click.Level2;             
-		pi->packets[r].item.ProcType = sm_item->GetItem()->Proc.Type;      
-		pi->packets[r].item.ProcEffect = sm_item->GetItem()->Proc.Effect;
-		pi->packets[r].item.CastTime_ = sm_item->GetItem()->CastTime_;  
+		pi->packets[r].item.Price = sm_item->GetPrice(); 
+		if(sm_item->GetMerchantCount() > 0)
+			pi->packets[r].item.Charges = sm_item->GetMerchantCount();    
+		else
+			pi->packets[r].item.Charges = -1;    
+		pi->packets[r].item.SellRate = sm_item->GetItem()->SellRate;
+		pi->packets[r].item.CastTime = sm_item->GetItem()->CastTime;  
 		pi->packets[r].item.SkillModType = sm_item->GetItem()->SkillModType;
 		pi->packets[r].item.SkillModValue = sm_item->GetItem()->SkillModValue;
 		pi->packets[r].item.BaneDmgRace = sm_item->GetItem()->BaneDmgRace;
@@ -1237,20 +1406,112 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
 
-		//_log(ZONE__INIT,"Your %s (%i) is item # %i to be deflated. It is in slot %i with charges %i", pi->packets[r].item.Name, pi->packets[r].item.ID, r, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
+		if(sm_item->GetItem()->ItemClass == 1){
+			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
+			pi->packets[r].item.container.BagSlots = sm_item->GetItem()->BagSlots;         
+			pi->packets[r].item.container.BagSize = sm_item->GetItem()->BagSize;    
+			pi->packets[r].item.container.BagWR = sm_item->GetItem()->BagWR; 
+		}
+		else if(sm_item->GetItem()->ItemClass == 2){
+			strcpy(pi->packets[r].item.book.Filename,sm_item->GetItem()->Filename);
+			pi->packets[r].item.book.Book = sm_item->GetItem()->Book;         
+			pi->packets[r].item.book.BookType = sm_item->GetItem()->BookType; 
+		}
+		else
+		{
+		pi->packets[r].item.common.AStr = sm_item->GetItem()->AStr;           
+		pi->packets[r].item.common.ASta = sm_item->GetItem()->ASta;           
+		pi->packets[r].item.common.ACha = sm_item->GetItem()->ACha;           
+		pi->packets[r].item.common.ADex = sm_item->GetItem()->ADex;           
+		pi->packets[r].item.common.AInt = sm_item->GetItem()->AInt;           
+		pi->packets[r].item.common.AAgi = sm_item->GetItem()->AAgi;           
+		pi->packets[r].item.common.AWis = sm_item->GetItem()->AWis;           
+		pi->packets[r].item.common.MR = sm_item->GetItem()->MR;             
+		pi->packets[r].item.common.FR = sm_item->GetItem()->FR;             
+		pi->packets[r].item.common.CR = sm_item->GetItem()->CR;             
+		pi->packets[r].item.common.DR = sm_item->GetItem()->DR;             
+		pi->packets[r].item.common.PR = sm_item->GetItem()->PR;             
+		pi->packets[r].item.common.HP = sm_item->GetItem()->HP;             
+		pi->packets[r].item.common.Mana = sm_item->GetItem()->Mana;           
+		pi->packets[r].item.common.AC = sm_item->GetItem()->AC;		
+		pi->packets[r].item.common.MaxCharges = sm_item->GetItem()->MaxCharges;    
+		pi->packets[r].item.common.Light = sm_item->GetItem()->Light;          
+		pi->packets[r].item.common.Delay = sm_item->GetItem()->Delay;          
+		pi->packets[r].item.common.Damage = sm_item->GetItem()->Damage;               
+		pi->packets[r].item.common.Range = sm_item->GetItem()->Range;          
+		pi->packets[r].item.common.ItemType = sm_item->GetItem()->ItemType;          
+		pi->packets[r].item.common.Magic = sm_item->GetItem()->Magic;          
+		pi->packets[r].item.common.Material = sm_item->GetItem()->Material;   
+		pi->packets[r].item.common.Color = sm_item->GetItem()->Color;    
+		pi->packets[r].item.common.Deity = sm_item->GetItem()->Deity;   
+		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
+		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
+		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable; 
+		}
+		if(sm_item->GetItem()->Click.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Click.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Click.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Click.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Click.Type;
+			if(sm_item->GetItem()->Click.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Click.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Click.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Click.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Click.Level2;  
+			}
+		}
+		else if(sm_item->GetItem()->Scroll.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Scroll.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Scroll.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Scroll.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Scroll.Type;
+			if(sm_item->GetItem()->Scroll.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Scroll.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Scroll.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Scroll.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Scroll.Level2;  
+			}
+		}
+		else if(sm_item->GetItem()->Proc.Effect > 0){
+			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Proc.Effect;
+			pi->packets[r].item.Effect2 = sm_item->GetItem()->Proc.Effect; 
+			pi->packets[r].item.EffectType2 = sm_item->GetItem()->Proc.Type;  
+			pi->packets[r].item.common.EffectType1 = sm_item->GetItem()->Proc.Type;
+			if(sm_item->GetItem()->Proc.Level > 0)
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Proc.Level; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Proc.Level;
+			}
+			else
+			{
+				pi->packets[r].item.common.EffectLevel1 = sm_item->GetItem()->Proc.Level2; 
+				pi->packets[r].item.EffectLevel2 = sm_item->GetItem()->Proc.Level2;  
+			}
+		}
+		
+
+   _log(ZONE__INIT,"MERCHANT PRICE IS SET TO: %i for item: %s in slot: %i quantity:", pi->packets[r].item.Price, pi->packets[r].item.Name, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
+		
 	}
 	int32 length = 5000;
 	int buffer = 2;
 
-	//_log(ZONE__INIT,"Sent %i items", itemcount);
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, length);
-	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, pi->count * sizeof(structs::PlayerItemsPacket_Struct), &outapp->pBuffer[buffer], length-buffer);
-	structs::PlayerItems_Struct* inven = (structs::PlayerItems_Struct*) outapp->pBuffer;
-	inven->count = itemcount;
+	//_log(ZONE__INIT,"Senind %i merchant items", itemcount);
+	//memcpy(pi->packets,weasel_string.c_str(),weasel_string.length());
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, length);
+	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, itemcount * sizeof(structs::MerchantItemsPacket_Struct), &outapp->pBuffer[buffer], length-buffer);
+	pi->count = itemcount;
 
 	dest->FastQueuePacket(&outapp);
 	delete[] __emu_buffer;
-	
 }
 
 DECODE(OP_MoveItem)
@@ -1294,7 +1555,8 @@ ENCODE(OP_HPUpdate)
 	FINISH_ENCODE();
 }
 
-DECODE(OP_Consume) {
+DECODE(OP_Consume) 
+{
 	DECODE_LENGTH_EXACT(structs::Consume_Struct);
 	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
@@ -1302,37 +1564,34 @@ DECODE(OP_Consume) {
 		emu->slot = eq->slot+1;
 	else
 		emu->slot = eq->slot;
-	OUT(type);
-	OUT(auto_consumed);
+	IN(type);
+	IN(auto_consumed);
 
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_ReadBook) {
+ENCODE(OP_ReadBook) 
+{
 
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
 
 	unsigned char *__emu_buffer = in->pBuffer;
-
 	BookText_Struct *emu_BookText_Struct = (BookText_Struct *)__emu_buffer;
-
 	in->size = sizeof(structs::BookText_Struct) + strlen(emu_BookText_Struct->booktext);
-
 	in->pBuffer = new unsigned char[in->size];
-
 	structs::BookText_Struct *eq_BookText_Struct = (structs::BookText_Struct*)in->pBuffer;
 
 	eq_BookText_Struct->type = emu_BookText_Struct->type;
 	strcpy(eq_BookText_Struct->booktext, emu_BookText_Struct->booktext);
 
 	delete[] __emu_buffer;
-
 	dest->FastQueuePacket(&in, ack_req);
 
 }
 
-DECODE(OP_ReadBook) {
+DECODE(OP_ReadBook) 
+{
 	DECODE_LENGTH_ATLEAST(structs::BookRequest_Struct);
 	SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
@@ -1342,6 +1601,278 @@ DECODE(OP_ReadBook) {
 	FINISH_DIRECT_DECODE();
 }
 
+ENCODE(OP_Illusion) 
+{
+	ENCODE_LENGTH_EXACT(Illusion_Struct);
+	SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
+	OUT(spawnid);
+	//OUT_str(charname);
+	if(emu->race > 250){
+		eq->race = 1;
+	}
+	else {
+		OUT(race);
+	}
+	OUT(gender);
+	OUT(texture);
+	OUT(helmtexture);
+	OUT(face);
+	OUT(hairstyle);
+	OUT(haircolor);
+	//OUT(beard);
+	OUT(beardcolor);
+	//OUT(size);
+	eq->unknown_26=26;
+	eq->unknown016=0xFFFFFFFF;
+
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_ShopRequest)
+{
+	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+	OUT(npcid);
+	OUT(playerid);
+	OUT(command);
+	//eq->unknown[0] = 0xD4;
+	//eq->unknown[1] = 0x53;
+	//eq->unknown[2] = 0x00;
+	OUT(rate);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_ShopRequest) 
+{
+	DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
+	SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+	IN(npcid);
+	IN(playerid);
+	IN(command);
+	IN(rate);
+	FINISH_DIRECT_DECODE();
+}
+
+DECODE(OP_ShopPlayerSell) { DECODE_FORWARD(OP_ShopPlayerBuy); }
+DECODE(OP_ShopPlayerBuy)
+{
+	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
+	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	IN(npcid);
+	IN(playerid);
+	IN(itemslot);
+	IN(quantity);
+	IN(price);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ShopPlayerSell) { ENCODE_FORWARD(OP_ShopPlayerBuy); }
+ENCODE(OP_ShopPlayerBuy)
+{
+	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	OUT(npcid);
+	OUT(playerid);
+	OUT(itemslot);
+	OUT(quantity);
+	eq->price=0;
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_ShopDelItem)
+{
+	ENCODE_LENGTH_EXACT(Merchant_DelItem_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_DelItem_Struct, structs::Merchant_DelItem_Struct);
+	OUT(npcid);
+	OUT(playerid);
+	OUT(itemslot);
+	FINISH_ENCODE();
+}
+
+/*ENCODE(OP_FormattedMessage)
+{
+	EQApplicationPacket *__packet = *p; 
+	*p = nullptr; 
+	unsigned char *__emu_buffer = __packet->pBuffer; 
+	FormattedMessage_Struct *emu = (FormattedMessage_Struct *) __emu_buffer; 
+	uint32 __i = 0; 
+	__i++; 
+	
+	int msglen = __packet->size - sizeof(FormattedMessage_Struct);
+	int len = sizeof(structs::FormattedMessage_Struct) + msglen - 6;
+	__packet->pBuffer = new unsigned char[len]; 
+	__packet->size = len; 
+	memset(__packet->pBuffer, 0, len); 
+	structs::FormattedMessage_Struct *eq = (structs::FormattedMessage_Struct *) __packet->pBuffer; 
+	eq->string_id = emu->string_id;
+	eq->type = emu->type;
+	eq->unknown0 = 0x0000;
+	strcpy(eq->message, emu->message);
+	FINISH_ENCODE();
+}*/
+
+/*char *WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
+	char *returned_juice = nullptr;
+	//structs::Item_Struct* thejuice = (structs::Item_Struct*) returned_juice;
+	//structs::Item_Struct* thejuice = (structs::Item_Struct*)returned_juice;
+
+	 EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPacket,sizeof(structs::Item_Struct));
+
+
+      outapp->size=sizeof(structs::Item_Struct);
+      structs::Item_Struct* thejuice = (structs::Item_Struct*) outapp->pBuffer;
+
+  		if(type == 0)
+  		{
+  			if(inst->GetCharges() > 0)
+  				thejuice->Charges = inst->GetCharges();
+			else
+  				thejuice->Charges = 1;
+  
+  			if((slot_id >= 251 && slot_id <= 330) || (slot_id >= 2031 && slot_id <= 2110))
+  				thejuice->equipSlot = slot_id-1;
+  			else
+  				thejuice->equipSlot = slot_id;
+  
+  			thejuice->Price = inst->GetItem()->Price;
+  		}
+  		else
+  		{
+  			if(inst->GetMerchantCount() > 0)
+  				thejuice->Charges = inst->GetMerchantCount();
+  			else
+  				thejuice->Charges = -1;
+  
+  			thejuice->equipSlot = inst->GetMerchantSlot();
+  			thejuice->Price = inst->GetPrice();
+  
+  			_log(ZONE__INIT, "Shopkeeper item: %s in slot: %i set price to: %i and quantity to: %i", inst->GetItem()->Name, slot_id, thejuice->Price, thejuice->Charges); 
+  		}
+  		_log(ZONE__INIT, "Shopkeeper item: %s in slot: %i set price to: %i and quantity to: %i", inst->GetItem()->Name, slot_id, thejuice->Price, thejuice->Charges); 
+  
+  		thejuice->ItemClass = inst->GetItem()->ItemClass;
+  		strcpy(thejuice->Name,inst->GetItem()->Name);
+  		strcpy(thejuice->Lore,inst->GetItem()->Lore);       
+  		strcpy(thejuice->IDFile,inst->GetItem()->IDFile);  	
+  		thejuice->Weight = inst->GetItem()->Weight;      
+  		thejuice->NoRent = inst->GetItem()->NoRent;         
+  		thejuice->NoDrop = inst->GetItem()->NoDrop;         
+  		thejuice->Size = inst->GetItem()->Size;           
+  		thejuice->ID = inst->GetItem()->ID;        
+  		thejuice->Icon = inst->GetItem()->Icon;       
+  		thejuice->Slots = inst->GetItem()->Slots;          
+  		thejuice->SellRate = inst->GetItem()->SellRate;
+  		thejuice->CastTime = inst->GetItem()->CastTime;  
+  		thejuice->SkillModType = inst->GetItem()->SkillModType;
+  		thejuice->SkillModValue = inst->GetItem()->SkillModValue;
+  		thejuice->BaneDmgRace = inst->GetItem()->BaneDmgRace;
+  		thejuice->BaneDmgBody = inst->GetItem()->BaneDmgBody;
+  		thejuice->BaneDmgAmt = inst->GetItem()->BaneDmgAmt;
+  		thejuice->RecLevel = inst->GetItem()->RecLevel;       
+  		thejuice->RecSkill = inst->GetItem()->RecSkill;   
+  		thejuice->ElemDmgType = inst->GetItem()->ElemDmgType; 
+  		thejuice->ElemDmgAmt = inst->GetItem()->ElemDmgAmt;
+  		thejuice->ReqLevel = inst->GetItem()->ReqLevel; 
+  		thejuice->FocusEffect = inst->GetItem()->Focus.Effect;
+  
+  		if(inst->GetItem()->ItemClass == 1)
+  		{
+  			thejuice->container.BagType = inst->GetItem()->BagType; 
+  			thejuice->container.BagSlots = inst->GetItem()->BagSlots;         
+  			thejuice->container.BagSize = inst->GetItem()->BagSize;    
+  			thejuice->container.BagWR = inst->GetItem()->BagWR; 
+  		}
+  		else if(inst->GetItem()->ItemClass == 2)
+  		{
+  			strcpy(thejuice->book.Filename,inst->GetItem()->Filename);
+  			thejuice->book.Book = inst->GetItem()->Book;         
+  			thejuice->book.BookType = inst->GetItem()->BookType; 
+  		}
+  		else
+  		{
+  			thejuice->common.AStr = inst->GetItem()->AStr;           
+  			thejuice->common.ASta = inst->GetItem()->ASta;           
+  			thejuice->common.ACha = inst->GetItem()->ACha;           
+  			thejuice->common.ADex = inst->GetItem()->ADex;           
+  			thejuice->common.AInt = inst->GetItem()->AInt;           
+  			thejuice->common.AAgi = inst->GetItem()->AAgi;           
+  			thejuice->common.AWis = inst->GetItem()->AWis;           
+  			thejuice->common.MR = inst->GetItem()->MR;             
+  			thejuice->common.FR = inst->GetItem()->FR;             
+  			thejuice->common.CR = inst->GetItem()->CR;             
+  			thejuice->common.DR = inst->GetItem()->DR;             
+  			thejuice->common.PR = inst->GetItem()->PR;             
+  			thejuice->common.HP = inst->GetItem()->HP;             
+  			thejuice->common.Mana = inst->GetItem()->Mana;           
+  			thejuice->common.AC = inst->GetItem()->AC;		
+  			thejuice->common.MaxCharges = inst->GetItem()->MaxCharges;    
+  			//thejuice->common.GMFlag = inst->GetItem()->GMFlag;         
+  			thejuice->common.Light = inst->GetItem()->Light;          
+  			thejuice->common.Delay = inst->GetItem()->Delay;          
+  			thejuice->common.Damage = inst->GetItem()->Damage;            
+  			thejuice->common.Range = inst->GetItem()->Range;          
+  			thejuice->common.ItemType = inst->GetItem()->ItemType;          
+  			thejuice->common.Magic = inst->GetItem()->Magic;              
+  			thejuice->common.Material = inst->GetItem()->Material;   
+  			thejuice->common.Deity = inst->GetItem()->Deity; 
+  			thejuice->common.Color = inst->GetItem()->Color;    
+  			thejuice->common.Classes = inst->GetItem()->Classes;  
+  			thejuice->common.Races = inst->GetItem()->Races;  
+  			thejuice->common.Stackable = inst->GetItem()->Stackable;
+  		}
+  		
+  		if(inst->GetItem()->Click.Effect > 0){
+  			thejuice->common.Effect1 = inst->GetItem()->Click.Effect;
+  			thejuice->Effect2 = inst->GetItem()->Click.Effect; 
+  			thejuice->EffectType2 = inst->GetItem()->Click.Type;  
+  			thejuice->common.EffectType1 = inst->GetItem()->Click.Type;
+  			if(inst->GetItem()->Click.Level > 0)
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Click.Level; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Click.Level;
+  			}
+  			else
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Click.Level2; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Click.Level2;  
+  			}
+  		}
+  		else if(inst->GetItem()->Scroll.Effect > 0){
+  			thejuice->common.Effect1 = inst->GetItem()->Scroll.Effect;
+  			thejuice->Effect2 = inst->GetItem()->Scroll.Effect; 
+  			thejuice->EffectType2 = inst->GetItem()->Scroll.Type;  
+  			thejuice->common.EffectType1 = inst->GetItem()->Scroll.Type;
+  			if(inst->GetItem()->Scroll.Level > 0)
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Scroll.Level; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Scroll.Level;
+  			}
+  			else
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Scroll.Level2; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Scroll.Level2;  
+  			}
+  		}
+  		else if(inst->GetItem()->Proc.Effect > 0){
+  			thejuice->common.Effect1 = inst->GetItem()->Proc.Effect;
+  			thejuice->Effect2 = inst->GetItem()->Proc.Effect; 
+  			thejuice->EffectType2 = inst->GetItem()->Proc.Type;  
+  			thejuice->common.EffectType1 = inst->GetItem()->Proc.Type;
+  			if(inst->GetItem()->Proc.Level > 0)
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Proc.Level; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Proc.Level;
+  			}
+  			else
+  			{
+  				thejuice->common.EffectLevel1 = inst->GetItem()->Proc.Level2; 
+  				thejuice->EffectLevel2 = inst->GetItem()->Proc.Level2;  
+  			}
+  		}
+
+	//	_log(ZONE__INIT,"I weaseled you a %s it's in slot: %i with charges: %i", myitem->Name, myitem->equipSlot, myitem->Charges);
+	return ;
+}*/
 
 } //end namespace Mac
 

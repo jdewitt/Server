@@ -1671,11 +1671,6 @@ void Lua_Mob::DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup) {
 	self->DoKnockback(caster, pushback, pushup);
 }
 
-void Lua_Mob::RemoveNimbusEffect(int effect_id) {
-	Lua_Safe_Call_Void();
-	self->RemoveNimbusEffect(effect_id);
-}
-
 bool Lua_Mob::IsRunning() {
 	Lua_Safe_Call_Bool();
 	return self->IsRunning();
@@ -2082,7 +2077,6 @@ luabind::scope lua_register_mob() {
 		.def("SetSlotTint", (void(Lua_Mob::*)(int,int,int,int))&Lua_Mob::SetSlotTint)
 		.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
 		.def("DoKnockback", (void(Lua_Mob::*)(Lua_Mob,uint32,uint32))&Lua_Mob::DoKnockback)
-		.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)
 		.def("IsRunning", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRunning)
 		.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)
 		.def("SetBodyType", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetBodyType)

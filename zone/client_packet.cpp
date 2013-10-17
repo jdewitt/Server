@@ -5531,6 +5531,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != MERCHANT)
 		return;
 
+	_log(ZONE__INIT, "Hit OP_ShopPlayerBuy. npcid: %i playerid: %i itemslot: %i quantity: %i  price: %i", mp->npcid, mp->playerid, mp->itemslot, mp->quantity, mp->price);
 	if (mp->quantity < 1) return;
 
 	//you have to be somewhat close to them to be properly using them
@@ -5896,14 +5897,21 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
-	EQApplicationPacket empty(OP_ShopEndConfirm);
-	QueuePacket(&empty);
-	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopEndConfirm, 2);
-	//outapp->pBuffer[0] = 0x0a;
-	//outapp->pBuffer[1] = 0x66;
-	//QueuePacket(outapp);
-	//safe_delete(outapp);
-	//Save();
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopEndConfirm, 2);
+		outapp->pBuffer[0] = 0x0a;
+		outapp->pBuffer[1] = 0x66;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+		Save();
+	}
+	else
+	{
+		EQApplicationPacket empty(OP_ShopEndConfirm);
+		QueuePacket(&empty);
+	}
+
 	return;
 }
 

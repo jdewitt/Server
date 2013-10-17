@@ -3114,9 +3114,9 @@ struct TraderClick_Struct{
 };
 
 struct FormattedMessage_Struct{
-	uint32	unknown0;
-	uint32	string_id;
-	uint32	type;
+	uint16	unknown0;
+	uint16	string_id;
+	uint16	type;
 	char	message[0];
 };
 struct SimpleMessage_Struct{

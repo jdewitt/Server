@@ -514,9 +514,9 @@ struct ChannelMessage_Struct
 };
 
 struct FormattedMessage_Struct{
-	uint32	unknown0;
-	uint32	string_id;
-	uint32	type;
+	uint16	unknown0;
+	uint16	string_id;
+	uint16	type;
 	char	message[0];
 };
 
@@ -876,7 +876,7 @@ struct Item_Struct
 {
 	/*0000*/ char      Name[64];        // Name of item
 	/*0064*/ char      Lore[80];        // Lore text
-	/*0144*/ char      IDfile[30];       // This is the filename of the item graphic when held/worn.
+	/*0144*/ char      IDFile[30];       // This is the filename of the item graphic when held/worn.
 	/*0174*/ uint8	   Weight;          // Weight of item
 	/*0175*/ int8      NoRent;          // Nosave flag 1=normal, 0=nosave, -1=spell?
 	/*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
@@ -915,21 +915,21 @@ struct Item_Struct
 			/*0248*/ uint8     Light;            // Light effect of this item
 			/*0249*/ uint8     Delay;            // Weapon Delay
 			/*0250*/ uint8     Damage;           // Weapon Damage
-			/*0251*/ int8      ClickType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
+			/*0251*/ int8      EffectType1;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
 			/*0252*/ uint8     Range;            // Range of weapon
 			/*0253*/ uint8     ItemType;            // Skill of this weapon, refer to weaponskill chart
 			/*0254*/ int8      Magic;            // Magic flag
-			/*0255*/ int8     ClickLevel;           // Casting level
-			/*0256*/ uint8    Material;         // Material?
-			/*0257*/ uint8    unknown0257[3];   // ***Placeholder
-			/*0260*/ uint32   Color;            // Amounts of RGB in original color
-			/*0264*/ uint16   Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
-			/*0266*/ uint16   ClickEffect;         // SpellID of special effect
-			/*0268*/ uint16   Classes;          // Classes that can use this item
-			/*0270*/ uint8    unknown0270[2];   // ***Placeholder
-			/*0272*/ uint16   Races;            // Races that can use this item
-			/*0274*/ int8     unknown0274[2];   // ***Placeholder
-			/*0276*/ int8     Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)			
+			/*0255*/ int8      EffectLevel1;           // Casting level
+			/*0256*/ uint8     Material;         // Material?
+			/*0257*/ uint8     unknown0257[3];   // ***Placeholder
+			/*0260*/ uint32    Color;            // Amounts of RGB in original color
+			/*0264*/ uint16    Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
+			/*0266*/ uint16    Effect1;         // SpellID of special effect
+			/*0268*/ uint16    Classes;          // Classes that can use this item
+			/*0270*/ uint8     unknown0270[2];   // ***Placeholder
+			/*0272*/ uint16    Races;            // Races that can use this item
+			/*0274*/ int8      unknown0274[2];   // ***Placeholder
+			/*0276*/ int8      Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)			
 		} common; 
 		struct
 		{
@@ -949,16 +949,13 @@ struct Item_Struct
 			/*0273*/ uint8    unknown0275[4];     // ***Placeholder
 		} container;
 	};
-	/*0277*/ uint8    Clicklevel2;            // Casting level
-	union
-	{
-		/*0278*/ int8    Charges;         // Number of charges (-1 = unlimited)
-		/*0278*/ int8    StackSize;          // Number of items in stack
-	};
-	/*0279*/ int8     ProcType;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
-	/*0281*/ uint16   ProcEffect;         // spellId of special effect
-	/*0282*/ uint8    unknown0282[10]; // ***Placeholder 0288
-	/*0292*/ uint32   CastTime_;        // Cast time of clicky item in miliseconds
+	/*0277*/ uint8    EffectLevel2;            // Casting level
+	/*0278*/ int8     Charges;         // Number of charges (-1 = unlimited)
+	/*0279*/ int8     EffectType2;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
+	/*0280*/ uint16   Effect2;         // spellId of special effect
+	/*0282*/ uint8    unknown0282[6]; // ***Placeholder 0288
+	/*0288*/ float    SellRate;
+	/*0292*/ uint32   CastTime;        // Cast time of clicky item in miliseconds
 	/*0296*/ uint8    unknown0296[16]; // ***Placeholder
 	/*0312*/ uint16   SkillModType;
 	/*0314*/ int16    SkillModValue;
@@ -985,6 +982,16 @@ struct PlayerItemsPacket_Struct {
 struct PlayerItems_Struct {
 /*000*/	int16		count;
 /*002*/	struct PlayerItemsPacket_Struct	packets[0];
+};
+
+struct MerchantItemsPacket_Struct {
+	uint16 itemtype;
+	struct Item_Struct	item;
+};
+
+struct MerchantItems_Struct {
+/*000*/	int16		count;	
+/*002*/	struct MerchantItemsPacket_Struct packets[0];
 };
 
 /*
@@ -1264,8 +1271,12 @@ struct TimeOfDay_Struct
 struct Merchant_Click_Struct {
 /*000*/ uint16	npcid;			// Merchant NPC's entity id
 /*002*/ uint16	playerid;
-		uint8   command;
-/*004*/ uint8	unknown[7]; /*
+/*004*/	uint8   command;
+/*005*/ uint8	unknown[3];
+/*008*/ float   rate;
+};
+
+/*
 0 is e7 from 01 to // MAYBE SLOT IN PURCHASE
 1 is 03
 2 is 00
@@ -1284,8 +1295,8 @@ struct Merchant_Click_Struct {
 00 90
 00 3F
 */
-};			
-struct Merchant_Purchase_Struct {
+	
+struct Merchant_Sell_Struct {
 /*000*/	uint16	npcid;			// Merchant NPC's entity id
 /*002*/	uint16	playerid;		// Player's entity id
 /*004*/	uint16	itemslot;
@@ -1296,7 +1307,8 @@ struct Merchant_Purchase_Struct {
 /*009*/	uint8	unknown003;
 /*010*/	uint8	unknown004;
 /*011*/	uint8	unknown005;
-/*012*/	int32  itemcost;
+		uint16  unknown00;
+/*012*/	int16   price;
 };
 
 struct Item_Shop_Struct {
@@ -1326,26 +1338,22 @@ struct Merchant_DelItem_Struct{
 // Size: 72 Bytes
 // OpCode: 9120
 // Notes: Fucking finally... ;p
-struct Illusion_Struct 
-{ 
-/*0000*/ char   name[16];
-/*0016*/ uint8	unknown1[4]; // usually 00 00 00 00
-/*0020*/ uint8	unknown2[4]; // dictated by packet, maybe zone but got 00 00 00 00 in grobb
-/*0024*/ uint8	unknown3[4];
-/*0028*/ uint8	unknown4[2];
-/*0030*/ char	target[16];
-/*0046*/ uint8	unknown5[2];
-/*0048*/ uint16	jackbauer; //always 24
-/*0050*/ uint16	unknown7;
-/*0052*/ uint16  unknown8;
-/*0054*/ uint16	unknown9; //00 00
-/*0056*/ uint8	unknown10[4];
-/*0060*/ uint8	unknown11[2];
-/*0062*/ uint16	race; // 01 = human 02 = barbarian, etc
-/*0064*/ uint16	gender; // 00 = male 01 = female 02 = neuter, 02 is default if nothing is entered.
-/*0066*/ uint16	texture; // 00 = cloth 01 = leather FF = default
-/*0068*/ uint16	helm; // 00 = cloth 01 = leather FF = default
-/*0070*/ uint16	face; // 00 = cloth 01 = leather FF = default
+struct Illusion_Struct {
+/*000*/	int16	spawnid;
+/*002*/	int16	race;
+/*004*/	int8	gender;
+/*005*/ int8	texture;
+/*006*/	int8	helmtexture;
+/*007*/ int8	unknown_26; //Always 26
+/*008*/	int8	haircolor;
+/*009*/	int8	beardcolor;
+/*010*/	int8	eyecolor1; // the eyecolors always seem to be the same, maybe left and right eye?
+/*011*/	int8	eyecolor2;
+/*012*/	int8	hairstyle;
+/*013*/	int8	title; //Face Overlay? (barbarian only)
+/*014*/	int8	face; // and beard
+/*015*/ int8	unknown015;
+/*016*/ int32	unknown016; // Always 0xFFFFFFFF it seems.
 };
 
 struct CPlayerItems_packet_Struct 

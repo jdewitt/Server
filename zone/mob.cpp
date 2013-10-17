@@ -4379,16 +4379,6 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 	}
 }
 
-void Mob::RemoveNimbusEffect(int effectid)
-{
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
-	RemoveNimbusEffect_Struct* rne = (RemoveNimbusEffect_Struct*)outapp->pBuffer;
-	rne->spawnid = GetID();
-	rne->nimbus_effect = effectid;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
-}
-
 bool Mob::IsBoat() const {
 	return (race == 72 || race == 73 || race == 114 || race == 404 || race == 550 || race == 551 || race == 552);
 }

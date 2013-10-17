@@ -991,6 +991,11 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[npcid];
 	std::list<TempMerchantList>::iterator tmp_itr;
 
+	uint32 size = 0;
+	uint16 m = 0;
+	std::map<uint16, std::string> ser_items;
+	std::map<uint16, std::string>::iterator mer_itr;
+
 	uint32 i=1;
 	uint8 handychance = 0;
 	for(itr = merlist.begin();itr != merlist.end() && i<numItemSlots;itr++){
@@ -1029,8 +1034,21 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				else
 					inst->SetCharges(1);
 
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
-				safe_delete(inst);
+				if(GetClientVersion() == EQClientMac)
+				{
+					if(inst) 
+					{
+						std::string packet = inst->Serialize(ml.slot-1);
+						ser_items[m++] = packet;
+						size += packet.length();
+						_log(ZONE__INIT, "Got merchant item # %i", m);
+					}
+				}
+				else
+				{
+					SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+					safe_delete(inst);
+				}
 			}
 		}
 		// Account for merchant lists with gaps.
@@ -1066,8 +1084,21 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					inst->SetCharges(item->MaxCharges);//inst->SetCharges(charges);
 				else
 					inst->SetCharges(1);
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
-				safe_delete(inst);
+				if(GetClientVersion() == EQClientMac)
+				{
+					if(inst) 
+					{
+						std::string packet = inst->Serialize(ml.slot-1);
+						ser_items[m++] = packet;
+						size += packet.length();
+						_log(ZONE__INIT, "Got merchant item # %i", m);
+					}
+				}
+				else
+				{
+					SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+					safe_delete(inst);
+				}
 			}
 		}
 		tmp_merlist.push_back(ml);
@@ -1105,6 +1136,21 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
 
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, size);
+		uchar* ptr = outapp->pBuffer;
+		for(mer_itr = ser_items.begin(); mer_itr != ser_items.end(); mer_itr++){
+			int length = mer_itr->second.length();
+			if(length > 5) {
+				memcpy(ptr, mer_itr->second.c_str(), length);
+				ptr += length;
+			}
+		}
+		_log(ZONE__INIT, "Client is sending inventory packet to OP_MerchantItemPacket.");
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 //		safe_delete_array(cpi);
 }
 
