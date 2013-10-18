@@ -203,6 +203,7 @@ struct Item_Struct {
 	bool	NoPet;
 	bool	PotionBelt;
 	bool	Stackable;
+	int8	Stackable_; //Stackable is not a bool on EQMac
 	bool	NoTransfer;
 	bool	QuestItemFlag;
 	int16	StackSize;

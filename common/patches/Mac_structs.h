@@ -889,7 +889,12 @@ struct Item_Struct
 	/*0186*/ uint8     unknown0186[2];   // Equip slot cont.?
 	/*0188*/ uint32    Slots;  // Slots where this item goes
 	/*0192*/ int32     Price;            // Item cost in copper
-	/*0196*/ uint8     unknown0196[32]; // ***Placeholder
+	/*0196*/ uint8     unknown0196[16]; // ***Placeholder
+	/*0212*/ uint8	   unknown0212; //8a
+	/*0213*/ uint8	   unknown0213; //26
+	/*0214*/ int16     unknown0214;
+	/*0216*/ uint8     unknown0216; // 01
+	/*0217*/ uint8     unknown217[11];
 	union
 	{
 		struct
@@ -953,7 +958,9 @@ struct Item_Struct
 	/*0278*/ int8     Charges;         // Number of charges (-1 = unlimited)
 	/*0279*/ int8     EffectType2;      // 0=combat, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check, -1=no effect
 	/*0280*/ uint16   Effect2;         // spellId of special effect
-	/*0282*/ uint8    unknown0282[6]; // ***Placeholder 0288
+	/*0282*/ int8     unknown0282; //FF
+	/*0283*/ int8     unknown0283; //FF
+	/*0284*/ uint8    unknown0284[4]; // ***Placeholder 0288
 	/*0288*/ float    SellRate;
 	/*0292*/ uint32   CastTime;        // Cast time of clicky item in miliseconds
 	/*0296*/ uint8    unknown0296[16]; // ***Placeholder

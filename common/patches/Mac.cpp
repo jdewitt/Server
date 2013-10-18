@@ -1064,6 +1064,11 @@ ENCODE(OP_ItemPacket) {
 		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
 		myitem->ReqLevel = item->GetItem()->ReqLevel; 
 		myitem->FocusEffect = item->GetItem()->Focus.Effect;
+		/*myitem->unknown0212=0x8a;
+		myitem->unknown0213=0x26;
+		myitem->unknown0216=0x01;
+		myitem->unknown0282=0xFF;
+		myitem->unknown0283=0xFF;*/
 
 		if(item->GetItem()->ItemClass == 1){
 			myitem->container.BagType = item->GetItem()->BagType; 
@@ -1105,7 +1110,7 @@ ENCODE(OP_ItemPacket) {
 		myitem->common.Deity = item->GetItem()->Deity;   
 		myitem->common.Classes = item->GetItem()->Classes;  
 		myitem->common.Races = item->GetItem()->Races;  
-		myitem->common.Stackable = item->GetItem()->Stackable; 
+		myitem->common.Stackable = item->GetItem()->Stackable_; 
 		}
 		if(item->GetItem()->Click.Effect > 0){
 			myitem->common.Effect1 = item->GetItem()->Click.Effect;
@@ -1234,6 +1239,11 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
+		/*pi->packets[r].item.unknown0212=0x8a;
+		pi->packets[r].item.unknown0213=0x26;
+		pi->packets[r].item.unknown0216=0x01;
+		pi->packets[r].item.unknown0282=0xFF;
+		pi->packets[r].item.unknown0283=0xFF;*/
 
 		if(sm_item->GetItem()->ItemClass == 1){
 			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
@@ -1275,7 +1285,7 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.common.Deity = sm_item->GetItem()->Deity;   
 		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
 		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
-		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable; 
+		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable_; 
 		}
 		if(sm_item->GetItem()->Click.Effect > 0){
 			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Click.Effect;
@@ -1405,6 +1415,11 @@ ENCODE(OP_ShopInventoryPacket)
 		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
+		/*pi->packets[r].item.unknown0212=0x8a;
+		pi->packets[r].item.unknown0213=0x26;
+		pi->packets[r].item.unknown0216=0x01;
+		pi->packets[r].item.unknown0282=0xFF;
+		pi->packets[r].item.unknown0283=0xFF;*/
 
 		if(sm_item->GetItem()->ItemClass == 1){
 			pi->packets[r].item.container.BagType = sm_item->GetItem()->BagType; 
@@ -1446,7 +1461,7 @@ ENCODE(OP_ShopInventoryPacket)
 		pi->packets[r].item.common.Deity = sm_item->GetItem()->Deity;   
 		pi->packets[r].item.common.Classes = sm_item->GetItem()->Classes;  
 		pi->packets[r].item.common.Races = sm_item->GetItem()->Races;  
-		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable; 
+		pi->packets[r].item.common.Stackable = sm_item->GetItem()->Stackable_; 
 		}
 		if(sm_item->GetItem()->Click.Effect > 0){
 			pi->packets[r].item.common.Effect1 = sm_item->GetItem()->Click.Effect;
@@ -1534,6 +1549,31 @@ DECODE(OP_MoveItem)
 
 	IN(number_in_stack);
 	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_DeleteItem) {  ENCODE_FORWARD(OP_MoveItem); }
+ENCODE(OP_DeleteCharge) {  ENCODE_FORWARD(OP_MoveItem); }
+ENCODE(OP_MoveItem)
+{
+	ENCODE_LENGTH_EXACT(MoveItem_Struct);
+	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+
+	if(emu->to_slot == 30)
+		eq->to_slot=0;
+	else if((emu->to_slot >= 251 && emu->to_slot <= 330) || (emu->to_slot >= 2031 && emu->to_slot <= 2110)) 
+		eq->to_slot = emu->to_slot-1;
+	else
+		eq->to_slot=emu->to_slot;
+
+	if(emu->from_slot == 30)
+		eq->from_slot=0;
+	else if((emu->from_slot >= 251 && emu->from_slot <= 330) || (emu->from_slot >= 2031 && emu->from_slot <= 2110)) 
+		eq->from_slot = emu->from_slot-1;
+	else
+		eq->from_slot=emu->from_slot;
+
+	OUT(number_in_stack);
+	FINISH_ENCODE();
 }
 
 ENCODE(OP_Stamina)
