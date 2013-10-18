@@ -1685,10 +1685,13 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 void Client::OPGMEndTraining(const EQApplicationPacket *app)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
-	GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
+	//if(GetClientVersion() > EQClientMac)
+	//{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
+		GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
 
-	FastQueuePacket(&outapp);
+		FastQueuePacket(&outapp);
+	//}
 
 	Mob* pTrainer = entity_list.GetMob(p->npcid);
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
@@ -2264,7 +2267,7 @@ void Client::ClearHover()
 	FillSpawnStruct(&sze->player,CastToMob());
 
 	sze->player.spawn.NPC = 0;
-	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);

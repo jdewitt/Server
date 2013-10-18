@@ -1513,9 +1513,9 @@ struct TradeCoin_Struct{
 	uint32	amount;
 };
 struct TradeMoneyUpdate_Struct{
-	uint32	trader;
-	uint32	type;
-	uint32	amount;
+	uint16	trader;
+	uint16	type;
+	int32	amount;
 };
 /*
 ** Surname struct

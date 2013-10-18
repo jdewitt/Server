@@ -1319,17 +1319,15 @@ struct Merchant_Sell_Struct {
 };
 
 struct Item_Shop_Struct {
-	uint16 merchantid;
 	uint8 itemtype;
 	Item_Struct item;
-	uint8 iss_unknown001[6];
 };
 
 struct Merchant_DelItem_Struct{
-/*000*/	uint32	npcid;			// Merchant NPC's entity id
-/*004*/	uint32	playerid;		// Player's entity id
-/*008*/	uint8	itemslot;       // Slot of the item you want to remove
-/*009*/	uint8	unknown[3];
+/*000*/	uint16	npcid;			// Merchant NPC's entity id
+/*002*/	uint16	playerid;		// Player's entity id
+/*006*/	uint8	itemslot;       // Slot of the item you want to remove
+/*007*/	uint8	unknown007;     // 0x40
 };
 
  struct ItemToTrade_Struct { 
@@ -1670,7 +1668,7 @@ struct GMTrainee_Struct{
 
 struct GMTrainEnd_Struct {
 	/*000*/ int16 npcid;
-	/*002*/ int16 unknown;
+	/*002*/ int16 playerid;
 };
 
 struct GMSkillChange_Struct {

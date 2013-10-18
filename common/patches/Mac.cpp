@@ -207,7 +207,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT_array(languages, 26);
 	OUT(x);
 	OUT(y);
-	OUT(z);
+	eq->z=emu->z*10;
 	OUT(heading);
 	OUT(platinum_bank);
 	OUT(gold_bank);
@@ -476,7 +476,7 @@ ENCODE(OP_ClientUpdate)
 	eq->x_pos = (int16)emu->y_pos;
 	OUT(delta_x);
 	OUT(delta_y);
-	OUT(z_pos);
+	eq->z_pos=emu->z_pos*10;
 	OUT(delta_heading);
 	eq->y_pos = (int16)emu->x_pos;
 	OUT(delta_z);
@@ -492,7 +492,7 @@ DECODE(OP_ClientUpdate)
 //	IN(sequence);
 	emu->x_pos = (int16)eq->y_pos;
 	emu->y_pos = (int16)eq->x_pos;
-	emu->z_pos = (int16)eq->z_pos;
+	emu->z_pos = (int16)eq->z_pos/10;
 	emu->heading = (uint8)eq->heading;
 	IN(delta_x);
 	IN(delta_y);
@@ -994,6 +994,7 @@ DECODE(OP_GMEndTraining) {
 	DECODE_LENGTH_EXACT(structs::GMTrainEnd_Struct);
 	SETUP_DIRECT_DECODE(GMTrainEnd_Struct, structs::GMTrainEnd_Struct);
 	IN(npcid);
+	IN(playerid);
 	FINISH_DIRECT_DECODE();
 }
 
@@ -1672,7 +1673,7 @@ ENCODE(OP_ShopRequest)
 {
 	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-	OUT(npcid);
+	eq->npcid=emu->npcid;
 	OUT(playerid);
 	OUT(command);
 	//eq->unknown[0] = 0xD4;
@@ -1686,7 +1687,7 @@ DECODE(OP_ShopRequest)
 {
 	DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
 	SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-	IN(npcid);
+	emu->npcid=eq->npcid;
 	IN(playerid);
 	IN(command);
 	IN(rate);
@@ -1698,7 +1699,7 @@ DECODE(OP_ShopPlayerBuy)
 {
 	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
 	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-	IN(npcid);
+	emu->npcid=eq->npcid;
 	IN(playerid);
 	IN(itemslot);
 	IN(quantity);
@@ -1711,11 +1712,11 @@ ENCODE(OP_ShopPlayerBuy)
 {
 	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-	OUT(npcid);
-	OUT(playerid);
+	eq->npcid=emu->npcid;
+	eq->playerid=emu->playerid;
 	OUT(itemslot);
 	OUT(quantity);
-	eq->price=0;
+	OUT(price);
 	FINISH_ENCODE();
 }
 
@@ -1723,7 +1724,7 @@ ENCODE(OP_ShopDelItem)
 {
 	ENCODE_LENGTH_EXACT(Merchant_DelItem_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_DelItem_Struct, structs::Merchant_DelItem_Struct);
-	OUT(npcid);
+	eq->npcid=emu->npcid;
 	OUT(playerid);
 	OUT(itemslot);
 	FINISH_ENCODE();

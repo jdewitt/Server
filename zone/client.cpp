@@ -2081,6 +2081,8 @@ void Client::SendClientMoneyUpdate(uint8 type,uint32 amount){
 	mus->amount=amount;
 	mus->trader=0;
 	mus->type=type;
+	LogFile->write(EQEMuLog::Debug, "Client::SendClientMoneyUpdate() %s added %i coin of type: %i.",
+			GetName(), amount, type);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -2184,9 +2186,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.platinum = m_pp.platinum + tmp2;
 	}
 	tmp-=tmp2*1000;
-
-	//if (updateclient)
-	//	SendClientMoneyUpdate(3,tmp2);
+	if (updateclient && GetClientVersion() == EQClientMac)
+		SendClientMoneyUpdate(3,tmp2);
 
 	// Add Amount of Gold
 	tmp2 = tmp/100;
@@ -2197,8 +2198,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.gold = m_pp.gold + tmp2;
 	}
 	tmp-=tmp2*100;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(2,tmp2);
+	if (updateclient && GetClientVersion() == EQClientMac)
+		SendClientMoneyUpdate(2,tmp2);
 
 	// Add Amount of Silver
 	tmp2 = tmp/10;
@@ -2209,8 +2210,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.silver = m_pp.silver + tmp2;
 	}
 	tmp-=tmp2*10;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(1,tmp2);
+	if (updateclient && GetClientVersion() == EQClientMac)
+		SendClientMoneyUpdate(1,tmp2);
 
 	// Add Copper
 	//tmp	= tmp - (tmp2* 10);
@@ -2223,7 +2224,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	} else {
 		m_pp.copper = m_pp.copper + tmp2;
 	}
-
+	if (updateclient && GetClientVersion() == EQClientMac)
+		SendClientMoneyUpdate(0,tmp2);
 
 	//send them all at once, since the above code stopped working.
 	if(updateclient)
@@ -2241,18 +2243,26 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	int32 new_value = m_pp.platinum + platinum;
 	if(new_value >= 0 && new_value > m_pp.platinum)
 		m_pp.platinum += platinum;
+		if (updateclient && GetClientVersion() == EQClientMac)
+			SendClientMoneyUpdate(3,platinum);
 
 	new_value = m_pp.gold + gold;
 	if(new_value >= 0 && new_value > m_pp.gold)
 		m_pp.gold += gold;
+		if (updateclient && GetClientVersion() == EQClientMac)
+			SendClientMoneyUpdate(2,gold);
 
 	new_value = m_pp.silver + silver;
 	if(new_value >= 0 && new_value > m_pp.silver)
 		m_pp.silver += silver;
+		if (updateclient && GetClientVersion() == EQClientMac)
+			SendClientMoneyUpdate(1,silver);
 
 	new_value = m_pp.copper + copper;
 	if(new_value >= 0 && new_value > m_pp.copper)
 		m_pp.copper += copper;
+		if (updateclient && GetClientVersion() == EQClientMac)
+			SendClientMoneyUpdate(0,copper);
 
 	if(updateclient)
 		SendMoneyUpdate();
@@ -2267,15 +2277,18 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 }
 
 void Client::SendMoneyUpdate() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyUpdate,sizeof(MoneyUpdate_Struct));
-	MoneyUpdate_Struct* mus= (MoneyUpdate_Struct*)outapp->pBuffer;
 
-	mus->platinum = m_pp.platinum;
-	mus->gold = m_pp.gold;
-	mus->silver = m_pp.silver;
-	mus->copper = m_pp.copper;
+	if(GetClientVersion() > EQClientMac){
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyUpdate,sizeof(MoneyUpdate_Struct));
+		MoneyUpdate_Struct* mus= (MoneyUpdate_Struct*)outapp->pBuffer;
 
-	FastQueuePacket(&outapp);
+		mus->platinum = m_pp.platinum;
+		mus->gold = m_pp.gold;
+		mus->silver = m_pp.silver;
+		mus->copper = m_pp.copper;
+
+		FastQueuePacket(&outapp);
+	}
 }
 
 bool Client::HasMoney(uint64 Copper) {
