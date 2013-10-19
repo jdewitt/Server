@@ -140,16 +140,17 @@ struct CharacterSelect_Struct
 /*0730*/	uint8	face[10];			// Characters Face Type
 /*0740*/	uint32	equip[10][9];		// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
 /*1100*/	Color_Struct cs_colors[10][9];	// Characters Equipment Colors (RR GG BB 00)
-/*1480*/	uint32	deity[10];			// Characters Deity
-/*1520*/	uint32	primary[10];		// Characters primary and secondary IDFile number
+/*1460*/	uint16	deity[10];			// Characters Deity
+/*1480*/	uint32	primary[10];		// Characters primary and secondary IDFile number
 /*1520*/	uint32	secondary[10];		// Characters primary and secondary IDFile number
-/*1600*/	uint8	beard[10];	// vesuvias - found values
-/*1610*/	uint8	beardcolor[10];
-/*1620*/	uint8	eyecolor2[10];
-/*1630*/	uint8	eyecolor1[10];
-/*1640*/	uint8	hairstyle[10];
-/*1650*/	uint8	haircolor[10];
-///*1460*/	uint8	cs_unknown[160];	// ***Placeholder
+/*1560*/	uint8	haircolor[10]; 
+/*1570*/	uint8	beardcolor[10];	
+/*1580*/	uint8	eyecolor1[10]; 
+/*1590*/	uint8	eyecolor2[10]; 
+/*1600*/	uint8	hairstyle[10]; 
+/*1610*/	uint8	beard[10];
+
+
 };
 
 //Tazadar : This is used to show weapons on char select screen
@@ -419,8 +420,7 @@ struct Spawn_Struct
 /*0024*/	float	size;
 /*0028*/	float	walkspeed;
 /*0032*/	float	runspeed;
-/*0036*/	Color_Struct	equipcolors[7];
-/*0064*/	uint8	unknown0064[8];
+/*0036*/	Color_Struct	equipcolors[MAX_MATERIALS];
 /*0072*/	uint16	spawn_id;			// Id of new spawn
 /*0074*/	uint8	bodytype;			// 65 is disarmable trap, 66 and 67 are invis triggers/traps
 /*0075*/	uint8	unknown0075;
@@ -445,11 +445,11 @@ struct Spawn_Struct
 /*0097*/	uint8	texture;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
 /*0098*/	uint8	helm;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
 /*0099*/	uint8	s_unknown0099;		// used to be s_unknown5[2]
-/*0100*/	uint16	equipment[9];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
+/*0100*/	uint16	equipment[MAX_MATERIALS];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
 /*0118*/	int8	guildrank;			// ***Placeholder
 /*0119*/	uint8	unknown0207;
 /*0120*/	uint16	deity;				// Deity.
-/*0122*/	uint8	unknown122;			// ***Placeholder
+/*0122*/	uint8	unknown0122;			// ***Placeholder
 /*0123*/	char	name[64];			// Name of spawn (len is 30 or less)
 /*0187*/	char	Surname[20];		// Last Name of player
 /*0207*/	uint8	haircolor;
@@ -1308,14 +1308,11 @@ struct Merchant_Sell_Struct {
 /*002*/	uint16	playerid;		// Player's entity id
 /*004*/	uint16	itemslot;
 /*006*/	uint8	IsSold;		// Already sold
-/*007*/	uint8	unknown001;	// always 0x0b, 0x7c, 0x00 ??
-//		uint8	unknown002;  On live, it looks like it is only 16 bytes now and quanity is put at byte 9 (Hogie on 12/29/2002)
-/*008*/	uint8	quantity;		// Qty - when used in Merchant_Purchase_Struct
-/*009*/	uint8	unknown003;
-/*010*/	uint8	unknown004;
-/*011*/	uint8	unknown005;
-		uint16  unknown00;
-/*012*/	int16   price;
+/*007*/	uint8	unknown001;
+/*008*/	uint8	quantity;	// Qty - when used in Merchant_Purchase_Struct
+/*009*/	uint8	unknown004[3];
+/*010*/	uint16  price;
+/*012*/ uint8	unknown014[2];
 };
 
 struct Item_Shop_Struct {

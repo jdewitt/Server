@@ -627,7 +627,7 @@ ENCODE(OP_ZoneSpawns){
 
 		eq->texture = emu->equip_chest2;
 //		eq->unknown0194[3] = emu->unknown0194[3];
-		for(k = 0; k < 7; k++) {
+		for(k = 0; k < 9; k++) {
 			eq->equipment[k] = emu->equipment[k];
 			eq->equipcolors[k].color = emu->colors[k].color;
 		}
@@ -667,6 +667,7 @@ ENCODE(OP_ZoneSpawns){
 		eq->spawn_id = emu->spawnId;
 //		eq->unknown0344[4] = emu->unknown0344[4];
 		//eq->lfg = emu->lfg;
+		eq->luclinface = emu->face;
 
 		/*
 		if (emu->face == 99)	      {eq->face = 0;}
@@ -1065,7 +1066,7 @@ ENCODE(OP_ItemPacket) {
 		myitem->ElemDmgAmt = item->GetItem()->ElemDmgAmt;
 		myitem->ReqLevel = item->GetItem()->ReqLevel; 
 		myitem->FocusEffect = item->GetItem()->Focus.Effect;
-		/*myitem->unknown0212=0x8a;
+	/*	myitem->unknown0212=0x8a;
 		myitem->unknown0213=0x26;
 		myitem->unknown0216=0x01;
 		myitem->unknown0282=0xFF;
@@ -1240,7 +1241,7 @@ ENCODE(OP_CharInventory){
 		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
-		/*pi->packets[r].item.unknown0212=0x8a;
+	/*	pi->packets[r].item.unknown0212=0x8a;
 		pi->packets[r].item.unknown0213=0x26;
 		pi->packets[r].item.unknown0216=0x01;
 		pi->packets[r].item.unknown0282=0xFF;
@@ -1399,7 +1400,7 @@ ENCODE(OP_ShopInventoryPacket)
 		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
 		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
 		pi->packets[r].item.Price = sm_item->GetPrice(); 
-		if(sm_item->GetMerchantCount() > 0)
+		if(sm_item->GetMerchantCount() > 25)
 			pi->packets[r].item.Charges = sm_item->GetMerchantCount();    
 		else
 			pi->packets[r].item.Charges = -1;    
@@ -1416,7 +1417,7 @@ ENCODE(OP_ShopInventoryPacket)
 		pi->packets[r].item.ElemDmgAmt = sm_item->GetItem()->ElemDmgAmt;
 		pi->packets[r].item.ReqLevel = sm_item->GetItem()->ReqLevel; 
 		pi->packets[r].item.FocusEffect = sm_item->GetItem()->Focus.Effect;
-		/*pi->packets[r].item.unknown0212=0x8a;
+	/*	pi->packets[r].item.unknown0212=0x8a;
 		pi->packets[r].item.unknown0213=0x26;
 		pi->packets[r].item.unknown0216=0x01;
 		pi->packets[r].item.unknown0282=0xFF;
