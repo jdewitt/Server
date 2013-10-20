@@ -944,6 +944,7 @@ ENCODE(OP_Action) {
 	FINISH_ENCODE();
 }
 
+DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 DECODE(OP_Consider) {
 	DECODE_LENGTH_EXACT(structs::Consider_Struct);
 	SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
@@ -1021,6 +1022,8 @@ ENCODE(OP_ItemPacket) {
 			outapp->SetOpcode(OP_SummonedItem);
 		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
 			outapp->SetOpcode(OP_TradeItemPacket);
+		else if(old_item_pkt->PacketType == ItemPacketLoot)
+			outapp->SetOpcode(OP_LootItemPacket);
 		else if(item->GetItem()->ItemClass == 1)
 			outapp->SetOpcode(OP_ContainerPacket);
 		else if(item->GetItem()->ItemClass == 2)
@@ -1597,6 +1600,17 @@ ENCODE(OP_HPUpdate)
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_MobHealth)
+{
+	ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct2);
+	SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct2, structs::SpawnHPUpdate_Struct);
+	OUT(spawn_id);
+	eq->cur_hp=emu->hp;
+	eq->max_hp=100;
+	FINISH_ENCODE();
+}
+
+
 DECODE(OP_Consume) 
 {
 	DECODE_LENGTH_EXACT(structs::Consume_Struct);
@@ -1729,6 +1743,49 @@ ENCODE(OP_ShopDelItem)
 	OUT(playerid);
 	OUT(itemslot);
 	FINISH_ENCODE();
+}
+
+ENCODE(OP_Animation)
+{
+	ENCODE_LENGTH_EXACT(Animation_Struct);
+	SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
+	OUT(spawnid);
+	OUT(action);
+	eq->a_unknown[5]=0x80;
+	eq->a_unknown[6]=0x3F;
+	FINISH_ENCODE();
+}
+
+DECODE(OP_Animation)
+{
+	DECODE_LENGTH_EXACT(structs::Animation_Struct);
+	SETUP_DIRECT_DECODE(Animation_Struct, structs::Animation_Struct);
+	IN(spawnid);
+	IN(action);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_LootItem) {
+
+	ENCODE_LENGTH_EXACT(LootingItem_Struct);
+	SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
+	OUT(lootee);
+	OUT(looter);
+	OUT(slot_id);
+	OUT(auto_loot);
+
+	FINISH_ENCODE();
+}
+
+DECODE(OP_LootItem) {
+	DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
+	SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
+	IN(lootee);
+	IN(looter);
+	IN(slot_id);
+	IN(auto_loot);
+
+	FINISH_DIRECT_DECODE();
 }
 
 /*ENCODE(OP_FormattedMessage)

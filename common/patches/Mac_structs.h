@@ -667,11 +667,11 @@ struct ZoneChange_Struct {
 /*073*/	uint8	error[3]; // =0 ok, =ffffff error
 };
 
-struct Attack_Struct
+struct Animation_Struct
 {
-/*00*/ uint32   spawn_id;		// Comment: Spawn ID
-/*04*/ uint8    type;			// Comment: 
-/*05*/ uint8    a_unknown2[7];	// Comment: ***Placeholder};
+/*00*/ uint32   spawnid;		// Comment: Spawn ID
+/*04*/ uint8    action;			// Comment: 
+/*05*/ uint8    a_unknown[7];	// Comment: ***Placeholder};
 };
 
 struct Consider_Struct
@@ -1106,11 +1106,11 @@ struct ItemOnCorpse_Struct
 
 struct LootingItem_Struct 
 {
-/*000*/	uint32	lootee;			// Comment: 
-/*002*/	uint32	looter;			// Comment: 
+/*000*/	uint16	lootee;			// Comment: 
+/*002*/	uint16	looter;			// Comment: 
 /*004*/	uint16	slot_id;		// Comment: 
 /*006*/	uint8	unknown3[2];	// Comment: 
-/*008*/	uint32	type;			// Comment: 
+/*008*/	uint32	auto_loot;			// Comment: 
 };
 
 

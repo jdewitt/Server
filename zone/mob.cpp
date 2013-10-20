@@ -1289,14 +1289,15 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
-	if(type == 0){
+
+	/*if(type == 0){
 		anim->action = 10;
 		anim->value=animnum;
 	}
-	else{
+	else{*/
 		anim->action = animnum;
 		anim->value=type;
-	}
+	//}
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
 	safe_delete(outapp);
 }

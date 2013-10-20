@@ -3696,9 +3696,19 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 
 void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(uint32)) {
-		std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
-		return;
+	if(GetClientVersion() > EQClientMac)
+	{
+		if (app->size != sizeof(uint32)) {
+			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
+			return;
+		}
+	}
+	else
+	{
+		if (app->size != sizeof(uint16)) {
+			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint16) << std::endl;
+			return;
+		}
 	}
 
 	SetLooting(false);
@@ -3725,11 +3735,22 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(uint32)) {
-		std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
-		return;
+	LogFile->write(EQEMuLog::Debug, "Hit Handle_OP_LootRequest");
+	if(GetClientVersion() > EQClientMac)
+	{
+		if (app->size != sizeof(uint32)) {
+			std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
+			return;
+		}
 	}
-
+	else
+	{
+		if (app->size != sizeof(uint16)) {
+			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint16) << std::endl;
+			return;
+		}
+	}
+	
 	SetLooting(true);
 
 	Entity* ent = entity_list.GetID(*((uint32*)app->pBuffer));

@@ -1117,7 +1117,7 @@ public:
 	uint8 GetNumMercs();
 	void SetMerc(Merc* newmerc);
 	void SendMercMerchantResponsePacket(int32 response_type);
-	void SendMercenaryUnknownPacket(uint8 type);
+	//void SendMercenaryUnknownPacket(uint8 type);
 	void SendMercenaryUnsuspendPacket(uint8 type);
 	void SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspended_time, int32 update_interval = 900000, int32 unk01 = 180000);
 	void SendMercSuspendResponsePacket(uint32 suspended_time);

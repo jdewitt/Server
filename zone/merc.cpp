@@ -5540,7 +5540,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		mercOwner->GetMercInfo().IsSuspended = false;
 
 		mercOwner->SendMercenaryUnsuspendPacket(0);
-		mercOwner->SendMercenaryUnknownPacket(1);
+	//	mercOwner->SendMercenaryUnknownPacket(1);
 		mercOwner->GetMercInfo().SuspendedTime = 0;
 		mercOwner->GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));
 		mercOwner->GetMercTimer()->SetTimer(mercOwner->GetMercInfo().MercTimerRemaining);
@@ -5818,11 +5818,11 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 	}
 }
 
-void Client::SendMercenaryUnknownPacket(uint8 type) {
+/*void Client::SendMercenaryUnknownPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-}
+}*/
 
 void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
