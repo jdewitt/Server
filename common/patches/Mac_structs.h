@@ -2311,6 +2311,7 @@ struct OldBindStruct {
 	/*020*/
 };
 
+static const uint32 MAX_PP_AA_ARRAY		= 226;
 struct PlayerProfile_Struct
 {
 #define pp_inventory_size 30
@@ -2392,7 +2393,8 @@ struct PlayerProfile_Struct
 /*3348*/	uint8	autosplit;
 /*3349*/	uint8	unknown3449[95];
 /*3444*/	uint32	current_zone;		// 
-/*3448*/	uint8	unknown3448[336];	// ***Placeholder
+/*3448*/	uint8	aa_array[MAX_PP_AA_ARRAY];
+/*3576*/	uint8	unknown3448[110];	// ***Placeholder
 /*3784*/	uint32	bind_point_zone;	// Lyenu: Bind zone is saved as a int32 now
 /*3788*/	uint32	start_point_zone[4];
 										// Lyenu: Start Point Zones are saved as int32s now
@@ -2418,7 +2420,9 @@ struct PlayerProfile_Struct
 /*4967*/	int8	guildrank;			// Player Guild Rank (0=member, 1=officer, 2=leader)
 /*4968*/	uint8	unknown4760[44];
 /*5012*/	char	groupMembers[6][64];	// Group Members
-/*5396*/	uint8	unknown5124[29];	// ***Placeholder 
+/*5396*/	uint8	unknown5124[24];	// ***Placeholder 
+/*5420*/	uint32	expAA;			
+/*5424*/    uint8	unknown5424;
 /*5425*/	uint8	AAPercent;			// Player AA Percent
 /*5426*/	uint8	haircolor;			// Player Hair Color
 /*5427*/	uint8	beardcolor;			// Player Beard Color
@@ -2428,7 +2432,7 @@ struct PlayerProfile_Struct
 /*5431*/	uint8	beard_t;			// T7g: Beard Type, formerly title - I have no clue why, Title moved a few lines below this one
 /*5432*/	uint8	luclinface;			// Player Face Type (Is that right?)
 /*5433*/	uint8	unknown5225[195];	// ***Placeholder
-/*5628*/	uint32	expAA;				// AA Exp
+/*5628*/	uint32	unknown5628;				// AA Exp
 /*5632*/	uint8	title;				// AA Title
 /*5633*/	uint8	perAA;				// AA Percentage
 /*5634*/	uint32	aapoints;			// AA Points
@@ -2570,6 +2574,31 @@ struct Weather_Struct {
 uint8 bytes[8];
 };
 
+struct AltAdvStats_Struct {
+  int32 experience;
+  int16 unspent;//turning on (percent to 10) giving you 10 points
+  int8	percentage;
+  int8	unknownaas007;
+};
+
+struct AA_Skills {
+	uint8 aa_value;
+};
+
+struct AATable_Struct {
+	uint8 unknown;
+	structs::AA_Skills aa_list[MAX_PP_AA_ARRAY];
+};
+
+struct EnvDamage2_Struct {
+	int16 id;
+	int16 unknown;
+	int8 dmgtype; //FA = Lava; FC = Falling
+	int8 unknown2;
+	int16 constant; //Always FFFF
+	int16 damage;
+	int8 unknown3[14]; //A bunch of 00's...
+};
 
 	};	//end namespace structs
 };	//end namespace MAC

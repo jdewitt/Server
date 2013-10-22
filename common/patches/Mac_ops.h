@@ -69,5 +69,9 @@ E(OP_Animation)
 D(OP_Animation)
 E(OP_LootItem)
 D(OP_LootItem)
+E(OP_AAExpUpdate)
+E(OP_RespondAA)
+E(OP_UpdateAA)
+E(OP_SendAATable)
 #undef E
 #undef D

@@ -387,6 +387,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
+	ConnectedOpcodes[OP_UpdateAA] = &Client::Handle_OP_UpdateAA;
 }
 
 void ClearMappedOpcode(EmuOpcode op) {
@@ -468,6 +469,9 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			char buffer[64];
 			app->build_header_dump(buffer);
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
+
+			char* packet_dump = "unhandled_packets.txt";
+			FileDumpPacketHex(packet_dump, app);
 
 			if(app->size < 1000)
 				DumpPacket(app->pBuffer, app->size);
@@ -639,6 +643,8 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 	if(GetClientVersion() == EQClientMac)
 	{
+		SendAAStats();
+
 		SendNewZone(zone->newzone_data, m_pp.name);
 
 		if(entity_list.SendZoneDoorsBulk(outapp, this))
@@ -726,7 +732,11 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 
 	//Send AA Exp packet:
 	if(GetLevel() >= 51)
+	{
 		SendAAStats();
+		if(GetClientVersion() == EQClientMac)
+			SendAATable();
+	}
 
 	// Send exp packets
 	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
@@ -940,7 +950,40 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 }
 
 void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app) {
+	
 	SendAATable();
+}
+
+void Client::Handle_OP_UpdateAA(const EQApplicationPacket *app) {
+	LogFile->write(EQEMuLog::Debug, "I'm handling Connect_OP_UpdateAA you ass!");
+
+	if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
+	{
+		if(m_epp.perAA == 0)
+			Message_StringID(0, 121); //ON
+		m_epp.perAA = atoi((char *)&app->pBuffer[3]);
+		SendAAStats();
+		SendAATable();
+	}
+	else if(strcmp((char *)app->pBuffer,"off") == 0) 
+	{
+		if(m_epp.perAA > 0)
+			Message_StringID(0, 119); //OFF
+		m_epp.perAA = 0;
+		SendAAStats();
+	}
+	else if(strncmp((char *)app->pBuffer,"buy ",4) == 0) 
+	{
+		int aa = atoi((char *)&app->pBuffer[4]);
+		AA_Action *action = (AA_Action *)app->pBuffer;
+
+		action->ability=atoi((char *)&app->pBuffer[4]);
+		action->action=3;
+		action->exp_value=m_epp.perAA;
+		action->unknown08=0;
+		LogFile->write(EQEMuLog::Debug, "Buying: aaID: %i, action: %i, exp: %i", action->ability, action->action, action->exp_value);
+		BuyAA(action);
+	}
 }
 
 void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
@@ -7801,6 +7844,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		m_epp.perAA = 0;
 		SendAAStats();
 	} else if(action->action == aaActionSetEXP) {
+		_log(ZONE__INIT, "Got precentage: %i", action->exp_value);
 		if(m_epp.perAA == 0)
 			Message_StringID(0, 121);	//121 Alternate Experience is *ON*.
 		m_epp.perAA = action->exp_value;

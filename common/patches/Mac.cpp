@@ -217,6 +217,9 @@ ENCODE(OP_PlayerProfile) {
 //OUT(expansions);
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
+	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
+		eq->aa_array[r] = emu->aa_array[r].value;
+	}
 	//OUT(zoneInstance);
 	for(r = 0; r < 6; r++) {
 		OUT_str(groupMembers[r]);
@@ -1786,6 +1789,32 @@ DECODE(OP_LootItem) {
 	IN(auto_loot);
 
 	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_AAExpUpdate){
+	
+	ENCODE_LENGTH_EXACT(AltAdvStats_Struct);
+	SETUP_DIRECT_ENCODE(AltAdvStats_Struct, structs::AltAdvStats_Struct);
+	OUT(experience);
+	OUT(unspent);
+	OUT(percentage);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_UpdateAA); }
+ENCODE(OP_UpdateAA){
+
+}
+
+ENCODE(OP_RespondAA) {
+	ENCODE_LENGTH_EXACT(AATable_Struct);
+	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
+
+	unsigned int r;
+	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
+		OUT(aa_list[r].aa_value);
+	}
+	FINISH_ENCODE();
 }
 
 /*ENCODE(OP_FormattedMessage)

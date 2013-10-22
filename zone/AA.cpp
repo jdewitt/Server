@@ -993,6 +993,7 @@ void Client::SendAAStats() {
 	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)max_AAXP);
 	aps->unspent = m_pp.aapoints;
 	aps->percentage = m_epp.perAA;
+	LogFile->write(EQEMuLog::Debug, "AA values sent. Exp: %i, Points: %i, Percentage: %i!", aps->experience, aps->unspent, aps->percentage);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -1027,7 +1028,7 @@ void Client::BuyAA(AA_Action* action)
 		return; // Not purchasable racial AAs(set a cost to make them purchasable)
 
 	uint32 cur_level = GetAA(aa2->id);
-	if((aa2->id + cur_level) != action->ability) { //got invalid AA
+	if((aa2->id + cur_level) != action->ability && GetClientVersion() != EQClientMac) { //got invalid AA
 		mlog(AA__ERROR, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
 		return;
 	}
@@ -1063,7 +1064,7 @@ void Client::BuyAA(AA_Action* action)
 			SendAA(aa2->id);
 			SendAA(aa2->sof_next_id);
 		}
-		else
+		else if(GetClientVersionBit() >= 2)
 			SendAA(aa2->id);
 
 		SendAATable();
