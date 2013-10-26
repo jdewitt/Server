@@ -569,19 +569,30 @@ struct Object_Data_Struct{
 };
 
 struct Object_Struct {
-		uint8	unknown001[8];
-		uint32	itemid;	//maybe
-		uint32	dropid;	//this id will be used, if someone clicks on this object
-		uint8	unknown014[128];		// ***Placeholder
-		float	ypos;
-		float	xpos;
-		float	zpos;					// Z Position
-		char	idFile[16];				// ACTOR ID
-		uint16	heading;
-		char	objectname[16];
-		uint16	itemsinbag[10]; //if you drop a bag, thats where the items are
-		uint8	unknowneos[14];
+/*000*/		int8	unknown001[8];
+/*008*/		uint16  itemid;
+/*010*/		uint16  unknown010;
+/*012*/		int32	drop_id;	//this id will be used, if someone clicks on this object
+/*016*/		int16	zone_id;
+/*016*/		uint8   unknown014[6];
+/*024*/		uint8   charges;
+/*025*/		uint8   unknown25;
+/*026*/		uint8   maxcharges;
+/*027*/		uint8	unknown027[113];		// ***Placeholder
+/*140*/		float   heading;
+/*144*/		float	z;
+/*148*/		float	x;
+/*152*/		float	y;					// Z Position
+/*156*/		char	object_name[16];				// ACTOR ID
+/*172*/		int8	unknown172[14];
+/*186*/		int16	itemsinbag[10]; //if you drop a bag, thats where the items are
+/*206*/		int16	unknown206;
+/*208*/		int32	unknown208;
+/*212*/		uint32	object_type;
+/*216*/		int8	unknown216[8];
+/*224*/
 };
+
 struct ClickObject_Struct {
 	uint32	objectID;
 	uint16	PlayerID;

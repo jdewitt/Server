@@ -1817,6 +1817,36 @@ ENCODE(OP_RespondAA) {
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_GroundSpawn) {
+
+	ENCODE_LENGTH_EXACT(Object_Struct);
+	SETUP_DIRECT_ENCODE(Object_Struct, structs::Object_Struct);
+    OUT(drop_id);
+	OUT(zone_id);
+	OUT(heading);
+	OUT(z);
+	OUT(y);
+	OUT(x);
+	strncpy(eq->object_name,emu->object_name,16);
+	OUT(object_type);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_GroundSpawn) {
+	DECODE_LENGTH_EXACT(structs::Object_Struct);
+	SETUP_DIRECT_DECODE(Object_Struct, structs::Object_Struct);
+    IN(drop_id);
+	IN(zone_id);
+	IN(heading);
+	IN(z);
+	IN(y);
+	IN(x);
+	strncpy(emu->object_name,eq->object_name,16);
+	IN(object_type);
+
+	FINISH_DIRECT_DECODE();
+}
+
 /*ENCODE(OP_FormattedMessage)
 {
 	EQApplicationPacket *__packet = *p; 

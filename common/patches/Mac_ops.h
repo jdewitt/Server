@@ -73,5 +73,7 @@ E(OP_AAExpUpdate)
 E(OP_RespondAA)
 E(OP_UpdateAA)
 E(OP_SendAATable)
+E(OP_GroundSpawn)
+D(OP_GroundSpawn)
 #undef E
 #undef D
