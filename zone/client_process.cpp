@@ -858,7 +858,7 @@ void Client::BulkSendInventoryItems() {
 	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
-	for(slot_id = 0; slot_id <= 30; slot_id++) {
+	for(slot_id = 0; slot_id <= 29; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -943,7 +943,7 @@ void Client::BulkSendItems()
 {
 	int16 slot_id = 0;
 
-	for (slot_id=0; slot_id<=30; slot_id++) {
+	for (slot_id=0; slot_id<=29; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -1280,7 +1280,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(SLOT_CURSOR, 1, true);
+					DeleteItemInInventory(SLOT_CURSOR, 0, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");

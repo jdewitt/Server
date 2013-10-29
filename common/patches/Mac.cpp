@@ -1021,7 +1021,7 @@ ENCODE(OP_ItemPacket) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPacket,sizeof(structs::Item_Struct));
 
 		outapp->SetOpcode(OP_Unknown);
-		if(old_item_pkt->PacketType == ItemPacketSummonItem)
+		if(old_item_pkt->PacketType == ItemPacketSummonItem || int_struct->slot_id == 30)
 			outapp->SetOpcode(OP_SummonedItem);
 		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
 			outapp->SetOpcode(OP_TradeItemPacket);
@@ -1406,10 +1406,10 @@ ENCODE(OP_ShopInventoryPacket)
 		pi->packets[r].item.Icon = sm_item->GetItem()->Icon;       
 		pi->packets[r].item.Slots = sm_item->GetItem()->Slots;  
 		pi->packets[r].item.Price = sm_item->GetPrice(); 
-		if(sm_item->GetMerchantCount() > 25)
+		if(sm_item->GetMerchantCount() > 1)
 			pi->packets[r].item.Charges = sm_item->GetMerchantCount();    
 		else
-			pi->packets[r].item.Charges = -1;    
+			pi->packets[r].item.Charges = 1;    
 		pi->packets[r].item.SellRate = sm_item->GetItem()->SellRate;
 		pi->packets[r].item.CastTime = sm_item->GetItem()->CastTime;  
 		pi->packets[r].item.SkillModType = sm_item->GetItem()->SkillModType;
@@ -1521,7 +1521,7 @@ ENCODE(OP_ShopInventoryPacket)
 		}
 		
 
-   _log(ZONE__INIT,"MERCHANT PRICE IS SET TO: %i for item: %s in slot: %i quantity:", pi->packets[r].item.Price, pi->packets[r].item.Name, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
+   _log(ZONE__INIT,"MERCHANT PRICE IS SET TO: %i for item: %s in slot: %i quantity: %i", pi->packets[r].item.Price, pi->packets[r].item.Name, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
 		
 	}
 	int32 length = 5000;
@@ -1829,6 +1829,8 @@ ENCODE(OP_GroundSpawn) {
 	OUT(x);
 	strncpy(eq->object_name,emu->object_name,16);
 	OUT(object_type);
+	eq->charges=1;
+	eq->maxcharges=1;
 	FINISH_ENCODE();
 }
 
@@ -1847,6 +1849,55 @@ DECODE(OP_GroundSpawn) {
 	FINISH_DIRECT_DECODE();
 }
 
+ENCODE(OP_ClickObjectAction) {
+
+	ENCODE_LENGTH_EXACT(ClickObjectAction_Struct);
+	SETUP_DIRECT_ENCODE(ClickObjectAction_Struct, structs::ClickObjectAction_Struct);
+	OUT(player_id);
+    OUT(drop_id);
+	OUT(open);
+	OUT(type);
+	OUT(icon);
+	eq->slot=emu->unknown16;
+	FINISH_ENCODE();
+}
+
+DECODE(OP_ClickObjectAction) {
+	DECODE_LENGTH_EXACT(structs::ClickObjectAction_Struct);
+	SETUP_DIRECT_DECODE(ClickObjectAction_Struct, structs::ClickObjectAction_Struct);
+	IN(player_id);
+    IN(drop_id);
+	IN(open);
+	IN(type);
+	IN(icon);
+	emu->unknown16=eq->slot;
+	FINISH_DIRECT_DECODE();
+}
+
+DECODE(OP_TradeSkillCombine) {
+	DECODE_LENGTH_EXACT(structs::Combine_Struct);
+	SETUP_DIRECT_DECODE(NewCombine_Struct, structs::Combine_Struct);
+	IN(container_slot);
+	FINISH_DIRECT_DECODE();
+}
+
+DECODE(OP_TradeRequest) {
+	DECODE_LENGTH_EXACT(structs::TradeRequest_Struct);
+	SETUP_DIRECT_DECODE(TradeRequest_Struct, structs::TradeRequest_Struct);
+	IN(from_mob_id);
+	IN(to_mob_id);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_TradeRequestAck) { ENCODE_FORWARD(OP_TradeRequest); }
+ENCODE(OP_TradeRequest) {
+
+	ENCODE_LENGTH_EXACT(TradeRequest_Struct);
+	SETUP_DIRECT_ENCODE(TradeRequest_Struct, structs::TradeRequest_Struct);
+	OUT(from_mob_id);
+    OUT(to_mob_id);
+	FINISH_ENCODE();
+}
 /*ENCODE(OP_FormattedMessage)
 {
 	EQApplicationPacket *__packet = *p; 

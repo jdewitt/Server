@@ -794,6 +794,14 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 		SendHPUpdate();
 	}
 
+	if(eqs->ClientVersion() == EQClientMac)
+	{
+		const ItemInst* inst = m_inv[SLOT_CURSOR];
+		if (inst){
+			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+		}
+	}
+
 	return;
 }
 
@@ -5642,7 +5650,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	item = database.GetItem(item_id);
 	if (!item){
 		//error finding item, client didnt get the update packet for whatever reason, roleplay a tad
-		Message(15,"%s tells you 'Sorry, that item is for display purposes only.' as they take the item off the shelf.",tmp->GetCleanName());
+		Message(0,"%s tells you 'Sorry, that item is for display purposes only.' as they take the item off the shelf.",tmp->GetCleanName());
 		EQApplicationPacket* delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
 		Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
 		delitem->itemslot = mp->itemslot;
@@ -5707,26 +5715,38 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	bool stacked = TryStacking(inst);
+	bool bag = false;
+	bool cursor = true;
+	if(inst->IsType(ItemClassContainer))
+	{
+		bag = true;
+		cursor = false;
+	}
+
 	if(!stacked)
-		freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
+		freeslotid = m_inv.FindFreeSlot(bag, cursor, item->Size);
 
 	//make sure we are not completely full...
-	if(freeslotid == SLOT_CURSOR) {
-		if(m_inv.GetItem(SLOT_CURSOR) != nullptr) {
-			Message(13, "You do not have room for any more items.");
+	if(freeslotid == SLOT_CURSOR || freeslotid == SLOT_INVALID) {
+		if(m_inv.GetItem(SLOT_CURSOR) != nullptr || freeslotid == SLOT_INVALID) {
+			Message(13,"You have no more room. The item falls to the ground.");
+			DropInst(inst);
+			QueuePacket(outapp);
 			safe_delete(outapp);
 			safe_delete(inst);
 			return;
 		}
 	}
 
-	if(freeslotid == SLOT_INVALID)
+	/*if(freeslotid == SLOT_INVALID)
 	{
-		Message(13, "You do not have room for any more items.");
+		Message(13,"You have no more room. The item falls to the ground.");
+		DropInst(inst);
+		QueuePacket(outapp);
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
-	}
+	}*/
 
 	std::string packet;
 	if(mp->quantity==1 && item->MaxCharges>0 && item->MaxCharges<255)
@@ -5734,7 +5754,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	if (!stacked && inst) {
 		PutItemInInventory(freeslotid, *inst);
-		SendItemPacket(freeslotid, inst, ItemPacketTrade);
+		if(freeslotid == SLOT_CURSOR)
+			SendItemPacket(freeslotid, inst, ItemPacketSummonItem);
+		else
+			SendItemPacket(freeslotid, inst, ItemPacketTrade);
 	}
 	else if(!stacked){
 		LogFile->write(EQEMuLog::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
@@ -5759,8 +5782,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			inst->SetPrice(SinglePrice);
 			inst->SetMerchantSlot(mp->itemslot);
 			inst->SetMerchantCount(new_charges);
-
-			SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
+			if(freeslotid == SLOT_CURSOR)
+				SendItemPacket(freeslotid, inst, ItemPacketSummonItem);
+			else
+				SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);			
 		}
 	}
 	safe_delete(inst);

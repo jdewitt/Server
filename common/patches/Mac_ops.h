@@ -75,5 +75,11 @@ E(OP_UpdateAA)
 E(OP_SendAATable)
 E(OP_GroundSpawn)
 D(OP_GroundSpawn)
+E(OP_ClickObjectAction)
+D(OP_ClickObjectAction)
+D(OP_TradeSkillCombine)
+D(OP_TradeRequest)
+E(OP_TradeRequest)
+E(OP_TradeRequestAck)
 #undef E
 #undef D

@@ -598,17 +598,17 @@ struct ClickObject_Struct {
 	uint16	PlayerID;
 	uint16	unknown;
 };
-struct ClickObjectAck_Struct {
+struct ClickObjectAction_Struct {
 /*00*/	uint32	player_id;		// Comment: Entity Id of player who clicked object
-/*04*/	uint8	unknown[4];		// Comment: Unknown 
+/*04*/	uint32	drop_id;		// Comment: Unknown 
 /*08*/	uint8	open;			// Comment: 0=close 1=open
-/*09*/	uint8	unknown6;		// Comment: Unknown 
+/*09*/	uint8	unknown9;		// Comment: Unknown 
 /*10*/	uint8	type;			// Comment: number that determines the type of the item (i.e forge) 
-/*11*/	uint8	unknown8;		// Comment: Unknown 
+/*11*/	uint8	unknown11;		// Comment: Unknown 
 /*12*/	uint8	slot;			// Comment: number of slots of the container
 /*13*/  uint8	unknown10[3];	// Comment: Unknown 
-/*14*/	uint16	icon_nr;		// Comment: Icon of the item
-/*16*/	uint8	unknown16[4];	// Comment: Unknown
+/*16*/	uint16	icon;		// Comment: Icon of the item
+/*18*/	uint8	unknown16[2];	// Comment: Unknown
 };
 
 /*
@@ -1457,10 +1457,10 @@ struct ChangeLooks_Struct
 /*006*/	uint8	face;		// Comment: and beard
 };
 
-struct Trade_Window_Struct 
+struct TradeRequest_Struct
 {
-	uint32 fromid;			// Comment: 
-	uint32 toid;				// Comment: 
+	uint16 from_mob_id;			// Comment: 
+	uint16 to_mob_id;				// Comment: 
 };
 
 struct TradeMoneyUpdate_Struct{
@@ -1552,9 +1552,9 @@ struct Combine_Struct
 { 
 	uint8 worldobjecttype;	// Comment: Harakiri if its a world object like forge, id will be here
 	uint8 unknown001;		// Comment: 
-	uint8 unknown002;		// Comment: 
+	uint8 success;		// Comment: 
 	uint8 unknown003;
-	uint16 containerslot;	// Comment: the position of the container, or 1000 if its a world container	
+	uint16 container_slot;	// Comment: the position of the container, or 1000 if its a world container	
 	uint16 iteminslot[10];	// Comment: IDs of items in container
 	uint16 unknown005;		// Comment: 
 	uint16 unknown006;		// Comment: 

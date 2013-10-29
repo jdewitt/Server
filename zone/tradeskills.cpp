@@ -368,7 +368,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Update Made count
 	if (success) {
 		if (!spec.has_learnt && ((spec.must_learn&0x10) != 0x10)) {
-			user->Message_StringID(4, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
+			if(user->GetClientVersion() > EQClientMac)
+				user->Message_StringID(4, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
 		}
 		database.UpdateRecipeMadecount(spec.recipe_id, user->CharacterID(), spec.madecount+1);
 	}

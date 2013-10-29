@@ -2906,18 +2906,35 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 		return;
 	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
 		return;
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SimpleMessage,12);
-	SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
-	sms->color=type;
-	sms->string_id=string_id;
+	if(GetClientVersion() > EQClientMac)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SimpleMessage,12);
+		SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
+		sms->color=type;
+		sms->string_id=string_id;
 
-	sms->unknown8=0;
+		sms->unknown8=0;
 
-	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		if(distance>0)
+			entity_list.QueueCloseClients(this,outapp,false,distance);
+		else
+			QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 	else
-		QueuePacket(outapp);
-	safe_delete(outapp);
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, 12);
+		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+		fm->string_id = string_id;
+		fm->type = type;
+
+		if(distance>0)
+			entity_list.QueueCloseClients(this,outapp,false,distance);
+		else
+			QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+
 }
 
 //
