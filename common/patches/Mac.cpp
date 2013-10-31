@@ -846,12 +846,19 @@ ENCODE(OP_ZoneChange)
 
 ENCODE(OP_CancelTrade)
 {
-	ENCODE_LENGTH_EXACT(structs::CancelTrade_Struct);
+	ENCODE_LENGTH_EXACT(CancelTrade_Struct);
 	SETUP_DIRECT_ENCODE(CancelTrade_Struct, structs::CancelTrade_Struct);
-	eq->fromid = emu->fromid;
-	eq->action = emu->action;
-	memset(eq->unknown1337,0x00,sizeof(eq->unknown1337));
+	OUT(fromid);
+	eq->action=1665;
 	FINISH_ENCODE();
+}
+
+DECODE(OP_CancelTrade) {
+	DECODE_LENGTH_EXACT(structs::TradeRequest_Struct);
+	SETUP_DIRECT_DECODE(TradeRequest_Struct, structs::TradeRequest_Struct);
+	IN(from_mob_id);
+	IN(to_mob_id);
+	FINISH_DIRECT_DECODE();
 }
 
 ENCODE(OP_MemorizeSpell) {
@@ -1889,13 +1896,30 @@ DECODE(OP_TradeRequest) {
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_TradeRequestAck) { ENCODE_FORWARD(OP_TradeRequest); }
 ENCODE(OP_TradeRequest) {
 
 	ENCODE_LENGTH_EXACT(TradeRequest_Struct);
 	SETUP_DIRECT_ENCODE(TradeRequest_Struct, structs::TradeRequest_Struct);
 	OUT(from_mob_id);
     OUT(to_mob_id);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_TradeRequestAck) {
+	DECODE_LENGTH_EXACT(structs::TradeRequest_Struct);
+	SETUP_DIRECT_DECODE(TradeRequest_Struct, structs::TradeRequest_Struct);
+	IN(from_mob_id);
+	IN(to_mob_id);
+	FINISH_DIRECT_DECODE();
+}
+
+
+ENCODE(OP_TradeRequestAck) {
+
+	ENCODE_LENGTH_EXACT(TradeRequest_Struct);
+	SETUP_DIRECT_ENCODE(TradeRequest_Struct, structs::TradeRequest_Struct);
+	OUT(from_mob_id);
+	OUT(to_mob_id);
 	FINISH_ENCODE();
 }
 /*ENCODE(OP_FormattedMessage)

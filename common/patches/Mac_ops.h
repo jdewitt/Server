@@ -81,5 +81,7 @@ D(OP_TradeSkillCombine)
 D(OP_TradeRequest)
 E(OP_TradeRequest)
 E(OP_TradeRequestAck)
+D(OP_TradeRequestAck)
+D(OP_CancelTrade)
 #undef E
 #undef D

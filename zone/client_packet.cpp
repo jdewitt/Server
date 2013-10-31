@@ -4945,11 +4945,25 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 		FinishTrade(this);
 		trade->Reset();
 	}
-	EQApplicationPacket end_trade1(OP_FinishWindow, 0);
-	QueuePacket(&end_trade1);
+	else
+	{
+		//EQMac sends a second CancelTrade packet. Since "with" and the trade became invalid the first time around, this handles the second which prevents the client from bugging.
+		if(GetClientVersion() == EQClientMac)
+		{
+			CancelTrade_Struct* msg = (CancelTrade_Struct*) app->pBuffer;
+			QueuePacket(app);
+			LogFile->write(EQEMuLog::Debug, "Cancelled second trade. from is: %i.", msg->fromid);
+		}
+	}
 
-	EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-	QueuePacket(&end_trade2);
+	if(GetClientVersion() > EQClientMac)
+	{
+		EQApplicationPacket end_trade1(OP_FinishWindow, 0);
+		QueuePacket(&end_trade1);
+
+		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
+		QueuePacket(&end_trade2);
+	}
 	return;
 }
 
@@ -6070,11 +6084,20 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 
 	SetTradeskillObject(nullptr);
 
-	EQApplicationPacket end_trade1(OP_FinishWindow, 0);
-	QueuePacket(&end_trade1);
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket end_trade1(OP_ClickObjectAction, 0);
+		QueuePacket(&end_trade1);
+	}
+	
+	else
+	{
+		EQApplicationPacket end_trade1(OP_FinishWindow, 0);
+		QueuePacket(&end_trade1);
 
-	EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-	QueuePacket(&end_trade2);
+		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
+		QueuePacket(&end_trade2);
+	}
 	return;
 }
 

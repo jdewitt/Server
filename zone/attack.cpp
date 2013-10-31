@@ -1449,7 +1449,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
 	if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 		char val1[20]={0};
-		entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+		if(GetClientVersion() > EQClientMac)
+			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
 			killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 	}
 
@@ -2059,7 +2060,9 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 
 		if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20]={0};
-			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+
+			if(killerMob->CastToClient()->GetClientVersion() > EQClientMac)
+				entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
 				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	} else {
@@ -3591,7 +3594,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 							}
 						}
 						else
-							entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
+							if(attacker->CastToClient()->GetClientVersion() > EQClientMac)
+								entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
 				} else {
 					if(damage > 0) {
 						if(spell_id != SPELL_UNKNOWN)

@@ -1248,7 +1248,6 @@ struct GiveItem_Struct
 struct CancelTrade_Struct { 
 	uint16 fromid;
 	uint16 action;
-	uint8 unknown1337[4];
 };
 
 
@@ -1459,8 +1458,14 @@ struct ChangeLooks_Struct
 
 struct TradeRequest_Struct
 {
-	uint16 from_mob_id;			// Comment: 
-	uint16 to_mob_id;				// Comment: 
+	uint16 to_mob_id;			// Comment: 
+	uint16 from_mob_id;				// Comment: 
+};
+
+struct TradeAccept_Struct {
+/*00*/	uint16 from_mob_id;
+/*04*/	uint16 to_mob_id;		//seems to be garbage
+/*08*/
 };
 
 struct TradeMoneyUpdate_Struct{
