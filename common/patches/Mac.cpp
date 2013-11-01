@@ -177,7 +177,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_cursor);
 	OUT(silver_cursor);
 	OUT(copper_cursor);
-	OUT_array(skills, 75);
+//	OUT_array(skills, 75);
+	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
 	//OUT(toxicity);
 	OUT(thirst_level);
 	OUT(hunger_level);
@@ -1973,6 +1974,21 @@ ENCODE(OP_TimeOfDay){
 	OUT(year);
 	FINISH_ENCODE();
 }
+
+DECODE(OP_WhoAllRequest) {
+	DECODE_LENGTH_EXACT(structs::Who_All_Struct);
+	SETUP_DIRECT_DECODE(Who_All_Struct, structs::Who_All_Struct);
+	strcpy(emu->whom,eq->whom);
+	IN(wrace);
+	IN(wclass);
+	IN(lvllow);
+	IN(lvlhigh);
+	IN(gmlookup);
+	IN(guildid);
+	FINISH_DIRECT_DECODE();
+}
+
+
 /*ENCODE(OP_FormattedMessage)
 {
 	EQApplicationPacket *__packet = *p; 

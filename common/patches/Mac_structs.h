@@ -187,9 +187,9 @@ struct ServerZoneEntry_Struct {
 /*0180*/	uint8	pvp;				// PVP Flag
 /*0181*/	uint16	unknown0181;		// ***Placeholder
 /*0183*/	int8	face;				// Face Type
-/*0197*/    uint16  equipment[MAX_MATERIALS]; // Array elements correspond to struct equipment above
+/*0197*/    uint16  equipment[9]; // Array elements correspond to struct equipment above
 /*0202*/	uint16	unknown;			// ***Placeholder
-/*0206*/	Color_Struct colors[MAX_MATERIALS]; // Array elements correspond to struct equipment_colors above
+/*0206*/	Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
 /*0240*/	uint8	npc_armor_graphic;	// Texture (0xFF=Player - See list of textures for more)
 /*0241*/	uint8	unknown0241[19];	// ***Placeholder
 /*0260*/	float	walkspeed;			// Speed when you walk
@@ -420,7 +420,7 @@ struct Spawn_Struct
 /*0024*/	float	size;
 /*0028*/	float	walkspeed;
 /*0032*/	float	runspeed;
-/*0036*/	Color_Struct	equipcolors[MAX_MATERIALS];
+/*0036*/	Color_Struct	equipcolors[9];
 /*0072*/	uint16	spawn_id;			// Id of new spawn
 /*0074*/	uint8	bodytype;			// 65 is disarmable trap, 66 and 67 are invis triggers/traps
 /*0075*/	uint8	unknown0075;
@@ -445,7 +445,7 @@ struct Spawn_Struct
 /*0097*/	uint8	texture;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
 /*0098*/	uint8	helm;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
 /*0099*/	uint8	s_unknown0099;		// used to be s_unknown5[2]
-/*0100*/	uint16	equipment[MAX_MATERIALS];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
+/*0100*/	uint16	equipment[9];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
 /*0118*/	int8	guildrank;			// ***Placeholder
 /*0119*/	uint8	unknown0207;
 /*0120*/	uint16	deity;				// Deity.
@@ -1531,17 +1531,17 @@ struct Bug_Report_Struct
 	char bugdescription[1024];	// Comment: The bug description
 };
 
-// Comment: 76 length in total
 struct Who_All_Struct 
-{
-	char whom[32];		// Comment: 
-	uint16 wrace;		// Comment: FF FF = no race
-	uint16 wclass;		// Comment: FF FF = no class
-	uint16 firstlvl;		// Comment: FF FF = no numbers
-	uint16 secondlvl;	// Comment: FF FF = no numbers
-	uint16 gmlookup;		// Comment: FF FF = not doing /who all gm
-	uint8 unknown[34];	// Comment: 
-
+{ 
+/*000*/	char	whom[64];
+/*064*/	int16	wrace;		// FF FF = no race
+/*066*/	int16	wclass;		// FF FF = no class
+/*068*/	int16	lvllow;		// FF FF = no numbers
+/*070*/	int16	lvlhigh;	// FF FF = no numbers
+/*072*/	int16	gmlookup;	// FF FF = not doing /who all gm
+/*074*/	int16	guildid;
+/*076*/	int8	unknown076[64];
+/*140*/
 };
 
 // Comment: 4 bytes in total
@@ -2326,6 +2326,7 @@ struct OldBindStruct {
 };
 
 static const uint32 MAX_PP_AA_ARRAY		= 226;
+static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 struct PlayerProfile_Struct
 {
 #define pp_inventory_size 30

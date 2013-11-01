@@ -86,5 +86,6 @@ D(OP_CancelTrade)
 E(OP_ManaChange)
 E(OP_DeleteSpawn)
 E(OP_TimeOfDay)
+D(OP_WhoAllRequest)
 #undef E
 #undef D

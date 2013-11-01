@@ -107,8 +107,8 @@ struct sockaddr_in address;
 		fcntl(sock, F_SETFL, O_NONBLOCK);
 	#endif
 	//moved these because on windows the output was delayed and causing the console window to look bad
-	//cout << "Starting factory Reader" << endl;
-	//cout << "Starting factory Writer" << endl;
+	//std::cout << "Starting factory Reader" << std::endl;
+	//std::cout << "Starting factory Writer" << std::endl;
 	#ifdef _WINDOWS
 		_beginthread(EQStreamFactoryReaderLoop,0, this);
 		_beginthread(EQStreamFactoryWriterLoop,0, this);
@@ -122,7 +122,7 @@ struct sockaddr_in address;
 EQStream *EQStreamFactory::Pop()
 {
 EQStream *s=nullptr;
-	//cout << "Pop():Locking MNewStreams" << endl;
+	//std::cout << "Pop():Locking MNewStreams" << std::endl;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
 		s=NewStreams.front();
@@ -130,7 +130,7 @@ EQStream *s=nullptr;
 		s->PutInUse();
 	}
 	MNewStreams.unlock();
-	//cout << "Pop(): Unlocking MNewStreams" << endl;
+	//std::cout << "Pop(): Unlocking MNewStreams" << std::endl;
 
 	return s;
 }
@@ -147,11 +147,11 @@ void EQStreamFactory::PushOld(EQOldStream *s)
 
 void EQStreamFactory::Push(EQStream *s)
 {
-	//cout << "Push():Locking MNewStreams" << endl;
+	//std::cout << "Push():Locking MNewStreams" << std::endl;
 	MNewStreams.lock();
 	NewStreams.push(s);
 	MNewStreams.unlock();
-	//cout << "Push(): Unlocking MNewStreams" << endl;
+	//std::cout << "Push(): Unlocking MNewStreams" << std::endl;
 }
 
 
@@ -317,7 +317,7 @@ void EQStreamFactory::CheckTimeout()
 				//give it a little time for everybody to finish with it
 			} else {
 				//everybody is done, we can delete it now
-				//cout << "Removing connection" << endl;
+				//std::cout << "Removing connection" << std::endl;
 				std::map<std::string,EQStream *>::iterator temp=stream_itr;
 				stream_itr++;
 				//let whoever has the stream outside delete it
@@ -451,9 +451,9 @@ Timer DecayTimer(20);
 		stream_count=Streams.size() + OldStreams.size();
 		MStreams.unlock();
 		if (!stream_count) {
-			//cout << "No streams, waiting on condition" << endl;
+			//std::cout << "No streams, waiting on condition" << std::endl;
 			WriterWork.Wait();
-			//cout << "Awake from condition, must have a stream now" << endl;
+			//std::cout << "Awake from condition, must have a stream now" << std::endl;
 		}
 	}
 }

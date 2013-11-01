@@ -416,14 +416,14 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	#if EQDEBUG >= 9
-//		std::cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << std::endl;
+		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
 	#endif
 
 	#ifdef SOLAR
 		if(0 && opcode != OP_ClientUpdate)
 		{
 			LogFile->write(EQEMuLog::Debug,"HandlePacket() OPCODE debug enabled client %s", GetName());
-			std::cerr << "OPCODE: " << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << std::endl;
+			std::cerr << "OPCODE: " << std::hex << std::setw(4) << std::setfill('0') << opcode << std::dec << ", size: " << app->size << std::endl;
 			DumpPacket(app);
 		}
 	#endif
@@ -1321,7 +1321,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good
-			CheckIncreaseSkill(TRACKING, nullptr, -20);
+			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
 	// Break Hide if moving without sneaking and set rewind timer if moved
@@ -1364,7 +1364,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	{
 		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos))
 		{
-			CheckIncreaseSkill(SWIMMING, nullptr, -17);
+			CheckIncreaseSkill(SkillSwimming, nullptr, -17);
 		}
 	}
 
@@ -2681,7 +2681,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(!HasSkill(BEGGING) || !GetTarget())
+	if(!HasSkill(SkillBegging) || !GetTarget())
 		return;
 
 	if(GetTarget()->GetClass() == LDON_TREASURE)
@@ -2719,7 +2719,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 		return;
 	}
 
-	uint16 CurrentSkill = GetSkill(BEGGING);
+	uint16 CurrentSkill = GetSkill(SkillBegging);
 
 	float ChanceToBeg=((float)(CurrentSkill/700.0f) + 0.15f) * 100;
 
@@ -2741,7 +2741,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	CheckIncreaseSkill(BEGGING, nullptr, -10);
+	CheckIncreaseSkill(SkillBegging, nullptr, -10);
 }
 
 void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
@@ -3004,7 +3004,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	if (sa->type == AT_Invis) {
 		if(sa->parameter != 0)
 		{
-			if(!HasSkill(HIDE) && GetSkill(HIDE) == 0)
+			if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
 			{
 				if(GetClientVersion() < EQClientSoF)
 				{
@@ -3063,7 +3063,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		/*
 		else if (sa->parameter == 0x05) {
 			// Illusion
-			cout << "Illusion packet recv'd:" << endl;
+			std::cout << "Illusion packet recv'd:" << std::endl;
 			DumpPacket(app);
 		}
 		*/
@@ -3105,7 +3105,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_Sneak) {
 		if(sa->parameter != 0)
 		{
-			if(!HasSkill(SNEAK))
+			if(!HasSkill(SkillSneak))
 			{
 				char *hack_str = nullptr;
 				MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Sneak: %i", sa->parameter);
@@ -3189,7 +3189,7 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 		return;
 
 	Mob* killer = entity_list.GetMob(ds->killer_id);
-	Death(killer, ds->damage, ds->spell_id, (SkillType)ds->attack_skill);
+	Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
 	return;
 }
 
@@ -3448,8 +3448,8 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 
 	//BreakInvis();
 
-	uint16 primfeign = GetSkill(FEIGN_DEATH);
-	uint16 secfeign = GetSkill(FEIGN_DEATH);
+	uint16 primfeign = GetSkill(SkillFeignDeath);
+	uint16 secfeign = GetSkill(SkillFeignDeath);
 	if (primfeign > 100) {
 		primfeign = 100;
 		secfeign = secfeign - 100;
@@ -3467,13 +3467,13 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		SetFeigned(true);
 	}
 
-	CheckIncreaseSkill(FEIGN_DEATH, nullptr, 5);
+	CheckIncreaseSkill(SkillFeignDeath, nullptr, 5);
 	return;
 }
 
 void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 {
-	if(!HasSkill(SNEAK) && GetSkill(SNEAK) == 0) {
+	if(!HasSkill(SkillSneak) && GetSkill(SkillSneak) == 0) {
 		return; //You cannot sneak if you do not have sneak
 	}
 
@@ -3497,9 +3497,9 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 	else {
-		CheckIncreaseSkill(SNEAK, nullptr, 5);
+		CheckIncreaseSkill(SkillSneak, nullptr, 5);
 	}
-	float hidechance = ((GetSkill(SNEAK)/300.0f) + .25) * 100;
+	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25) * 100;
 	float random = MakeRandomFloat(0, 99);
 	if(!was && random < hidechance) {
 		sneaking = true;
@@ -3528,7 +3528,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 {
-	if(!HasSkill(HIDE) && GetSkill(HIDE) == 0)
+	if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
 	{
 		//Can not be able to train hide but still have it from racial though
 		return; //You cannot hide if you do not have hide
@@ -3541,9 +3541,9 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	int reuse = HideReuseTime - GetAA(209);
 	p_timers.Start(pTimerHide, reuse-1);
 
-	float hidechance = ((GetSkill(HIDE)/250.0f) + .25) * 100;
+	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25) * 100;
 	float random = MakeRandomFloat(0, 100);
-	CheckIncreaseSkill(HIDE, nullptr, 5);
+	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
@@ -3564,7 +3564,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color=0x010E;
 		if (!auto_attack && entity_list.Fighting(this)) {
-			if (MakeRandomInt(0, 260) < (int)GetSkill(HIDE)) {
+			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
 				msg->string_id=343;
 				entity_list.Evade(this);
 			} else {
@@ -3868,14 +3868,14 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 	Mob * target = GetTarget();
 	if(target->IsNPC())
 	{
-		if(HasSkill(SENSE_TRAPS))
+		if(HasSkill(SkillSenseTraps))
 		{
 			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			HandleLDoNSenseTraps(target->CastToNPC(), GetSkill(SENSE_TRAPS), LDoNTypeMechanical);
+			HandleLDoNSenseTraps(target->CastToNPC(), GetSkill(SkillSenseTraps), LDoNTypeMechanical);
 		}
 		else
 			Message(13, "You do not have the sense traps skill.");
@@ -3887,14 +3887,14 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 	Mob * target = GetTarget();
 	if(target->IsNPC())
 	{
-		if(HasSkill(DISARM_TRAPS))
+		if(HasSkill(SkillDisarmTraps))
 		{
 			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			HandleLDoNDisarm(target->CastToNPC(), GetSkill(DISARM_TRAPS), LDoNTypeMechanical);
+			HandleLDoNDisarm(target->CastToNPC(), GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
 		}
 		else
 			Message(13, "You do not have the disarm trap skill.");
@@ -3906,14 +3906,14 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 	Mob * target = GetTarget();
 	if(target->IsNPC())
 	{
-		if(HasSkill(PICK_LOCK))
+		if(HasSkill(SkillPickLock))
 		{
 			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			HandleLDoNPickLock(target->CastToNPC(), GetSkill(PICK_LOCK), LDoNTypeMechanical);
+			HandleLDoNPickLock(target->CastToNPC(), GetSkill(SkillPickLock), LDoNTypeMechanical);
 		}
 		else
 			Message(13, "You do not have the pick locks skill.");
@@ -4761,9 +4761,9 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
 		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
-		CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
+		CheckIncreaseSkill(SkillAlcoholTolerance, nullptr, 25);
 
-		int16 AlcoholTolerance = GetSkill(ALCOHOL_TOLERANCE);
+		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
 		int16 IntoxicationIncrease;
 
 		if(GetClientVersion() < EQClientSoD)
@@ -6186,7 +6186,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 		" FROM tradeskill_recipe AS tr "
 		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
 		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE tr.id IN (%s) "
+		" WHERE tr.enabled <> 0 AND tr.id IN (%s) "
 		" AND tr.must_learn & 0x20 <> 0x20 AND ((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
 		" GROUP BY tr.id "
 		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
@@ -6241,7 +6241,7 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		" FROM tradeskill_recipe AS tr "
 		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
 		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u "
+		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
 		" AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
 		" GROUP BY tr.id "
 		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
@@ -7739,7 +7739,7 @@ void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 {
-	if(!HasSkill(MEND))
+	if(!HasSkill(SkillMend))
 		return;
 
 	if(!p_timers.Expired(&database, pTimerMend, false)) {
@@ -7750,7 +7750,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
-	if (MakeRandomInt(0, 199) < (int)GetSkill(MEND)) {
+	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
 		int criticalchance = 0;
 		switch(GetAA(aaCriticalMend)){
 		case 1:
@@ -7779,7 +7779,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 		0 skill - 25% chance to worsen
 		20 skill - 23% chance to worsen
 		50 skill - 16% chance to worsen */
-		if ((GetSkill(MEND) <= 75) && (MakeRandomInt(GetSkill(MEND),100) < 75) && (MakeRandomInt(1, 3) == 1))
+		if ((GetSkill(SkillMend) <= 75) && (MakeRandomInt(GetSkill(SkillMend),100) < 75) && (MakeRandomInt(1, 3) == 1))
 		{
 			SetHP(currenthp > mendhp ? (GetHP() - mendhp) : 1);
 			SendHPUpdate();
@@ -7789,7 +7789,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 			Message_StringID(4,MEND_FAIL);
 	}
 
-	CheckIncreaseSkill(MEND, nullptr, 10);
+	CheckIncreaseSkill(SkillMend, nullptr, 10);
 	return;
 }
 
@@ -7847,7 +7847,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	{
 		mod_client_death_env();
 
-		Death(0, 32000, SPELL_UNKNOWN, HAND_TO_HAND);
+		Death(0, 32000, SPELL_UNKNOWN, SkillHandtoHand);
 	}
 	SendHPUpdate();
 	return;
@@ -7865,7 +7865,7 @@ void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 	// Broadcast to other clients
 	CombatDamage_Struct* damage = (CombatDamage_Struct*)app->pBuffer;
 	//dont send to originator of falling damage packets
-	entity_list.QueueClients(this, app, (damage->type==FallingDamageType));
+	entity_list.QueueClients(this, app, (damage->type==DamageTypeFalling));
 	return;
 }
 
@@ -8124,7 +8124,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		DumpPacket(app);
 	}
 
-	if(!HasSkill(PICK_POCKETS))
+	if(!HasSkill(SkillPickPockets))
 	{
 		return;
 	}
@@ -8149,7 +8149,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		pick_out->coin = 0;
 		pick_out->from = victim->GetID();
 		pick_out->to = GetID();
-		pick_out->myskill = GetSkill(PICK_POCKETS);
+		pick_out->myskill = GetSkill(SkillPickPockets);
 		pick_out->type = 0;
 		//if we do not send this packet the client will lock up and require the player to relog.
 		QueuePacket(outapp);
@@ -8162,7 +8162,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		pick_out->coin = 0;
 		pick_out->from = victim->GetID();
 		pick_out->to = GetID();
-		pick_out->myskill = GetSkill(PICK_POCKETS);
+		pick_out->myskill = GetSkill(SkillPickPockets);
 		pick_out->type = 0;
 		//if we do not send this packet the client will lock up and require the player to relog.
 		QueuePacket(outapp);
@@ -8178,7 +8178,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		pick_out->coin = 0;
 		pick_out->from = victim->GetID();
 		pick_out->to = GetID();
-		pick_out->myskill = GetSkill(PICK_POCKETS);
+		pick_out->myskill = GetSkill(SkillPickPockets);
 		pick_out->type = 0;
 		//if we do not send this packet the client will lock up and require the player to relog.
 		QueuePacket(outapp);
@@ -8228,10 +8228,10 @@ void Client::Handle_OP_Track(const EQApplicationPacket *app)
 	if(GetClass() != RANGER && GetClass() != DRUID && GetClass() != BARD)
 		return;
 
-	if( GetSkill(TRACKING)==0 )
-		SetSkill(TRACKING,1);
+	if( GetSkill(SkillTracking)==0 )
+		SetSkill(SkillTracking,1);
 	else
-		CheckIncreaseSkill(TRACKING, nullptr, 15);
+		CheckIncreaseSkill(SkillTracking, nullptr, 15);
 
 	if(!entity_list.MakeTrackPacket(this))
 		LogFile->write(EQEMuLog::Error, "Unable to generate OP_Track packet requested by client.");
@@ -8311,7 +8311,7 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 {
-	if (!HasSkill(SENSE_TRAPS))
+	if (!HasSkill(SkillSenseTraps))
 		return;
 
 	if(!p_timers.Expired(&database, pTimerSenseTraps, false)) {
@@ -8334,10 +8334,10 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 
 	Trap* trap = entity_list.FindNearbyTrap(this,800);
 
-	CheckIncreaseSkill(SENSE_TRAPS, nullptr);
+	CheckIncreaseSkill(SkillSenseTraps, nullptr);
 
 	if (trap && trap->skill > 0) {
-		int uskill = GetSkill(SENSE_TRAPS);
+		int uskill = GetSkill(SkillSenseTraps);
 		if ((MakeRandomInt(0,99) + uskill) >= (MakeRandomInt(0,99) + trap->skill*0.75))
 		{
 			float xdif = trap->x - GetX();
@@ -8378,7 +8378,7 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 {
-	if (!HasSkill(DISARM_TRAPS))
+	if (!HasSkill(SkillDisarmTraps))
 		return;
 
 	if(!p_timers.Expired(&database, pTimerDisarmTraps, false)) {
@@ -8402,7 +8402,7 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 	Trap* trap = entity_list.FindNearbyTrap(this,60);
 	if (trap && trap->detected)
 	{
-		int uskill = GetSkill(DISARM_TRAPS);
+		int uskill = GetSkill(SkillDisarmTraps);
 		if ((MakeRandomInt(0, 49) + uskill) >= (MakeRandomInt(0, 49) + trap->skill))
 		{
 			Message(MT_Skills,"You disarm a trap.");
@@ -8420,7 +8420,7 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 				Message(MT_Skills,"You failed to disarm a trap.");
 			}
 		}
-		CheckIncreaseSkill(DISARM_TRAPS, nullptr);
+		CheckIncreaseSkill(SkillDisarmTraps, nullptr);
 		return;
 	}
 	Message(MT_Skills,"You did not find any traps close enough to disarm.");
@@ -8642,8 +8642,8 @@ void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SafeFallSuccess(const EQApplicationPacket *app)	// bit of a misnomer, sent whenever safe fall is used (success of fail)
 {
-	if(HasSkill(SAFE_FALL)) //this should only get called if the client has safe fall, but just in case...
-		CheckIncreaseSkill(SAFE_FALL, nullptr); //check for skill up
+	if(HasSkill(SkillSafeFall)) //this should only get called if the client has safe fall, but just in case...
+		CheckIncreaseSkill(SkillSafeFall, nullptr); //check for skill up
 }
 
 void Client::Handle_OP_Heartbeat(const EQApplicationPacket *app)
@@ -8874,7 +8874,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	//uint32 aalen = database.GetPlayerAlternateAdv(account_id, name, &aa);
 	//if (aalen == 0) {
-	//	cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << endl;
+	//	std::cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << std::endl;
 	//	return false;
 	//}
 
@@ -9079,8 +9079,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	if(m_pp.ldon_points_available > 0x77359400)
 		m_pp.ldon_points_available = 0x77359400;
 
-	if(GetSkill(SWIMMING) < 100)
-		SetSkill(SWIMMING,100);
+	if(GetSkill(SkillSwimming) < 100)
+		SetSkill(SkillSwimming,100);
 
 	//pull AAs from the PP
 	for(uint32 a=0; a < MAX_PP_AA_ARRAY; a++){
@@ -11200,12 +11200,12 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	}
 	else if(GetClass() == ROGUE)
 	{
-		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemTypePierce) ||
-			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemTypePierce)) {
-			float SuccessChance = (GetSkill(APPLY_POISON) + GetLevel()) / 400.0f;
+		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemType1HPiercing) ||
+			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemType1HPiercing)) {
+			float SuccessChance = (GetSkill(SkillApplyPoison) + GetLevel()) / 400.0f;
 			double ChanceRoll = MakeRandomFloat(0, 1);
 
-			CheckIncreaseSkill(APPLY_POISON, nullptr, 10);
+			CheckIncreaseSkill(SkillApplyPoison, nullptr, 10);
 
 			if(ChanceRoll < SuccessChance) {
 				ApplyPoisonSuccessResult = 1;
