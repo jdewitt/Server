@@ -623,7 +623,7 @@ ENCODE(OP_ZoneSpawns){
 		eq->level = emu->level;
 //		eq->unknown0259[4] = emu->unknown0259[4];
 	//	eq->beard = emu->beard;
-		//eq->petOwnerId = emu->petOwnerId;
+		eq->petOwnerId = emu->petOwnerId;
 		eq->guildrank = emu->guildrank;
 		if(emu->NPC == 1)
 			eq->guildrank = 0;
@@ -650,7 +650,7 @@ ENCODE(OP_ZoneSpawns){
 		strcpy(eq->Surname, emu->lastName);
 		eq->walkspeed = emu->walkspeed;
 //		eq->unknown0328 = emu->unknown0328;
-		//eq->is_pet = emu->is_pet;
+//		eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
 		if(emu->class_ > 19 && emu->class_ < 35)
 			eq->class_ = emu->class_-3;
@@ -751,7 +751,7 @@ ENCODE(OP_NewSpawn) {
 		eq->level = emu->level;
 //		eq->unknown0259[4] = emu->unknown0259[4];
 	//	eq->beard = emu->beard;
-		//eq->petOwnerId = emu->petOwnerId;
+		eq->petOwnerId = emu->petOwnerId;
 		eq->guildrank = emu->guildrank;
 //		eq->unknown0194[3] = emu->unknown0194[3];
 		for(k = 0; k < 9; k++) {
@@ -1041,7 +1041,10 @@ ENCODE(OP_ItemPacket) {
 		else
 			outapp->SetOpcode(OP_ItemPacket);
 
-		outapp->size=sizeof(structs::Item_Struct);
+		if(item->GetItem()->ItemClass == 2)
+			outapp->size=261;
+		else
+			outapp->size=sizeof(structs::Item_Struct);
         structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
 		
 		//structs::Item_Struct* weasel = (structs::Item_Struct*) outapp->pBuffer;
@@ -1719,7 +1722,6 @@ DECODE(OP_ShopRequest)
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ShopPlayerSell) { DECODE_FORWARD(OP_ShopPlayerBuy); }
 DECODE(OP_ShopPlayerBuy)
 {
 	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
@@ -1732,8 +1734,31 @@ DECODE(OP_ShopPlayerBuy)
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_ShopPlayerSell) { ENCODE_FORWARD(OP_ShopPlayerBuy); }
 ENCODE(OP_ShopPlayerBuy)
+{
+	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	eq->npcid=emu->npcid;
+	eq->playerid=emu->playerid;
+	OUT(itemslot);
+	OUT(quantity);
+	OUT(price);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_ShopPlayerSell)
+{
+	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
+	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	emu->npcid=eq->npcid;
+	IN(playerid);
+	IN(itemslot);
+	IN(quantity);
+	IN(price);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ShopPlayerSell)
 {
 	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
 	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
@@ -1810,9 +1835,10 @@ ENCODE(OP_AAExpUpdate){
 
 ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_UpdateAA); }
 ENCODE(OP_UpdateAA){
-
+	
 }
 
+//On live, only sent after an AA is purchased.
 ENCODE(OP_RespondAA) {
 	ENCODE_LENGTH_EXACT(AATable_Struct);
 	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
@@ -1821,6 +1847,7 @@ ENCODE(OP_RespondAA) {
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
 		OUT(aa_list[r].aa_value);
 	}
+	//eq->unknown=1;
 	FINISH_ENCODE();
 }
 
@@ -1920,6 +1947,30 @@ ENCODE(OP_TradeRequestAck) {
 	SETUP_DIRECT_ENCODE(TradeRequest_Struct, structs::TradeRequest_Struct);
 	OUT(from_mob_id);
 	OUT(to_mob_id);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_ManaChange){
+	ENCODE_LENGTH_EXACT(ManaChange_Struct);
+	SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
+	OUT(new_mana);
+	OUT(spell_id);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_DeleteSpawn) {
+	SETUP_DIRECT_ENCODE(DeleteSpawn_Struct, structs::DeleteSpawn_Struct);
+	OUT(spawn_id);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_TimeOfDay){
+	SETUP_DIRECT_ENCODE(TimeOfDay_Struct, structs::TimeOfDay_Struct);
+	OUT(hour);
+	OUT(minute);
+	OUT(day);
+	OUT(month);
+	OUT(year);
 	FINISH_ENCODE();
 }
 /*ENCODE(OP_FormattedMessage)

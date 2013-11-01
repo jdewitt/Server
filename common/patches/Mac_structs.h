@@ -415,7 +415,7 @@ struct Spawn_Struct
 					spacer2:1,			// ***Placeholder
 					deltaX:10;			// Velocity X
 /*0013*/	uint8	unknown0051;
-/*0014*/	uint16	pet_owner_id;		// Id of pet owner (0 if not a pet)
+/*0014*/	uint16	petOwnerId;		// Id of pet owner (0 if not a pet)
 /*0016*/	uint8	s_unknown1a[8];		// Placeholder
 /*0024*/	float	size;
 /*0028*/	float	walkspeed;
@@ -459,7 +459,7 @@ struct Spawn_Struct
 /*0211*/	uint8	hairstyle;
 /*0212*/	uint8	title;				//Face Overlay? (barbarian only)
 /*0213*/	uint8	luclinface;			// and beard
-			uint8	unknownpop[6];
+/*0214*/	uint8	unknownpop[6];
 };
 
 /*
@@ -481,7 +481,6 @@ struct NewSpawn_Struct
 struct DeleteSpawn_Struct
 {
 /*00*/ uint16 spawn_id;				// Comment: Spawn ID to delete
-	   uint32 ds_unknown1;			// Comment: 
 };
 
 /*
@@ -952,7 +951,6 @@ struct Item_Struct
 			/*0228*/ int16	  BookType;	
 			/*0230*/ int8     Book;      // ***Placeholder
 			/*0231*/ char     Filename[30];            // Filename of book text on server
-			/*0261*/ int8     unknown0262[16];    // ***Placeholder
 		} book;
 		struct
 		{
@@ -2592,7 +2590,7 @@ uint8 bytes[8];
 
 struct AltAdvStats_Struct {
   int32 experience;
-  int16 unspent;//turning on (percent to 10) giving you 10 points
+  int16 unspent;
   int8	percentage;
   int8	unknownaas007;
 };
@@ -2604,6 +2602,16 @@ struct AA_Skills {
 struct AATable_Struct {
 	uint8 unknown;
 	structs::AA_Skills aa_list[MAX_PP_AA_ARRAY];
+};
+
+//Server sends 7-9 of these 12 byte packets when you enter a zone on opcode 1442
+//Client sends this packet as 256 bytes, and is our equivlent of AA_Action
+struct UpdateAA_Struct {
+/*000*/ int8  unknown00[4]; // 0x0000 except for the first and last couple of packets. The more AAs the player has, the more data is here.
+/*004*/ int16 aaid; // skill_id of a purchased AA.
+/*006*/ int8  unknown06[6]; //Always the same in each packet, perhaps player info. Last 2 bytes seen as 0x7252 a couple of times.
+/*012*/
+
 };
 
 struct EnvDamage2_Struct {

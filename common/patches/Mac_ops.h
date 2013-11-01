@@ -83,5 +83,8 @@ E(OP_TradeRequest)
 E(OP_TradeRequestAck)
 D(OP_TradeRequestAck)
 D(OP_CancelTrade)
+E(OP_ManaChange)
+E(OP_DeleteSpawn)
+E(OP_TimeOfDay)
 #undef E
 #undef D
