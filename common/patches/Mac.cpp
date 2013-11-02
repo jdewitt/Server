@@ -1032,8 +1032,10 @@ ENCODE(OP_ItemPacket) {
 		outapp->SetOpcode(OP_Unknown);
 		if(old_item_pkt->PacketType == ItemPacketSummonItem || int_struct->slot_id == 30)
 			outapp->SetOpcode(OP_SummonedItem);
-		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
+		else if(old_item_pkt->PacketType == ItemPacketTradeView)
 			outapp->SetOpcode(OP_TradeItemPacket);
+		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
+			outapp->SetOpcode(OP_MerchantItemPacket);
 		else if(old_item_pkt->PacketType == ItemPacketLoot)
 			outapp->SetOpcode(OP_LootItemPacket);
 		else if(item->GetItem()->ItemClass == 1)
@@ -2010,6 +2012,13 @@ DECODE(OP_GroupInvite) {
 	FINISH_DIRECT_DECODE();
 }
 
+ENCODE(OP_TradeCoins) {
+	SETUP_DIRECT_ENCODE(TradeCoin_Struct, structs::TradeCoin_Struct);
+	OUT(trader);
+	OUT(slot);
+	OUT(amount);
+	FINISH_ENCODE();
+}
 
 /*ENCODE(OP_FormattedMessage)
 {

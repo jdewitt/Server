@@ -91,5 +91,6 @@ E(OP_GroupInvite)
 D(OP_GroupInvite)
 E(OP_GroupInvite2)
 D(OP_GroupInvite2)
+E(OP_TradeCoins)
 #undef E
 #undef D

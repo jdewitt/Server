@@ -1448,29 +1448,27 @@ struct ChangeLooks_Struct
 
 struct TradeRequest_Struct
 {
-	uint16 to_mob_id;			// Comment: 
-	uint16 from_mob_id;				// Comment: 
+	uint16 to_mob_id;	
+	uint16 from_mob_id;			
 };
 
 struct TradeAccept_Struct {
 /*00*/	uint16 from_mob_id;
-/*04*/	uint16 to_mob_id;		//seems to be garbage
+/*04*/	uint16 to_mob_id;	
 /*08*/
 };
 
 struct TradeMoneyUpdate_Struct{
-	uint32	trader;			// Comment: 
-	uint32	type;		 // Comment: 
-	uint32	amount;			// Comment: 
+	uint16	trader;			
+	uint8	type;	
+ 	uint8   unknown;	//0x06
+	uint32	amount;		
 };
 
 struct TradeCoin_Struct{
-	uint32	trader;		// Comment: 
-	uint8	slot;		// Comment: 
-	uint16	unknown5;		// Comment: 
-	uint8	unknown7;		// Comment: 
-	uint32	amount;			// Comment: 
-	uint8	unknown8[10];	// Comment:
+	uint16	trader;	
+	uint16	slot;	
+	uint32	amount;	
 };
 
 struct Give_Struct 
@@ -1636,12 +1634,14 @@ struct InspectRequest_Struct
 	uint32 PlayerID;		// Comment: 
 }; 
 
-//Size: 1044 (Answer)
 struct InspectAnswer_Struct 
 { 
-	uint32 TargetID;			// Comment: ? 
-	uint32 PlayerID;			// Comment: ?
-	uint8  unknown[1036];	// Comment: ?
+/*0000*/	uint16 TargetID;			// Comment: ? 
+/*0002*/	uint16 PlayerID;			// Comment: ?
+/*0004*/	uint8  unknown[128];
+/*0132*/	char itemnames[23][64];
+/*1604*/    char text[140];
+/*1744*/
 }; 
 
 

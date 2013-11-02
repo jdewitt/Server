@@ -2317,6 +2317,13 @@ struct InspectResponse_Struct {
 /*1860*/
 };
 
+struct OldInspectResponse_Struct 
+{ 
+	int16 TargetID;			// Comment: ? 
+	int16 PlayerID;			// Comment: ?
+	int8  unknown[1740];	// Comment: ?
+}; 
+
 //OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed) -U
 struct InspectMessage_Struct {
 /*000*/ char text[256];

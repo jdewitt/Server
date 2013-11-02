@@ -6904,6 +6904,22 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 
 void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 
+	if(GetClientVersion() == EQClientMac)
+	{
+		if (app->size != sizeof(OldInspectResponse_Struct)) {
+		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectAnswer, size=%i, expected %i", app->size, sizeof(OldInspectResponse_Struct));
+		return;
+		}
+
+		EQApplicationPacket* outapp		= app->Copy();
+	    OldInspectResponse_Struct* insr	= (OldInspectResponse_Struct*) outapp->pBuffer;
+		Mob* tmp = entity_list.GetMob(insr->TargetID); 
+
+		if(tmp != 0 && tmp->IsClient()) { tmp->CastToClient()->QueuePacket(outapp); }
+	}
+
+	else
+	{
 	if (app->size != sizeof(InspectResponse_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectAnswer, size=%i, expected %i", app->size, sizeof(InspectResponse_Struct));
 		return;
@@ -6941,7 +6957,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	database.SetPlayerInspectMessage(name, &playermessage);
 
 	if(tmp != 0 && tmp->IsClient()) { tmp->CastToClient()->QueuePacket(outapp); } // Send answer to requester
-
+	}
 	return;
 }
 

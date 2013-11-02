@@ -756,7 +756,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("DzJoinExpeditionConfirm", static_cast<int>(OP_DzJoinExpeditionConfirm)),
 			luabind::value("DzJoinExpeditionReply", static_cast<int>(OP_DzJoinExpeditionReply)),
 			luabind::value("DzExpeditionInfo", static_cast<int>(OP_DzExpeditionInfo)),
-			luabind::value("DzMemberStatus", static_cast<int>(OP_DzMemberStatus)),
+//			luabind::value("DzMemberStatus", static_cast<int>(OP_DzMemberStatus)),
 			luabind::value("DzLeaderStatus", static_cast<int>(OP_DzLeaderStatus)),
 			luabind::value("DzExpeditionEndsWarning", static_cast<int>(OP_DzExpeditionEndsWarning)),
 			luabind::value("DzExpeditionList", static_cast<int>(OP_DzExpeditionList)),
