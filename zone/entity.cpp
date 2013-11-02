@@ -4487,6 +4487,12 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct* Who) {
 
 	WARS->unknown44[1] = 0;
 
+	WARS->unknown44[2] = 0;
+
+	WARS->unknown44[3] = 0;
+
+	WARS->unknown44[4] = 0;
+
 	WARS->unknown52 = Entries;
 
 	WARS->unknown56 = Entries;

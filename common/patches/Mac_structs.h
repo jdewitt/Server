@@ -1156,14 +1156,6 @@ struct GMGoto_Struct { // x,y is swapped as compared to summon and makes sense a
 };
 
 
-
-/*struct GMGoto_Struct 
-{
-	char	gotoname[30];		// Comment: 
-	char	myname[30];			// Comment: 
-	uint8	unknown[48];		// Comment: 
-};*/
-
 struct GMSurname_Struct 
 {
 	char name[64];			// Comment: 
@@ -1396,9 +1388,9 @@ struct ZoneUnavail_Struct
 
 struct GroupInvite_Struct 
 {
-	char invited[64];		// Comment: 
-	char inviter[64];		// Comment: 
-	char unknown[31];		// Comment: 
+	char invitee_name[64];		// Comment: 
+	char inviter_name[64];		// Comment: 
+	char unknown[65];		// Comment: 
 };
 
 
@@ -1542,6 +1534,65 @@ struct Who_All_Struct
 /*074*/	int16	guildid;
 /*076*/	int8	unknown076[64];
 /*140*/
+};
+
+struct WhoAllPlayer{
+	uint16	formatstring;
+	uint16	pidstring;
+	char*	name;
+	uint16	rankstring;
+	char*	guild;
+	uint16	unknown80[3];
+	uint16	zonestring;
+	uint32	zone;
+	uint16	class_;
+	uint16	level;
+	uint16	race;
+	char*	account;
+	uint16	unknown100;
+};
+
+struct WhoAllReturnStruct {
+/*000*/	uint32	id;
+/*004*/	uint16	playerineqstring;
+/*006*/	char	line[27];
+/*033*/	uint8	unknown35; //0A
+/*034*/	uint16	unknown36;//0s
+/*036*/	uint16	playersinzonestring;
+/*038*/	uint16	unknown44[5]; //0s
+/*048*/	uint32	unknown52;//1
+/*052*/	uint32	unknown56;//1
+/*056*/	uint16	playercount;//1
+struct WhoAllPlayer player[0];
+};
+
+// The following four structs are the WhoAllPlayer struct above broken down
+// for use in World ClientList::SendFriendsWho to accomodate the user of variable
+// length strings within the struct above.
+
+struct	WhoAllPlayerPart1 {
+	uint16	FormatMSGID;
+	uint16	PIDMSGID;
+	char	Name[1];;
+};
+
+struct	WhoAllPlayerPart2 {
+	uint16	RankMSGID;
+	char	Guild[1];
+};
+
+struct	WhoAllPlayerPart3 {
+	uint16	Unknown80[3];
+	uint16	ZoneMSGID;
+	uint32	Zone;
+	uint16	Class_;
+	uint16	Level;
+	uint16	Race;
+	char	Account[1];
+};
+
+struct	WhoAllPlayerPart4 {
+	uint32	Unknown100;
 };
 
 // Comment: 4 bytes in total

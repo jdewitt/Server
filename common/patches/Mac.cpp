@@ -802,6 +802,7 @@ ENCODE(OP_NewSpawn) {
 		eq->spawn_id = emu->spawnId;
 //		eq->unknown0344[4] = emu->unknown0344[4];
 		//eq->lfg = emu->lfg;
+		eq->luclinface = emu->face;
 
 		/*
 		if (emu->face == 99)	      {eq->face = 0;}
@@ -1042,10 +1043,11 @@ ENCODE(OP_ItemPacket) {
 		else
 			outapp->SetOpcode(OP_ItemPacket);
 
-		if(item->GetItem()->ItemClass == 2)
+		if(outapp->GetOpcode() == OP_BookPacket)
 			outapp->size=261;
 		else
 			outapp->size=sizeof(structs::Item_Struct);
+
         structs::Item_Struct* myitem = (structs::Item_Struct*) outapp->pBuffer;
 		
 		//structs::Item_Struct* weasel = (structs::Item_Struct*) outapp->pBuffer;
@@ -1089,13 +1091,13 @@ ENCODE(OP_ItemPacket) {
 		myitem->unknown0282=0xFF;
 		myitem->unknown0283=0xFF;*/
 
-		if(item->GetItem()->ItemClass == 1){
+		if(outapp->GetOpcode() == OP_ContainerPacket || item->GetItem()->ItemClass == 1){
 			myitem->container.BagType = item->GetItem()->BagType; 
 			myitem->container.BagSlots = item->GetItem()->BagSlots;         
 			myitem->container.BagSize = item->GetItem()->BagSize;    
 			myitem->container.BagWR = item->GetItem()->BagWR; 
 		}
-		else if(item->GetItem()->ItemClass == 2){
+		else if(outapp->GetOpcode() == OP_BookPacket || item->GetItem()->ItemClass == 2){
 			strcpy(myitem->book.Filename,item->GetItem()->Filename);
 			myitem->book.Book = item->GetItem()->Book;         
 			myitem->book.BookType = item->GetItem()->BookType; 
@@ -1985,6 +1987,26 @@ DECODE(OP_WhoAllRequest) {
 	IN(lvlhigh);
 	IN(gmlookup);
 	IN(guildid);
+	emu->type = 3;
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_GroupInvite2) { ENCODE_FORWARD(OP_GroupInvite); }
+ENCODE(OP_GroupInvite) {
+
+	ENCODE_LENGTH_EXACT(GroupInvite_Struct);
+	SETUP_DIRECT_ENCODE(GroupInvite_Struct, structs::GroupInvite_Struct);
+	strcpy(eq->invitee_name,emu->invitee_name);
+	strcpy(eq->inviter_name,emu->inviter_name);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_GroupInvite2) { DECODE_FORWARD(OP_GroupInvite); }
+DECODE(OP_GroupInvite) {
+	DECODE_LENGTH_EXACT(structs::GroupInvite_Struct);
+	SETUP_DIRECT_DECODE(GroupInvite_Struct, structs::GroupInvite_Struct);
+	strcpy(emu->invitee_name,eq->invitee_name);
+	strcpy(emu->inviter_name,eq->inviter_name);
 	FINISH_DIRECT_DECODE();
 }
 

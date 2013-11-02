@@ -2966,19 +2966,33 @@ struct ZoneServerInfo_Struct
 };
 
 struct WhoAllPlayer{
-	uint32	formatstring;
-	uint32	pidstring;
+	uint16	formatstring;
+	uint16	pidstring;
 	char*	name;
-	uint32	rankstring;
+	uint16	rankstring;
 	char*	guild;
-	uint32	unknown80[2];
-	uint32	zonestring;
+	uint16	unknown80[3];
+	uint16	zonestring;
 	uint32	zone;
-	uint32	class_;
-	uint32	level;
-	uint32	race;
+	uint16	class_;
+	uint16	level;
+	uint16	race;
 	char*	account;
-	uint32	unknown100;
+	uint16	unknown100;
+};
+
+struct WhoAllReturnStruct {
+/*000*/	uint32	id;
+/*004*/	uint16	playerineqstring;
+/*006*/	char	line[27];
+/*033*/	uint8	unknown35; //0A
+/*034*/	uint16	unknown36;//0s
+/*036*/	uint16	playersinzonestring;
+/*038*/	uint16	unknown44[5]; //0s
+/*048*/	uint32	unknown52;//1
+/*052*/	uint32	unknown56;//1
+/*056*/	uint16	playercount;//1
+struct WhoAllPlayer player[0];
 };
 
 // The following four structs are the WhoAllPlayer struct above broken down
@@ -2986,42 +3000,28 @@ struct WhoAllPlayer{
 // length strings within the struct above.
 
 struct	WhoAllPlayerPart1 {
-	uint32	FormatMSGID;
-	uint32	PIDMSGID;
+	uint16	FormatMSGID;
+	uint16	PIDMSGID;
 	char	Name[1];;
 };
 
 struct	WhoAllPlayerPart2 {
-	uint32	RankMSGID;
+	uint16	RankMSGID;
 	char	Guild[1];
 };
 
 struct	WhoAllPlayerPart3 {
-	uint32	Unknown80[2];
-	uint32	ZoneMSGID;
+	uint16	Unknown80[3];
+	uint16	ZoneMSGID;
 	uint32	Zone;
-	uint32	Class_;
-	uint32	Level;
-	uint32	Race;
+	uint16	Class_;
+	uint16	Level;
+	uint16	Race;
 	char	Account[1];
 };
 
 struct	WhoAllPlayerPart4 {
-	uint32	Unknown100;
-};
-
-struct WhoAllReturnStruct {
-/*000*/	uint32	id;
-/*004*/	uint32	playerineqstring;
-/*008*/	char	line[27];
-/*035*/	uint8	unknown35; //0A
-/*036*/	uint32	unknown36;//0s
-/*040*/	uint32	playersinzonestring;
-/*044*/	uint32	unknown44[2]; //0s
-/*052*/	uint32	unknown52;//1
-/*056*/	uint32	unknown56;//1
-/*060*/	uint32	playercount;//1
-	struct WhoAllPlayer player[0];
+	uint16	Unknown100;
 };
 
 struct Trader_Struct {

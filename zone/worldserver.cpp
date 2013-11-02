@@ -371,7 +371,7 @@ void WorldServer::Process() {
 			if (wars && wars->id!=0 && wars->id<0xFFFFFFFF){
 				Client* client = entity_list.GetClientByID(wars->id);
 				if (client) {
-					if(pack->size==64)//no results
+					if(pack->size==58)//no results
 						client->Message_StringID(0,WHOALL_NO_RESULTS);
 					else{
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);

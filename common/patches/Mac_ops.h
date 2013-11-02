@@ -87,5 +87,9 @@ E(OP_ManaChange)
 E(OP_DeleteSpawn)
 E(OP_TimeOfDay)
 D(OP_WhoAllRequest)
+E(OP_GroupInvite)
+D(OP_GroupInvite)
+E(OP_GroupInvite2)
+D(OP_GroupInvite2)
 #undef E
 #undef D

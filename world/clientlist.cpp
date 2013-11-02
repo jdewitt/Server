@@ -507,14 +507,14 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	int whomlen = 0;
 	if (whom) {
 		whomlen = strlen(whom->whom);
-		if(whom->wrace == 0x001A) // 0x001A is the old Froglok race number and is sent by the client for /who all froglok
+		if(whom->wrace == 0x1A) // 0x001A is the old Froglok race number and is sent by the client for /who all froglok
 			whom->wrace = FROGLOK; // This is what EQEmu uses for the Froglok Race number.
 	}
 
 	char* output = 0;
 	uint32 outsize = 0, outlen = 0;
-	uint32 totalusers=0;
-	uint32 totallength=0;
+	uint16 totalusers=0;
+	uint16 totallength=0;
 	AppendAnyLenString(&output, &outsize, &outlen, "Players on server:");
 	if (connection->IsConsole())
 		AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
@@ -553,50 +553,59 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		}
 		countclients.Advance();
 	}
-	uint32 plid=fromid;
-	uint32 playerineqstring=5001;
+	uint16 plid=fromid;
+	uint16 playerineqstring=5001;
 	const char line2[]="---------------------------";
 	uint8 unknown35=0x0A;
-	uint32 unknown36=0;
-	uint32 playersinzonestring=5028;
+	uint16 unknown36=0;
+	uint16 playersinzonestring=5028;
 	if(totalusers>20 && admin<100){
 		totalusers=20;
 		playersinzonestring=5033;
 	}
 	else if(totalusers>1)
 		playersinzonestring=5036;
-	uint32 unknown44[2];
+	uint16 unknown44[5];
 	unknown44[0]=0;
 	unknown44[1]=0;
+	unknown44[2]=0;
+	unknown44[3]=0;
+	unknown44[4]=0;
 	uint32 unknown52=totalusers;
 	uint32 unknown56=1;
-	ServerPacket* pack2 = new ServerPacket(ServerOP_WhoAllReply,64+totallength+(49*totalusers));
+	ServerPacket* pack2 = new ServerPacket(ServerOP_WhoAllReply,58+totallength+(30*totalusers));
 	memset(pack2->pBuffer,0,pack2->size);
 	uchar *buffer=pack2->pBuffer;
 	uchar *bufptr=buffer;
 	//memset(buffer,0,pack2->size);
 	memcpy(bufptr,&plid, sizeof(uint32));
 	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&playerineqstring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&playerineqstring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 	memcpy(bufptr,&line2, strlen(line2));
 	bufptr+=strlen(line2);
 	memcpy(bufptr,&unknown35, sizeof(uint8));
 	bufptr+=sizeof(uint8);
-	memcpy(bufptr,&unknown36, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&playersinzonestring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&unknown44[0], sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&unknown44[1], sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&unknown36, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&playersinzonestring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown44[0], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown44[1], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown44[2], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown44[3], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown44[4], sizeof(uint16));
+	bufptr+=sizeof(uint16);
 	memcpy(bufptr,&unknown52, sizeof(uint32));
 	bufptr+=sizeof(uint32);
 	memcpy(bufptr,&unknown56, sizeof(uint32));
 	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&totalusers, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&totalusers, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 
 	iterator.Reset();
 	int idx=-1;
@@ -621,7 +630,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	))
 ) {
 			line[0] = 0;
-			uint32 rankstring=0xFFFFFFFF;
+			uint16 rankstring=0xFFFF;
 				if((cle->Anon()==1 && cle->GetGM() && cle->Admin()>admin) || (idx>=20 && admin<100)){ //hide gms that are anon from lesser gms and normal players, cut off at 20
 					rankstring=0;
 					iterator.Advance();
@@ -662,7 +671,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			char guildbuffer[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
 				sprintf(guildbuffer,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
-			uint32 formatstring=5025;
+			uint16 formatstring=5025;
 			if(cle->Anon()==1 && (admin<cle->Admin() || admin==0))
 				formatstring=5024;
 			else if(cle->Anon()==1 && admin>=cle->Admin() && admin>0)
@@ -674,13 +683,13 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 
 	//war* wars2 = (war*)pack2->pBuffer;
 
-	uint32 plclass_=0;
-	uint32 pllevel=0;
-	uint32 pidstring=0xFFFFFFFF;//5003;
-	uint32 plrace=0;
-	uint32 zonestring=0xFFFFFFFF;
+	uint16 plclass_=0;
+	uint16 pllevel=0;
+	uint16 pidstring=0xFFFF;//5003;
+	uint16 plrace=0;
+	uint16 zonestring=0xFFFF;
 	uint32 plzone=0;
-	uint32 unknown80[2];
+	uint16 unknown80[3];
 	if(cle->Anon()==0 || (admin>=cle->Admin() && admin>0)){
 		plclass_=cle->class_();
 		pllevel=cle->level();
@@ -695,9 +704,9 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	if(admin>=cle->Admin() && admin>0)
 		unknown80[0]=cle->Admin();
 	else
-		unknown80[0]=0xFFFFFFFF;
-	unknown80[1]=0xFFFFFFFF;//1035
-
+	unknown80[0]=0xFFFF;
+	unknown80[1]=0xFFFF;//1035
+	unknown80[2]=0xFFFF;
 
 	//char plstatus[20]={0};
 	//sprintf(plstatus, "Status %i",cle->Admin());
@@ -708,36 +717,38 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	if(admin>=cle->Admin() && admin>0)
 		strcpy(placcount,cle->AccountName());
 
-	memcpy(bufptr,&formatstring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&pidstring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&formatstring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&pidstring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 	memcpy(bufptr,&plname, strlen(plname)+1);
 	bufptr+=strlen(plname)+1;
-	memcpy(bufptr,&rankstring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&rankstring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 	memcpy(bufptr,&guildbuffer, strlen(guildbuffer)+1);
 	bufptr+=strlen(guildbuffer)+1;
-	memcpy(bufptr,&unknown80[0], sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&unknown80[1], sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&zonestring, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	memcpy(bufptr,&unknown80[0], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown80[1], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&unknown80[2], sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&zonestring, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 	memcpy(bufptr,&plzone, sizeof(uint32));
 	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&plclass_, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&pllevel, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	memcpy(bufptr,&plrace, sizeof(uint32));
-	bufptr+=sizeof(uint32);
-	uint32 ending=0;
+	memcpy(bufptr,&plclass_, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&pllevel, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	memcpy(bufptr,&plrace, sizeof(uint16));
+	bufptr+=sizeof(uint16);
+	uint16 ending=0;
 	memcpy(bufptr,&placcount, strlen(placcount)+1);
 	bufptr+=strlen(placcount)+1;
-	ending=207;
-	memcpy(bufptr,&ending, sizeof(uint32));
-	bufptr+=sizeof(uint32);
+	ending=211;
+	memcpy(bufptr,&ending, sizeof(uint16));
+	bufptr+=sizeof(uint16);
 		}
 		iterator.Advance();
 	}
@@ -807,7 +818,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		WhoAllReturnStruct *WARS = (WhoAllReturnStruct *)bufptr;
 
 		WARS->id = FriendsWho->FromID;
-		WARS->playerineqstring = 0xffffffff;
+		WARS->playerineqstring = 0xffff;
 		strcpy(WARS->line, "");
 		WARS->unknown35 = 0x0a;
 		WARS->unknown36 = 0x00;
@@ -819,6 +830,9 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 
 		WARS->unknown44[0] = 0;
 		WARS->unknown44[1] = 0;
+		WARS->unknown44[2] = 0;
+		WARS->unknown44[3] = 0;
+		WARS->unknown44[4] = 0;
 		WARS->unknown52 = FriendsOnline;
 		WARS->unknown56 = 1;
 		WARS->playercount = FriendsOnline;
@@ -832,17 +846,17 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			char GuildName[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
 				sprintf(GuildName,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
-			uint32 FormatMSGID=5025; // 5025 %T1[%2 %3] %4 (%5) %6 %7 %8 %9
+			uint16 FormatMSGID=5025; // 5025 %T1[%2 %3] %4 (%5) %6 %7 %8 %9
 			if(cle->Anon()==1)
 				FormatMSGID=5024; // 5024 %T1[ANONYMOUS] %2 %3
 			else if(cle->Anon()==2)
 				FormatMSGID=5023; // 5023 %T1[ANONYMOUS] %2 %3 %4
 
-			uint32 PlayerClass=0;
-			uint32 PlayerLevel=0;
-			uint32 PlayerRace=0;
-			uint32 ZoneMSGID=0xffffffff;
-			uint32 PlayerZone=0;
+			uint16 PlayerClass=0;
+			uint16 PlayerLevel=0;
+			uint16 PlayerRace=0;
+			uint16 ZoneMSGID=0xffff;
+			uint16 PlayerZone=0;
 
 			if(cle->Anon()==0) {
 				PlayerClass=cle->class_();
@@ -858,20 +872,21 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			WhoAllPlayerPart1* WAPP1 = (WhoAllPlayerPart1*)bufptr;
 
 			WAPP1->FormatMSGID = FormatMSGID;
-			WAPP1->PIDMSGID = 0xffffffff;
+			WAPP1->PIDMSGID = 0xffff;
 			strcpy(WAPP1->Name, PlayerName);
 
 			bufptr += sizeof(WhoAllPlayerPart1) + strlen(PlayerName);
 			WhoAllPlayerPart2* WAPP2 = (WhoAllPlayerPart2*)bufptr;
 
-			WAPP2->RankMSGID = 0xffffffff;
+			WAPP2->RankMSGID = 0xffff;
 			strcpy(WAPP2->Guild, GuildName);
 
 			bufptr += sizeof(WhoAllPlayerPart2) + strlen(GuildName);
 			WhoAllPlayerPart3* WAPP3 = (WhoAllPlayerPart3*)bufptr;
 
-			WAPP3->Unknown80[0] = 0xffffffff;
-			WAPP3->Unknown80[1] = 0xffffffff;
+			WAPP3->Unknown80[0] = 0xffff;
+			WAPP3->Unknown80[1] = 0xffff;
+			WAPP3->Unknown80[2] = 0xffff;
 			WAPP3->ZoneMSGID = ZoneMSGID;
 			WAPP3->Zone = PlayerZone;
 			WAPP3->Class_ = PlayerClass;
@@ -882,7 +897,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			bufptr += sizeof(WhoAllPlayerPart3);
 
 			WhoAllPlayerPart4* WAPP4 = (WhoAllPlayerPart4*)bufptr;
-			WAPP4->Unknown100 = 207;
+			WAPP4->Unknown100 = 211;
 
 			bufptr += sizeof(WhoAllPlayerPart4);
 
