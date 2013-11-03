@@ -583,14 +583,14 @@ ENCODE(OP_ZoneSpawns){
 //		eq->unknown0004 = emu->unknown0004;
 		eq->anon = emu->anon;
 		//eq->face = emu->face;
-		memcpy(eq->name, emu->name, 30);
+		memcpy(eq->name, emu->name, 47);
 		eq->deity = emu->deity;
 //		eq->unknown0073 = emu->unknown0073;
 		eq->size = emu->size;
 //		eq->unknown0079 = emu->unknown0079;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
-		eq->haircolor = emu->haircolor;
+//		eq->haircolor = emu->haircolor;
 		eq->cur_hp = emu->curHp;
 		//eq->max_hp = emu->max_hp;
 		//eq->findable = emu->findable;
@@ -608,18 +608,18 @@ ENCODE(OP_ZoneSpawns){
 //		eq->padding0066 = emu->padding0066;
 		eq->deltaZ = 0;
 //		eq->padding0070 = emu->padding0070;
-		eq->eyecolor1 = emu->eyecolor1;
+//		eq->eyecolor1 = emu->eyecolor1;
 //		eq->unknown0115[24] = emu->unknown0115[24];
 		//eq->showhelm = emu->showhelm;
 //		eq->unknown0140[4] = emu->unknown0140[4];
 		//eq->is_npc = emu->is_npc;
-		eq->hairstyle = emu->hairstyle;
+//		eq->hairstyle = emu->hairstyle;
 
 		//if(emu->gender == 1){
 		//	eq->hairstyle = eq->hairstyle == 0xFF ? 0 : eq->hairstyle;
 		//}
 		eq->anim_type = 0x64;
-		eq->beardcolor = emu->beardcolor;
+//		eq->beardcolor = emu->beardcolor;
 //		eq->unknown0147[4] = emu->unknown0147[4];
 		eq->level = emu->level;
 //		eq->unknown0259[4] = emu->unknown0259[4];
@@ -648,7 +648,7 @@ ENCODE(OP_ZoneSpawns){
 		else
 			eq->race = emu->race;
 //		eq->unknown0288 = emu->unknown0288;
-		strcpy(eq->Surname, emu->lastName);
+		strncpy(eq->Surname, emu->lastName, 20);
 		eq->walkspeed = emu->walkspeed;
 //		eq->unknown0328 = emu->unknown0328;
 //		eq->is_pet = emu->is_pet;
@@ -661,7 +661,13 @@ ENCODE(OP_ZoneSpawns){
 			eq->class_ = 32;
 		else 
 			eq->class_ = emu->class_;
+		eq->haircolor = emu->haircolor;
+		eq->beardcolor = emu->beardcolor;
+		eq->eyecolor1 = emu->eyecolor1;
 		eq->eyecolor2 = emu->eyecolor2;
+		eq->hairstyle = emu->hairstyle;
+		eq->beard = emu->beard;
+		eq->face = emu->face;
 //		eq->unknown0333 = emu->unknown0333;
 	//	eq->flymode = emu->flymode;
 		eq->gender = emu->gender;
@@ -671,7 +677,6 @@ ENCODE(OP_ZoneSpawns){
 		eq->spawn_id = emu->spawnId;
 //		eq->unknown0344[4] = emu->unknown0344[4];
 		//eq->lfg = emu->lfg;
-		eq->luclinface = emu->face;
 
 		/*
 		if (emu->face == 99)	      {eq->face = 0;}
@@ -711,14 +716,14 @@ ENCODE(OP_NewSpawn) {
 //		eq->unknown0004 = emu->unknown0004;
 		eq->anon = emu->anon;
 		//eq->face = emu->face;
-		strncpy(eq->name, emu->name, 64);
+		strncpy(eq->name, emu->name, 47);
 		eq->deity = emu->deity;
 //		eq->unknown0073 = emu->unknown0073
 		eq->size = emu->size;
 //		eq->unknown0079 = emu->unknown0079;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
-		eq->haircolor = emu->haircolor;
+//		eq->haircolor = emu->haircolor;
 		eq->cur_hp = emu->curHp;
 		//eq->max_hp = emu->max_hp;
 		//eq->findable = emu->findable;
@@ -736,18 +741,24 @@ ENCODE(OP_NewSpawn) {
 //		eq->padding0066 = emu->padding0066;
 		eq->deltaZ = 0;
 //		eq->padding0070 = emu->padding0070;
-		eq->eyecolor1 = emu->eyecolor1;
+//		eq->eyecolor1 = emu->eyecolor1;
 //		eq->unknown0115[24] = emu->unknown0115[24];
 		//eq->showhelm = emu->showhelm;
 //		eq->unknown0140[4] = emu->unknown0140[4];
 		//eq->is_npc = emu->is_npc;
-		eq->hairstyle = emu->hairstyle;
+//		eq->hairstyle = emu->hairstyle;
 
 		//if(emu->gender == 1){
 		//	eq->hairstyle = eq->hairstyle == 0xFF ? 0 : eq->hairstyle;
 		//}
 
+		eq->haircolor = emu->haircolor;
 		eq->beardcolor = emu->beardcolor;
+		eq->eyecolor1 = emu->eyecolor1;
+		eq->eyecolor2 = emu->eyecolor2;
+		eq->hairstyle = emu->hairstyle;
+		eq->beard = emu->beard;
+		eq->face = emu->face;
 //		eq->unknown0147[4] = emu->unknown0147[4];
 		eq->level = emu->level;
 //		eq->unknown0259[4] = emu->unknown0259[4];
@@ -792,7 +803,7 @@ ENCODE(OP_NewSpawn) {
 			eq->class_ = 32;
 		else 
 			eq->class_ = emu->class_;
-		eq->eyecolor2 = emu->eyecolor2;
+//		eq->eyecolor2 = emu->eyecolor2;
 //		eq->unknown0333 = emu->unknown0333;
 	//	eq->flymode = emu->flymode;
 		eq->gender = emu->gender;
@@ -802,7 +813,6 @@ ENCODE(OP_NewSpawn) {
 		eq->spawn_id = emu->spawnId;
 //		eq->unknown0344[4] = emu->unknown0344[4];
 		//eq->lfg = emu->lfg;
-		eq->luclinface = emu->face;
 
 		/*
 		if (emu->face == 99)	      {eq->face = 0;}

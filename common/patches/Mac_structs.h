@@ -416,7 +416,14 @@ struct Spawn_Struct
 					deltaX:10;			// Velocity X
 /*0013*/	uint8	unknown0051;
 /*0014*/	uint16	petOwnerId;		// Id of pet owner (0 if not a pet)
-/*0016*/	uint8	s_unknown1a[8];		// Placeholder
+/*0016*/	uint8	s_unknown1a;		// Placeholder
+/*0017*/    uint8	haircolor; 
+/*0018*/	uint8	beardcolor;	
+/*0019*/	uint8	eyecolor1; 
+/*0020*/	uint8	eyecolor2; 
+/*0021*/	uint8	hairstyle; 
+/*0022*/	uint8	beard;
+/*0023*/    uint8   unknown0023; //0xff
 /*0024*/	float	size;
 /*0028*/	float	walkspeed;
 /*0032*/	float	runspeed;
@@ -441,25 +448,20 @@ struct Spawn_Struct
 /*0093*/	uint8	unknown078;
 /*0094*/	uint8	LD;					// 0=NotLD, 1=LD
 /*0095*/	uint8	GM;					// 0=NotGM, 1=GM
-/*0096*/	uint8	s_unknown5_5;		// used to be s_unknown5[5]
-/*0097*/	uint8	texture;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
-/*0098*/	uint8	helm;	// 0xFF=Player, 0=none, 1=leather, 2=chain, 3=steelplate
-/*0099*/	uint8	s_unknown0099;		// used to be s_unknown5[2]
+/*0096*/	uint8	unknown;				
+/*0097*/	uint8	texture;
+/*0098*/	uint8	helm; 
+/*0099*/	uint8	face;		
 /*0100*/	uint16	equipment[9];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
 /*0118*/	int8	guildrank;			// ***Placeholder
 /*0119*/	uint8	unknown0207;
 /*0120*/	uint16	deity;				// Deity.
 /*0122*/	uint8	unknown0122;			// ***Placeholder
-/*0123*/	char	name[64];			// Name of spawn (len is 30 or less)
-/*0187*/	char	Surname[20];		// Last Name of player
-/*0207*/	uint8	haircolor;
-/*0208*/	uint8	beardcolor;
-/*0209*/	uint8	eyecolor1;			// the eyecolors always seem to be the same, maybe left and right eye?
-/*0210*/	uint8	eyecolor2;
-/*0211*/	uint8	hairstyle;
+/*0123*/	char	name[47];			// Name of spawn (len is 30 or less)
+/*0170*/	char	Surname[20];		// Last Name of player
+/*0190*/	uint8	unknown207[22];
 /*0212*/	uint8	title;				//Face Overlay? (barbarian only)
-/*0213*/	uint8	luclinface;			// and beard
-/*0214*/	uint8	unknownpop[6];
+/*0213*/	uint8	unknownpop[7];
 };
 
 /*
