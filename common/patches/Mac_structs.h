@@ -1895,14 +1895,14 @@ struct Door_Struct
 /*0020*/ float   xPos;               // x loc
 /*0024*/ float   zPos;               // z loc
 /*0028*/ float	 heading;
-/*0032*/ uint32  incline;
-/*0036*/ uint16	 size;
+/*0032*/ uint16  incline;
+/*0034*/ uint16	 size;
+/*0036*/ uint8	 unknown[2];
 /*0038*/ uint8	 doorid;             // door's id #
 /*0039*/ uint8	 opentype;
 /*0040*/ uint8	 doorIsOpen;
-/*0041*/ uint16	 inverted;		//FFFF
-/*0043*/ uint16	 parameter; 
-/*0045*/ uint8	 unknown[2];
+/*0041*/ uint8	 inverted;
+/*0042*/ uint16	 parameter; 
 };
 
 /******Useful Open Types*******/
