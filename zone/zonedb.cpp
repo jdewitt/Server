@@ -2220,6 +2220,31 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
 	return 0;
 }
 
+uint8 ZoneDatabase::GetZoneWeatherRate(uint32 zoneid, uint32 version) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather_rate FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
+	{
+		safe_delete_array(query);
+		if (mysql_num_rows(result) > 0) {
+			row = mysql_fetch_row(result);
+			uint8 tmp = atoi(row[0]);
+			mysql_free_result(result);
+			return tmp;
+		}
+		mysql_free_result(result);
+	}
+
+	else {
+		std::cerr << "Error in GetZoneWeatherRate query '" << query << "' " << errbuf << std::endl;
+		safe_delete_array(query);
+	}
+	return 0;
+}
+
 bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 w) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;

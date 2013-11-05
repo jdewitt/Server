@@ -1168,9 +1168,9 @@ void Client::SendAATable() {
 					if(macaaid == r+1)
 					{
 						value = aa[i]->value;
-						_log(ZONE__INIT,"MacAAID is: %i in second loop: %i value is set to: %i", macaaid, r, value);
+						//_log(ZONE__INIT,"MacAAID is: %i in second loop: %i value is set to: %i", macaaid, r, value);
 						aa2->aa_list[r].aa_value = value;
-						_log(ZONE__INIT,"Successfully assigned value: %i", value);
+						//_log(ZONE__INIT,"Successfully assigned value: %i", value);
 						break;
 					}
 				}

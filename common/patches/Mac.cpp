@@ -219,6 +219,10 @@ ENCODE(OP_PlayerProfile) {
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
+	//	int8 macaaid = 0;
+	//	if(emu->aa_array[r].AA > 0)
+	//		macaaid = zone->EmuToEQMacAA(emu->aa_array[r].AA);
+	//	eq->aa_array[r].AA = macaaid;
 		OUT(aa_array[r].AA);
 		OUT(aa_array[r].value);
 	}
@@ -346,17 +350,6 @@ ENCODE(OP_GuildsList) {
 }
 
 
-
-ENCODE(OP_Weather) {
-	SETUP_DIRECT_ENCODE(Weather_Struct, structs::Weather_Struct);
-
-	if(emu->type == 0x31)
-	{
-
-	}
-	
-	FINISH_ENCODE();	
-}
 
 ENCODE(OP_NewZone) {
 	SETUP_DIRECT_ENCODE(NewZone_Struct, structs::NewZone_Struct);

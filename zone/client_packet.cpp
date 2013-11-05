@@ -9331,19 +9331,51 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	/*if(GetClientVersion() == EQClientMac)
 	{
+		PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
+		memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
+
 		int r = 0;
-		int8 tmpaa = 0;
 		for(r = 0; r < MAX_PP_AA_ARRAY; r++) {
-			tmpaa = m_pp.aa_array[r].AA;
-			if(tmpaa > 0)
-				m_pp.aa_array[r].AA = zone->EmuToEQMacAA(tmpaa);
+		
+			if(pps->aa_array[r].AA > 0)
+			{
+				int baseid = pps->aa_array[r].AA;
+				SendAA_Struct* aa3 = zone->FindAA(baseid);
+
+				if(!aa3) {
+				//hunt for a lower level...
+				int w;
+				int a;
+					for(w=1;w<MAX_AA_ACTION_RANKS;w++){
+						a = baseid - w;
+						if(a <= 0)
+							break;
+						//_log(ZONE__INIT,"Could not find AA %d, trying potential parent %d", aa[i]->AA, a);
+						aa3 = zone->FindAA(a);
+						if(aa3 != nullptr)
+						{
+							baseid = a;
+							break;
+						}
+					}
+				}	
+				pps->aa_array[r].AA = zone->EmuToEQMacAA(baseid);
+			}
 		}
-	}*/
-	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
-	m_pp.entityid = GetID();
-	memcpy(outapp->pBuffer,&m_pp,outapp->size);
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
+		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
+		m_pp.entityid = GetID();
+		memcpy(outapp->pBuffer,pps,outapp->size);
+		outapp->priority = 6;
+		FastQueuePacket(&outapp);
+	}
+	else
+	{*/
+		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
+		m_pp.entityid = GetID();
+		memcpy(outapp->pBuffer,&m_pp,outapp->size);
+		outapp->priority = 6;
+		FastQueuePacket(&outapp);
+	//}
 
 	if(m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
@@ -9456,6 +9488,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Weather Packet
 	// This shouldent be moved, this seems to be what the client
 	// uses to advance to the next state (sending ReqNewZone)
+	if(GetClientVersion() > EQClientMac)
+	{
 	outapp = new EQApplicationPacket(OP_Weather, 12);
 	Weather_Struct *ws = (Weather_Struct *) outapp->pBuffer;
 	ws->val1 = 0x000000FF;
@@ -9469,7 +9503,16 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
+	}
+	else
+	{
+		outapp = new EQApplicationPacket(OP_Weather, 8);
+		outapp->pBuffer[4] = 1;
 
+		outapp->priority = 6;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 	//////////////////////////////////////
 	// Group Roles
 	//

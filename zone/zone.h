@@ -234,6 +234,7 @@ public:
 
 	time_t	weather_timer;
 	uint8	weather_type;
+	uint8	weather_rate;
 
 	uint8 loglevelvar;
 	uint8 merchantvar;

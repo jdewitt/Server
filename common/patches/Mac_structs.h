@@ -2644,7 +2644,8 @@ struct CharCreate_Struct
 };
 
 struct Weather_Struct {
-uint8 bytes[8];
+/*000*/	uint32 type;
+/*004*/	uint32 intensity;
 };
 
 struct AltAdvStats_Struct {

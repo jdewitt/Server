@@ -135,10 +135,11 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 
 	zone->weather_type = database.GetZoneWeather(iZoneID, zone->GetInstanceVersion());
+	zone->weather_rate = database.GetZoneWeatherRate(iZoneID, zone->GetInstanceVersion());
 
 	LogFile->write(EQEMuLog::Debug, "Zone: %s has weather of type %i.", zonename, zone->weather_type);
 
-	if(zone->weather_type > 3 || zone->weather_type == 0) {
+	if(zone->weather_type > 4 || zone->weather_type == 0) {
 		zone->zone_weather = 0;
 		zone->Weather_Timer->Disable();
 		LogFile->write(EQEMuLog::Debug, "Zone: %s(%i) has no weather type. The weather timer has been disabled.", zonename, iZoneID);
@@ -898,7 +899,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		long_name = strcpy(new char[18], "Long zone missing");
 	}
 	autoshutdown_timer.Start(AUTHENTICATION_TIMEOUT * 1000, false);
-	Weather_Timer = new Timer((MakeRandomInt(1800, 7200) + 30) * 2000);
+	//We want the intial timer to be short for the benefit of zones with a high weather rate.
+	Weather_Timer = new Timer(MakeRandomInt(1,200) * 1000);
 	Weather_Timer->Start();
 	LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
 	weather_type = 0;
@@ -1364,32 +1366,64 @@ bool Zone::Process() {
 	if(Weather_Timer->Check()){
 		Weather_Timer->Disable();
 		uint16 tmpweather = MakeRandomInt(0, 100);
+		uint8 tmpOldWeather = zone->zone_weather;
 
 		if(zone->weather_type != 0)
 		{
-			if(tmpweather >= 80)
+			int change_rate = 100-zone->weather_rate;
+			//If the weather has low rate, this gives it a good chance to change back to normal.
+			if(change_rate >= tmpweather)
 			{
-				// A change in the weather....
-				uint8 tmpOldWeather = zone_weather;
-
-				if(zone->zone_weather == 0)
-					zone->zone_weather = zone->weather_type;
-				else
+				if(zone->zone_weather > 0)
+				{
 					zone->zone_weather = 0;
-
+				}
+			}
+			//Weather has a chance to change.
+			if(zone->weather_rate >= tmpweather)
+			{
+				// Weather is defintely changing.
+				if(change_rate >= tmpweather)
+				{
+					if(zone->weather_type == 4)
+					{
+						if(zone->zone_weather == 0)
+							zone->zone_weather = MakeRandomInt(1,2);
+						else if(zone->zone_weather == 1)
+							zone->zone_weather = MakeRandomInt(0,2);
+						else
+							zone->zone_weather = MakeRandomInt(0,1);
+					}
+					else if(zone->zone_weather == 0 && tmpOldWeather == 0)
+						zone->zone_weather = zone->weather_type;
+					else
+						zone->zone_weather = 0;
+				}
+				//Weather is switching to another type, but not returning to normal.
+				if(zone->zone_weather == 0 && tmpOldWeather == 0)
+				{
+					if(zone->weather_type == 4)
+						zone->zone_weather = MakeRandomInt(1,2);
+					else
+						zone->zone_weather = zone->weather_type;
+				}
+			}
+			if(zone->zone_weather != tmpOldWeather)
+			{
 				LogFile->write(EQEMuLog::Debug, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i", zone->GetShortName(), tmpOldWeather, zone_weather);
-
 				this->weatherSend();
 			}
 			else
-				LogFile->write(EQEMuLog::Debug, "The weather for zone: %s is not going to change. Chance was = %i percent.", zone->GetShortName(), tmpweather);
+				LogFile->write(EQEMuLog::Debug, "The weather for zone: %s is not going to change. Chance was %i >= %i percent.", zone->GetShortName(), zone->weather_rate, tmpweather);
 
 			uint32 weatherTime = 0;
-
-			if(zone->zone_weather != zone->weather_type)
-				weatherTime = (MakeRandomInt(1800, 7200) + 30) * 2000;
+			uint32 weatherTimer = RuleI(Zone, WeatherTimer);
+			if(weatherTimer < 60)
+				weatherTimer = 60;
+			if(zone->zone_weather > 0)
+				weatherTime = (MakeRandomInt(weatherTimer/4, weatherTimer)) * 1000;
 			else
-				weatherTime = (MakeRandomInt(900, 2700) + 30) * 1000;
+				weatherTime = (MakeRandomInt(weatherTimer/8, weatherTimer/3)) * 1000;
 
 			Weather_Timer->Start(weatherTime);
 
@@ -1811,10 +1845,10 @@ void Zone::weatherSend()
 		entity_list.Message(0, 0, "The sky clears.");
 		break;
 	case 1:
-		entity_list.Message(0, 0, "Raindrops begin to fall from the sky.");
+		entity_list.Message(0, 0, "It begins to rain.");
 		break;
 	case 2:
-		entity_list.Message(0, 0, "Snowflakes begin to fall from the sky.");
+		entity_list.Message(0, 0, "It begins to snow.");
 		break;
 	default:
 		entity_list.Message(0, 0, "Strange weather patterns form in the sky. (%i)", zone_weather);

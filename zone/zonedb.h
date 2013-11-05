@@ -431,6 +431,7 @@ public:
 	*/
 	uint8	GetZoneWeather(uint32 zoneid, uint32 version);
 	bool	SetZoneWeather(uint32 zoneid, uint32 version, uint8 w);
+	uint8	GetZoneWeatherRate(uint32 zoneid, uint32 version);
 	/*
 	* Group
 	*/
