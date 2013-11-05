@@ -219,7 +219,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
-		eq->aa_array[r] = emu->aa_array[r].value;
+		OUT(aa_array[r].AA);
+		OUT(aa_array[r].value);
 	}
 	//OUT(zoneInstance);
 	for(r = 0; r < 6; r++) {
@@ -229,6 +230,10 @@ ENCODE(OP_PlayerProfile) {
 //	OUT(leadAAActive);
 //	OUT(showhelm);
 	_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
+
+	char* packet_dump = "pp_dump.txt";
+	FileDumpPacketHex(packet_dump, __packet);
+
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
 	EQApplicationPacket* outapp = new EQApplicationPacket();
 	outapp->SetOpcode(OP_PlayerProfile);
@@ -1854,17 +1859,21 @@ ENCODE(OP_UpdateAA){
 }
 
 //On live, only sent after an AA is purchased.
-ENCODE(OP_RespondAA) {
+/*ENCODE(OP_RespondAA) {
 	ENCODE_LENGTH_EXACT(AATable_Struct);
 	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
 
 	unsigned int r;
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
+
 		OUT(aa_list[r].aa_value);
 	}
-	//eq->unknown=1;
+	eq->unknown=1;
+
+	char* packet_dump = "respondaa_dump.txt";
+	FileDumpPacketHex(packet_dump, __packet);
 	FINISH_ENCODE();
-}
+}*/
 
 ENCODE(OP_GroundSpawn) {
 

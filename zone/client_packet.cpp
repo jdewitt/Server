@@ -963,7 +963,10 @@ void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app) {
 }
 
 void Client::Handle_OP_UpdateAA(const EQApplicationPacket *app) {
-	LogFile->write(EQEMuLog::Debug, "I'm handling Connect_OP_UpdateAA you ass!");
+
+	char* packet_dump = "OP_UpdateAA_Dump.txt";
+	FileDumpPacketHex(packet_dump, app);
+
 
 	if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
 	{
@@ -971,7 +974,7 @@ void Client::Handle_OP_UpdateAA(const EQApplicationPacket *app) {
 			Message_StringID(0, 121); //ON
 		m_epp.perAA = atoi((char *)&app->pBuffer[3]);
 		SendAAStats();
-		SendAATable();
+		//SendAATable();
 	}
 	else if(strcmp((char *)app->pBuffer,"off") == 0) 
 	{
@@ -982,15 +985,40 @@ void Client::Handle_OP_UpdateAA(const EQApplicationPacket *app) {
 	}
 	else if(strncmp((char *)app->pBuffer,"buy ",4) == 0) 
 	{
-		int aa = atoi((char *)&app->pBuffer[4]);
 		AA_Action *action = (AA_Action *)app->pBuffer;
+		int aa = atoi((char *)&app->pBuffer[4]);
 
-		action->ability=atoi((char *)&app->pBuffer[4]);
+		int emuaa = database.GetMacToEmuAA(aa);
+		SendAA_Struct* aa2 = zone->FindAA(emuaa);
+
+		if(aa2 == nullptr)
+		{
+			LogFile->write(EQEMuLog::Error, "Handle_OP_UpdateAA dun goofed. EQMacAAID is: %i, but no valid EmuAAID could be found.", aa);
+			SendAATable(); // So client doesn't bug.
+			SendAAStats();
+			return;
+		}
+
+		uint32 cur_level = 0;
+		if(aa2->id > 0)
+			cur_level = GetAA(aa2->id);
+
+		action->ability=emuaa+cur_level;
 		action->action=3;
 		action->exp_value=m_epp.perAA;
 		action->unknown08=0;
-		LogFile->write(EQEMuLog::Debug, "Buying: aaID: %i, action: %i, exp: %i", action->ability, action->action, action->exp_value);
+
+		LogFile->write(EQEMuLog::Debug, "Buying: EmuaaID: %i, MacaaID: %i, action: %i, exp: %i", action->ability, aa, action->action, action->exp_value);
 		BuyAA(action);
+	}
+	else if(strncmp((char *)app->pBuffer,"activate ",9) == 0)
+	{
+		int aa = atoi((char *)&app->pBuffer[9]);
+		AA_Action *action = (AA_Action *)app->pBuffer;
+
+		action->ability=database.GetMacToEmuAA(aa);
+		mlog(AA__MESSAGE, "Activating AA %d", action->ability);		
+		ActivateAA((aaID) action->ability);
 	}
 }
 
@@ -9304,6 +9332,16 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
+	/*if(GetClientVersion() == EQClientMac)
+	{
+		int r = 0;
+		int8 tmpaa = 0;
+		for(r = 0; r < MAX_PP_AA_ARRAY; r++) {
+			tmpaa = m_pp.aa_array[r].AA;
+			if(tmpaa > 0)
+				m_pp.aa_array[r].AA = zone->EmuToEQMacAA(tmpaa);
+		}
+	}*/
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
 	m_pp.entityid = GetID();
 	memcpy(outapp->pBuffer,&m_pp,outapp->size);

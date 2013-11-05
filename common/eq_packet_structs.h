@@ -4090,6 +4090,7 @@ struct SendAA_Struct {
 	uint32 sof_current_level;
 	uint32 sof_next_id;
 	uint8 level_inc;
+	uint8 eqmacid;
 
 /*0000*/	uint32 id;
 /*0004*/	uint32 unknown004;
@@ -4140,6 +4141,16 @@ struct AA_Skills {		//this should be removed and changed to AA_Array
 /*04*/	uint32	aa_value;
 /*08*/	uint32	unknown08;
 /*12*/
+};
+
+struct OldAA_Skills {
+	uint8 aa_value;
+};
+
+struct OldAATable_Struct {
+	uint8 unknown;
+	OldAA_Skills aa_list[226];
+	uint8 unknown2;
 };
 
 struct AAExpUpdate_Struct {

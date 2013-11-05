@@ -2378,7 +2378,16 @@ struct OldBindStruct {
 	/*020*/
 };
 
-static const uint32 MAX_PP_AA_ARRAY		= 226;
+/*
+ *Used in PlayerProfile
+ */
+struct AA_Array
+{
+	uint8 AA;
+	uint8 value;
+};
+
+static const uint32  MAX_PP_AA_ARRAY		= 227;
 static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 struct PlayerProfile_Struct
 {
@@ -2461,8 +2470,7 @@ struct PlayerProfile_Struct
 /*3348*/	uint8	autosplit;
 /*3349*/	uint8	unknown3449[95];
 /*3444*/	uint32	current_zone;		// 
-/*3448*/	uint8	aa_array[MAX_PP_AA_ARRAY];
-/*3576*/	uint8	unknown3448[110];	// ***Placeholder
+/*3448*/	uint8	unknown3448[336];	// Lots of data on fake PP struct, none in normal decoded packet.
 /*3784*/	uint32	bind_point_zone;	// Lyenu: Bind zone is saved as a int32 now
 /*3788*/	uint32	start_point_zone[4];
 										// Lyenu: Start Point Zones are saved as int32s now
@@ -2491,7 +2499,7 @@ struct PlayerProfile_Struct
 /*5396*/	uint8	unknown5124[24];	// ***Placeholder 
 /*5420*/	uint32	expAA;			
 /*5424*/    uint8	unknown5424;
-/*5425*/	uint8	AAPercent;			// Player AA Percent
+/*5425*/	uint8	perAA;			    // Player AA Percent
 /*5426*/	uint8	haircolor;			// Player Hair Color
 /*5427*/	uint8	beardcolor;			// Player Beard Color
 /*5428*/	uint8	eyecolor1;			// Player Left Eye Color
@@ -2499,14 +2507,11 @@ struct PlayerProfile_Struct
 /*5430*/	uint8	hairstyle;			// Player Hair Style
 /*5431*/	uint8	beard_t;			// T7g: Beard Type, formerly title - I have no clue why, Title moved a few lines below this one
 /*5432*/	uint8	luclinface;			// Player Face Type (Is that right?)
-/*5433*/	uint8	unknown5225[195];	// ***Placeholder
-/*5628*/	uint32	unknown5628;				// AA Exp
-/*5632*/	uint8	title;				// AA Title
-/*5633*/	uint8	perAA;				// AA Percentage
-/*5634*/	uint32	aapoints;			// AA Points
-/*5638*/	uint8	unknown5426[2822];	// Unknown
-//			uint32	raid_id;			// Raid ID?
-//			uint32	unknown5450;		// Unknown (Added 09 Oct 2002)
+/*5433*/	uint8	unknown5225[179];	// ***Placeholder
+/*5612*/	AA_Array   aa_array[125];
+/*5862*/    uint8   unknown5862[40];
+/*5902*/    uint16  aapoints;
+/*5904*/	uint8   unknown5904[2556];
 };
 
 /*

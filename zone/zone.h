@@ -124,6 +124,7 @@ public:
 	int		GetTotalAAs() { return totalAAs; }
 	SendAA_Struct*	GetAABySequence(uint32 seq) { return aas[seq]; }
 	SendAA_Struct*	FindAA(uint32 id);
+	uint8	EmuToEQMacAA(uint32 id);
 	uint8	GetTotalAALevels(uint32 skill_id);
 	void	LoadZoneDoors(const char* zone, int16 version);
 	bool	LoadZoneObjects();

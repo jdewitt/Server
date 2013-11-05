@@ -34,6 +34,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/classes.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
+#include "../common/packet_dump_file.h"
 #include "../common/StringUtil.h"
 #include "../common/logsys.h"
 #include "zonedb.h"
@@ -1028,7 +1029,7 @@ void Client::BuyAA(AA_Action* action)
 		return; // Not purchasable racial AAs(set a cost to make them purchasable)
 
 	uint32 cur_level = GetAA(aa2->id);
-	if((aa2->id + cur_level) != action->ability && GetClientVersion() != EQClientMac) { //got invalid AA
+	if((aa2->id + cur_level) != action->ability) { //got invalid AA
 		mlog(AA__ERROR, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
 		return;
 	}
@@ -1119,6 +1120,70 @@ void Client::SendAATimers() {
 }
 
 void Client::SendAATable() {
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(OldAATable_Struct));
+
+		OldAATable_Struct* aa2 = (OldAATable_Struct *)outapp->pBuffer;
+		aa2->unknown = 1;
+		aa2->unknown2 = 0;
+
+		uint32 i;
+		uint8 macaaid = 0;
+		for(i=0;i < 226;i++){
+		
+			if(aa[i]->AA > 0)
+			{
+				int baseid = aa[i]->AA;
+				SendAA_Struct* aa3 = zone->FindAA(baseid);
+				if(!aa3) {
+				//hunt for a lower level...
+				int w;
+				int a;
+					for(w=1;w<MAX_AA_ACTION_RANKS;w++){
+						a = aa[i]->AA - w;
+						if(a <= 0)
+							break;
+						//_log(ZONE__INIT,"Could not find AA %d, trying potential parent %d", aa[i]->AA, a);
+						aa3 = zone->FindAA(a);
+						if(aa3 != nullptr)
+						{
+							baseid = a;
+							break;
+						}
+					}
+				}	
+				macaaid = zone->EmuToEQMacAA(baseid);
+				if(macaaid < 1)
+				_log(ZONE__INIT, "DANGER! Something went wrong! EmuAAID is: %i (%i) but MacAAID is: %i",baseid,aa[i]->AA,macaaid);
+				//_log(ZONE__INIT,"MacAAID is: %i EmuAAID is: %i on loop: %i", macaaid, aa[i]->AA, i);
+			}
+
+			if(macaaid > 0)
+			{
+				uint8 value = 0;
+				uint32 r;
+				for(r=0;r < 226;r++){
+					//_log(ZONE__INIT,"MacAAID is: %i in second loop: %i", macaaid, r);
+					if(macaaid == r+1)
+					{
+						value = aa[i]->value;
+						_log(ZONE__INIT,"MacAAID is: %i in second loop: %i value is set to: %i", macaaid, r, value);
+						aa2->aa_list[r].aa_value = value;
+						_log(ZONE__INIT,"Successfully assigned value: %i", value);
+						break;
+					}
+				}
+			}
+			macaaid = 0;
+		}	
+		char* packet_dump = "respondaa_dump.txt";
+		FileDumpPacketHex(packet_dump, outapp);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+	else
+	{
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
 
 	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
@@ -1443,6 +1508,17 @@ SendAA_Struct* Zone::FindAA(uint32 id) {
 	return aas_send[id];
 }
 
+uint8 Zone::EmuToEQMacAA(uint32 id) {
+	SendAA_Struct* saa;
+	saa = aas_send[id];
+
+	if(saa == nullptr)
+		return 0;
+	else
+		return saa->eqmacid;
+
+}
+
 void Zone::LoadAAs() {
 	LogFile->write(EQEMuLog::Status, "Loading AA information...");
 	totalAAs = database.CountAAs();
@@ -1499,6 +1575,26 @@ bool ZoneDatabase::LoadAAEffects2() {
 	}
 	safe_delete_array(query);
 	return true;
+}
+uint32 ZoneDatabase::GetMacToEmuAA(uint8 eqmacid) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	int32 skill_id = 0;
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars where eqmacid=%i", eqmacid), errbuf, &result)) {
+		safe_delete_array(query);
+		if (mysql_num_rows(result) == 1) {
+			row = mysql_fetch_row(result);
+			skill_id=atoi(row[0]);
+		}
+		mysql_free_result(result);
+	} else {
+		LogFile->write(EQEMuLog::Error, "Error in GetMacToEmuAA '%s: %s", query, errbuf);
+		safe_delete_array(query);
+	}
+	LogFile->write(EQEMuLog::Debug, "GetMacToEmuAA is returning: %i", skill_id);
+	return skill_id;
 }
 void Client::ResetAA(){
 	uint32 i;
@@ -1802,7 +1898,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars order by skill_id"), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars order by eqmacid"), errbuf, &result)) {
 		int skill=0,ndx=0;
 		while((row = mysql_fetch_row(result))!=nullptr) {
 			skill=atoi(row[0]);
@@ -1818,7 +1914,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 
 	AARequiredLevelAndCost.clear();
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id"), errbuf, &result))
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id, level, cost from aa_required_level_cost order by eqmacid"), errbuf, &result))
 	{
 		AALevelCost_Struct aalcs;
 		while((row = mysql_fetch_row(result))!=nullptr)
@@ -1890,7 +1986,8 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				"a.account_time_required, "
 				"a.sof_current_level,"
 				"a.sof_next_id, "
-				"a.level_inc "
+				"a.level_inc, "
+				"a.eqmacid "
 			" FROM altadv_vars a WHERE skill_id=%i", skill_id), errbuf, &result)) {
 			safe_delete_array(query);
 			if (mysql_num_rows(result) == 1) {
@@ -1946,6 +2043,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				sendaa->sof_current_level = atoul(row[25]);
 				sendaa->sof_next_id = atoul(row[26]);
 				sendaa->level_inc = static_cast<uint8>(atoul(row[27]));
+				sendaa->eqmacid = static_cast<uint8>(atoul(row[28]));
 			}
 			mysql_free_result(result);
 		} else {

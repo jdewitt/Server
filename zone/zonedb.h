@@ -286,6 +286,7 @@ public:
 	bool	LoadSwarmSpells();
 	SendAA_Struct*	GetAASkillVars(uint32 skill_id);
 	uint8	GetTotalAALevels(uint32 skill_id);
+	uint32	GetMacToEmuAA(uint8 eqmacid);
 	uint32	GetSizeAA();
 	uint32	CountAAs();
 	void	LoadAAs(SendAA_Struct **load);
