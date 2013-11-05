@@ -8954,9 +8954,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	x_pos		= m_pp.x;
 	y_pos		= m_pp.y;
 	z_pos		= m_pp.z;
-/*	if(ClientVersion == EQClientMac){
-			z_pos = m_pp.z/10;
-	}*/
 	heading		= m_pp.heading;
 	race		= m_pp.race;
 	base_race	= m_pp.race;

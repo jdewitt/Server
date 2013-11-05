@@ -1184,19 +1184,20 @@ void Client::SendAATable() {
 	}
 	else
 	{
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
 
-	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
-	aa2->aa_spent = GetAAPointsSpent();
+		AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
+		aa2->aa_spent = GetAAPointsSpent();
 
-	uint32 i;
-	for(i=0;i < MAX_PP_AA_ARRAY;i++){
-		aa2->aa_list[i].aa_skill = aa[i]->AA;
-		aa2->aa_list[i].aa_value = aa[i]->value;
-		aa2->aa_list[i].unknown08 = 0;
+		uint32 i;
+		for(i=0;i < MAX_PP_AA_ARRAY;i++){
+			aa2->aa_list[i].aa_skill = aa[i]->AA;
+			aa2->aa_list[i].aa_value = aa[i]->value;
+			aa2->aa_list[i].unknown08 = 0;
+		}
+		QueuePacket(outapp);
+		safe_delete(outapp);
 	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::SendPreviousAA(uint32 id, int seq){
