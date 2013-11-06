@@ -2684,6 +2684,12 @@ struct EnvDamage2_Struct {
 	int8 unknown3[14]; //A bunch of 00's...
 };
 
+struct	ItemViewRequest_Struct {
+/*000*/int16	item_id;
+/*002*/char	item_name[64];
+/*066*/
+};
+
 	};	//end namespace structs
 };	//end namespace MAC
 

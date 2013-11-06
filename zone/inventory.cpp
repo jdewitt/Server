@@ -807,6 +807,15 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 			hash
 		);
 	}
+	else if (GetClientVersion() >= EQClientMac)
+	{
+		static char itemid[6];
+		sprintf(itemid, "%06d", item->ID);
+		MakeAnyLenString(&ret_link, "%1X" "%s",
+			0,
+			itemid
+		);
+	}
 	else
 	{
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",

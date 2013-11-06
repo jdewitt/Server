@@ -1040,6 +1040,8 @@ ENCODE(OP_ItemPacket) {
 		outapp->SetOpcode(OP_Unknown);
 		if(old_item_pkt->PacketType == ItemPacketSummonItem || int_struct->slot_id == 30)
 			outapp->SetOpcode(OP_SummonedItem);
+		else if(old_item_pkt->PacketType == ItemPacketViewLink)
+			outapp->SetOpcode(OP_ItemLinkResponse);
 		else if(old_item_pkt->PacketType == ItemPacketTradeView)
 			outapp->SetOpcode(OP_TradeItemPacket);
 		else if(old_item_pkt->PacketType == ItemPacketTrade || old_item_pkt->PacketType == ItemPacketMerchant)
@@ -2030,6 +2032,14 @@ ENCODE(OP_TradeCoins) {
 	OUT(slot);
 	OUT(amount);
 	FINISH_ENCODE();
+}
+
+DECODE(OP_ItemLinkResponse){
+	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
+	SETUP_DIRECT_DECODE(LDONItemViewRequest_Struct, structs::ItemViewRequest_Struct);
+	IN(item_id);
+	strcpy(emu->item_name,eq->item_name);
+	FINISH_DIRECT_DECODE();
 }
 
 /*ENCODE(OP_FormattedMessage)

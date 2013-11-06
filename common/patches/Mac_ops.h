@@ -91,5 +91,6 @@ D(OP_GroupInvite)
 E(OP_GroupInvite2)
 D(OP_GroupInvite2)
 E(OP_TradeCoins)
+D(OP_ItemLinkResponse)
 #undef E
 #undef D

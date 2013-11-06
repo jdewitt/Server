@@ -2933,6 +2933,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 					((item==0)?"null":item->Name), 0x12,
 					((item==0)?0:inst->GetCharges()));
 			}
+			else if (c->GetClientVersion() == EQClientMac)
+			{
+				static char itemid[6];
+				sprintf(itemid, "%06d", (item==0)?0:item->ID);
+				c->Message((item==0), "WornSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
+					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
+					((item==0)?"null":item->Name), 0x12,
+					((item==0)?0:inst->GetCharges()));
+			}
 			else
 			{
 				c->Message((item==0), "WornSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
@@ -2952,6 +2961,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 			{
 				c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
 					((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+					((item==0)?"null":item->Name), 0x12,
+					((item==0)?0:inst->GetCharges()));
+			}
+			else if (c->GetClientVersion() == EQClientMac)
+			{
+				static char itemid[6];
+				sprintf(itemid, "%06d", (item==0)?0:item->ID);
+				c->Message((item==0), "InvSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
+					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
 					((item==0)?"null":item->Name), 0x12,
 					((item==0)?0:inst->GetCharges()));
 			}
@@ -2975,6 +2993,16 @@ void command_peekinv(Client *c, const Seperator *sep)
 							((item==0)?"null":item->Name), 0x12,
 							((item==0)?0:instbag->GetCharges()));
 					}
+					else if (c->GetClientVersion() == EQClientMac)
+					{
+						static char itemid[6];
+						sprintf(itemid, "%06d", (item==0)?0:item->ID);
+						c->Message((item==0), "   InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
+							Inventory::CalcSlotId(i, j),
+							i, j, ((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
+							((item==0)?"null":item->Name), 0x12,
+							((item==0)?0:instbag->GetCharges()));
+			}
 					else
 					{
 						c->Message((item==0), "   InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i",
@@ -3011,6 +3039,11 @@ void command_peekinv(Client *c, const Seperator *sep)
 				c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
 					0, 0x12, 0, "null", 0x12, 0);
 			}
+			else if (c->GetClientVersion() == EQClientMac)
+			{
+				c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X%s%c), Charges: %i", SLOT_CURSOR,i,
+					0, 0x12, 0, "null", 0x12, 0);
+			}
 			else
 			{
 				c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
@@ -3025,6 +3058,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 				{
 					c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", SLOT_CURSOR,i,
 						((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+						((item==0)?"null":item->Name), 0x12,
+						((item==0)?0:inst->GetCharges()));
+				}
+				else if (c->GetClientVersion() == EQClientMac)
+				{
+					static char itemid[6];
+					sprintf(itemid, "%06d", (item==0)?0:item->ID);
+					c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%c%s%s%c), Charges: %i", SLOT_CURSOR,i,
+						((item==0)?0:item->ID),0x12, 0x30,((item==0)?0:itemid),
 						((item==0)?"null":item->Name), 0x12,
 						((item==0)?0:inst->GetCharges()));
 				}
@@ -3045,6 +3087,16 @@ void command_peekinv(Client *c, const Seperator *sep)
 							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
 								Inventory::CalcSlotId(SLOT_CURSOR, j),
 								SLOT_CURSOR, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+								((item==0)?"null":item->Name), 0x12,
+								((item==0)?0:instbag->GetCharges()));
+						}
+						else if (c->GetClientVersion() == EQClientMac)
+						{
+							static char itemid[6];
+							sprintf(itemid, "%06d", (item==0)?0:item->ID);
+							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
+								Inventory::CalcSlotId(SLOT_CURSOR, j),
+								SLOT_CURSOR, j, ((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
 								((item==0)?"null":item->Name), 0x12,
 								((item==0)?0:instbag->GetCharges()));
 						}
@@ -3099,6 +3151,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 				((item==0)?"null":item->Name), 0x12,
 				((item==0)?0:inst->GetCharges()));
 			}
+			else if (c->GetClientVersion() == EQClientMac)
+			{
+				static char itemid[6];
+				sprintf(itemid, "%06d", (item==0)?0:item->ID);
+				c->Message((item==0), "BankSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
+				((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
+				((item==0)?"null":item->Name), 0x12,
+				((item==0)?0:inst->GetCharges()));
+			}
 			else
 			{
 			c->Message((item==0), "BankSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
@@ -3116,6 +3177,16 @@ void command_peekinv(Client *c, const Seperator *sep)
 						c->Message((item==0), "   BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
 							Inventory::CalcSlotId(i, j),
 							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+							((item==0)?"null":item->Name), 0x12,
+							((item==0)?0:inst->GetCharges()));
+					}
+					else if (c->GetClientVersion() == EQClientMac)
+					{
+						static char itemid[6];
+						sprintf(itemid, "%06d", (item==0)?0:item->ID);
+						c->Message((item==0), "   BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
+							Inventory::CalcSlotId(i, j),
+							i, j, ((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
 							((item==0)?"null":item->Name), 0x12,
 							((item==0)?0:inst->GetCharges()));
 					}
@@ -3185,6 +3256,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 					((item==0)?"null":item->Name), 0x12,
 					((item==0)?0:inst->GetCharges()));
 			}
+			else if (c->GetClientVersion() == EQClientMac)
+			{
+				static char itemid[6];
+				sprintf(itemid, "%06d", (item==0)?0:item->ID);
+				c->Message((item==0), "TradeSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
+					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
+					((item==0)?"null":item->Name), 0x12,
+					((item==0)?0:inst->GetCharges()));
+			}
 			else
 			{
 				c->Message((item==0), "TradeSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
@@ -3202,6 +3282,16 @@ void command_peekinv(Client *c, const Seperator *sep)
 						c->Message((item==0), "   TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i",
 							Inventory::CalcSlotId(i, j),
 							i, j, ((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
+							((item==0)?"null":item->Name), 0x12,
+							((item==0)?0:inst->GetCharges()));
+					}
+					else if (c->GetClientVersion() == EQClientMac)
+					{
+						static char itemid[6];
+						sprintf(itemid, "%06d", (item==0)?0:item->ID);
+						c->Message((item==0), "   TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
+							Inventory::CalcSlotId(i, j),
+							i, j, ((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
 							((item==0)?"null":item->Name), 0x12,
 							((item==0)?0:inst->GetCharges()));
 					}
@@ -6195,6 +6285,12 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
 				}
+				else if (c->GetClientVersion() == EQClientMac)
+				{
+					static char itemid[6];
+					sprintf(itemid, "%06d", (item==0)?0:item->ID);
+					c->Message(0, "  %i: %c%c%s%s%c",(int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
+				}
 				else
 				{
 					c->Message(0, "  %i: %c%06X000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
@@ -6223,6 +6319,12 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				else if (c->GetClientVersion() >= EQClientSoF)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
+				}
+			    else if (c->GetClientVersion() == EQClientMac)
+				{
+					static char itemid[6];
+					sprintf(itemid, "%06d", (item==0)?0:item->ID);
+					c->Message(0, "  %i: %c%c%s%s%c",(int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
 				}
 				else
 				{

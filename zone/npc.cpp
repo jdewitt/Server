@@ -511,6 +511,12 @@ void NPC::QueryLoot(Client* to) {
 			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
+			else if (to->GetClientVersion() == EQClientMac)
+			{
+				static char itemid[6];
+				sprintf(itemid, "%06d", item->ID);
+				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%c%s%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
+			}
 			else
 			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
