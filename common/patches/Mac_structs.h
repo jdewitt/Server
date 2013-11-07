@@ -235,7 +235,7 @@ struct NewZone_Struct
 /*0000*/	char	char_name[64];			// Character Name
 /*0064*/	char	zone_short_name[32];	// Zone Short Name
 /*0096*/	char	zone_long_name[278];	// Zone Long Name
-/*0374*/	uint8	ztype;
+/*0374*/	uint8	ztype;					// fog_on
 /*0375*/	uint8	fog_red[4];				// Red Fog 0-255 repeated over 4 bytes (confirmed: Wizzel)
 /*0379*/	uint8	fog_green[4];			// Green Fog 0-255 repeated over 4 bytes (confirmed: Wizzel)
 /*0383*/	uint8	fog_blue[4];			// Blue Fog 0-255 repeated over 4 bytes (confirmed: Wizzel)
@@ -243,10 +243,19 @@ struct NewZone_Struct
 /*0388*/	float	fog_minclip[4];			// Where the fog begins (lowest clip setting). Repeated over 4 floats. (confirmed: Wizzel)
 /*0404*/	float	fog_maxclip[4];			// Where the fog ends (highest clip setting). Repeated over 4 floats. (confirmed: Wizzel)	
 /*0420*/	float	gravity;
-/*0424*/	uint8	time_type;
-/*0425*/	uint8	unknown360[49];
+/*0424*/	uint8	time_type;				//outdoor
+/*0425*/	uint8	rainchance;
+/*0426*/	uint8	rainduration;
+/*0427*/	uint8	snowchance;
+/*0428*/	uint8	snowduration;
+/*0429*/	uint8	specialdates;
+/*0430*/	uint8	specialcodes;
+/*0431*/	char	timezone[43];			// ? What is this?
 /*0474*/	uint8	sky;					// Sky Type
-/*0475*/	uint8	unknown331[9];			// ***Placeholder
+/*0475*/	int16	water_music;			// ***Placeholder
+/*0477*/	int16	normal_music_day;		// ***Placeholder
+/*0479*/	int16	normal_music_night;		// ***Placeholder
+/*0481*/	char	unknown481[3];
 /*0484*/	float	zone_exp_multiplier;	// Experience Multiplier
 /*0488*/	float	safe_y;					// Zone Safe Y
 /*0492*/	float	safe_x;					// Zone Safe X
@@ -2688,6 +2697,22 @@ struct	ItemViewRequest_Struct {
 /*000*/int16	item_id;
 /*002*/char	item_name[64];
 /*066*/
+};
+
+/*_MAC_NET_MSG_rpServer, LogServer in emu*/
+struct LogServer_Struct {
+/*000*/	uint32	rp_active; //Is FV ruleset?
+/*004*/	uint32	pk_active; //Is a Zek-era server?
+/*008*/	uint32	auto_identify; //Dunno, keep 0
+/*012*/	uint32	NameGen;	// Name generator enabled?
+/*016*/	uint32	Gibberish;	// Disables chat if enabled.
+/*020*/	uint32	test_server;
+/*024*/	uint32	Locale;
+/*028*/	uint32	ProfanityFilter;
+/*032*/	char	worldshortname[32]; //ServerName on disasm
+/*064*/	uint8	unknown064[32]; //  loggingServerPassword
+/*096*/	char	unknown096[16];	// 'pacman' on live
+/*112*/	char	unknown112[16];	// '64.37,148,36' on live
 };
 
 	};	//end namespace structs

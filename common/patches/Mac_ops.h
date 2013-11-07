@@ -92,5 +92,6 @@ E(OP_GroupInvite2)
 D(OP_GroupInvite2)
 E(OP_TradeCoins)
 D(OP_ItemLinkResponse)
+E(OP_LogServer)
 #undef E
 #undef D
