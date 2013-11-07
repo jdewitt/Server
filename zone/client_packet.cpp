@@ -387,7 +387,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
-	ConnectedOpcodes[OP_UpdateAA] = &Client::Handle_OP_UpdateAA;
 }
 
 void ClearMappedOpcode(EmuOpcode op) {
@@ -960,66 +959,6 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app) {
 	
 	SendAATable();
-}
-
-void Client::Handle_OP_UpdateAA(const EQApplicationPacket *app) {
-
-	char* packet_dump = "OP_UpdateAA_Dump.txt";
-	FileDumpPacketHex(packet_dump, app);
-
-
-	if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
-	{
-		if(m_epp.perAA == 0)
-			Message_StringID(0, 121); //ON
-		m_epp.perAA = atoi((char *)&app->pBuffer[3]);
-		SendAAStats();
-		//SendAATable();
-	}
-	else if(strcmp((char *)app->pBuffer,"off") == 0) 
-	{
-		if(m_epp.perAA > 0)
-			Message_StringID(0, 119); //OFF
-		m_epp.perAA = 0;
-		SendAAStats();
-	}
-	else if(strncmp((char *)app->pBuffer,"buy ",4) == 0) 
-	{
-		AA_Action *action = (AA_Action *)app->pBuffer;
-		int aa = atoi((char *)&app->pBuffer[4]);
-
-		int emuaa = database.GetMacToEmuAA(aa);
-		SendAA_Struct* aa2 = zone->FindAA(emuaa);
-
-		if(aa2 == nullptr)
-		{
-			LogFile->write(EQEMuLog::Error, "Handle_OP_UpdateAA dun goofed. EQMacAAID is: %i, but no valid EmuAAID could be found.", aa);
-			SendAATable(); // So client doesn't bug.
-			SendAAStats();
-			return;
-		}
-
-		uint32 cur_level = 0;
-		if(aa2->id > 0)
-			cur_level = GetAA(aa2->id);
-
-		action->ability=emuaa+cur_level;
-		action->action=3;
-		action->exp_value=m_epp.perAA;
-		action->unknown08=0;
-
-		LogFile->write(EQEMuLog::Debug, "Buying: EmuaaID: %i, MacaaID: %i, action: %i, exp: %i", action->ability, aa, action->action, action->exp_value);
-		BuyAA(action);
-	}
-	else if(strncmp((char *)app->pBuffer,"activate ",9) == 0)
-	{
-		int aa = atoi((char *)&app->pBuffer[9]);
-		AA_Action *action = (AA_Action *)app->pBuffer;
-
-		action->ability=database.GetMacToEmuAA(aa);
-		mlog(AA__MESSAGE, "Activating AA %d", action->ability);		
-		ActivateAA((aaID) action->ability);
-	}
 }
 
 void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
@@ -1993,15 +1932,19 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	}
 	Consume_Struct* pcs = (Consume_Struct*)app->pBuffer;
 	_log(ZONE__INIT, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
+	int value = 6000;
+	if(GetClientVersion() == EQClientMac)
+		value = 127;
+
 	if(pcs->type == 0x01)
 	{
-		if(m_pp.hunger_level > 6000)
+		if(m_pp.hunger_level > value)
 		{
 			EQApplicationPacket *outapp;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
-			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
-			sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
+			sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
+			sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
 
 			QueuePacket(outapp);
 			safe_delete(outapp);
@@ -2010,13 +1953,13 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	}
 	else if(pcs->type == 0x02)
 	{
-		if(m_pp.thirst_level > 6000)
+		if(m_pp.thirst_level > value)
 		{
 			EQApplicationPacket *outapp;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
-			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
-			sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
+			sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
+			sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
 
 			QueuePacket(outapp);
 			safe_delete(outapp);
@@ -2041,15 +1984,15 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Error, "OP_Consume: unknown type, type:%i", (int)pcs->type);
 		return;
 	}
-	if (m_pp.hunger_level > 50000)
-		m_pp.hunger_level = 50000;
-	if (m_pp.thirst_level > 50000)
-		m_pp.thirst_level = 50000;
+	if (m_pp.hunger_level > 50000 || (GetClientVersion() == EQClientMac && m_pp.hunger_level > 250))
+		m_pp.hunger_level = value;
+	if (m_pp.thirst_level > 50000 || (GetClientVersion() == EQClientMac && m_pp.thirst_level > 250))
+		m_pp.thirst_level = value;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
-	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
-	sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
+	sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
+	sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -7922,36 +7865,93 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 	mlog(AA__IN, "Received OP_AAAction");
 	mpkt(AA__IN, app);
 
-	if(app->size!=sizeof(AA_Action)){
-		printf("Error! OP_AAAction size didnt match!\n");
-	return;
-	}
-	AA_Action* action=(AA_Action*)app->pBuffer;
+	if(GetClientVersion() == EQClientMac)
+	{
+		if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
+		{
+			if(m_epp.perAA == 0)
+				Message_StringID(0, 121); //ON
+			m_epp.perAA = atoi((char *)&app->pBuffer[3]);
+			SendAAStats();
+			SendAATable();
+		}
+		else if(strcmp((char *)app->pBuffer,"off") == 0) 
+		{
+			if(m_epp.perAA > 0)
+				Message_StringID(0, 119); //OFF
+			m_epp.perAA = 0;
+			SendAAStats();
+		}
+		else if(strncmp((char *)app->pBuffer,"buy ",4) == 0) 
+		{
+			AA_Action *action = (AA_Action *)app->pBuffer;
+			int aa = atoi((char *)&app->pBuffer[4]);
 
-	if(action->action == aaActionActivate) {//AA Hotkey
-		mlog(AA__MESSAGE, "Activating AA %d", action->ability);
-		ActivateAA((aaID) action->ability);
-	} else if(action->action == aaActionBuy) {
-		BuyAA(action);
-	}
-	else if(action->action == aaActionDisableEXP){ //Turn Off AA Exp
-		if(m_epp.perAA > 0)
-			Message_StringID(0, 119);	//119 Alternate Experience is *OFF*.
-		m_epp.perAA = 0;
-		SendAAStats();
-	} else if(action->action == aaActionSetEXP) {
-		_log(ZONE__INIT, "Got precentage: %i", action->exp_value);
-		if(m_epp.perAA == 0)
-			Message_StringID(0, 121);	//121 Alternate Experience is *ON*.
-		m_epp.perAA = action->exp_value;
-		if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA=0;	// stop exploit with sanity check
-		// send an update
-		SendAAStats();
-		SendAATable();
-	} else {
-		printf("Unknown AA action: %u %u 0x%x %d\n", action->action, action->ability, action->unknown08, action->exp_value);
-	}
+			int emuaa = database.GetMacToEmuAA(aa);
+			SendAA_Struct* aa2 = zone->FindAA(emuaa);
 
+			if(aa2 == nullptr)
+			{
+				LogFile->write(EQEMuLog::Error, "Handle_OP_AAAction dun goofed. EQMacAAID is: %i, but no valid EmuAAID could be found.", aa);
+				SendAATable(); // So client doesn't bug.
+				SendAAStats();
+				return;
+			}
+
+			uint32 cur_level = 0;
+			if(aa2->id > 0)
+				cur_level = GetAA(aa2->id);
+
+			action->ability=emuaa+cur_level;
+			action->action=3;
+			action->exp_value=m_epp.perAA;
+			action->unknown08=0;
+
+			LogFile->write(EQEMuLog::Debug, "Buying: EmuaaID: %i, MacaaID: %i, action: %i, exp: %i", action->ability, aa, action->action, action->exp_value);
+			BuyAA(action);
+		}
+		else if(strncmp((char *)app->pBuffer,"activate ",9) == 0)
+		{
+			int aa = atoi((char *)&app->pBuffer[9]);
+			AA_Action *action = (AA_Action *)app->pBuffer;
+
+			action->ability=database.GetMacToEmuAA(aa);
+			mlog(AA__MESSAGE, "Activating AA %d", action->ability);		
+			ActivateAA((aaID) action->ability);
+		}
+	}
+	else
+	{
+		if(app->size!=sizeof(AA_Action)){
+			printf("Error! OP_AAAction size didnt match!\n");
+		return;
+		}
+		AA_Action* action=(AA_Action*)app->pBuffer;
+
+		if(action->action == aaActionActivate) {//AA Hotkey
+			mlog(AA__MESSAGE, "Activating AA %d", action->ability);
+			ActivateAA((aaID) action->ability);
+		} else if(action->action == aaActionBuy) {
+			BuyAA(action);
+		}
+		else if(action->action == aaActionDisableEXP){ //Turn Off AA Exp
+			if(m_epp.perAA > 0)
+				Message_StringID(0, 119);	//119 Alternate Experience is *OFF*.
+			m_epp.perAA = 0;
+			SendAAStats();
+		} else if(action->action == aaActionSetEXP) {
+			_log(ZONE__INIT, "Got precentage: %i", action->exp_value);
+			if(m_epp.perAA == 0)
+				Message_StringID(0, 121);	//121 Alternate Experience is *ON*.
+			m_epp.perAA = action->exp_value;
+			if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA=0;	// stop exploit with sanity check
+			// send an update
+			SendAAStats();
+			SendAATable();
+		} else {
+			printf("Unknown AA action: %u %u 0x%x %d\n", action->action, action->ability, action->unknown08, action->exp_value);
+		}
+	}
 	return;
 }
 
@@ -9333,37 +9333,18 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
-	/*if(GetClientVersion() == EQClientMac)
+	//We need to send the EQMac AAIDs to those clients, but keep the Emu IDs in the DB.
+	if(GetClientVersion() == EQClientMac)
 	{
 		PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
 		memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
 
 		int r = 0;
-		for(r = 0; r < MAX_PP_AA_ARRAY; r++) {
-		
+		for(r = 0; r < MAX_PP_AA_ARRAY; r++) 
+		{
 			if(pps->aa_array[r].AA > 0)
 			{
-				int baseid = pps->aa_array[r].AA;
-				SendAA_Struct* aa3 = zone->FindAA(baseid);
-
-				if(!aa3) {
-				//hunt for a lower level...
-				int w;
-				int a;
-					for(w=1;w<MAX_AA_ACTION_RANKS;w++){
-						a = baseid - w;
-						if(a <= 0)
-							break;
-						//_log(ZONE__INIT,"Could not find AA %d, trying potential parent %d", aa[i]->AA, a);
-						aa3 = zone->FindAA(a);
-						if(aa3 != nullptr)
-						{
-							baseid = a;
-							break;
-						}
-					}
-				}	
-				pps->aa_array[r].AA = zone->EmuToEQMacAA(baseid);
+				pps->aa_array[r].AA = zone->EmuToEQMacAA(pps->aa_array[r].AA);
 			}
 		}
 		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
@@ -9373,13 +9354,13 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		FastQueuePacket(&outapp);
 	}
 	else
-	{*/
+	{
 		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
 		m_pp.entityid = GetID();
 		memcpy(outapp->pBuffer,&m_pp,outapp->size);
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-	//}
+	}
 
 	if(m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);

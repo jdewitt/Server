@@ -133,6 +133,8 @@ ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_NewSpawn); }
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
 
+	eq->available_slots=0xffff;
+
 	int r = 0;
 	//	OUT(checksum);
 	OUT(gender);
@@ -147,7 +149,7 @@ ENCODE(OP_PlayerProfile) {
 
 
 	OUT(deity);
-	//OUT(intoxication);
+	OUT(intoxication);
 	//OUT_array(spellSlotRefresh, 8);
 	//OUT(abilitySlotRefresh);
 //	OUT(unknown0166[4]);
@@ -194,13 +196,12 @@ ENCODE(OP_PlayerProfile) {
 //	OUT(endurance);
 //	OUT(aapoints_spent);
 	OUT(aapoints);
-//	OUT(available_slots);
 	OUT_str(name);
 	strcpy(eq->Surname, emu->last_name);
-	eq->guildid = emu->guild_id;
-	//OUT(birthday);
-	//OUT(lastlogin);
-	//OUT(timePlayedMin);
+	OUT(guild_id);
+	OUT(birthday);
+	OUT(lastlogin);
+	OUT(timePlayedMin);
 	OUT(pvp);
 	OUT(anon);
 	OUT(gm);
@@ -215,6 +216,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_bank);
 	OUT(silver_bank);
 	OUT(copper_bank);
+	OUT(level2);
 //	OUT(platinum_shared);
 //OUT(expansions);
 	OUT(autosplit);
@@ -1718,11 +1720,10 @@ ENCODE(OP_Illusion)
 	OUT(face);
 	OUT(hairstyle);
 	OUT(haircolor);
-	//OUT(beard);
+	OUT(beard);
 	OUT(beardcolor);
-	//OUT(size);
-	eq->unknown_26=26;
-	eq->unknown016=0xFFFFFFFF;
+	OUT(size);
+	eq->unknown_void=0xFFFFFFFF;
 
 	FINISH_ENCODE();
 }
@@ -1863,27 +1864,14 @@ ENCODE(OP_AAExpUpdate){
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_UpdateAA); }
-ENCODE(OP_UpdateAA){
-	
-}
-
-//On live, only sent after an AA is purchased.
-/*ENCODE(OP_RespondAA) {
-	ENCODE_LENGTH_EXACT(AATable_Struct);
-	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
-
-	unsigned int r;
-	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
-
-		OUT(aa_list[r].aa_value);
-	}
-	eq->unknown=1;
-
-	char* packet_dump = "respondaa_dump.txt";
-	FileDumpPacketHex(packet_dump, __packet);
+ENCODE(OP_AAAction){
+	ENCODE_LENGTH_EXACT(UseAA_Struct);
+	SETUP_DIRECT_ENCODE(UseAA_Struct, structs::UseAA_Struct);
+	OUT(end);
+	OUT(ability);
+	OUT(begin);
 	FINISH_ENCODE();
-}*/
+}
 
 ENCODE(OP_GroundSpawn) {
 
