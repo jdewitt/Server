@@ -186,7 +186,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(thirst_level);
 	OUT(hunger_level);
 	for(r = 0; r < 15; r++) {
-		eq->buffs[r].visable = (emu->buffs[r].spellid != 0xFFFF || emu->buffs[r].spellid != 0) ? 2 : 0;
+		eq->buffs[r].visable = (emu->buffs[r].spellid == 0xFFFFFFFF || emu->buffs[r].spellid == 0) ? 0 : 2;
 		OUT(buffs[r].level);
 		OUT(buffs[r].bard_modifier);
 		OUT(buffs[r].spellid);
@@ -1563,7 +1563,7 @@ ENCODE(OP_ShopInventoryPacket)
 		}
 		
 
-   _log(ZONE__INIT,"MERCHANT PRICE IS SET TO: %i for item: %s in slot: %i quantity: %i", pi->packets[r].item.Price, pi->packets[r].item.Name, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
+   //_log(ZONE__INIT,"MERCHANT PRICE IS SET TO: %i for item: %s in slot: %i quantity: %i", pi->packets[r].item.Price, pi->packets[r].item.Name, pi->packets[r].item.equipSlot, pi->packets[r].item.Charges);
 		
 	}
 	int32 length = 5000;
@@ -2043,6 +2043,16 @@ DECODE(OP_ItemLinkResponse){
 	IN(item_id);
 	strcpy(emu->item_name,eq->item_name);
 	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_LogServer) {
+
+	ENCODE_LENGTH_EXACT(LogServer_Struct);
+	SETUP_DIRECT_ENCODE(LogServer_Struct, structs::LogServer_Struct);
+	eq->pk_active = emu->enable_pvp;
+	eq->rp_active = emu->enable_FV;
+	strcpy(eq->worldshortname, emu->worldshortname);
+	FINISH_ENCODE();
 }
 
 /*ENCODE(OP_FormattedMessage)

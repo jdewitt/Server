@@ -2347,7 +2347,7 @@ struct OldSpellBuff_Struct
 	/*000*/uint8  visable;		// Comment: Cofruben: 0 = Buff not visible, 1 = Visible and permanent buff(Confirmed by Tazadar) , 2 = Visible and timer on(Confirmed by Tazadar) 
 	/*001*/uint8  level;			// Comment: Level of person who casted buff
 	/*002*/uint8  bard_modifier;	// Comment: Harakiri: this seems to be the bard modifier, it is normally 0x0A because we set in in the CastOn_Struct when its not a bard, else its the instrument mod
-	/*003*/uint8  b_unknown3;	// Comment: ***Placeholder
+	/*003*/uint8  activated;	// Comment: ***Placeholder
 	/*004*/uint16 spellid;		// Comment: Unknown -> needs confirming -> ID of spell?
 	/*006*/uint32 duration;		// Comment: Unknown -> needs confirming -> Duration in ticks
 };
@@ -2690,6 +2690,22 @@ struct	ItemViewRequest_Struct {
 /*000*/int16	item_id;
 /*002*/char	item_name[64];
 /*066*/
+};
+
+/*_MAC_NET_MSG_rpServer, LogServer in emu*/
+struct LogServer_Struct {
+/*000*/	uint32	rp_active; //Is FV ruleset?
+/*004*/	uint32	pk_active; //Is a Zek-era server?
+/*008*/	uint32	auto_identify; //Dunno, keep 0
+/*012*/	uint32	NameGen;	// Name generator enabled?
+/*016*/	uint32	Gibberish;	// Disables chat if enabled.
+/*020*/	uint32	test_server;
+/*024*/	uint32	Locale;
+/*028*/	uint32	ProfanityFilter;
+/*032*/	char	worldshortname[32]; //ServerName on disasm
+/*064*/	uint8	unknown064[32]; //  loggingServerPassword
+/*096*/	char	unknown096[16];	// 'pacman' on live
+/*112*/	char	unknown112[16];	// '64.37,148,36' on live
 };
 
 	};	//end namespace structs
