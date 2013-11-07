@@ -108,6 +108,7 @@ DECODE(OP_SendLoginInfo) {
 	DECODE_LENGTH_EXACT(structs::LoginInfo_Struct);
 	SETUP_DIRECT_DECODE(LoginInfo_Struct, structs::LoginInfo_Struct);
 	memcpy(emu->login_info, eq->AccountName, 64);
+	IN(zoning);
 	FINISH_DIRECT_DECODE();
 }
 

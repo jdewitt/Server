@@ -2045,7 +2045,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name), errbuf))
+	if (!RunQuery(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s', leadershipaa=''",(unsigned long)gid,name), errbuf))
 		printf("Unable to set group leader: %s\n",errbuf);
 
 	safe_delete_array(query);

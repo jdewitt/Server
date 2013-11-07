@@ -2026,8 +2026,10 @@ struct LSAuth_Struct {
 //TODO: confirm everything in this struct
 struct LoginInfo_Struct {
 /*000*/	char	AccountName[127];	// Length confirmed - Dark-Prince 22/12/2007
-/*064*/	char	Password[24];		// Length confirmed - Dark-Prince 22/12/2007
-/*189*/	uint8	unknown189[49];		//TODO: Find out wtf is this one and confirm size
+/*127*/	char	Password[24];		// Length confirmed - Dark-Prince 22/12/2007
+/*151*/ uint8	unknown189[41];		
+/*192*/ uint8   zoning;
+/*193*/ uint8   unknown193[7];
 /*200*/
 };
 

@@ -462,7 +462,7 @@ int command_init(void) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
-#if EQDEBUG >=5
+#if EQDEBUG >=11
 			LogFile->write(EQEMuLog::Debug, "command_init(): - Command '%s' set to access level %d." , cur->first.c_str(), itr->second);
 #endif
 		}
