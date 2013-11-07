@@ -518,26 +518,40 @@ DECODE(OP_TargetCommand)
 	FINISH_DIRECT_DECODE();
 }
 
-
 DECODE(OP_SetServerFilter)
 {
+	DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
 	SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
-	int r;
-	for(r = 0; r < 17; r++) {
-		IN(filters[r]);
-	}
-	emu->filters[17] = 1;
-	emu->filters[18] = 1;
-	emu->filters[19] = 1;
-	emu->filters[20] = 1;
-	emu->filters[21] = 1;
-	emu->filters[22] = 1;
-	emu->filters[23] = 1;
-	emu->filters[24] = 1;
-	emu->filters[25] = 1;
-	emu->filters[26] = 1;
-	emu->filters[27] = 1;
-	emu->filters[28] = 1;
+	emu->filters[0]=eq->filters[5]; //GuildChat
+	emu->filters[1]=eq->filters[6]; //Socials
+	emu->filters[2]=eq->filters[7]; //GroupChat
+	emu->filters[3]=eq->filters[8]; //Shouts
+	emu->filters[4]=eq->filters[9]; //Auctions
+	emu->filters[5]=eq->filters[10];//OOC
+	emu->filters[6]=1;				//BadWords
+	emu->filters[7]=eq->filters[2]; //PC Spells 0 is on
+	emu->filters[8]=0;				//NPC Spells Client has it but it doesn't work. 0 is on.
+	emu->filters[9]=eq->filters[3]; //Bard Songs 0 is on
+	emu->filters[10]=eq->filters[15]; //Spell Crits 0 is on
+	int critm = eq->filters[16];
+	if(critm > 0){critm = critm-1;}
+	emu->filters[11]=critm;			//Melee Crits 0 is on EQMac has 3 options, Emu only 2.
+	emu->filters[12]=eq->filters[0]; //Spell Damage 0 is on
+	emu->filters[13]=eq->filters[11]; //My Misses
+	emu->filters[14]=eq->filters[12]; //Others Misses
+	emu->filters[15]=eq->filters[13]; //Others Hit
+	emu->filters[16]=eq->filters[14]; //Missed Me
+	emu->filters[17] = 0;			  //Damage Shields
+	emu->filters[18] = 0;			  //DOT
+	emu->filters[19] = 0;			  //Pet Hits
+	emu->filters[20] = 0;			  //Pet Misses
+	emu->filters[21] = 0;			  //Focus Effects
+	emu->filters[22] = 0;			  //Pet Spells
+	emu->filters[23] = 0;			  //HoT	
+	emu->filters[24] = 0;			  //Unknowns
+	emu->filters[25] = 0;			
+	emu->filters[26] = 0;
+	emu->filters[27] = 0;
 	FINISH_DIRECT_DECODE();
 }
 

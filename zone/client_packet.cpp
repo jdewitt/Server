@@ -7609,6 +7609,10 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 {
+
+	char* packet_dump = "serverfilter.txt";
+	FileDumpPacketHex(packet_dump, app);
+
 	if(app->size != sizeof(SetServerFilter_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Received invalid sized "
 										"OP_SetServerFilter: got %d, expected %d", app->size,
