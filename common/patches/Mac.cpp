@@ -499,11 +499,6 @@ DECODE(OP_ClientUpdate)
 	emu->y_pos = (int16)eq->x_pos;
 	emu->z_pos = (int16)eq->z_pos/10;
 	emu->heading = (uint8)eq->heading;
-
-	 
-	emu->delta_x = (uint64)(eq->delta_x / 16.0) & 0x7FF;
-	emu->delta_z = (uint64)(eq->delta_z / 16.0) & 0x7FF;
-	emu->delta_y = ((uint64)(eq->delta_y / 16.0) >> 11) >> 11;
 	IN(delta_x);
 	IN(delta_y);
 	IN(delta_z);
@@ -2048,16 +2043,6 @@ DECODE(OP_ItemLinkResponse){
 	IN(item_id);
 	strcpy(emu->item_name,eq->item_name);
 	FINISH_DIRECT_DECODE();
-}
-
-ENCODE(OP_LogServer) {
-
-	ENCODE_LENGTH_EXACT(LogServer_Struct);
-	SETUP_DIRECT_ENCODE(LogServer_Struct, structs::LogServer_Struct);
-	eq->pk_active = emu->enable_pvp;
-	eq->rp_active = emu->enable_FV;
-	strcpy(eq->worldshortname, emu->worldshortname);
-	FINISH_ENCODE();
 }
 
 /*ENCODE(OP_FormattedMessage)
