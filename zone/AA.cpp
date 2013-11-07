@@ -1133,32 +1133,7 @@ void Client::SendAATable() {
 		for(i=0;i < 226;i++){
 		
 			if(aa[i]->AA > 0)
-			{
-				int baseid = aa[i]->AA;
-				SendAA_Struct* aa3 = zone->FindAA(baseid);
-				if(!aa3) {
-				//hunt for a lower level...
-				int w;
-				int a;
-					for(w=1;w<MAX_AA_ACTION_RANKS;w++){
-						a = aa[i]->AA - w;
-						if(a <= 0)
-							break;
-						//_log(ZONE__INIT,"Could not find AA %d, trying potential parent %d", aa[i]->AA, a);
-						aa3 = zone->FindAA(a);
-						if(aa3 != nullptr)
-						{
-							baseid = a;
-							break;
-						}
-					}
-				}	
-				macaaid = zone->EmuToEQMacAA(baseid);
-				if(macaaid < 1)
-				_log(ZONE__INIT, "DANGER! Something went wrong! EmuAAID is: %i (%i) but MacAAID is: %i",baseid,aa[i]->AA,macaaid);
-				//_log(ZONE__INIT,"MacAAID is: %i EmuAAID is: %i on loop: %i", macaaid, aa[i]->AA, i);
-			}
-
+				macaaid = zone->EmuToEQMacAA(aa[i]->AA);
 			if(macaaid > 0)
 			{
 				uint8 value = 0;
@@ -1510,14 +1485,42 @@ SendAA_Struct* Zone::FindAA(uint32 id) {
 }
 
 uint8 Zone::EmuToEQMacAA(uint32 id) {
-	SendAA_Struct* saa;
-	saa = aas_send[id];
+	
+	if(id > 0)
+	{
+		int baseid = id;
+		int newid = 0;
+		SendAA_Struct* aa2 = zone->FindAA(baseid);
+		if(!aa2) {
+		//hunt for a lower level...
+		int w;
+		int a;
+			for(w=1;w<MAX_AA_ACTION_RANKS;w++){
+				a = baseid - w;
+				if(a <= 0)
+					break;
+				//_log(ZONE__INIT,"Could not find AA %d, trying potential parent %d", aa[i]->AA, a);
+				aa2 = zone->FindAA(a);
+				if(aa2 != nullptr)
+				{
+					newid = a;
+					break;
+				}
+			}
+		}	
+		else
+			newid = id;
 
-	if(saa == nullptr)
-		return 0;
+		SendAA_Struct* saa;
+		saa = aas_send[newid];
+
+		if(saa == nullptr)
+			return 0;
+		else
+			return saa->eqmacid;
+	}
 	else
-		return saa->eqmacid;
-
+		return 0;
 }
 
 void Zone::LoadAAs() {

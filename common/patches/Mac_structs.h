@@ -787,8 +787,8 @@ struct SpawnHPUpdate_Struct
 */
 struct Stamina_Struct 
 {
-/*00*/ uint16 food;		// Comment: low more hungry 6000-0
-/*02*/ uint16 water;		// Comment: low more thirsty 6000-0
+/*00*/ uint16 food;		// Comment: low more hungry 127-0
+/*02*/ uint16 water;		// Comment: low more thirsty 127-0
 /*04*/ uint16 fatigue;	// Comment: high more fatigued 0-100
 };
 
@@ -1346,27 +1346,19 @@ struct Merchant_DelItem_Struct{
 	    uint8  unknown02[3];
 };
 
-// 4-20-08 (Wizzel)
-// Received when a client uses an illusion related action.
-// Size: 72 Bytes
-// OpCode: 9120
-// Notes: Fucking finally... ;p
 struct Illusion_Struct {
 /*000*/	int16	spawnid;
 /*002*/	int16	race;
 /*004*/	int8	gender;
 /*005*/ int8	texture;
 /*006*/	int8	helmtexture;
-/*007*/ int8	unknown_26; //Always 26
-/*008*/	int8	haircolor;
-/*009*/	int8	beardcolor;
-/*010*/	int8	eyecolor1; // the eyecolors always seem to be the same, maybe left and right eye?
-/*011*/	int8	eyecolor2;
-/*012*/	int8	hairstyle;
-/*013*/	int8	title; //Face Overlay? (barbarian only)
-/*014*/	int8	face; // and beard
-/*015*/ int8	unknown015;
-/*016*/ int32	unknown016; // Always 0xFFFFFFFF it seems.
+/*007*/ int8	face; 
+/*008*/	int8	hairstyle;
+/*009*/	int8	haircolor;
+/*010*/	int8	beard;
+/*011*/	int8	beardcolor;
+/*012*/	float	size;
+/*016*/ int32	unknown_void; // Always 0xFFFFFFFF it seems.
 };
 
 struct CPlayerItems_packet_Struct 
@@ -2035,8 +2027,10 @@ struct LSAuth_Struct {
 //TODO: confirm everything in this struct
 struct LoginInfo_Struct {
 /*000*/	char	AccountName[127];	// Length confirmed - Dark-Prince 22/12/2007
-/*064*/	char	Password[24];		// Length confirmed - Dark-Prince 22/12/2007
-/*189*/	uint8	unknown189[49];		//TODO: Find out wtf is this one and confirm size
+/*127*/	char	Password[24];		// Length confirmed - Dark-Prince 22/12/2007
+/*151*/ uint8	unknown189[41];		
+/*192*/ uint8   zoning;
+/*193*/ uint8   unknown193[7];
 /*200*/
 };
 
@@ -2415,16 +2409,14 @@ struct PlayerProfile_Struct
 /*0141*/	uint8	unknown0141;		// ***Placeholder
 /*0142*/	uint16	race;				// Player Race (Lyenu: Changed to an int16, since races can be over 255)
 /*0144*/	uint16	class_;				// Player Class
-/*0146*/	uint8	unknown0146;		// ***Placeholder
-/*0147*/	uint8	unknown0147;		// ***Placeholder
+/*0146*/	uint16	bodytype;
 /*0148*/	uint8	level;				// Player Level
-/*0149*/	uint8	unknown0149;		// ***Placeholder
-/*0150*/	uint8	unknown0150[2];		// ***Placeholder
+/*0149*/	uint8	unknown0149[3];		// ***Placeholder
 /*0152*/	uint32	exp;				// Current Experience
 /*0156*/	uint16	trainingpoints;				// Players Points
 /*0158*/	uint16	mana;				// Player Mana
 /*0160*/	uint16	cur_hp;				// Player Health
-/*0162*/	uint16	face;				// Players Face
+/*0162*/	uint16	status;				
 /*0164*/	uint16	STR;				// Player Strength
 /*0166*/	uint16	STA;				// Player Stamina
 /*0168*/	uint16	CHA;				// Player Charisma
@@ -2432,7 +2424,7 @@ struct PlayerProfile_Struct
 /*0172*/	uint16	INT;				// Player Intelligence
 /*0174*/	uint16	AGI;				// Player Agility
 /*0176*/	uint16	WIS;				// Player Wisdom
-/*0178*/	uint8	face_;               //
+/*0178*/	uint8	luclinface;               //
 /*0179*/    int8    EquipType[9];       // i think its the visible parts of the body armor
 /*0188*/    int32   EquipColor[9];      //
 /*0224*/	uint16	inventory[30];		// Player Inventory Item Numbers
@@ -2453,7 +2445,7 @@ struct PlayerProfile_Struct
 /*2358*/	uint8	unknown2374[512];	// ***Placeholder
 /*2870*/	int16	mem_spells[8];	// Player spells memorized
 /*2886*/	uint8	unknown2886[14];			// ***Placeholder [16]
-/*2900*/	uint16	unknown2900;
+/*2900*/	uint16	available_slots;
 /*2902*/	float	y;					// Player Y
 /*2906*/	float	x;					// Player X
 /*2910*/	float	z;					// Player Z
@@ -2471,11 +2463,17 @@ struct PlayerProfile_Struct
 /*2960*/	uint32	gold_cursor;
 /*2964*/	uint32	silver_cursor;
 /*2968*/	uint32	copper_cursor;
-/*2972*/	uint8	unknown2972[16];	// ***Placeholder
+/*2972*/	uint8	currency[16];	    //Unused currency?
 /*2988*/	uint16	skills[75];			// Player Skills
-/*3138*/	uint32	hunger_level;		// Probably wrong, previously was in the spot where skills should be.
-/*3142*/	uint32	thirst_level;		// Probably wrong, previously was in the spot where skills should be.
-/*3146*/	uint8	unknown3144[202];
+/*3138*/	uint8	innate[99];
+/*3237*/    uint16  air_remaining_;
+/*3239*/    uint8   texture;
+/*3240*/	float   height;
+/*3244*/	float	width;
+/*3248*/	float   length;
+/*3252*/	float   view_height;
+/*3256*/    uint8   boat_name[16];
+/*3272*/    uint8   unknown[76];
 /*3348*/	uint8	autosplit;
 /*3349*/	uint8	unknown3449[95];
 /*3444*/	uint32	current_zone;		// 
@@ -2492,18 +2490,20 @@ struct PlayerProfile_Struct
 /*4768*/	uint16	bank_inv[8];		// Player Bank Inventory Item Numbers
 /*4784*/	uint16	bank_cont_inv[80];	// Player Bank Inventory Item Numbers (Bags)
 /*4944*/	uint16	deity;		// ***Placeholder
-/*4946*/	uint16	guildid;			// Player Guild ID Number
-/*4948*/	uint32   BirthdayTime;
-/*4952*/	uint32   Unknown_4952;
-/*4956*/	uint32   TimePlayedMin;
-/*4960*/	uint8    Unknown_4960[2];
-/*4962*/	uint8    fatigue;
+/*4946*/	uint16	guild_id;			// Player Guild ID Number
+/*4948*/	uint32  birthday;
+/*4952*/	uint32  lastlogin;
+/*4956*/	uint32  timePlayedMin;
+/*4960*/	uint8   thirst_level;
+/*4961*/    uint8   hunger_level;
+/*4962*/	uint8   fatigue;
 /*4963*/	uint8	pvp;				// Player PVP Flag
-/*4964*/	uint8	unknown4756;		// ***Placeholder
+/*4964*/	uint8	level2;		// ***Placeholder
 /*4965*/	uint8	anon;				// Player Anon. Flag
 /*4966*/	uint8	gm;					// Player GM Flag
-/*4967*/	int8	guildrank;			// Player Guild Rank (0=member, 1=officer, 2=leader)
-/*4968*/	uint8	unknown4760[44];
+/*4967*/	uint8	guildrank;			// Player Guild Rank (0=member, 1=officer, 2=leader)
+/*4968*/    uint8   intoxication;
+/*4969*/	uint8	unknown4760[43];
 /*5012*/	char	groupMembers[6][64];	// Group Members
 /*5396*/	uint8	unknown5124[24];	// ***Placeholder 
 /*5420*/	uint32	expAA;			
@@ -2515,10 +2515,11 @@ struct PlayerProfile_Struct
 /*5429*/	uint8	eyecolor2;			// Player Right Eye Color
 /*5430*/	uint8	hairstyle;			// Player Hair Style
 /*5431*/	uint8	beard_t;			// T7g: Beard Type, formerly title - I have no clue why, Title moved a few lines below this one
-/*5432*/	uint8	luclinface;			// Player Face Type (Is that right?)
+/*5432*/	uint8	face;			// Player Face Type (Is that right?)
 /*5433*/	uint8	unknown5225[179];	// ***Placeholder
-/*5612*/	AA_Array   aa_array[125];
-/*5862*/    uint8   unknown5862[40];
+/*5612*/	AA_Array aa_array[120];
+/*5852*/    uint32   aa_timers[12];
+/*5900*/    uint16   air_remaining;
 /*5902*/    uint16  aapoints;
 /*5904*/	uint8   unknown5904[2556];
 };
@@ -2661,7 +2662,7 @@ struct AltAdvStats_Struct {
   int32 experience;
   int16 unspent;
   int8	percentage;
-  int8	unknownaas007;
+  int8	unknown_void;
 };
 
 struct AA_Skills {
@@ -2673,12 +2674,13 @@ struct AATable_Struct {
 	structs::AA_Skills aa_list[MAX_PP_AA_ARRAY];
 };
 
-//Server sends 7-9 of these 12 byte packets when you enter a zone on opcode 1442
+//Server sends this packet for reuse timers
 //Client sends this packet as 256 bytes, and is our equivlent of AA_Action
-struct UpdateAA_Struct {
-/*000*/ int8  unknown00[4]; // 0x0000 except for the first and last couple of packets. The more AAs the player has, the more data is here.
-/*004*/ int16 aaid; // skill_id of a purchased AA.
-/*006*/ int8  unknown06[6]; //Always the same in each packet, perhaps player info. Last 2 bytes seen as 0x7252 a couple of times.
+struct UseAA_Struct {
+/*000*/ int32 begin;
+/*004*/ int16 ability; // skill_id of a purchased AA.
+/*006*/ int8  unknown_void[2]; 
+/*008*/ int32 end;
 /*012*/
 
 };

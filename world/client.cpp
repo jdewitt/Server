@@ -1454,8 +1454,15 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	//what was the point of this? zone dosent handle this:
 	//pp.expAA			= 0xFFFFFFFF;
 
-	pp.hunger_level = 6000;
-	pp.thirst_level = 6000;
+	if(ClientVersionBit & 1) {
+		pp.hunger_level = 127;
+		pp.thirst_level = 127;
+	}
+	else
+	{
+		pp.hunger_level = 6000;
+		pp.thirst_level = 6000;
+	}
 
 
 	// FIXME: FV roleplay, database goodness...

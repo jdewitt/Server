@@ -50,7 +50,7 @@ SpawnGroup::SpawnGroup( uint32 in_id, char* name, int in_group_spawn_limit, floa
 }
 
 uint32 SpawnGroup::GetNPCType() {
-#if EQDEBUG >= 10
+#if EQDEBUG >= 11
 	LogFile->write(EQEMuLog::Debug, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
 #endif
 	int npcType = 0;

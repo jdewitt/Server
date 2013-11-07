@@ -108,6 +108,7 @@ DECODE(OP_SendLoginInfo) {
 	DECODE_LENGTH_EXACT(structs::LoginInfo_Struct);
 	SETUP_DIRECT_DECODE(LoginInfo_Struct, structs::LoginInfo_Struct);
 	memcpy(emu->login_info, eq->AccountName, 64);
+	IN(zoning);
 	FINISH_DIRECT_DECODE();
 }
 
@@ -132,6 +133,8 @@ ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_NewSpawn); }
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
 
+	eq->available_slots=0xffff;
+
 	int r = 0;
 	//	OUT(checksum);
 	OUT(gender);
@@ -146,7 +149,7 @@ ENCODE(OP_PlayerProfile) {
 
 
 	OUT(deity);
-	//OUT(intoxication);
+	OUT(intoxication);
 	//OUT_array(spellSlotRefresh, 8);
 	//OUT(abilitySlotRefresh);
 //	OUT(unknown0166[4]);
@@ -193,13 +196,12 @@ ENCODE(OP_PlayerProfile) {
 //	OUT(endurance);
 //	OUT(aapoints_spent);
 	OUT(aapoints);
-//	OUT(available_slots);
 	OUT_str(name);
 	strcpy(eq->Surname, emu->last_name);
-	eq->guildid = emu->guild_id;
-	//OUT(birthday);
-	//OUT(lastlogin);
-	//OUT(timePlayedMin);
+	OUT(guild_id);
+	OUT(birthday);
+	OUT(lastlogin);
+	OUT(timePlayedMin);
 	OUT(pvp);
 	OUT(anon);
 	OUT(gm);
@@ -214,6 +216,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_bank);
 	OUT(silver_bank);
 	OUT(copper_bank);
+	OUT(level2);
 //	OUT(platinum_shared);
 //OUT(expansions);
 	OUT(autosplit);
@@ -523,26 +526,40 @@ DECODE(OP_TargetCommand)
 	FINISH_DIRECT_DECODE();
 }
 
-
 DECODE(OP_SetServerFilter)
 {
+	DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
 	SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
-	int r;
-	for(r = 0; r < 17; r++) {
-		IN(filters[r]);
-	}
-	emu->filters[17] = 1;
-	emu->filters[18] = 1;
-	emu->filters[19] = 1;
-	emu->filters[20] = 1;
-	emu->filters[21] = 1;
-	emu->filters[22] = 1;
-	emu->filters[23] = 1;
-	emu->filters[24] = 1;
-	emu->filters[25] = 1;
-	emu->filters[26] = 1;
-	emu->filters[27] = 1;
-	emu->filters[28] = 1;
+	emu->filters[0]=eq->filters[5]; //GuildChat
+	emu->filters[1]=eq->filters[6]; //Socials
+	emu->filters[2]=eq->filters[7]; //GroupChat
+	emu->filters[3]=eq->filters[8]; //Shouts
+	emu->filters[4]=eq->filters[9]; //Auctions
+	emu->filters[5]=eq->filters[10];//OOC
+	emu->filters[6]=1;				//BadWords
+	emu->filters[7]=eq->filters[2]; //PC Spells 0 is on
+	emu->filters[8]=0;				//NPC Spells Client has it but it doesn't work. 0 is on.
+	emu->filters[9]=eq->filters[3]; //Bard Songs 0 is on
+	emu->filters[10]=eq->filters[15]; //Spell Crits 0 is on
+	int critm = eq->filters[16];
+	if(critm > 0){critm = critm-1;}
+	emu->filters[11]=critm;			//Melee Crits 0 is on EQMac has 3 options, Emu only 2.
+	emu->filters[12]=eq->filters[0]; //Spell Damage 0 is on
+	emu->filters[13]=eq->filters[11]; //My Misses
+	emu->filters[14]=eq->filters[12]; //Others Misses
+	emu->filters[15]=eq->filters[13]; //Others Hit
+	emu->filters[16]=eq->filters[14]; //Missed Me
+	emu->filters[17] = 0;			  //Damage Shields
+	emu->filters[18] = 0;			  //DOT
+	emu->filters[19] = 0;			  //Pet Hits
+	emu->filters[20] = 0;			  //Pet Misses
+	emu->filters[21] = 0;			  //Focus Effects
+	emu->filters[22] = 0;			  //Pet Spells
+	emu->filters[23] = 0;			  //HoT	
+	emu->filters[24] = 0;			  //Unknowns
+	emu->filters[25] = 0;			
+	emu->filters[26] = 0;
+	emu->filters[27] = 0;
 	FINISH_DIRECT_DECODE();
 }
 
@@ -1708,11 +1725,10 @@ ENCODE(OP_Illusion)
 	OUT(face);
 	OUT(hairstyle);
 	OUT(haircolor);
-	//OUT(beard);
+	OUT(beard);
 	OUT(beardcolor);
-	//OUT(size);
-	eq->unknown_26=26;
-	eq->unknown016=0xFFFFFFFF;
+	OUT(size);
+	eq->unknown_void=0xFFFFFFFF;
 
 	FINISH_ENCODE();
 }
@@ -1853,27 +1869,14 @@ ENCODE(OP_AAExpUpdate){
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_UpdateAA); }
-ENCODE(OP_UpdateAA){
-	
-}
-
-//On live, only sent after an AA is purchased.
-/*ENCODE(OP_RespondAA) {
-	ENCODE_LENGTH_EXACT(AATable_Struct);
-	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
-
-	unsigned int r;
-	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
-
-		OUT(aa_list[r].aa_value);
-	}
-	eq->unknown=1;
-
-	char* packet_dump = "respondaa_dump.txt";
-	FileDumpPacketHex(packet_dump, __packet);
+ENCODE(OP_AAAction){
+	ENCODE_LENGTH_EXACT(UseAA_Struct);
+	SETUP_DIRECT_ENCODE(UseAA_Struct, structs::UseAA_Struct);
+	OUT(end);
+	OUT(ability);
+	OUT(begin);
 	FINISH_ENCODE();
-}*/
+}
 
 ENCODE(OP_GroundSpawn) {
 

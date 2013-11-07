@@ -7993,11 +7993,15 @@ bool Client::RemoveRespawnOption(uint8 position)
 
 void Client::SetHunger(int32 in_hunger)
 {
+	int value = 6000;
+	if(GetClientVersion() == EQClientMac)
+		value = 127;
+
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = in_hunger;
-	sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
+	sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
 
 	m_pp.hunger_level = in_hunger;
 
@@ -8007,10 +8011,14 @@ void Client::SetHunger(int32 in_hunger)
 
 void Client::SetThirst(int32 in_thirst)
 {
+	int value = 6000;
+	if(GetClientVersion() == EQClientMac)
+		value = 127;
+
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
-	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
+	sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
 	sta->water = in_thirst;
 
 	m_pp.thirst_level = in_thirst;
