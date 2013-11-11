@@ -1089,7 +1089,10 @@ void Client::BuyAA(AA_Action* action)
 void Client::SendAATimer(uint32 ability, uint32 begin, uint32 end) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
-	uaaout->ability = ability;
+	int32 tmp = ability;
+	if(GetClientVersion() == EQClientMac)
+		tmp = zone->EmuToEQMacAA(ability);
+	uaaout->ability = tmp;
 	uaaout->begin = begin;
 	uaaout->end = end;
 	QueuePacket(outapp);
@@ -1102,18 +1105,60 @@ void Client::SendAATimers() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 
-	PTimerList::iterator c,e;
-	c = p_timers.begin();
-	e = p_timers.end();
-	for(; c != e; c++) {
-		PersistentTimer *cur = c->second;
-		if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
-			continue;	//not an AA timer
-		//send timer
-		uaaout->begin = cur->GetStartTime();
-		uaaout->end = static_cast<uint32>(time(nullptr));
-		uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
-		QueuePacket(outapp);
+	if(GetClientVersion() == EQClientMac)
+	{
+		uint32 i;
+		uint8 macaaid = 0;
+		for(i=0;i < MAX_PP_AA_ARRAY;i++)
+		{
+			if(aa[i]->AA > 0)
+			{
+				SendAA_Struct* aa2 = nullptr;
+				aa2 = zone->FindAA(aa[i]->AA);
+				if(aa2)
+				{
+					if(aa2->spell_refresh > 0) //&& aa2->classes & (1 << GetClass()))
+					{
+						int32 starttime = 0; 
+						PTimerList::iterator c,e;
+						c = p_timers.begin();
+						e = p_timers.end();
+						for(; c != e; c++) {
+							PersistentTimer *cur = c->second;
+							if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
+								continue;	//not an AA timer
+							else
+							{
+								if(cur->GetType() + pTimerAAStart == aa2->id)
+									starttime = cur->GetStartTime();
+									break;
+							}
+						}
+						uaaout->begin = starttime;
+						uaaout->end = static_cast<uint32>(time(nullptr));
+						uaaout->ability = zone->EmuToEQMacAA(aa2->id);
+						QueuePacket(outapp);
+						_log(ZONE__INIT, "Sending out timer for AA: %i. Timer start: %i Timer end: %i Recast Time: %i", uaaout->ability, uaaout->begin, uaaout->end, aa2->spell_refresh);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		PTimerList::iterator c,e;
+		c = p_timers.begin();
+		e = p_timers.end();
+		for(; c != e; c++) {
+			PersistentTimer *cur = c->second;
+			if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
+				continue;	//not an AA timer
+			//send timer
+			uaaout->begin = cur->GetStartTime();
+			uaaout->end = static_cast<uint32>(time(nullptr));
+			uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
+			QueuePacket(outapp);
+		}
 	}
 
 	safe_delete(outapp);
@@ -1152,8 +1197,6 @@ void Client::SendAATable() {
 			}
 			macaaid = 0;
 		}	
-		char* packet_dump = "respondaa_dump.txt";
-		FileDumpPacketHex(packet_dump, outapp);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

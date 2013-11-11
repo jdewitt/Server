@@ -793,11 +793,7 @@ ENCODE(OP_NewSpawn) {
 		eq->anim_type = 0x64;
 		eq->texture = emu->equip_chest2;
         eq->helm = emu->helm;
-		if(emu->race > 250)
-			eq->race = 1;
-		else
-			eq->race = emu->race;
-
+		eq->race = emu->race;
 		eq->GuildID = emu->guildID;
 		if(eq->GuildID == 0)
 			eq->GuildID = 0xFFFF;
@@ -1213,9 +1209,6 @@ ENCODE(OP_ItemPacket) {
 
 		if(outapp->size != 360)
 			_log(ZONE__INIT,"Invalid size on OP_ItemPacket packet. Expected: 360, Got: %i", outapp->size);
-
-		char* packet_dump = "packet_dump.txt";
-		FileDumpPacketHex(packet_dump, outapp);
 
 		//_log(ZONE__INIT,"I sent you a %s it's in slot: %i with charges: %i", myitem->Name, myitem->equipSlot, myitem->Charges);
 
@@ -1708,12 +1701,7 @@ ENCODE(OP_Illusion)
 	SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
 	OUT(spawnid);
 	//OUT_str(charname);
-	if(emu->race > 250){
-		eq->race = 1;
-	}
-	else {
-		OUT(race);
-	}
+	OUT(race);
 	OUT(gender);
 	OUT(texture);
 	OUT(helmtexture);
@@ -1870,6 +1858,11 @@ ENCODE(OP_AAAction){
 	OUT(end);
 	OUT(ability);
 	OUT(begin);
+	eq->unknown_void=2154;
+
+	char* packet_dump = "AAAction_OUT.txt";
+	FileDumpPacketHex(packet_dump, __packet);
+
 	FINISH_ENCODE();
 }
 
@@ -2052,6 +2045,28 @@ ENCODE(OP_LogServer) {
 	eq->pk_active = emu->enable_pvp;
 	eq->rp_active = emu->enable_FV;
 	strcpy(eq->worldshortname, emu->worldshortname);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_RequestClientZoneChange){
+	SETUP_DIRECT_ENCODE(RequestClientZoneChange_Struct, structs::RequestClientZoneChange_Struct);
+	OUT(zone_id);
+	OUT(x);
+	OUT(y);
+	OUT(z);
+	OUT(heading);
+	OUT(type);
+	FINISH_ENCODE();
+}
+
+//Just using OP_RequestClientZoneChange to keep the zoning code as stock as possible.
+ENCODE(OP_ZonePlayerToBind){
+	SETUP_DIRECT_ENCODE(ZonePlayerToBind_Struct, structs::RequestClientZoneChange_Struct);
+	eq->zone_id = emu->bind_zone_id;
+	OUT(x);
+	OUT(y);
+	OUT(z);
+	OUT(heading);
 	FINISH_ENCODE();
 }
 

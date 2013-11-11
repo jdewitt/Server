@@ -1124,6 +1124,14 @@ struct LootingItem_Struct
 /*008*/	uint32	auto_loot;			// Comment: 
 };
 
+struct RequestClientZoneChange_Struct {
+/*00*/	uint32	zone_id;
+/*02*/	float	y;
+/*04*/	float	x;
+/*08*/	float	z;
+/*12*/	float	heading;
+/*16*/	uint32	type;	//unknown... values
+};
 
 // Size = 84 bytes
 struct GMZoneRequest_Struct {
@@ -2433,15 +2441,15 @@ struct PlayerProfile_Struct
 /*1746*/    struct  OldItemProperties_Struct	cursorItemProprieties[10];
                                           //just like invitemprops[]
 /*1846*/	int16	spell_book[256];	// Player spells scribed in their book
-/*2358*/	uint8	unknown2374[512];	// ***Placeholder
+/*2358*/	uint8	unknown2374[512];	// 0xFF
 /*2870*/	int16	mem_spells[8];	// Player spells memorized
-/*2886*/	uint8	unknown2886[14];			// ***Placeholder [16]
-/*2900*/	uint16	available_slots;
-/*2902*/	float	y;					// Player Y
-/*2906*/	float	x;					// Player X
-/*2910*/	float	z;					// Player Z
-/*2914*/	float	heading;			// Player Heading
-/*2918*/	uint8	unknown2920[6];		// ***Placeholder
+/*2886*/	uint8	unknown2886[16];	// 0xFF
+/*2902*/	uint16	available_slots;
+/*2904*/	float	y;					// Player Y
+/*2908*/	float	x;					// Player X
+/*2912*/	float	z;					// Player Z
+/*2916*/	float	heading;			// Player Heading
+/*2920*/	uint8	unknown2920[4];		// ***Placeholder
 /*2924*/	uint32	platinum;			// Player Platinum (Character)
 /*2928*/	uint32	gold;				// Player Gold (Character)
 /*2932*/	uint32	silver;				// Player Silver (Character)
@@ -2670,7 +2678,7 @@ struct AATable_Struct {
 struct UseAA_Struct {
 /*000*/ int32 begin;
 /*004*/ int16 ability; // skill_id of a purchased AA.
-/*006*/ int8  unknown_void[2]; 
+/*006*/ int16  unknown_void; 
 /*008*/ int32 end;
 /*012*/
 

@@ -733,6 +733,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	if(GetLevel() >= 51)
 	{
 		SendAAStats();
+		SendAATimers();
 		if(GetClientVersion() == EQClientMac)
 			SendAATable();
 	}
@@ -752,7 +753,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	}
 	safe_delete(outapp);
 
-	SendAATimers();
+	//SendAATimers();
 
 	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
@@ -7553,9 +7554,6 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 {
 
-	char* packet_dump = "serverfilter.txt";
-	FileDumpPacketHex(packet_dump, app);
-
 	if(app->size != sizeof(SetServerFilter_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Received invalid sized "
 										"OP_SetServerFilter: got %d, expected %d", app->size,
@@ -7867,6 +7865,9 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 
 	if(GetClientVersion() == EQClientMac)
 	{
+		char* packet_dump = "AAAction_IN.txt";
+		FileDumpPacketHex(packet_dump, app);
+
 		if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
 		{
 			if(m_epp.perAA == 0)

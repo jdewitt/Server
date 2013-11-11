@@ -92,5 +92,7 @@ D(OP_GroupInvite2)
 E(OP_TradeCoins)
 D(OP_ItemLinkResponse)
 E(OP_LogServer)
+E(OP_RequestClientZoneChange)
+E(OP_ZonePlayerToBind)
 #undef E
 #undef D
