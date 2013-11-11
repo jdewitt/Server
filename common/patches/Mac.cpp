@@ -658,10 +658,7 @@ ENCODE(OP_ZoneSpawns){
 		//eq->title = emu->face;
 //		eq->unknown0274 = emu->unknown0274;
 		eq->helm = emu->helm;
-		if(emu->race > 255)
-			eq->race = 1;
-		else
-			eq->race = emu->race;
+		eq->race = emu->race;
 //		eq->unknown0288 = emu->unknown0288;
 		strncpy(eq->Surname, emu->lastName, 20);
 		eq->walkspeed = emu->walkspeed;
