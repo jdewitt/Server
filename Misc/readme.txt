@@ -1,0 +1,5 @@
+- Copy spells_en.txt and spdat.eff from your client's directory to the server directory.
+- Source in your DB (a blank template is included to get you up)
+- Edit db.ini and LoginServer.ini to match your info
+- Edit Boot5zones.bat or startserver.bat to match the IPs of your system.
+- Run the server

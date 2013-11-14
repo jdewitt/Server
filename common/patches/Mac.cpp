@@ -1764,10 +1764,10 @@ ENCODE(OP_ShopPlayerBuy)
 
 DECODE(OP_ShopPlayerSell)
 {
-	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
-	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);
+	SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 	emu->npcid=eq->npcid;
-	IN(playerid);
+	//IN(playerid);
 	IN(itemslot);
 	IN(quantity);
 	IN(price);
@@ -1776,10 +1776,10 @@ DECODE(OP_ShopPlayerSell)
 
 ENCODE(OP_ShopPlayerSell)
 {
-	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
-	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
+	SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
 	eq->npcid=emu->npcid;
-	eq->playerid=emu->playerid;
+	//eq->playerid=emu->playerid;
 	OUT(itemslot);
 	OUT(quantity);
 	OUT(price);

@@ -1321,8 +1321,17 @@ struct Merchant_Sell_Struct {
 /*007*/	uint8	unknown001;
 /*008*/	uint8	quantity;	// Qty - when used in Merchant_Purchase_Struct
 /*009*/	uint8	unknown004[3];
-/*010*/	uint16  price;
-/*012*/ uint8	unknown014[2];
+/*012*/	uint16  price;
+/*014*/ uint8	unknown014[2];
+};
+
+struct Merchant_Purchase_Struct {
+/*000*/	uint16	npcid;			// Merchant NPC's entity id
+/*002*/ uint16  playerid;
+/*004*/	uint16	itemslot;		// Player's entity id
+/*006*/ uint16  price;
+/*008*/	uint8	quantity;
+/*009*/ uint8   unknown_void[7];
 };
 
 struct Item_Shop_Struct {
