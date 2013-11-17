@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS `login_versions` (
   PRIMARY KEY  (`approval`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT into login_versions values (1,"12-4-2002 1800");
+
 CREATE TABLE IF NOT EXISTS `login_worldservers` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `account` varchar(30) NOT NULL default '',
