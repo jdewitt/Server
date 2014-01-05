@@ -2709,7 +2709,7 @@ struct	ItemViewRequest_Struct {
 /*066*/
 };
 
-/*_MAC_NET_MSG_rpServer, LogServer in emu*/
+/*_MAC_NET_MSG_rpServer, size: 244, LogServer in emu*/
 struct LogServer_Struct {
 /*000*/	uint32	rp_active; //Is FV ruleset?
 /*004*/	uint32	pk_active; //Is a Zek-era server?
@@ -2723,7 +2723,27 @@ struct LogServer_Struct {
 /*064*/	uint8	unknown064[32]; //  loggingServerPassword
 /*096*/	char	unknown096[16];	// 'pacman' on live
 /*112*/	char	unknown112[16];	// '64.37,148,36' on live
+/*126*/	uint8	unknown128[48];
+/*176*/	uint32	unknown176;
+/*180*/	char	unknown180[64];	// 'eqdataexceptions@mail.station.sony.com' on live
+/*244*/
 };
+
+/* _MAC_NET_MSG_reward_MacMsg, OP_Sound, Size: 48 */
+struct QuestReward_Struct{
+	/*0000*/	uint16	mob_id; 
+	/*0002*/	uint16	target_id;
+	/*0006*/	uint32	exp_reward;
+	/*0010*/	uint32	faction;
+	/*0014*/	uint32	faction_mod;
+	/*0018*/	uint32	copper;
+	/*0022*/	uint32	silver;
+	/*0024*/	uint32	gold;
+	/*0028*/	uint32	platinum;
+	/*0032*/	uint16	item_id;
+	/*0034*/	uint8	unknown[14];
+};
+
 
 	};	//end namespace structs
 };	//end namespace MAC
