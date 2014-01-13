@@ -482,11 +482,11 @@ ENCODE(OP_ClientUpdate)
 	OUT(delta_x);
 	OUT(delta_y);
 	eq->z_pos=emu->z_pos*10;
-	OUT(delta_heading);
+	eq->delta_heading = (uint8)emu->delta_heading;
 	eq->y_pos = (int16)emu->x_pos;
 	OUT(delta_z);
-	eq->anim_type = (int16)emu->animation;
-	OUT(heading);
+	eq->anim_type = (uint8)emu->animation;
+	eq->heading = (uint8)emu->heading;
 	FINISH_ENCODE();
 }
 
@@ -502,7 +502,7 @@ DECODE(OP_ClientUpdate)
 	IN(delta_x);
 	IN(delta_y);
 	IN(delta_z);
-	IN(delta_heading);
+	emu->delta_heading = (uint8)eq->delta_heading;
 	emu->animation = eq->anim_type;
 	FINISH_DIRECT_DECODE();
 }

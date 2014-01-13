@@ -1285,7 +1285,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	delta_y			= ppu->delta_y;
 	delta_z			= ppu->delta_z;
 	delta_heading	= ppu->delta_heading;
-	heading			= EQ19toFloat(ppu->heading);
+	if(GetClientVersion() == EQClientMac)
+		heading			= ppu->heading;
+	else
+		heading			= EQ19toFloat(ppu->heading);
 
 	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good
