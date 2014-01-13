@@ -897,9 +897,9 @@ struct Item_Struct
 	/*0179*/ uint8     unknown0179;     // ***Placeholder
 	/*0180*/ uint16    ID;         // Unique Item number
 	/*0182*/ uint16    Icon;         // Icon Number
-	/*0184*/ int16     equipSlot;       // Current Equip slot
+	/*0184*/ int16     equipSlot;       // Current slot location of item
 	/*0186*/ uint8     unknown0186[2];   // Equip slot cont.?
-	/*0188*/ uint32    Slots;  // Slots where this item goes
+	/*0188*/ uint32    Slots;  // Slots where this item is allowed
 	/*0192*/ int32     Price;            // Item cost in copper
 	/*0196*/ uint8     unknown0196[16]; // ***Placeholder
 	/*0212*/ uint8	   unknown0212; //8a
@@ -940,7 +940,7 @@ struct Item_Struct
 			/*0256*/ uint8     Material;         // Material?
 			/*0257*/ uint8     unknown0257[3];   // ***Placeholder
 			/*0260*/ uint32    Color;            // Amounts of RGB in original color
-			/*0264*/ uint16    Deity;   // ***Placeholder (Asiel: Has to do with Diety, will unwrap later)
+			/*0264*/ uint16    Deity;   // Deity
 			/*0266*/ uint16    Effect1;         // SpellID of special effect
 			/*0268*/ uint16    Classes;          // Classes that can use this item
 			/*0270*/ uint8     unknown0270[2];   // ***Placeholder
@@ -950,19 +950,20 @@ struct Item_Struct
 		} common; 
 		struct
 		{
-			/*0228*/ int16	  BookType;	
-			/*0230*/ int8     Book;      // ***Placeholder
+			/*0228*/ int16	  BookType;	 // Type of book (scroll, note, etc)
+			/*0230*/ int8     Book;      // Are we a book
 			/*0231*/ char     Filename[30];            // Filename of book text on server
+			/*0261*/ int8     unknown0262[16];    // Not used, fills out space in the packet so ShowEQ doesn't complain.
 		} book;
 		struct
 		{
-			/*0228*/ int8     unknown0228[40];     // ***Placeholder
-			/*0268*/ uint8	  BagType;
+			/*0228*/ int8     unknown0228[40];     // Not used, fills out space in the packet so ShowEQ doesn't complain.
+			/*0268*/ uint8	  BagType;			//Bag type (obviously)
 			/*0269*/ uint8    BagSlots;        // number of slots in container
-			/*0270*/ int8     IsBagOpen;     // ***Placeholder
+			/*0270*/ int8     IsBagOpen;     // 1 if bag is open, 0 if not.
 			/*0271*/ int8     BagSize;    // Maximum size item container can hold
 			/*0272*/ uint8    BagWR; // % weight reduction of container
-			/*0273*/ uint8    unknown0275[4];     // ***Placeholder
+			/*0273*/ uint8    unknown0275[4];     // Not used, fills out space in the packet so ShowEQ doesn't complain.
 		} container;
 	};
 	/*0277*/ uint8    EffectLevel2;            // Casting level
@@ -1005,6 +1006,14 @@ struct PlayerItems_Struct {
 struct MerchantItemsPacket_Struct {
 	uint16 itemtype;
 	struct Item_Struct	item;
+};
+
+struct TradeItemsPacket_Struct {
+	uint16 fromid;
+	uint16 slotid;
+	uint8  unknown;
+	struct Item_Struct	item;
+	uint8 unknown1[5];
 };
 
 struct MerchantItems_Struct {
@@ -1344,14 +1353,6 @@ struct Merchant_DelItem_Struct{
 /*002*/	uint16	playerid;		// Player's entity id
 /*006*/	uint8	itemslot;       // Slot of the item you want to remove
 /*007*/	uint8	unknown007;     // 0x40
-};
-
- struct ItemToTrade_Struct { 
-/*000*/	uint32 playerid;
-/*004*/	uint16 to_slot;
-/*006*/	uint8 unknown_1;
-/*007*/	Item_Struct item;
-	    uint8  unknown02[3];
 };
 
 struct Illusion_Struct {

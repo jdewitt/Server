@@ -1974,7 +1974,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 }
 
 // Send an item packet (including all subitems of the item)
-void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type)
+void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type, int16 fromid)
 {
 	if (!inst)
 		return;
@@ -1987,11 +1987,18 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 	ItemPacket_Struct* itempacket = nullptr;
 
 	// Construct packet
-	opcode = (packet_type==ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
+	if(packet_type==ItemPacketViewLink)
+		opcode = OP_ItemLinkResponse;
+	else if(packet_type==ItemPacketTradeView && GetClientVersion() == EQClientMac)
+		opcode = OP_TradeItemPacket;
+	else
+		opcode = OP_ItemPacket;
+	//opcode = (packet_type==ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
 	outapp = new EQApplicationPacket(opcode, packet.length()+sizeof(ItemPacket_Struct));
 	itempacket = (ItemPacket_Struct*)outapp->pBuffer;
 	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
 	itempacket->PacketType = packet_type;
+	itempacket->fromid = fromid;
 
 #if EQDEBUG >= 9
 		DumpPacket(outapp);

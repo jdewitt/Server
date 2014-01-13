@@ -1445,7 +1445,8 @@ enum ItemPacketType
 struct ItemPacket_Struct
 {
 /*00*/	ItemPacketType	PacketType;
-/*04*/	char			SerializedItem[1];
+/*04*/	uint16			fromid;
+/*06*/	char			SerializedItem[1];
 /*xx*/
 };
 

@@ -794,7 +794,7 @@ public:
 	int		GetItemLinkHash(const ItemInst* inst);
 	void	SendItemLink(const ItemInst* inst, bool sendtoall=false);
 	void	SendLootItemInPacket(const ItemInst* inst, int16 slot_id);
-	void	SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
+	void	SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type, int16 fromid = 0);
 	bool	IsValidSlot(uint32 slot);
 	bool	IsBankSlot(uint32 slot);
 
