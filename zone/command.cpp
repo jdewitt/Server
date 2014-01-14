@@ -24,7 +24,7 @@
 	2.	Add the function in this file.
 	3.	In the command_init function you must add a call to command_add
 		for your function. If you want an alias for your command, add
-		a second call to command_add with the descriptin and access args
+		a second call to command_add with the description and access args
 		set to nullptr and 0 respectively since they aren't used when adding
 		an alias. The function pointers being equal is makes it an alias.
 		The access level you set with command_add is only a default if
@@ -220,6 +220,7 @@ int command_init(void) {
 		command_add("itemtest","- merth's test function",250,command_itemtest) ||
 		command_add("gassign","[id] - Assign targetted NPC to predefined wandering grid id",100,command_gassign) ||
 		command_add("ai","[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target",100,command_ai) ||
+		command_add("showspellslist","Shows spell list of targeted NPC",100,command_showspellslist) ||
 		command_add("worldshutdown","- Shut down world and all zones",200,command_worldshutdown) ||
 		command_add("sendzonespawns","- Refresh spawn list for all clients in zone",150,command_sendzonespawns) ||
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
@@ -445,7 +446,9 @@ int command_init(void) {
 		command_add("xtargets", "Show your targets Extended Targets and optionally set how many xtargets they can have.", 250, command_xtargets) ||
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", 250, command_zopp) ||
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
-		command_add("questerrors", "Shows quest errors.", 100, command_questerrors)
+		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
+		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
+		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe)
 		)
 	{
 		command_deinit();
@@ -716,71 +719,6 @@ void command_sendop(Client *c,const Seperator *sep){
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 	return;
-
-	/*if(sep->arg[1][0] && sep->arg[2][0])
-	{
-		c->Message_StringID(atoi(sep->arg[1]),atoi(sep->arg[2]),sep->arg[3],sep->arg[4],sep->arg[5],sep->arg[6],sep->arg[7],sep->arg[8]);
-	}
-	else
-		c->Message(0,"type,string id, message1...");*/
-	/*
-		clientupdate lvl and such
-			uint32	level; //new level
-
-
-	*/
-
-
-	/*
-	if(sep->arg[1][0] && sep->arg[2][0]){
-		EQApplicationPacket* outapp = new EQApplicationPacket((EmuOpcode)atoi(sep->arg[1]),sizeof(GMName_Struct));
-		GMName_Struct* gms=(GMName_Struct*)outapp->pBuffer;
-		memset(outapp->pBuffer,0,outapp->size);
-		strcpy(gms->gmname,c->GetName());
-		strcpy(gms->oldname,c->GetName());
-		strcpy(gms->newname,sep->arg[3]);
-		if(sep->arg[4][0])
-			gms->badname=atoi(sep->arg[4]);
-		c->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	*/
-	/*
-		else{
-			EQApplicationPacket* outapp = new EQApplicationPacket(121,atoi(sep->arg[2]));
-			memset(outapp->pBuffer,0,outapp->size);
-			uint8 offset=atoi(sep->arg[3]);
-			if(offset<outapp->size && sep->arg[4][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[4]);
-			offset++;
-			if(offset<outapp->size && sep->arg[5][0])
-				outapp->pBuffer[offset+3]=atoi(sep->arg[5]);
-			offset++;
-			if(offset<outapp->size && sep->arg[6][0])
-				outapp->pBuffer[offset+3]=atoi(sep->arg[6]);
-			offset++;
-			if(offset<outapp->size && sep->arg[7][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[7]);
-			offset++;
-			if(offset<outapp->size && sep->arg[8][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[8]);
-			offset++;
-			if(offset<outapp->size && sep->arg[9][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[9]);
-			c->QueuePacket(outapp);
-			safe_delete(outapp);
-		}*/
-		//c->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
-	//}
-		/*EQApplicationPacket* outapp = new EQApplicationPacket(atoi(sep->arg[1]), sizeof(PlayerAA_Struct));
-		memcpy(outapp->pBuffer,c->GetAAStruct(),outapp->size);
-		c->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-		c->Message(15,"Invalid opcode!");
-		*/
-
 }
 
 void command_optest(Client *c, const Seperator *sep)
@@ -819,6 +757,11 @@ void command_optest(Client *c, const Seperator *sep)
 				arr->y = c->GetX();
 				arr->z = c->GetZ();
 				c->FastQueuePacket(&outapp);
+				break;
+			}
+			case 3:
+			{
+				c->SendMarqueeMessage(15, 250, 0, 500, 5000, "Some msg");
 				break;
 			}
 			default:
@@ -6464,7 +6407,7 @@ void command_ban(Client *c, const Seperator *sep)
 			client = entity_list.GetClientByName(sep->arg[1]);
 			if(client)
 			{
-				client->Kick();
+				client->WorldKick();
 			}
 			else
 			{
@@ -6526,7 +6469,7 @@ void command_suspend(Client *c, const Seperator *sep)
 			Client *BannedClient = entity_list.GetClientByName(sep->arg[1]);
 
 			if(BannedClient)
-				BannedClient->Kick();
+				BannedClient->WorldKick();
 			else
 			{
 				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
@@ -6747,6 +6690,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit Mindmg - Sets an NPCs minimum damage");
 		c->Message(0, "#npcedit Maxdmg - Sets an NPCs maximum damage");
 		c->Message(0, "#npcedit Aggroradius - Sets an NPCs aggro radius");
+		c->Message(0, "#npcedit Assistradius - Sets an NPCs assist radius");
 		c->Message(0, "#npcedit Social - Set to 1 if an NPC should assist others on its faction");
 		c->Message(0, "#npcedit Runspeed - Sets an NPCs run speed");
 		c->Message(0, "#npcedit MR - Sets an NPCs magic resistance");
@@ -6953,6 +6897,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
+	else if ( strcasecmp( sep->arg[1], "assistradius" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has an assist radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set assistradius=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
 	else if ( strcasecmp( sep->arg[1], "social" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
@@ -7083,8 +7036,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"Quest globals have been %d for NPCID %u",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"disabled":"enabled");
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set qglobal=%i where id=%i",atoi(sep->argplus[2])==0?0:1,c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->Message(15, "Quest globals have been %s for NPCID %u", atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", c->GetTarget()->CastToNPC()->GetNPCTypeID());
+		database.RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET qglobal=%i WHERE id=%i", atoi(sep->argplus[2]) == 0 ? 0 : 1, c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -10862,6 +10815,25 @@ void command_object(Client *c, const Seperator *sep)
 	}
 }
 
+void command_showspellslist(Client *c, const Seperator *sep)
+{
+	Mob *target = c->GetTarget();
+
+	if (!target) {
+		c->Message(0, "Must target an NPC.");
+		return;
+	}
+
+	if (!target->IsNPC()) {
+		c->Message(0, "%s is not an NPC.", target->GetName());
+		return;
+	}
+
+	target->CastToNPC()->AISpellsList(c);
+
+	return;
+}
+
 // All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 #ifdef BOTS
 // Function delegate to support the command interface for Bots with the client.
@@ -11526,5 +11498,59 @@ void command_questerrors(Client *c, const Seperator *sep)
 		c->Message(0, iter->c_str());
 		++i;
 		++iter;
+	}
+}
+
+void command_enablerecipe(Client *c, const Seperator *sep)
+{
+	uint32 recipe_id = 0;
+	bool success = false;
+	if (c) {
+		if (sep->argnum == 1) {
+			recipe_id = atoi(sep->arg[1]);
+		}
+		else {
+			c->Message(0, "Invalid number of arguments.\nUsage: #enablerecipe recipe_id");
+			return;
+		}
+		if (recipe_id > 0) {
+			success = database.EnableRecipe(recipe_id);
+			if (success) {
+				c->Message(0, "Recipe enabled.");
+			}
+			else {
+				c->Message(0, "Recipe not enabled.");
+			}
+		}
+		else {
+			c->Message(0, "Invalid recipe id.\nUsage: #enablerecipe recipe_id");
+		}
+	}
+}
+
+void command_disablerecipe(Client *c, const Seperator *sep)
+{
+	uint32 recipe_id = 0;
+	bool success = false;
+	if (c) {
+		if (sep->argnum == 1) {
+			recipe_id = atoi(sep->arg[1]);
+		}
+		else {
+			c->Message(0, "Invalid number of arguments.\nUsage: #disablerecipe recipe_id");
+			return;
+		}
+		if (recipe_id > 0) {
+			success = database.DisableRecipe(recipe_id);
+			if (success) {
+				c->Message(0, "Recipe disabled.");
+			}
+			else {
+				c->Message(0, "Recipe not disabled.");
+			}
+		}
+		else {
+			c->Message(0, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");
+		}
 	}
 }

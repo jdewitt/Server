@@ -114,7 +114,7 @@ QuestManager::~QuestManager() {
 }
 
 void QuestManager::Process() {
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
 	while (cur != end) {
@@ -122,8 +122,7 @@ void QuestManager::Process() {
 			if(entity_list.IsMobInZone(cur->mob)) {
 				if(cur->mob->IsNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
-				}
-				else {
+				} else {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
 				}
@@ -133,13 +132,10 @@ void QuestManager::Process() {
 				cur = QTimerList.begin();
 				end = QTimerList.end();	//dunno if this is needed, cant hurt...
 			} else {
-				tmp = cur;
-				tmp++;
-				QTimerList.erase(cur);
-				cur = tmp;
+				cur = QTimerList.erase(cur);
 			}
 		} else
-			cur++;
+			++cur;
 	}
 
 	auto cur_iter = STimerList.begin();
@@ -168,18 +164,14 @@ void QuestManager::EndQuest() {
 	running_quest run = quests_running_.top();
 	if(run.depop_npc && run.owner->IsNPC()) {
 		//clear out any timers for them...
-		std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+		std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 		end = QTimerList.end();
 		while (cur != end) {
-			if(cur->mob == run.owner) {
-				tmp = cur;
-				tmp++;
-				QTimerList.erase(cur);
-				cur = tmp;
-			} else {
-				cur++;
-			}
+			if (cur->mob == run.owner)
+				cur = QTimerList.erase(cur);
+			else
+				++cur;
 		}
 
 		run.owner->Depop();
@@ -462,7 +454,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 			cur->Timer_.Start(seconds * 1000, false);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 
 	QTimerList.push_back(QuestTimer(seconds * 1000, owner, timer_name));
@@ -486,7 +478,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 			cur->Timer_.Start(milliseconds, false);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
@@ -495,7 +487,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 void QuestManager::stoptimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
 
-	if(questitem) {
+	if (questitem) {
 		questitem->StopTimer(timer_name);
 		return;
 	}
@@ -503,14 +495,12 @@ void QuestManager::stoptimer(const char *timer_name) {
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
-	while (cur != end)
-	{
-		if(cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
+	while (cur != end) {
+		if (cur->mob && cur->mob == owner && cur->name == timer_name) {
 			QTimerList.erase(cur);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 }
 
@@ -525,19 +515,11 @@ void QuestManager::stopalltimers() {
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 	end = QTimerList.end();
-	while (cur != end)
-	{
+	while (cur != end) {
 		if(cur->mob && cur->mob == owner)
-		{
-			tmp = cur;
-			tmp++;
-			QTimerList.erase(cur);
-			cur = tmp;
-		}
+			cur = QTimerList.erase(cur);
 		else
-		{
-			cur++;
-		}
+			++cur;
 	}
 }
 
@@ -2096,6 +2078,7 @@ bool QuestManager::istaskactive(int task) {
 
 	return false;
 }
+
 bool QuestManager::istaskactivityactive(int task, int activity) {
 	QuestManagerCurrentQuestVars();
 
@@ -2104,6 +2087,7 @@ bool QuestManager::istaskactivityactive(int task, int activity) {
 
 	return false;
 }
+
 int QuestManager::gettaskactivitydonecount(int task, int activity) {
 	QuestManagerCurrentQuestVars();
 
@@ -2113,6 +2097,7 @@ int QuestManager::gettaskactivitydonecount(int task, int activity) {
 	return 0;
 
 }
+
 void QuestManager::updatetaskactivity(int task, int activity, int count) {
 	QuestManagerCurrentQuestVars();
 
@@ -2165,6 +2150,7 @@ int QuestManager::enabledtaskcount(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::firsttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2173,6 +2159,7 @@ int QuestManager::firsttaskinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::lasttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2181,6 +2168,7 @@ int QuestManager::lasttaskinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::nexttaskinset(int taskset, int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2189,6 +2177,7 @@ int QuestManager::nexttaskinset(int taskset, int taskid) {
 
 	return -1;
 }
+
 int QuestManager::activespeaktask() {
 	QuestManagerCurrentQuestVars();
 
@@ -2196,6 +2185,7 @@ int QuestManager::activespeaktask() {
 		return initiator->ActiveSpeakTask(owner->GetNPCTypeID());
 	return 0;
 }
+
 int QuestManager::activespeakactivity(int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2204,6 +2194,7 @@ int QuestManager::activespeakactivity(int taskid) {
 
 	return 0;
 }
+
 int QuestManager::istaskcompleted(int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2212,6 +2203,7 @@ int QuestManager::istaskcompleted(int taskid) {
 
 	return -1;
 }
+
 int QuestManager::activetasksinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2220,6 +2212,7 @@ int QuestManager::activetasksinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::completedtasksinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2237,6 +2230,7 @@ bool QuestManager::istaskappropriate(int task) {
 
 	return false;
 }
+
 void QuestManager::clearspawntimers() {
 	if(zone) {
 		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
@@ -2253,6 +2247,7 @@ void QuestManager::clearspawntimers() {
 		}
 	}
 }
+
 void QuestManager::ze(int type, const char *str) {
 	entity_list.Message(0, type, str);
 }
@@ -2440,18 +2435,17 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 
 	const Item_Struct* item = nullptr;
 	item = database.GetItem(itemid);
-	if (!item) return 0;		// likewise, if it isn't a valid item, the merchant doesn't have any
+	if (!item)
+		return 0;	// if it isn't a valid item, the merchant doesn't have any
 
 	// look for the item in the merchant's temporary list
 	std::list<TempMerchantList> MerchList = zone->tmpmerchanttable[NPCid];
 	std::list<TempMerchantList>::const_iterator itr;
-	TempMerchantList ml;
 	uint32 Quant = 0;
 
-	for(itr = MerchList.begin(); itr != MerchList.end(); itr++){
-		ml = *itr;
-		if (ml.item == itemid) {	// if this is the item we're looking for
-			Quant = ml.charges;
+	for (itr = MerchList.begin(); itr != MerchList.end(); ++itr) {
+		if (itr->item == itemid) {	// if this is the item we're looking for
+			Quant = itr->charges;
 			break;
 		}
 	}
@@ -2892,6 +2886,22 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	strn0cpy(CZSC->Message, Message, 512);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+bool QuestManager::EnableRecipe(uint32 recipe_id)
+{
+	bool success = false;
+	if (recipe_id > 0)
+		success = database.EnableRecipe(recipe_id);
+	return (success);
+}
+
+bool QuestManager::DisableRecipe(uint32 recipe_id)
+{
+	bool success = false;
+	if (recipe_id > 0)
+		success = database.DisableRecipe(recipe_id);
+	return (success);
 }
 
 Client *QuestManager::GetInitiator() const {

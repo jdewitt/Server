@@ -1,5 +1,139 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/13/2014 ==
+Kayen: Numerous minor fixes to spell effects.
+Kayen: Changed SE_ArcheryDoubleAttack -> SE_DoubleRangedAttack (now works with throwing ect)
+Kayen: Changed SE_IncreaseHitDmgTaken -> SE_TriggerMeleeThreshold (now only works on melee)
+Kayen: Changed SE_MitigateMeleeDamageSP -> SE_MeleeThresholdGuard
+Kayen: Implemented SE_SpellThresholdGuard (Partial Spell Rune that only is lowered if spell hits are over X amount of damage)
+Kayen: Implemented SE_TriggerSpellThreshold (implemented  Trigger effect on X amount of spell damage taken)
+Kayen: Changed SE_ReduceHealing -> SE_FcHealAmtIncoming (focus limited Add/Remove amount of healing on target by X amount)
+Kayen: Change SE_CriticalHealChance2 -> SE_CriticalHealDecay	
+Kayen: Change SE_CriticalHealOverTime2 -> SE_CriticalRegenDecay	
+Kayen: Implemented SE_CriticalDotDecay	
+Note: 'Decay' effects means the chance to critical decays based on the level of the spell using the effect (like focus decay)
+Kayen: Implemented SE_FfLimitUseMin (focus limit to require a min amount of numhits value)
+Kayen: Implemented SE_FcLimitUse (focus to increases numhits count by percent)
+Kayen: Implemented SE_LimitRace	(Limits to spells cast by a certain race)
+Kayen: Implemented SE_FcMute  (silences casting of spells that contain specific spell effects) ie silence only heals
+
+== 01/09/2014 ==
+demonstar55: Add pet size preservation like live (zone, camp, etc)
+
+== 01/07/2014 ==
+demonstar55: Moved pet can attack check to before it tries to attack, which is more live like.
+
+== 01/03/2014 ==
+demonstar55: Crash prevention for emote.
+
+== 01/02/2014 ==
+demonstar55: Stuns from beneficial spells (Harvest) ignore immunity
+
+== 12/26/2013 ==
+demonstar55: Added classes_required to merchantlist (same bitmask as items)
+
+== 12/24/2013 ==
+Secrets (Akkadius): Perl $client->SilentMessage("Message"); addition, this is a pre-req for a Perl plugin I've shared with EQEmu. This function essentially mimics a player speaking with an NPC - which is used in popup window responses 
+Secrets: Added functionality to Perl for $client->PlayMP3("name of file"). 
+  Usage varies, but typically you can place an MP3/WAV/XMI in the EQDir//sounds, pfs, s3d, or root client folder and it will play through this Perl function. Example, $client->PlayMP3("combattheme1.mp3") or $client->PlayMP3("TUTBTrade1.mp3")
+  All clients except Secrets of Faydwer and 6.2 have their opcodes identified for this function. The struct + supported params is the same throughout versions. 
+  Use $client->PlayMP3 with an invalid sound file to stop playback or simply wait for it to end.
+KLS: Added functionality to Lua for Client:PlayMP3(filename)
+KLS: Added functionality to Lua for Client:SendMarqueeMessage(type, priority/opacity, fade_in_time_ms, fade_out_time_ms, duration_ms, msg)
+  
+== 12/16/2013 ==
+Kayen: Implemented SE_ArcheryDoubleAttack (Chance to do an extra archery attack)
+Kayen: Implemented SE_ShieldEquipDmgMod (Increase damage in primary hand if shield equiped)
+Kayen: Implemented SE_ShieldEquipHateMod (Increase hate generated if shield equiped)
+Kayen: Implemented SE_TriggerOnAmountValue (Trigger spell if HP/Mana/End bellow X value or num pet on target)
+
+== 12/16/2013 ==
+Kayen: Fix to SE_BlockNextSpellFocus to make it functional again.
+
+== 12/15/2013 ==
+demonstar55: Moved the blocked buff check down so we get spell effects like on live
+Kayen: Implemented SE_ReduceHealing (Reduces amount of healing on target by X amount)
+Kayen: Implemented SE_CastonFocusEffect (Triggers spell as part of a focus, when that focus effect is used)
+Kayen: Implemented SE_IncreaseHitDmgTaken (Effect is triggered when X amount of damage is taken)
+Kayen: More fixes for various spell triggers/procs to now properly use their resist modifier.
+
+== 12/14/2013 ==
+demonstar55: Blocked buffs shouldn't fail, they should just not be applied.
+JJ: Changed enable/disable recipe to confirm change made.
+
+== 12/13/2013 ==
+Kayen: Implemented additional functionality for SE_CurrentHP utilizing base2 values. (ie limit to body type)
+Kayen: Implemented SE_MitigateMeleeDamageSP (Partial Melee Rune that only is lowered if melee hits are over X amount of damage)
+Kayen: Implemented SE_SpellOnAmtDmgTaken (Effect is triggered when X amount of damage is taken)
+Kayen: Fix for various spell triggers/procs to now properly use their resist modifier.
+Kayen: Fix to mob->ModSkillDmgTaken(skill_num, value), setting value to -1 will now properly effect all skills.
+
+== 12/11/2013 ==
+demonstar55: Fixed issue with crippling blow from berserker frenzy not actually doing anything
+demonstar55: Fix haste caps
+
+== 12/04/2013 ==
+demonstar55: Fixed SpellType_Charm case in AICastSpell
+
+== 12/03/2013 ==
+demonstar55: Added #showspellslist to view a mobs spell list
+demonstar55: Fix procing off of unattackable things
+
+== 12/02/2013 ==
+JJ: Bandaid fix to CopyCharacter function.
+
+== 11/29/2013 ==
+demonstar55: Stacking issues should be resolved now, probably could be optimized more, but went from 3 loops that do stuff to 3 where only 2 really does stuff and one breaks early in most cases, so slightly better
+
+== 11/23/2013 ==
+Secrets: Fixed an issue related to a zone crash where the count of the abilities in an AA was 0, leading to a size 0 buffer issue.
+
+== 11/19/2013 ==
+Secrets: Fixed an issue with two zone crashes reported on PEQ related to the buff restrictions code and AAs.
+demonstar55: Partially make use of dot_stacking_exempt (case when it's 1 is implemented, -1 case isn't)
+
+== 11/18/2013 ==
+demonstar55: Added assistradius to npc_types, defaults to aggroradius if set to 0 (old behaviour)
+
+== 11/17/2013 ==
+Sorvani: fixed leash and tether special abilities to use the specified range correctly.
+demonstar55: Rewrote the Mob::_GetMovementSpeed fix an issue that arose from the change on 11/11
+	- Added the rule Character:BaseRunSpeedCap (default 158) so people can customize what their runspeed cap is. Hardcapped to 225 so stuff doesn't get too crazy.
+
+== 11/16/2013 ==
+Leere: Fixed the drinking message for auto-consume, it will again correctly show up for forced consumption instead.
+demonstar55: Added Mob::DoCastingChecks() which will check for various fail conditions while the casting bar is up. This is called after Mob::DoCastSpell() starts the casting and before it returns.
+
+== 11/15/2013 ==
+demonstar55: Fixed Mob::CalcFocusEffect()'s SE_LimitEffect
+Leere: Fixed a stacking issue for SE_StackingCommand_Block
+
+== 11/13/2013 ==
+demonstar55: Implemented bard song effect cap. You can set the base cap with the rule Character:BaseInstrumentSoftCap, defaults to 36 or "3.6" as it is sometimes referred to.
+demonstar55: Fix Echo of Taelosia and Ayonae's Tutelage to increase the mod cap instead of further improving the instrument mod
+demonstar55: Implemented Singing/Instrument Mastery as an AA bonus.
+
+== 11/11/2013 ==
+demonstar55: Changed the way walk speed is calculated to allow mobs to have their walk speed equal a 100% movement reduction
+
+== 11/09/2013 ==
+Leere: Fixed Bard mana regen, they now only are affected by items and AA.
+
+== 11/07/2013 ==
+KLS: Added a system to use the BaseData system in the client.
+KLS: Added an optional utility to import spells, skill caps and base data (will import from ./import and export to ./export).
+
+Be sure to source the SQL and run shared_memory.
+
+== 11/06/2013 ==
+JJ: (Kingly_Krab) Fix for #npcedit qglobal command.
+
+== 11/01/2013 ==
+JJ: Added in-game commands to enable/disable tradeskill recipes
+-Commands: #enablerecipe recipe_id, #disablerecipe recipe_id
+-Perl: quest::enablerecipe(recipe_id), quest::disablerecipe(recipe_id)
+-Lua: eq.enable_recipe(recipe_id), eq.disable_recipe(recipe_id)
+
 == 10/31/2013 ==
 Leere: Add the ability to disable a tradeskill recipe
 
@@ -13,7 +147,7 @@ Notes:
 	- A per-client method will still need to be observed when coding for the new skill uses
 
 == 10/27/2013 ==
-Uleat: Attempted fix for high level (12) debug compile failiures
+Uleat: Attempted fix for high level (12) debug compile failures
 Notes:
 	- Explicit Windows vs. Linux code was not changed due to my inability to compile Linux code
 	- Only CMake accessible flags were corrected if adding the 'std' namespace did not correct the issue

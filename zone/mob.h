@@ -106,7 +106,13 @@ public:
 	//Attack
 	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
 	virtual void RogueAssassinate(Mob* other); // solar
-	bool BehindMob(Mob* other = 0, float playerx = 0.0f, float playery = 0.0f) const;
+	float MobAngle(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const;
+	// greater than 90 is behind
+	inline bool BehindMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
+		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) > 90.0f; }
+	// less than 56 is in front, greater than 56 is usually where the client generates the messages
+	inline bool InFrontMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
+		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) < 56.0f; }
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
@@ -126,6 +132,7 @@ public:
 	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
 	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
 	bool CombatRange(Mob* other);
+	virtual inline bool IsBerserk() { return false; } // only clients
 
 	//Appearance
 	void SendLevelAppearance();
@@ -198,6 +205,7 @@ public:
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
+	bool DoCastingChecks();
 
 	//Buff
 	void BuffProcess();
@@ -205,6 +213,7 @@ public:
 	void BuffFadeBySpellID(uint16 spell_id);
 	void BuffFadeByEffect(int effectid, int skipslot = -1);
 	void BuffFadeAll();
+	void BuffFadeNonPersistDeath();
 	void BuffFadeDetrimental();
 	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
@@ -256,6 +265,8 @@ public:
 	void TempName(const char *newname = nullptr);
 	void SetTargetable(bool on);
 	bool IsTargetable() const { return m_targetable; }
+	bool HasShieldEquiped() const { return has_shieldequiped; }
+	inline void ShieldEquiped(bool val) { has_shieldequiped = val; }
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { return 0; }
 	virtual uint32 GetEquipment(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
@@ -442,7 +453,7 @@ public:
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
 	uint16 GetSkillByItemType(int ItemType);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
-	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr);
+	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr, float in_size = 0.0f);
 	bool IsWarriorClass() const;
 	char GetCasterClass() const;
 	uint8 GetArchetype() const;
@@ -528,6 +539,7 @@ public:
 	void TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger);
 	void TrySpellTrigger(Mob *target, uint32 spell_id);
 	void TryApplyEffect(Mob *target, uint32 spell_id);
+	void TryTriggerOnValueAmount(bool IsHP = false, bool IsMana = false, bool IsEndur = false, bool IsPet = false);
 	void TryTwincast(Mob *caster, Mob *target, uint32 spell_id);
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
 	bool TryFadeEffect(int slot);
@@ -557,6 +569,7 @@ public:
 	bool CanBlockSpell() const { return(spellbonuses.BlockNextSpell); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
 	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
+	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect); 
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -997,6 +1010,7 @@ protected:
 	uint32 casting_spell_timer_duration;
 	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
+	bool casting_spell_checks;
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
@@ -1039,6 +1053,7 @@ protected:
 	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
 	int16 rooted_mod; //Modifier to root break chance, defined when root is cast on a target.
 	bool offhand;
+	bool has_shieldequiped;
 
 	// Bind wound
 	Timer bindwound_timer;

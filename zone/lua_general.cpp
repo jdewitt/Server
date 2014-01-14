@@ -614,6 +614,22 @@ std::string lua_say_link(const char *phrase, bool silent, const char *link_name)
 	return std::string(text);
 }
 
+std::string lua_say_link(const char *phrase, bool silent) {
+	char text[256] = { 0 };
+	strncpy(text, phrase, 255);
+	quest_manager.saylink(text, silent, text);
+
+	return std::string(text);
+}
+
+std::string lua_say_link(const char *phrase) {
+	char text[256] = { 0 };
+	strncpy(text, phrase, 255);
+	quest_manager.saylink(text, false, text);
+
+	return std::string(text);
+}
+
 const char *lua_get_guild_name_by_id(uint32 guild_id) {
 	return quest_manager.getguildnamebyid(guild_id);
 }
@@ -1021,6 +1037,14 @@ void lua_clear_opcode(int op) {
 	ClearMappedOpcode(static_cast<EmuOpcode>(op));
 }
 
+bool lua_enable_recipe(uint32 recipe_id) {
+	return quest_manager.EnableRecipe(recipe_id);
+}
+
+bool lua_disable_recipe(uint32 recipe_id) {
+	return quest_manager.DisableRecipe(recipe_id);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1133,7 +1157,9 @@ luabind::scope lua_register_general() {
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
 		luabind::def("item_link", &lua_item_link),
-		luabind::def("say_link", &lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
@@ -1182,7 +1208,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_owner", &lua_get_owner),
 		luabind::def("get_quest_item", &lua_get_quest_item),
 		luabind::def("map_opcodes", &lua_map_opcodes),
-		luabind::def("clear_opcode", &lua_clear_opcode)
+		luabind::def("clear_opcode", &lua_clear_opcode),
+		luabind::def("enable_recipe", &lua_enable_recipe),
+		luabind::def("disable_recipe", &lua_disable_recipe)
 	];
 }
 

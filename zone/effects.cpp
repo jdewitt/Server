@@ -205,6 +205,9 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value) {
 	if (GetClass() == NECROMANCER && critChance > 0)
 		critChance += 5;
 
+	if (spellbonuses.CriticalDotDecay)
+			critChance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
+
 	if (critChance > 0){
 		if (MakeRandomInt(0, 99) < critChance){
 			modifier += modifier*ratio/100;
@@ -237,6 +240,7 @@ int32 Client::Additional_Heal(uint16 spell_id)
 
 	heal_amt += GetFocusEffect(focusAdditionalHeal, spell_id);
 	heal_amt += GetFocusEffect(focusAdditionalHeal2, spell_id);
+	heal_amt -= GetFocusEffect(focusFcHealAmtIncoming, spell_id);
 
 	if (heal_amt){
 		int duration = CalcBuffDuration(this, this, spell_id);
@@ -274,6 +278,9 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
 
 		//Live AA - Healing Gift, Theft of Life
 		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+						
+		if (spellbonuses.CriticalRegenDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
 
 		if(MakeRandomInt(0,99) < chance) {
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), ((value * modifier / 50) + heal_amt*2));
@@ -285,7 +292,11 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
 	}
 	// Hots
 	else {
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+		chance += itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+		
+		if (spellbonuses.CriticalRegenDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+		
 		if(MakeRandomInt(0,99) < chance)
 			return ((value * modifier / 50) + heal_amt*2);
 	}
@@ -611,6 +622,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	if(GetEndurance() > spell.EndurCost) {
 		SetEndurance(GetEndurance() - spell.EndurCost);
+		TryTriggerOnValueAmount(false, false, true);
 	} else {
 		Message(11, "You are too fatigued to use this skill right now.");
 		return(false);

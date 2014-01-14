@@ -3468,15 +3468,18 @@ struct LevelAppearance_Struct { //Sends a little graphic on level up
 	uint32	value5b;
 /*64*/
 };
-struct MerchantList{
+
+struct MerchantList {
 	uint32	id;
 	uint32	slot;
 	uint32	item;
 	int16	faction_required;
 	int8	level_required;
 	uint16	alt_currency_cost;
+	uint32	classes_required;
 };
-struct TempMerchantList{
+
+struct TempMerchantList {
 	uint32	npcid;
 	uint32	slot;
 	uint32	item;
@@ -3523,7 +3526,7 @@ struct MobRename_Struct {
 };
 
 struct PlayMP3_Struct {
-	char filename[128];
+	char filename[0];
 };
 
 //this is for custom title display in the skill window
@@ -5122,6 +5125,24 @@ struct ServerLootItem_Struct {
 	uint32 aug5;
 	uint8 minlevel;
 	uint8 maxlevel;
+};
+
+//Found in client near a ref to the string:
+//"Got a broadcast message for ... %s ...\n"
+struct ClientMarqueeMessage_Struct {
+	uint32 type;
+	uint32 unk04; // no idea, didn't notice a change when altering it.
+	//According to asm the following are hard coded values: 2, 4, 5, 6, 7, 10, 12, 13, 14, 15, 16, 18, 20
+	//There is also a non-hardcoded fall through but to be honest i don't know enough about what it does yet
+	uint32 priority; //needs a better name but it does:
+	//opacity = (priority / 255) - floor(priority / 255)
+	//# of fade in/out blinks = (int)((priority - 1) / 255)
+	//so 510 would have 100% opacity and 1 extra blink at end
+	uint32 fade_in_time; //The fade in time, in ms
+	uint32 fade_out_time; //The fade out time, in ms
+	uint32 duration; //in ms
+	char msg[1]; //message plus null terminator
+	
 };
 
 typedef std::list<ServerLootItem_Struct*> ItemList;

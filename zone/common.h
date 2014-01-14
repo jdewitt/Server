@@ -73,8 +73,11 @@ typedef enum {	//focus types
 	focusBlockNextSpell,
 	focusHealRate,
 	focusAdditionalDamage,
+	focusFcHealAmtIncoming,
 	focusSpellEffectiveness,
 	focusIncreaseNumHits,
+	focusFcLimitUse,
+	focusFcMute,
 	focusCriticalHealRate,
 	focusAdditionalHeal2,
 	focusAdditionalHeal,
@@ -229,6 +232,7 @@ struct StatBonuses {
 	uint16	percussionMod;
 	uint16	windMod;
 	uint16	stringedMod;
+	uint16	songModCap;
 	int8	hatemod;
 	int32	EnduranceReduction;
 
@@ -249,6 +253,7 @@ struct StatBonuses {
 	int16	DualWieldChance;					//i
 	int16	DoubleAttackChance;					//i
 	int16	TripleAttackChance;					//i
+	int16   DoubleRangedAttack;				//i
 	int16	ResistSpellChance;					//i
 	int16	ResistFearChance;					//i
 	bool	Fearless;							//i
@@ -307,10 +312,17 @@ struct StatBonuses {
 	int16	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
 	uint16	NegateAttacks[2];					// 0 = bool HasEffect 1 = Buff Slot
 	uint16	MitigateMeleeRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
+	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
+	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
 	int16	ShieldBlock;						// Chance to Shield Block
 	int16	BlockBehind;						// Chance to Block Behind (with our without shield)
+	bool	CriticalRegenDecay;					// increase critical regen chance, decays based on spell level cast
+	bool	CriticalHealDecay;					// increase critical heal chance, decays based on spell level cast
+	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
 
@@ -356,6 +368,9 @@ struct StatBonuses {
 	int16	ItemATKCap;							// Raise item attack cap
 	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
 	uint16	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
+	int16	ShieldEquipHateMod;					// Hate mod when shield equiped.
+	int16	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
+	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
 };
 
 typedef struct

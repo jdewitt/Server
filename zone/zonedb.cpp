@@ -1046,6 +1046,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.hp_regen_rate,"
 			"npc_types.mana_regen_rate,"
 			"npc_types.aggroradius,"
+			"npc_types.assistradius,"
 			"npc_types.bodytype,"
 			"npc_types.npc_faction_id,"
 			"npc_types.face,"
@@ -1145,6 +1146,9 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				// set defaultvalue for aggroradius
 				if (tmpNPCType->aggroradius <= 0)
 					tmpNPCType->aggroradius = 70;
+				tmpNPCType->assistradius = (int32)atoi(row[r++]);
+				if (tmpNPCType->assistradius <= 0)
+					tmpNPCType->assistradius = tmpNPCType->aggroradius;
 
 				if (row[r] && strlen(row[r]))
 					tmpNPCType->bodytype = (uint8)atoi(row[r]);
@@ -2766,11 +2770,11 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 	safe_delete_array(query);
 
 	if(!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`) "
-		"values (%u, 0, '%s', %i, %u, %u, %u) "
-		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u",
-		c->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana,
-		petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana),
+		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
+		"values (%u, 0, '%s', %i, %u, %u, %u, %f) "
+		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
+		c->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size,
+		petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size),
 		errbuf))
 	{
 		safe_delete_array(query);
@@ -2813,11 +2817,11 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 
 
 	if(!database.RunQuery(query, MakeAnyLenString(&query,
-		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`) "
-		"values (%u, 1, '%s', %u, %u, %u, %u) "
-		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u",
-		c->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana,
-		suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana),
+		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
+		"values (%u, 1, '%s', %u, %u, %u, %u, %f) "
+		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u, `size`=%f",
+		c->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana, suspended->size,
+		suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana, suspended->size),
 		errbuf))
 	{
 		safe_delete_array(query);
@@ -2863,7 +2867,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 	memset(suspended, 0, sizeof(PetInfo));
 
 	if(database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana` from `character_pet_info` where `char_id`=%u",
+		"SELECT `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size` from `character_pet_info` where `char_id`=%u",
 		c->CharacterID()), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -2881,6 +2885,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			pi->SpellID = atoi(row[3]);
 			pi->HP = atoul(row[4]);
 			pi->Mana = atoul(row[5]);
+			pi->size = atof(row[6]);
 		}
 		mysql_free_result(result);
 	}
