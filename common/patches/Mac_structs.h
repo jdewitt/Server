@@ -893,20 +893,23 @@ struct Item_Struct
 	/*0175*/ int8      NoRent;          // Nosave flag 1=normal, 0=nosave, -1=spell?
 	/*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
 	/*0177*/ uint8     Size;            // Size of item
-	/*0178*/ int8      ItemClass;
-	/*0179*/ uint8     unknown0179;     // ***Placeholder
+	/*0178*/ int16     ItemClass;
 	/*0180*/ uint16    ID;         // Unique Item number
 	/*0182*/ uint16    Icon;         // Icon Number
 	/*0184*/ int16     equipSlot;       // Current slot location of item
-	/*0186*/ uint8     unknown0186[2];   // Equip slot cont.?
+	/*0186*/ uint8     unknown0186[2];   // Client dump has equipSlot/location as a short so this is still unknown
 	/*0188*/ uint32    Slots;  // Slots where this item is allowed
 	/*0192*/ int32     Price;            // Item cost in copper
-	/*0196*/ uint8     unknown0196[16]; // ***Placeholder
-	/*0212*/ uint8	   unknown0212; //8a
-	/*0213*/ uint8	   unknown0213; //26
-	/*0214*/ int16     unknown0214;
-	/*0216*/ uint8     unknown0216; // 01
-	/*0217*/ uint8     unknown217[11];
+	/*0196*/ float     cur_x; //Here to 227 are named from client struct dump.
+	/*0200*/ float	   cur_y;
+	/*0204*/ float     cur_z;
+	/*0208*/ float     heading;
+	/*0212*/ uint32	   inv_refnum; 
+	/*0216*/ int16	   log; 
+	/*0218*/ int16     loot_log;
+	/*0220*/ uint16    avatar_level;  //Usually 01, sometimes seen as FFFF, once as 0.
+	/*0222*/ uint16    bottom_feed;
+	/*0224*/ uint32	   poof_item;
 	union
 	{
 		struct
@@ -937,15 +940,12 @@ struct Item_Struct
 			/*0253*/ uint8     ItemType;            // Skill of this weapon, refer to weaponskill chart
 			/*0254*/ int8      Magic;            // Magic flag
 			/*0255*/ int8      EffectLevel1;           // Casting level
-			/*0256*/ uint8     Material;         // Material?
-			/*0257*/ uint8     unknown0257[3];   // ***Placeholder
+			/*0256*/ uint32    Material;         // Material
 			/*0260*/ uint32    Color;            // Amounts of RGB in original color
-			/*0264*/ uint16    Deity;   // Deity
+			/*0264*/ uint16    Faction;			// Structs dumped from client has this as Faction
 			/*0266*/ uint16    Effect1;         // SpellID of special effect
-			/*0268*/ uint16    Classes;          // Classes that can use this item
-			/*0270*/ uint8     unknown0270[2];   // ***Placeholder
-			/*0272*/ uint16    Races;            // Races that can use this item
-			/*0274*/ int8      unknown0274[2];   // ***Placeholder
+			/*0268*/ uint32    Classes;          // Classes that can use this item
+			/*0272*/ uint32    Races;            // Races that can use this item
 			/*0276*/ int8      Stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)			
 		} common; 
 		struct
@@ -953,17 +953,17 @@ struct Item_Struct
 			/*0228*/ int16	  BookType;	 // Type of book (scroll, note, etc)
 			/*0230*/ int8     Book;      // Are we a book
 			/*0231*/ char     Filename[30];            // Filename of book text on server
-			/*0261*/ int8     unknown0262[16];    // Not used, fills out space in the packet so ShowEQ doesn't complain.
+			/*0261*/ int32    buffer1[4];    // Not used, fills out space in the packet so ShowEQ doesn't complain.
 		} book;
 		struct
 		{
-			/*0228*/ int8     unknown0228[40];     // Not used, fills out space in the packet so ShowEQ doesn't complain.
+			/*0228*/ int32    buffer2[10];     // Not used, fills out space in the packet so ShowEQ doesn't complain.
 			/*0268*/ uint8	  BagType;			//Bag type (obviously)
 			/*0269*/ uint8    BagSlots;        // number of slots in container
 			/*0270*/ int8     IsBagOpen;     // 1 if bag is open, 0 if not.
 			/*0271*/ int8     BagSize;    // Maximum size item container can hold
 			/*0272*/ uint8    BagWR; // % weight reduction of container
-			/*0273*/ uint8    unknown0275[4];     // Not used, fills out space in the packet so ShowEQ doesn't complain.
+			/*0273*/ uint32   buffer3;     // Not used, fills out space in the packet so ShowEQ doesn't complain.
 		} container;
 	};
 	/*0277*/ uint8    EffectLevel2;            // Casting level
@@ -981,15 +981,16 @@ struct Item_Struct
 	/*0316*/ int16    BaneDmgRace;
 	/*0318*/ int16    BaneDmgBody;
 	/*0320*/ uint8    BaneDmgAmt;
-	/*0321*/ uint8    unknown0321[3];
+	/*0321*/ uint8    unknown0321[3]; //title_flag
 	/*0324*/ uint8    RecLevel;         // max should be 65
 	/*0325*/ uint8    RecSkill;         // Max should be 252
-	/*0326*/ uint8    unknown0326[2];
+	/*0326*/ uint16   ProcRate; 
 	/*0328*/ uint8    ElemDmgType; 
 	/*0329*/ uint8    ElemDmgAmt;
-	/*0330*/ uint8    unknown0330[22];
-	/*0352*/ uint8    ReqLevel; // Required level
-	/*0353*/ uint8    unknown0353[5];
+	/*0330*/ uint8    unknown0330[22]; //Faction Mods and Deity
+	/*0352*/ uint16   ReqLevel; // Required level
+	/*0354*/ uint16   BardType;
+	/*0356*/ uint16	  BardValue;
 	/*0358*/ uint16   FocusEffect;  //Confirmed
 };
 
@@ -1297,8 +1298,8 @@ struct TimeOfDay_Struct
 struct Merchant_Click_Struct {
 /*000*/ uint16	npcid;			// Merchant NPC's entity id
 /*002*/ uint16	playerid;
-/*004*/	uint8   command;
-/*005*/ uint8	unknown[3];
+/*004*/	uint8  command;
+/*006*/ uint8	unknown[3];
 /*008*/ float   rate;
 };
 

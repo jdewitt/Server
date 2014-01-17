@@ -3784,8 +3784,12 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 	if(acthealed > 100){
 		if(caster){
 			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), TempString);
-			if(caster != this){
-				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), TempString);
+			if(caster != this && caster->IsClient())
+			{
+				if(caster->CastToClient()->GetClientVersion() != EQClientMac)
+				{
+					caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), TempString);
+				}
 			}
 		}
 		else{
