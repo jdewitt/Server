@@ -5855,6 +5855,11 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(DistNoRoot(*vendor) > USE_NPC_RANGE2)
 		return;
 
+	if(GetClientVersion() == EQClientMac)
+	{
+		if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
+			mp->itemslot = mp->itemslot+1;
+	}
 	uint32 price=0;
 	uint32 itemid = GetItemIDAt(mp->itemslot);
 	if(itemid == 0)
@@ -5921,8 +5926,13 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		}
 		inst2->SetMerchantCount(MerchantQuantity);
 
-		SendItemPacket(freeslot-1, inst2, ItemPacketMerchant);
-		safe_delete(inst2);
+		if(GetClientVersion() == EQClientMac)
+			BulkSendMerchantInventory(vendor->CastToNPC()->MerchantType,vendor->GetNPCTypeID());
+		else
+		{
+			SendItemPacket(freeslot-1, inst2, ItemPacketMerchant);
+			safe_delete(inst2);
+		}
 	}
 
 	// start QS code
@@ -5965,14 +5975,34 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	else
 		this->DeleteItemInInventory(mp->itemslot,mp->quantity,false);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
-	Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
-	mco->npcid = vendor->GetID();
-	mco->itemslot=mp->itemslot;
-	mco->quantity=mp->quantity;
-	mco->price=price;
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(OldMerchant_Purchase_Struct));
+		OldMerchant_Purchase_Struct* mco=(OldMerchant_Purchase_Struct*)outapp->pBuffer;
+
+		if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
+			mco->itemslot = mp->itemslot-1;
+		else
+			mco->itemslot = mp->itemslot;
+		mco->npcid = vendor->GetID();
+		mco->quantity=mp->quantity;
+		mco->price=price;
+		mco->playerid=this->GetID();
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+	else
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
+		Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
+		mco->npcid = vendor->GetID();
+		mco->itemslot=mp->itemslot;
+		mco->quantity=mp->quantity;
+		mco->price=price;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+
 	SendMoneyUpdate();
 	t1.start();
 	Save(1);

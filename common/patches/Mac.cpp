@@ -1109,7 +1109,7 @@ ENCODE(OP_CharInventory){
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 
-	int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
+	int16 itemcount = in->size / sizeof(InternalSerializedItem_Struct);
 	if(itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 		delete in;
@@ -1139,7 +1139,7 @@ ENCODE(OP_CharInventory){
 	memcpy(pi->packets,weasel_string.c_str(),weasel_string.length());
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, length);
 	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, itemcount * sizeof(structs::Item_Struct), &outapp->pBuffer[buffer], length-buffer);
-	pi->count = itemcount;
+	outapp->pBuffer[0] = itemcount;
 
 	dest->FastQueuePacket(&outapp);
 	delete[] __emu_buffer;
@@ -1154,7 +1154,7 @@ ENCODE(OP_ShopInventoryPacket)
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 
-	int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
+	int16 itemcount = in->size / sizeof(InternalSerializedItem_Struct);
 	if(itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 		_log(ZONE__INIT, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 		delete in;
@@ -1188,7 +1188,7 @@ ENCODE(OP_ShopInventoryPacket)
 	memcpy(pi->packets,weasel_string.c_str(),weasel_string.length());
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, length);
 	outapp->size = buffer + DeflatePacket((uchar*) pi->packets, itemcount * sizeof(structs::MerchantItemsPacket_Struct), &outapp->pBuffer[buffer], length-buffer);
-	pi->count = itemcount;
+	outapp->pBuffer[0] = itemcount;
 
 	dest->FastQueuePacket(&outapp);
 	delete[] __emu_buffer;
@@ -1728,6 +1728,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   			thejuice->equipSlot = slot_id;
 
 		thejuice->Charges = inst->GetCharges(); 
+		thejuice->Price = item->Price;
   	}
   	else
   	{ 
@@ -1737,6 +1738,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   			thejuice->Charges = 1;
   
   		thejuice->equipSlot = inst->GetMerchantSlot();
+		thejuice->Price = inst->GetPrice();  
     }
   
 		thejuice->ItemClass = item->ItemClass;
@@ -1750,7 +1752,6 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ID = item->ID;        
 		thejuice->Icon = item->Icon;       
 		thejuice->Slots = item->Slots;  
-		thejuice->Price = inst->GetPrice();   
 		thejuice->SellRate = item->SellRate;
 		thejuice->CastTime = item->CastTime;  
 		thejuice->SkillModType = item->SkillModType;

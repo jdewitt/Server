@@ -1872,6 +1872,14 @@ struct Merchant_Purchase_Struct {
 /*008*/	uint32	quantity;
 /*012*/	uint32	price;
 };
+struct OldMerchant_Purchase_Struct {
+/*000*/	uint16	npcid;			// Merchant NPC's entity id
+/*002*/ uint16  playerid;
+/*004*/	uint16	itemslot;		// Player's entity id
+/*006*/ uint16  price;
+/*008*/	uint8	quantity;
+/*009*/ uint8   unknown_void[7];
+};
 struct Merchant_DelItem_Struct{
 /*000*/	uint32	npcid;			// Merchant NPC's entity id
 /*004*/	uint32	playerid;		// Player's entity id
