@@ -8,13 +8,21 @@
 		<!-- <address>some.server.com</address> -->
 		<!-- <localaddress>192.168.0.5</localaddress> -->
 
-		<!-- Loginserver information.  Defaults shown -->
-		<loginserver>
+		<!-- Loginserver information. Loginserver2 is eqmac client login Defaults shown -->
+		<loginserver1>
 			<host>eqemulator.net</host>
 			<port>5998</port>
 			<account></account>
 			<password></password>
-		</loginserver>
+			<type>0</type>
+		</loginserver1>
+		<loginserver2>
+			<host>127.0.0.1</host>
+			<port>5999</port>
+			<account>0</account>
+			<password>0</password>
+			<type>1</type>
+		</loginserver2>
 
 		<!-- Server status.  Default is unlocked -->
 		<!--<locked/>-->
