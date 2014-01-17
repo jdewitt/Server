@@ -1026,7 +1026,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if(command_dispatch(this, message) == -2) {
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i != 0) {
+					if(i == 0) {
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
