@@ -799,8 +799,8 @@ bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
 
 	uint32 mask_test = client->GetClientVersionBit();
 	int count = 0;
-	uchar buffer1[sizeof(OldDoor_Struct)];
-	uchar buffer2[7000];
+	uchar doorstruct[sizeof(OldDoor_Struct)];
+	uchar packet[sizeof(OldDoor_Struct)*255];
 	int16 length = 0;
 
 	LinkedListIterator<Doors*> iterator(door_list);
@@ -815,14 +815,14 @@ bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
 		iterator.Advance();
 	}
 
-	if(count == 0 || count > 500)
+	if(count == 0 || count > 255) //doorid is uint8
 	{
 		return false;
 	}
 
 	count = 0;
 	Doors *door;
-	OldDoor_Struct* nd = (OldDoor_Struct*)buffer1;
+	OldDoor_Struct* nd = (OldDoor_Struct*)doorstruct;
 	memset(nd,0,sizeof(OldDoor_Struct));
 
 	iterator.Reset();
@@ -844,22 +844,26 @@ bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
 			nd->inverted = door->GetInvertState();
 			nd->parameter = door->GetDoorParam();
 			
-			memcpy(buffer2+length,buffer1,44);
-			length = length + 44;
+			memcpy(packet+length,doorstruct,sizeof(OldDoor_Struct));
+			length += sizeof(OldDoor_Struct);
+
+			_log(ZONE__INIT,"Added doorid %i (%s) which is count #: %i",nd->doorid,nd->name,count+1);
 
 			count++;
 		}
 		iterator.Advance();
 	}
 		
+	int32 deflength = sizeof(OldDoor_Struct)*count;
+	int buffer = 2;
+
 	app->SetOpcode(OP_SpawnDoor);
-	app->pBuffer = new uchar[7000];
-	length = DeflatePacket(buffer2,length,app->pBuffer+2,7000);
-	app->size = length+2;
+	app->pBuffer = new uchar[sizeof(OldDoor_Struct)*count];
+	app->size = buffer + DeflatePacket(packet,length,app->pBuffer+buffer,deflength+buffer);
 	OldDoorSpawns_Struct* ds = (OldDoorSpawns_Struct*)app->pBuffer;
 
 	ds->count = count;
-	_log(ZONE__INIT,"%i Doors successfully spawned.",count);
+	//_log(ZONE__INIT,"%i Doors successfully spawned.",count);
 	return true;
 }
 

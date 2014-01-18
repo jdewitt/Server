@@ -994,7 +994,6 @@ void Client::SendAAStats() {
 	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)max_AAXP);
 	aps->unspent = m_pp.aapoints;
 	aps->percentage = m_epp.perAA;
-	LogFile->write(EQEMuLog::Debug, "AA values sent. Exp: %i, Points: %i, Percentage: %i!", aps->experience, aps->unspent, aps->percentage);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
