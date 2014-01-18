@@ -42,7 +42,6 @@ INSERT INTO `variables` VALUES ('disablecommandline', '0', 'Allow command lines 
 INSERT INTO `variables` VALUES ('Expansions', '16383', 'Accessible expansions for each player', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('ServerType', '0', 'Sets server type | 0 - normal | 1 - pvp |', '2004-10-28 15:09:41');
 INSERT INTO `variables` VALUES ('holdzones', '1', 'Restart Crashed Zone Servers | 0 - off | 1 - on |', '2008-01-31 22:20:29');
-INSERT INTO `variables` VALUES ('LoginType', 'minilogin', 'Set this to Minilogin to login using a minilogin server :)', '2013-08-04 22:55:12');
 INSERT INTO `variables` VALUES ('Max_AAXP', '21626880', 'Max AA Experience', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('MerchantsKeepItems', '0', 'Merchants keep items sold to them | 0 - off | 1 - on |', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('MOTD', 'CAT PLANET!!!!!!!!!!!', 'Server Message of the Day', '2013-01-27 19:51:40');
