@@ -1049,7 +1049,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 						std::string packet = inst->Serialize(ml.slot-1);
 						ser_items[m++] = packet;
 						size += packet.length();
-						_log(ZONE__INIT, "Got merchant item # %i", m);
 					}
 				}
 				else
@@ -1099,7 +1098,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 						std::string packet = inst->Serialize(ml.slot-1);
 						ser_items[m++] = packet;
 						size += packet.length();
-						_log(ZONE__INIT, "Got TEMP merchant item # %i", m);
 					}
 
 				}
@@ -1156,7 +1154,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				ptr += length;
 			}
 		}
-		_log(ZONE__INIT, "Client is sending inventory packet to OP_MerchantItemPacket.");
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

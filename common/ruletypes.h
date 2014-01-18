@@ -32,7 +32,7 @@ RULE_BOOL( Character, UseDeathExpLossMult, false ) //Adjust to use the above mul
 RULE_INT ( Character, CorpseDecayTimeMS, 10800000 )
 RULE_INT ( Character, CorpseResTimeMS, 10800000 ) // time before cant res corpse(3 hours)
 RULE_BOOL( Character, LeaveCorpses, true )
-RULE_BOOL( Character, LeaveNakedCorpses, false )
+RULE_BOOL( Character, LeaveNakedCorpses, true )
 RULE_INT ( Character, MaxDraggedCorpses, 2 )
 RULE_REAL( Character, DragCorpseDistance, 400) // If the corpse is <= this distance from the player, it won't move
 RULE_REAL( Character, ExpMultiplier, 0.5 )
@@ -49,7 +49,7 @@ RULE_INT ( Character, AutosaveIntervalS, 300 )	//0=disabled
 RULE_INT ( Character, HPRegenMultiplier, 100)
 RULE_INT ( Character, ManaRegenMultiplier, 100)
 RULE_INT ( Character, EnduranceRegenMultiplier, 100)
-RULE_INT ( Character, ConsumptionMultiplier, 100) //item's hunger restored = this value * item's food level, 100 = normal, 50 = people eat 2x as fast, 200 = people eat 2x as slow
+RULE_INT ( Character, ConsumptionMultiplier, 500) //item's hunger restored = this value * item's food level, 100 = normal, 50 = people eat 2x as fast, 200 = people eat 2x as slow
 RULE_BOOL( Character, HealOnLevel, false)
 RULE_BOOL( Character, FeignKillsPet, false)
 RULE_INT ( Character, ItemManaRegenCap, 15)
@@ -86,15 +86,15 @@ RULE_BOOL ( Character, SoDClientUseSoDHPManaEnd, false)	// Setting this to true 
 RULE_BOOL ( Character, UseRaceClassExpBonuses, true)	// Setting this to true will enable Class and Racial experience rate bonuses
 RULE_BOOL ( Character, RespawnFromHover, false)		// Use Respawn window, or not.
 RULE_INT ( Character, RespawnFromHoverTimer, 300)	// Respawn Window countdown timer, in SECONDS
-RULE_BOOL ( Character, UseNewStatsWindow, true)		// New stats window shows everything
+RULE_BOOL ( Character, UseNewStatsWindow, false)		// New stats window shows everything
 RULE_BOOL ( Character, ItemCastsUseFocus, false) // If true, this allows item clickies to use focuses that have limited max levels on them
 RULE_INT ( Character, MinStatusForNoDropExemptions, 80) // This allows status x and higher to trade no drop items.
 RULE_INT ( Character, SkillCapMaxLevel, 75 )	// Sets the Max Level used for Skill Caps (from skill_caps table). -1 makes it use MaxLevel rule value. It is set to 75 because PEQ only has skillcaps up to that level, and grabbing the players' skill past 75 will return 0, breaking all skills past that level. This helps servers with obsurd level caps (75+ level cap) function without any modifications.
 RULE_INT ( Character, StatCap, 0 )
 RULE_BOOL ( Character, CheckCursorEmptyWhenLooting, true ) // If true, a player cannot loot a corpse (player or NPC) with an item on their cursor
 RULE_BOOL ( Character, MaintainIntoxicationAcrossZones, true ) // If true, alcohol effects are maintained across zoning and logging out/in.
-RULE_BOOL ( Character, EnableDiscoveredItems, true ) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
-RULE_BOOL ( Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
+RULE_BOOL ( Character, EnableDiscoveredItems, false ) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
+RULE_BOOL ( Character, EnableXTargetting, false) // Enable Extended Targetting Window, for users with UF and later clients.
 RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
@@ -145,8 +145,8 @@ RULE_CATEGORY( World )
 RULE_INT ( World, ZoneAutobootTimeoutMS, 60000 )
 RULE_INT ( World, ClientKeepaliveTimeoutMS, 65000 )
 RULE_BOOL ( World, UseBannedIPsTable, false ) // Toggle whether or not to check incoming client connections against the Banned_IPs table. Set this value to false to disable this feature.
-RULE_BOOL ( World, EnableTutorialButton, true)
-RULE_BOOL ( World, EnableReturnHomeButton, true)
+RULE_BOOL ( World, EnableTutorialButton, false)
+RULE_BOOL ( World, EnableReturnHomeButton, false)
 RULE_INT ( World, MaxLevelForTutorial, 10)
 RULE_INT ( World, TutorialZoneID, 189)
 RULE_INT ( World, GuildBankZoneID, 345)
@@ -156,7 +156,7 @@ RULE_INT ( World, ExemptMaxClientsStatus, -1 ) // Exempt accounts from the MaxCl
 RULE_INT ( World, AddMaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < ExemptMaxClientsStatus. Default value: -1 (feature disabled)
 RULE_INT ( World, AddMaxClientsStatus, -1 ) // Accounts with status >= this rule will be allowed to use the amount of accounts defined in the AddMaxClientsPerIP. Default value: -1 (feature disabled)
 RULE_BOOL ( World, MaxClientsSetByStatus, false) // If True, IP Limiting will be set to the status on the account as long as the status is > MaxClientsPerIP
-RULE_BOOL ( World, ClearTempMerchantlist, true) // Clears temp merchant items when world boots.
+RULE_BOOL ( World, ClearTempMerchantlist, false) // Clears temp merchant items when world boots.
 RULE_BOOL ( World, DeleteStaleCorpeBackups, true) // Deletes stale corpse backups older than 2 weeks.
 RULE_INT ( World, AccountSessionLimit, -1 ) //Max number of characters allowed on at once from a single account (-1 is disabled)
 RULE_INT ( World, ExemptAccountLimitStatus, -1 ) //Min status required to be exempt from multi-session per account limiting (-1 is disabled)
@@ -254,7 +254,7 @@ RULE_BOOL ( Watermap, CheckWaypointsInWaterWhenLoading, false ) // Does not appl
 RULE_BOOL ( Watermap, CheckForWaterAtWaypoints, false)		// Check if a mob has moved into/out of water when at waypoints and sets flymode
 RULE_BOOL ( Watermap, CheckForWaterWhenMoving, false)		// Checks if a mob has moved into/out of water each time it's loc is recalculated
 RULE_BOOL ( Watermap, CheckForWaterOnSendTo, false)		// Checks if a mob has moved into/out of water on SendTo
-RULE_BOOL ( Watermap, CheckForWaterWhenFishing, false)		// Only lets a player fish near water (if a water map exists for the zone)
+RULE_BOOL ( Watermap, CheckForWaterWhenFishing, true)		// Only lets a player fish near water (if a water map exists for the zone)
 RULE_REAL ( Watermap, FishingRodLength, 30)			// How far in front of player water must be for fishing to work
 RULE_REAL ( Watermap, FishingLineLength, 40)			// If water is more than this far below the player, it is considered too far to fish
 RULE_CATEGORY_END()
@@ -409,7 +409,7 @@ RULE_INT ( Aggro, IntAggroThreshold, 75 ) // Int <= this will aggro regardless o
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( TaskSystem)
-RULE_BOOL ( TaskSystem, EnableTaskSystem, true) // Globally enable or disable the Task system
+RULE_BOOL ( TaskSystem, EnableTaskSystem, false) // Globally enable or disable the Task system
 RULE_INT ( TaskSystem, PeriodicCheckTimer, 5) // Seconds between checks for failed tasks. Also used by the 'Touch' activity
 RULE_BOOL ( TaskSystem, RecordCompletedTasks, true)
 RULE_BOOL ( TaskSystem, RecordCompletedOptionalActivities, false)
@@ -501,7 +501,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY ( AA )
 RULE_INT ( AA, ExpPerPoint, 23976503)	//Amount of exp per AA. Is the same as the amount of exp to go from level 51 to level 52.
-RULE_BOOL ( AA, Stacking, true) //Allow AA that belong to the same group to stack on SOF+ clients.
+RULE_BOOL ( AA, Stacking, false) //Allow AA that belong to the same group to stack on SOF+ clients.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Console )

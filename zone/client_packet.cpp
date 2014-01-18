@@ -5931,8 +5931,8 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		else
 		{
 			SendItemPacket(freeslot-1, inst2, ItemPacketMerchant);
-			safe_delete(inst2);
 		}
+		safe_delete(inst2);
 	}
 
 	// start QS code
