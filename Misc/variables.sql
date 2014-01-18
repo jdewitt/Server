@@ -42,14 +42,10 @@ INSERT INTO `variables` VALUES ('disablecommandline', '0', 'Allow command lines 
 INSERT INTO `variables` VALUES ('Expansions', '16383', 'Accessible expansions for each player', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('ServerType', '0', 'Sets server type | 0 - normal | 1 - pvp |', '2004-10-28 15:09:41');
 INSERT INTO `variables` VALUES ('holdzones', '1', 'Restart Crashed Zone Servers | 0 - off | 1 - on |', '2008-01-31 22:20:29');
-INSERT INTO `variables` VALUES ('LoginType', 'minilogin', 'Set this to Minilogin to login using a minilogin server :)', '2013-08-04 22:55:12');
 INSERT INTO `variables` VALUES ('Max_AAXP', '21626880', 'Max AA Experience', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('MerchantsKeepItems', '0', 'Merchants keep items sold to them | 0 - off | 1 - on |', '2007-02-13 18:59:01');
 INSERT INTO `variables` VALUES ('MOTD', 'CAT PLANET!!!!!!!!!!!', 'Server Message of the Day', '2013-01-27 19:51:40');
 INSERT INTO `variables` VALUES ('GroupEXPBonus', '0.60', 'Experience multipler. Increase to increase group exp rate', '2007-11-17 21:20:43');
 INSERT INTO `variables` VALUES ('PvPreward', '0', 'Allows players to loot items off a player corpse in pvp | 0 - no items | 1 - a single item | 2 - all items | 3 - item specified in PvPreward |', '2004-11-08 12:28:35');
 INSERT INTO `variables` VALUES ('PvPitem', '0', 'Specific item that can be looted off a player in pvp', '2004-11-08 12:28:08');
-INSERT INTO `variables` VALUES ('PersistentZoneState', '0', 'Save zone state on shutdown for bootup | 0 - off | 1 - on |', '0000-00-00 00:00:00');
-INSERT INTO `variables` VALUES ('ZSPassword', '12345', 'Zone Server Password', '2005-09-15 01:50:25');
-INSERT INTO `variables` VALUES ('startzone', 'tutorial', 'starting zone', '2013-05-01 17:13:22');
-INSERT INTO `variables` VALUES ('LoginVersion', '2-4-2002 1800', 'Client Version for LoginServer', '2013-08-08 14:55:51');
+INSERT INTO `variables` VALUES ('LoginVersion', '12-4-2002 1800', 'Client Version for LoginServer', '2013-08-08 14:55:51');
