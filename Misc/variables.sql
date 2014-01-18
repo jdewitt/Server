@@ -49,7 +49,4 @@ INSERT INTO `variables` VALUES ('MOTD', 'CAT PLANET!!!!!!!!!!!', 'Server Message
 INSERT INTO `variables` VALUES ('GroupEXPBonus', '0.60', 'Experience multipler. Increase to increase group exp rate', '2007-11-17 21:20:43');
 INSERT INTO `variables` VALUES ('PvPreward', '0', 'Allows players to loot items off a player corpse in pvp | 0 - no items | 1 - a single item | 2 - all items | 3 - item specified in PvPreward |', '2004-11-08 12:28:35');
 INSERT INTO `variables` VALUES ('PvPitem', '0', 'Specific item that can be looted off a player in pvp', '2004-11-08 12:28:08');
-INSERT INTO `variables` VALUES ('PersistentZoneState', '0', 'Save zone state on shutdown for bootup | 0 - off | 1 - on |', '0000-00-00 00:00:00');
-INSERT INTO `variables` VALUES ('ZSPassword', '12345', 'Zone Server Password', '2005-09-15 01:50:25');
-INSERT INTO `variables` VALUES ('startzone', 'tutorial', 'starting zone', '2013-05-01 17:13:22');
-INSERT INTO `variables` VALUES ('LoginVersion', '2-4-2002 1800', 'Client Version for LoginServer', '2013-08-08 14:55:51');
+INSERT INTO `variables` VALUES ('LoginVersion', '12-4-2002 1800', 'Client Version for LoginServer', '2013-08-08 14:55:51');
