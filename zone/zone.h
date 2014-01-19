@@ -150,6 +150,7 @@ public:
 	void	ShowDisabledSpawnStatus(Mob* client);
 	void	ShowSpawnStatusByID(Mob* client, uint32 spawnid);
 	void	StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
+	void    ChangeWeather();
 	void	AddAuth(ServerZoneIncommingClient_Struct* szic);
 	void	RemoveAuth(const char* iCharName);
 	void	ResetAuth();
@@ -233,8 +234,7 @@ public:
 	inline	bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
 
 	time_t	weather_timer;
-	uint8	weather_type;
-	uint8	weather_rate;
+	uint8	weather_intensity;
 
 	uint8 loglevelvar;
 	uint8 merchantvar;

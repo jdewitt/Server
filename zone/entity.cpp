@@ -847,8 +847,6 @@ bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
 			memcpy(packet+length,doorstruct,sizeof(OldDoor_Struct));
 			length += sizeof(OldDoor_Struct);
 
-			_log(ZONE__INIT,"Added doorid %i (%s) which is count #: %i",nd->doorid,nd->name,count+1);
-
 			count++;
 		}
 		iterator.Advance();
@@ -863,7 +861,7 @@ bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
 	OldDoorSpawns_Struct* ds = (OldDoorSpawns_Struct*)app->pBuffer;
 
 	ds->count = count;
-	//_log(ZONE__INIT,"%i Doors successfully spawned.",count);
+
 	return true;
 }
 

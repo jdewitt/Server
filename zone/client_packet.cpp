@@ -3315,7 +3315,6 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	_log(ZONE__INIT, ", 062 Test! MoveItem. To: %i From: %i Charges %i", mi->to_slot, mi->from_slot, mi->number_in_stack);
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -4739,7 +4738,6 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 
 	
 	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
-	_log(ZONE__INIT, ", 062 Test! DeleteItem. To: %i From: %i Charges %i", alc->to_slot, alc->from_slot, alc->number_in_stack);
 
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
@@ -9528,19 +9526,19 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// uses to advance to the next state (sending ReqNewZone)
 	if(GetClientVersion() > EQClientMac)
 	{
-	outapp = new EQApplicationPacket(OP_Weather, 12);
-	Weather_Struct *ws = (Weather_Struct *) outapp->pBuffer;
-	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1)
-		ws->type = 0x31; // Rain
-	if (zone->zone_weather == 2)
-	{
-		outapp->pBuffer[8] = 0x01;
-		ws->type = 0x02;
-	}
-	outapp->priority = 6;
-	QueuePacket(outapp);
-	safe_delete(outapp);
+		outapp = new EQApplicationPacket(OP_Weather, 12);
+		Weather_Struct *ws = (Weather_Struct *) outapp->pBuffer;
+		ws->val1 = 0x000000FF;
+		if (zone->zone_weather == 1)
+			ws->type = 0x31; // Rain
+		if (zone->zone_weather == 2)
+		{
+			outapp->pBuffer[8] = 0x01;
+			ws->type = 0x02;
+		}
+		outapp->priority = 6;
+		QueuePacket(outapp);
+		safe_delete(outapp);
 	}
 	else
 	{
@@ -9822,7 +9820,7 @@ void Client::CompleteConnect()
 	}
 
 	if(zone)
-		zone->weatherSend();
+		zone->weatherSend(); //Zone-iN WEATHER
 
 	TotalKarma = database.GetKarma(AccountID());
 

@@ -134,21 +134,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		}
 	}
 
-	zone->weather_type = database.GetZoneWeather(iZoneID, zone->GetInstanceVersion());
-	zone->weather_rate = database.GetZoneWeatherRate(iZoneID, zone->GetInstanceVersion());
-
-	LogFile->write(EQEMuLog::Debug, "Zone: %s has weather of type %i.", zonename, zone->weather_type);
-
-	if(zone->weather_type > 4 || zone->weather_type == 0) {
-		zone->zone_weather = 0;
-		zone->Weather_Timer->Disable();
-		LogFile->write(EQEMuLog::Debug, "Zone: %s(%i) has no weather type. The weather timer has been disabled.", zonename, iZoneID);
-	}
-	else {
-		zone->zone_weather = 0;
-		LogFile->write(EQEMuLog::Debug, "Zone: %s(%i) has weather type = %i. The weather timer has been enabled.", zonename, iZoneID, zone->weather_type);
-	}
-
 	ZoneLoaded = true;
 
 	worldserver.SetZone(iZoneID, iInstanceID);
@@ -901,12 +886,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		long_name = strcpy(new char[18], "Long zone missing");
 	}
 	autoshutdown_timer.Start(AUTHENTICATION_TIMEOUT * 1000, false);
-	//We want the intial timer to be short for the benefit of zones with a high weather rate.
-	Weather_Timer = new Timer(MakeRandomInt(1,200) * 1000);
+	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
-	weather_type = 0;
 	zone_weather = 0;
+	weather_intensity = 0;
 	blocked_spells = nullptr;
 	totalBS = 0;
 	aas = nullptr;
@@ -1365,72 +1349,10 @@ bool Zone::Process() {
 		}
 	}
 
-	if(Weather_Timer->Check()){
+	if(Weather_Timer->Check())
+	{
 		Weather_Timer->Disable();
-		uint16 tmpweather = MakeRandomInt(0, 100);
-		uint8 tmpOldWeather = zone->zone_weather;
-
-		if(zone->weather_type != 0)
-		{
-			int change_rate = 100-zone->weather_rate;
-			//If the weather has low rate, this gives it a good chance to change back to normal.
-			if(change_rate >= tmpweather)
-			{
-				if(zone->zone_weather > 0)
-				{
-					zone->zone_weather = 0;
-				}
-			}
-			//Weather has a chance to change.
-			if(zone->weather_rate >= tmpweather)
-			{
-				// Weather is defintely changing.
-				if(change_rate >= tmpweather)
-				{
-					if(zone->weather_type == 4)
-					{
-						if(zone->zone_weather == 0)
-							zone->zone_weather = MakeRandomInt(1,2);
-						else if(zone->zone_weather == 1)
-							zone->zone_weather = MakeRandomInt(0,2);
-						else
-							zone->zone_weather = MakeRandomInt(0,1);
-					}
-					else if(zone->zone_weather == 0 && tmpOldWeather == 0)
-						zone->zone_weather = zone->weather_type;
-					else
-						zone->zone_weather = 0;
-				}
-				//Weather is switching to another type, but not returning to normal.
-				if(zone->zone_weather == 0 && tmpOldWeather == 0)
-				{
-					if(zone->weather_type == 4)
-						zone->zone_weather = MakeRandomInt(1,2);
-					else
-						zone->zone_weather = zone->weather_type;
-				}
-			}
-			if(zone->zone_weather != tmpOldWeather)
-			{
-				LogFile->write(EQEMuLog::Debug, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i", zone->GetShortName(), tmpOldWeather, zone_weather);
-				this->weatherSend();
-			}
-			else
-				LogFile->write(EQEMuLog::Debug, "The weather for zone: %s is not going to change. Chance was %i >= %i percent.", zone->GetShortName(), zone->weather_rate, tmpweather);
-
-			uint32 weatherTime = 0;
-			uint32 weatherTimer = RuleI(Zone, WeatherTimer);
-			if(weatherTimer < 60)
-				weatherTimer = 60;
-			if(zone->zone_weather > 0)
-				weatherTime = (MakeRandomInt(weatherTimer/4, weatherTimer)) * 1000;
-			else
-				weatherTime = (MakeRandomInt(weatherTimer/8, weatherTimer/3)) * 1000;
-
-			Weather_Timer->Start(weatherTime);
-
-			LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
-		}
+		this->ChangeWeather();
 	}
 
 	if(qGlobals)
@@ -1458,6 +1380,130 @@ bool Zone::Process() {
 	if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	return true;
+}
+
+void Zone::ChangeWeather() 
+{
+	uint8 rain1 = zone->newzone_data.rain_chance[0];
+	uint8 rain2 = zone->newzone_data.rain_chance[1];
+	uint8 rain3 = zone->newzone_data.rain_chance[2];
+	uint8 rain4 = zone->newzone_data.rain_chance[3];
+
+	uint8 raind1 = zone->newzone_data.rain_duration[0];
+	uint8 raind2 = zone->newzone_data.rain_duration[1];
+	uint8 raind3 = zone->newzone_data.rain_duration[2];
+	uint8 raind4 = zone->newzone_data.rain_duration[3];
+
+	uint8 snow1 = zone->newzone_data.snow_chance[0];
+	uint8 snow2 = zone->newzone_data.snow_chance[1];
+	uint8 snow3 = zone->newzone_data.snow_chance[2];
+	uint8 snow4 = zone->newzone_data.snow_chance[3];
+
+	uint8 snowd1 = zone->newzone_data.snow_duration[0];
+	uint8 snowd2 = zone->newzone_data.snow_duration[1];
+	uint8 snowd3 = zone->newzone_data.snow_duration[2];
+	uint8 snowd4 = zone->newzone_data.snow_duration[3];
+
+	const char RainChance[4] = {rain1,rain2,rain3,rain4};
+	int rchance = MakeRandomInt(0, 3);
+	const char SnowChance[4] = {snow1,snow2,snow3,snow4};
+	int schance = MakeRandomInt(0, 3);
+	const char RainDuration[4] = {raind1,raind2,raind3,raind4};
+	int rduration = MakeRandomInt(0, 3);
+	const char SnowDuration[4] = {snowd1,snowd2,snowd3,snowd4};
+	int sduration = MakeRandomInt(0, 3);
+
+	uint32 weathertimer = 0;
+	uint16 tmpweather = MakeRandomInt(0, 100);
+	uint8 duration = 0;
+	uint8 tmpOldWeather = zone->zone_weather;
+	bool changed = false;
+
+	if(tmpOldWeather == 0)
+	{
+		if(RainChance[rchance] > 0 || SnowChance[schance] > 0)
+		{
+			uint8 intensity = MakeRandomInt(1, 10);
+			if((RainChance[rchance] > SnowChance[schance]) || (RainChance[rchance] == SnowChance[schance]))
+			{
+				//It's gunna rain!
+				if(RainChance[rchance] >= tmpweather)
+				{
+					if(RainDuration[rduration] == 0)
+						duration = 1;
+					else
+						duration = RainDuration[rduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+
+					weathertimer = (duration*60)*1000;
+					Weather_Timer->Start(weathertimer);
+					zone->zone_weather = 1;
+					zone->weather_intensity = intensity;
+					changed = true;
+				}
+			}
+			else
+			{
+				//It's gunna snow!
+				if(SnowChance[schance] >= tmpweather)
+				{
+					if(SnowDuration[sduration] == 0)
+						duration = 1;
+					else
+						duration = SnowDuration[sduration]*3;
+					weathertimer = (duration*60)*1000;
+					Weather_Timer->Start(weathertimer);
+					zone->zone_weather = 2;
+					zone->weather_intensity = intensity;
+					changed = true;
+				}
+			}
+		}
+	}
+	else
+	{
+		changed = true;
+		//We've had weather, now taking a break
+		if(tmpOldWeather == 1)
+		{
+			if(RainDuration[rduration] == 0)
+				duration = 1;
+			else
+				duration = RainDuration[rduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+
+			weathertimer = (duration*60)*1000;
+			Weather_Timer->Start(weathertimer);
+			zone->zone_weather = 0;
+			zone->weather_intensity = 0;
+		}
+		else if(tmpOldWeather == 2)
+		{
+			if(SnowDuration[sduration] == 0)
+				duration = 1;
+			else
+				duration = SnowDuration[sduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+
+			weathertimer = (duration*60)*1000;
+			Weather_Timer->Start(weathertimer);
+			zone->zone_weather = 0;
+			zone->weather_intensity = 0;
+		}
+	}
+
+	if(changed == false)
+	{
+		if(weathertimer == 0)
+		{
+			uint32 weatherTimerRule = RuleI(Zone, WeatherTimer);
+			weathertimer = weatherTimerRule*1000;
+			Weather_Timer->Start(weathertimer);
+		}
+		LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
+	}
+	else
+	{
+		LogFile->write(EQEMuLog::Debug, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i The next check will be in %i seconds. Rain chance: %i, Rain duration: %i, Snow chance %i, Snow duration: %i", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,RainChance[rchance],RainDuration[rduration],SnowChance[schance],SnowDuration[sduration]);
+		this->weatherSend();
+	}
 }
 
 void Zone::StartShutdownTimer(uint32 set_time) {
@@ -1841,26 +1887,11 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
 
 void Zone::weatherSend()
 {
-	/*switch(zone_weather)
-	{
-	case 0:
-		entity_list.Message(0, 0, "The sky clears.");
-		break;
-	case 1:
-		entity_list.Message(0, 0, "It begins to rain.");
-		break;
-	case 2:
-		entity_list.Message(0, 0, "It begins to snow.");
-		break;
-	default:
-		entity_list.Message(0, 0, "Strange weather patterns form in the sky. (%i)", zone_weather);
-		break;
-	}*/
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 	if(zone_weather>0)
 		outapp->pBuffer[0] = zone_weather-1;
 	if(zone_weather>0)
-		outapp->pBuffer[4] = 0x10+MakeRandomInt(0, 9); // This number changes in the packets, intensity?
+		outapp->pBuffer[4] = zone->weather_intensity; // This number changes in the packets, intensity?
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
