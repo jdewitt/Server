@@ -567,27 +567,46 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	if(ReadyToZone) {
 		zone_mode = zm;
-		//Find equivelent for EQMac
 		if(zm == ZoneToBindPoint) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
-			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
+			//TODO: Find a better packet that works with EQMac on death.
+			if(eqs->ClientVersion() == EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-			// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
-			//
-			if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
-				gmg->bind_zone_id = 0;
+				strcpy(gmg->charname,this->name);
+				strcpy(gmg->gmname,this->name);
+				gmg->zoneID = zoneID;
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 			else
-			gmg->bind_zone_id = zoneID;
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
+				ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
-			gmg->x = x;
-			gmg->y = y;
-			gmg->z = z;
-			gmg->heading = heading;
-			strcpy(gmg->zone_name, pZoneName);
+				// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
+				//
+				if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
+					gmg->bind_zone_id = 0;
+				else
+				gmg->bind_zone_id = zoneID;
 
-			outapp->priority = 6;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
+				gmg->x = x;
+				gmg->y = y;
+				gmg->z = z;
+				gmg->heading = heading;
+				strcpy(gmg->zone_name, pZoneName);
+
+				outapp->priority = 6;
+				FastQueuePacket(&outapp);
+				safe_delete(outapp);
+			}
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
 			//EQMac's Teleport opcode forces a zone, so use GMGoto for intrazone moves for now.

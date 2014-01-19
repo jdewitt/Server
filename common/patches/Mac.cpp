@@ -1863,8 +1863,16 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		else if(item->Proc.Effect > 0){
 			thejuice->common.Effect1 = item->Proc.Effect;
 			thejuice->Effect2 = item->Proc.Effect; 
-			thejuice->EffectType2 = item->Proc.Type;  
-			thejuice->common.EffectType1 = item->Proc.Type;
+			if(item->Worn.Type > 0)
+			{
+				thejuice->EffectType2 = item->Worn.Type;  
+				thejuice->common.EffectType1 = item->Worn.Type;
+			}
+			else
+			{
+				thejuice->EffectType2 = item->Proc.Type;  
+				thejuice->common.EffectType1 = item->Proc.Type;
+			}
 			if(item->Proc.Level > 0)
 			{
 				thejuice->common.EffectLevel1 = item->Proc.Level; 
