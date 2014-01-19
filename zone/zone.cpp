@@ -1384,35 +1384,17 @@ bool Zone::Process() {
 
 void Zone::ChangeWeather() 
 {
-	uint8 rain1 = zone->newzone_data.rain_chance[0];
-	uint8 rain2 = zone->newzone_data.rain_chance[1];
-	uint8 rain3 = zone->newzone_data.rain_chance[2];
-	uint8 rain4 = zone->newzone_data.rain_chance[3];
+	if(!HasWeather())
+	{
+		Weather_Timer->Disable();
+		return;
+	}
 
-	uint8 raind1 = zone->newzone_data.rain_duration[0];
-	uint8 raind2 = zone->newzone_data.rain_duration[1];
-	uint8 raind3 = zone->newzone_data.rain_duration[2];
-	uint8 raind4 = zone->newzone_data.rain_duration[3];
-
-	uint8 snow1 = zone->newzone_data.snow_chance[0];
-	uint8 snow2 = zone->newzone_data.snow_chance[1];
-	uint8 snow3 = zone->newzone_data.snow_chance[2];
-	uint8 snow4 = zone->newzone_data.snow_chance[3];
-
-	uint8 snowd1 = zone->newzone_data.snow_duration[0];
-	uint8 snowd2 = zone->newzone_data.snow_duration[1];
-	uint8 snowd3 = zone->newzone_data.snow_duration[2];
-	uint8 snowd4 = zone->newzone_data.snow_duration[3];
-
-	const char RainChance[4] = {rain1,rain2,rain3,rain4};
-	int rchance = MakeRandomInt(0, 3);
-	const char SnowChance[4] = {snow1,snow2,snow3,snow4};
-	int schance = MakeRandomInt(0, 3);
-	const char RainDuration[4] = {raind1,raind2,raind3,raind4};
-	int rduration = MakeRandomInt(0, 3);
-	const char SnowDuration[4] = {snowd1,snowd2,snowd3,snowd4};
-	int sduration = MakeRandomInt(0, 3);
-
+	int chance = MakeRandomInt(0, 3);
+	uint8 rainchance = zone->newzone_data.rain_chance[chance];
+	uint8 rainduration = zone->newzone_data.rain_duration[chance];
+	uint8 snowchance = zone->newzone_data.snow_chance[chance];
+	uint8 snowduration = zone->newzone_data.snow_duration[chance];
 	uint32 weathertimer = 0;
 	uint16 tmpweather = MakeRandomInt(0, 100);
 	uint8 duration = 0;
@@ -1421,18 +1403,18 @@ void Zone::ChangeWeather()
 
 	if(tmpOldWeather == 0)
 	{
-		if(RainChance[rchance] > 0 || SnowChance[schance] > 0)
+		if(rainchance > 0 || snowchance > 0)
 		{
 			uint8 intensity = MakeRandomInt(1, 10);
-			if((RainChance[rchance] > SnowChance[schance]) || (RainChance[rchance] == SnowChance[schance]))
+			if((rainchance > snowchance) || (rainchance == snowchance))
 			{
 				//It's gunna rain!
-				if(RainChance[rchance] >= tmpweather)
+				if(rainchance >= tmpweather)
 				{
-					if(RainDuration[rduration] == 0)
+					if(rainduration == 0)
 						duration = 1;
 					else
-						duration = RainDuration[rduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+						duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
 
 					weathertimer = (duration*60)*1000;
 					Weather_Timer->Start(weathertimer);
@@ -1444,12 +1426,12 @@ void Zone::ChangeWeather()
 			else
 			{
 				//It's gunna snow!
-				if(SnowChance[schance] >= tmpweather)
+				if(snowchance >= tmpweather)
 				{
-					if(SnowDuration[sduration] == 0)
+					if(snowduration == 0)
 						duration = 1;
 					else
-						duration = SnowDuration[sduration]*3;
+						duration = snowduration*3;
 					weathertimer = (duration*60)*1000;
 					Weather_Timer->Start(weathertimer);
 					zone->zone_weather = 2;
@@ -1465,10 +1447,10 @@ void Zone::ChangeWeather()
 		//We've had weather, now taking a break
 		if(tmpOldWeather == 1)
 		{
-			if(RainDuration[rduration] == 0)
+			if(rainduration == 0)
 				duration = 1;
 			else
-				duration = RainDuration[rduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+				duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
 
 			weathertimer = (duration*60)*1000;
 			Weather_Timer->Start(weathertimer);
@@ -1477,10 +1459,10 @@ void Zone::ChangeWeather()
 		}
 		else if(tmpOldWeather == 2)
 		{
-			if(SnowDuration[sduration] == 0)
+			if(snowduration == 0)
 				duration = 1;
 			else
-				duration = SnowDuration[sduration]*3; //Duration is 1 EQ hour which is 3 earth minutes.
+				duration = snowduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
 
 			weathertimer = (duration*60)*1000;
 			Weather_Timer->Start(weathertimer);
@@ -1501,9 +1483,26 @@ void Zone::ChangeWeather()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Debug, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i The next check will be in %i seconds. Rain chance: %i, Rain duration: %i, Snow chance %i, Snow duration: %i", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,RainChance[rchance],RainDuration[rduration],SnowChance[schance],SnowDuration[sduration]);
+		LogFile->write(EQEMuLog::Debug, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i The next check will be in %i seconds. Rain chance: %i, Rain duration: %i, Snow chance %i, Snow duration: %i", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
 		this->weatherSend();
 	}
+}
+
+bool Zone::HasWeather()
+{
+	uint8 rain1 = zone->newzone_data.rain_chance[0];
+	uint8 rain2 = zone->newzone_data.rain_chance[1];
+	uint8 rain3 = zone->newzone_data.rain_chance[2];
+	uint8 rain4 = zone->newzone_data.rain_chance[3];
+	uint8 snow1 = zone->newzone_data.snow_chance[0];
+	uint8 snow2 = zone->newzone_data.snow_chance[1];
+	uint8 snow3 = zone->newzone_data.snow_chance[2];
+	uint8 snow4 = zone->newzone_data.snow_chance[3];
+
+	if(rain1 == 0 && rain2 == 0 && rain3 == 0 && rain4 == 0 && snow1 == 0 && snow2 == 0 && snow3 == 0 && snow4 == 0)
+		return false;
+	else
+		return true;
 }
 
 void Zone::StartShutdownTimer(uint32 set_time) {

@@ -387,6 +387,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
+	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
 }
 
 void ClearMappedOpcode(EmuOpcode op) {
@@ -7858,7 +7859,6 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	}
 
 	int damage = ed->damage;
-
 	if (ed->dmgtype == 252) {
 
 		switch(GetAA(aaAcrobatics)) { //Don't know what acrobatics effect is yet but it should be done client side via aa effect.. till then
@@ -7894,6 +7894,12 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 {
+	if(GetClientVersion() == EQClientMac)
+	{
+		Handle_OP_EnvDamage(app);
+		return;
+	}
+
 	if(app->size != sizeof(CombatDamage_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Received invalid sized OP_Damage: got %d, expected %d", app->size,
 			sizeof(CombatDamage_Struct));
@@ -9524,6 +9530,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Weather Packet
 	// This shouldent be moved, this seems to be what the client
 	// uses to advance to the next state (sending ReqNewZone)
+	// Can be blank, we send the real weather later on.
 	if(GetClientVersion() > EQClientMac)
 	{
 		outapp = new EQApplicationPacket(OP_Weather, 12);
@@ -14111,3 +14118,8 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app) {
 	// SideNote: Watching the slot translations, Unknown1 is showing '141' as well on certain item swaps.
 	// Manually looting a corpse results in a from '34' to '68' value for equipment items, '0' to '0' for inventory.
 }
+
+void Client::Handle_OP_Action(const EQApplicationPacket *app) {
+	//EQmac sends this when drowning.
+}
+

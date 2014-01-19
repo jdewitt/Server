@@ -5841,14 +5841,14 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspended_time, int32 update_interval, int32 unk01) {
 
 	// Send Mercenary Status/Timer packet
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryTimer, sizeof(MercenaryStatus_Struct));
+/*	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryTimer, sizeof(MercenaryStatus_Struct));
 	MercenaryStatus_Struct* mss = (MercenaryStatus_Struct*)outapp->pBuffer;
 	mss->MercEntityID = entity_id; // Seen 0 (no merc spawned) or unknown value when merc is spawned
 	mss->MercState = merc_state; // Seen 5 (normal) or 1 (suspended)
 	mss->SuspendedTime = suspended_time; // Seen 0 for not suspended or Unix Timestamp for suspended merc
 	mss->UpdateInterval = update_interval; // Seen 900000 - 15 minutes in ms
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
-	FastQueuePacket(&outapp);
+	FastQueuePacket(&outapp);*/
 }
 
 void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {

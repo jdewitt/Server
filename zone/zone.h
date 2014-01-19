@@ -151,6 +151,7 @@ public:
 	void	ShowSpawnStatusByID(Mob* client, uint32 spawnid);
 	void	StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
 	void    ChangeWeather();
+	bool	HasWeather();
 	void	AddAuth(ServerZoneIncommingClient_Struct* szic);
 	void	RemoveAuth(const char* iCharName);
 	void	ResetAuth();

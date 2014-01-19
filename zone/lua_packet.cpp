@@ -798,7 +798,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("MercenaryDataResponse", static_cast<int>(OP_MercenaryDataResponse)),
 			luabind::value("MercenaryHire", static_cast<int>(OP_MercenaryHire)),
 //			luabind::value("MercenaryUnknown1", static_cast<int>(OP_MercenaryUnknown1)),
-			luabind::value("MercenaryTimer", static_cast<int>(OP_MercenaryTimer)),
+//			luabind::value("MercenaryTimer", static_cast<int>(OP_MercenaryTimer)),
 			luabind::value("MercenaryAssign", static_cast<int>(OP_MercenaryAssign)),
 			luabind::value("MercenaryDataUpdate", static_cast<int>(OP_MercenaryDataUpdate)),
 			luabind::value("MercenaryCommand", static_cast<int>(OP_MercenaryCommand)),

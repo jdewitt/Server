@@ -948,11 +948,12 @@ ENCODE(OP_Damage) {
 	OUT(spellid);
 	OUT(damage);
 	//OUT(unknown11);
-	//OUT(sequence);
+	OUT(sequence);
 	//OUT(unknown19);
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_Action2) { ENCODE_FORWARD(OP_Action); }
 ENCODE(OP_Action) {
 	ENCODE_LENGTH_EXACT(Action_Struct);
 	SETUP_DIRECT_ENCODE(Action_Struct, structs::Action_Struct);
@@ -967,6 +968,17 @@ ENCODE(OP_Action) {
 	OUT(spell);
 	OUT(buff_unknown);
 	FINISH_ENCODE();
+}
+
+DECODE(OP_Damage) { DECODE_FORWARD(OP_EnvDamage); }
+DECODE(OP_EnvDamage) {
+	DECODE_LENGTH_EXACT(structs::EnvDamage2_Struct);
+	SETUP_DIRECT_DECODE(EnvDamage2_Struct, structs::EnvDamage2_Struct);
+	IN(id);
+	IN(dmgtype);
+	IN(damage);
+	IN(constant);
+	FINISH_DIRECT_DECODE();
 }
 
 DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }

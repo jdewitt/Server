@@ -275,12 +275,13 @@ struct CombatDamage_Struct
 /*000*/	uint16	target;
 /*002*/	uint16	source;
 /*004*/	uint8	type;
-		uint8   unknown;
+/*005*/	uint8   unknown;
 /*006*/	uint16	spellid;
 /*008*/	int32	damage;
-/*010*/	uint8	unknown1[4];
-/*014*/	uint32	sequence;
-/*018*/	uint8	unknown12[4];
+/*012*/	uint8	unknown12[4];
+/*016*/	uint32	sequence;
+/*020*/	uint8	unknown20[4];
+/*024*/
 
 };
 
@@ -2700,13 +2701,14 @@ struct UseAA_Struct {
 };
 
 struct EnvDamage2_Struct {
-	int16 id;
-	int16 unknown;
-	int8 dmgtype; //FA = Lava; FC = Falling
-	int8 unknown2;
-	int16 constant; //Always FFFF
-	int16 damage;
-	int8 unknown3[14]; //A bunch of 00's...
+/*000*/	int16 id;
+/*002*/ int16 unknown;
+/*004*/	int8 dmgtype; //FA = Lava; FC = Falling
+/*005*/	int8 unknown2;
+/*006*/	int16 constant; //Always FFFF
+/*008*/	int16 damage;
+/*010*/	int8 unknown3[14]; //A bunch of 00's...
+/*024*/
 };
 
 struct	ItemViewRequest_Struct {
