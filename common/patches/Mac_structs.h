@@ -720,14 +720,17 @@ struct ConsentResponse_Struct
 //Tazadar: New working packet for NPC_Death (12/08/08)
   struct Death_Struct
 {
-/*000*/	uint32	spawn_id;		// Comment: 
-/*004*/	uint32	killer_id;		// Comment: 
-/*008*/	uint32	corpseid;		// Comment: corpseid used for looting PC corpses ! (Tazadar)
-/*012*/	uint16	unknown12;		// Comment: 
-/*014*/	uint8	attack_skill;	// Comment: Attack skill (Confirmed by Tazadar)
-/*015*/	uint8	unknown15;		// Comment: 
-/*016*/	uint16	damage;			// Comment: Damage taken, (Confirmed by Tazadar)
-/*018*/ uint16	unknown18;		// Comment: 
+/*000*/	uint16	spawn_id;		// Comment: 
+/*002*/	uint16	killer_id;		// Comment: 
+/*004*/	uint16	corpseid;		// Comment: corpseid used for looting PC corpses ! (Tazadar)
+/*006*/	uint8	spawn_level;		// Comment: 
+/*007*/ uint8   unknown007;
+/*008*/	uint16	spell_id;	// Comment: Attack skill (Confirmed by Tazadar)
+/*010*/	uint8	attack_skill;		// Comment: 
+/*011*/ uint8   unknonw011;
+/*012*/	uint32	damage;			// Comment: Damage taken, (Confirmed by Tazadar)
+/*014*/ uint8   is_PC;		// Comment: 
+/*015*/ uint8   unknown015[3];
 };
 
 /*
@@ -2702,7 +2705,7 @@ struct UseAA_Struct {
 
 struct EnvDamage2_Struct {
 /*000*/	int16 id;
-/*002*/ int16 unknown;
+/*002*/int16 unknown;
 /*004*/	int8 dmgtype; //FA = Lava; FC = Falling
 /*005*/	int8 unknown2;
 /*006*/	int16 constant; //Always FFFF

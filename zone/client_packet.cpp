@@ -3154,23 +3154,65 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Death(const EQApplicationPacket *app)
 {
-	if(app->size != sizeof(Death_Struct))
-		return;
+	bool EnvDeath = false;
+	if(GetClientVersion() == EQClientMac)
+	{
+		LogFile->write(EQEMuLog::Debug,"Client hit OP_Death");
+		if(app->size != sizeof(OldDeath_Struct))
+		{
+			LogFile->write(EQEMuLog::Debug,"Handle_OP_Death: Struct is incorrect, expected %i got %i", sizeof(OldDeath_Struct), app->size);
+			return;
+		}
+		OldDeath_Struct* ds = (OldDeath_Struct*)app->pBuffer;
 
-	Death_Struct* ds = (Death_Struct*)app->pBuffer;
+		//Lava, Water, Falling, Freezing
+		if(ds->attack_skill >= 250 || ds->attack_skill <= 255) 
+		{ 
+			EnvDeath = true;
+		}
+		//I think this attack_skill value is really a value from SkillDamageTypes...
+		else if(ds->attack_skill > HIGHEST_SKILL)
+		{
+			mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
+			return;
+		}
 
-	//I think this attack_skill value is really a value from SkillDamageTypes...
-	if(ds->attack_skill > HIGHEST_SKILL) {
-		mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
-		return;
+		Mob* killer = entity_list.GetMob(ds->killer_id);
+		if(EnvDeath == true)
+		{
+			mod_client_death_env();
+			Death(0, 32000, SPELL_UNKNOWN, SkillHandtoHand);
+			return;
+		}
+		else
+		{
+			Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
+			return;
+		}
 	}
 
-	if(GetHP() > 0)
-		return;
+	else
+	{
+		if(app->size != sizeof(Death_Struct))
+		{
+			return;
+		}
 
-	Mob* killer = entity_list.GetMob(ds->killer_id);
-	Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
-	return;
+		Death_Struct* ds = (Death_Struct*)app->pBuffer;
+
+		//I think this attack_skill value is really a value from SkillDamageTypes...
+		if(ds->attack_skill > HIGHEST_SKILL) {
+			mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
+			return;
+		}
+
+		if(GetHP() > 0)
+			return;
+
+		Mob* killer = entity_list.GetMob(ds->killer_id);
+		Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
+		return;
+	}
 }
 
 void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)

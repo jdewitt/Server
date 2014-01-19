@@ -1272,6 +1272,21 @@ struct Death_Struct
 /*028*/	uint32	unknown028;
 };
 
+  struct OldDeath_Struct
+{
+/*000*/	uint16	spawn_id;		// Comment: 
+/*002*/	uint16	killer_id;		// Comment: 
+/*004*/	uint16	corpseid;		// Comment: corpseid used for looting PC corpses ! (Tazadar)
+/*006*/	uint8	spawn_level;		// Comment: 
+/*007*/ uint8   unknown007;
+/*008*/	uint16	spell_id;	// Comment: Attack skill (Confirmed by Tazadar)
+/*010*/	uint8	attack_skill;		// Comment: 
+/*011*/ uint8   unknonw011;
+/*012*/	uint32	damage;			// Comment: Damage taken, (Confirmed by Tazadar)
+/*014*/ uint8   is_PC;		// Comment: 
+/*015*/ uint8   unknown015[3];
+};
+
 struct BecomeCorpse_Struct {
 	uint32	spawn_id;
 	float y;
