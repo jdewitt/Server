@@ -215,7 +215,6 @@ public:
 	WaterMap* watermap;
 	PathManager *pathing;
 	NewZone_Struct	newzone_data;
-	uint8	zone_weather;
 
 	SpawnConditionManager spawn_conditions;
 
@@ -236,6 +235,7 @@ public:
 
 	time_t	weather_timer;
 	uint8	weather_intensity;
+	uint8	zone_weather;
 
 	uint8 loglevelvar;
 	uint8 merchantvar;

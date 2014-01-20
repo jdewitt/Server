@@ -150,19 +150,15 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 			{
 				strcpy(*map_filename, row[r++]);
 			}
-			i=0;
 			for(i=0;i<4;i++){
 				zone_data->rain_chance[i]=atoi(row[r++]);
 			}
-			i=0;
 			for(i=0;i<4;i++){
 				zone_data->rain_duration[i]=atoi(row[r++]);
 			}
-			i=0;
 			for(i=0;i<4;i++){
 				zone_data->snow_chance[i]=atoi(row[r++]);
 			}
-			i=0;
 			for(i=0;i<4;i++){
 				zone_data->snow_duration[i]=atof(row[r++]);
 			}
