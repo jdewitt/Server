@@ -1890,7 +1890,7 @@ void Zone::weatherSend()
 	if(zone_weather>0)
 		outapp->pBuffer[0] = zone_weather-1;
 	if(zone_weather>0)
-		outapp->pBuffer[4] = zone->weather_intensity; // This number changes in the packets, intensity?
+		outapp->pBuffer[4] = zone->weather_intensity;
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
