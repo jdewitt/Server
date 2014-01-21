@@ -841,7 +841,6 @@ DECODE(OP_ZoneChange)
 	memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
 	IN(zoneID);
 	IN(success);
-	eq->instanceID = 0;
 	FINISH_DIRECT_DECODE();
 }
 

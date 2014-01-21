@@ -54,10 +54,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
 
 	uint16 target_zone_id = 0;
-	uint16 target_instance_id = zc->instanceID;
-	if(eqs->ClientVersion() == EQClientMac)
+	uint16 target_instance_id = 0;
+	if(eqs->ClientVersion() != EQClientMac)
 	{
-		target_instance_id = 0;
+		target_instance_id = zc->instanceID;
 	}
 	ZonePoint* zone_point = nullptr;
 	//figure out where they are going.
