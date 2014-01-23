@@ -1588,6 +1588,12 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if(IsAssistExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetAssistExemption(false);
+				return;
+			}
 			else if(GetTarget()->IsClient())
 			{
 				//make sure this client is in our raid/group
@@ -2812,21 +2818,15 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 
 	EQApplicationPacket* outapp = app->Copy();
 	eid = (EntityId_Struct*)outapp->pBuffer;
-	if (RuleB(Combat, AssistNoTargetSelf)) eid->entity_id = GetID();
-	if(entity && entity->IsMob())
-	{
+	if (RuleB(Combat, AssistNoTargetSelf))
+		eid->entity_id = GetID();
+	if (entity && entity->IsMob()) {
 		Mob *assistee = entity->CastToMob();
-		if(!assistee->IsInvisible(this) && assistee->GetTarget())
-		{
+		if (assistee->GetTarget()) {
 			Mob *new_target = assistee->GetTarget();
-			if
-			(
-				new_target &&
-				!new_target->IsInvisible(this) &&
-				(GetGM() || (Dist(*assistee) <= TARGETING_RANGE &&
-				Dist(*new_target) <= TARGETING_RANGE))
-			)
-			{
+			if (new_target && (GetGM() ||
+					Dist(*assistee) <= TARGETING_RANGE)) {
+				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			}
 		}
