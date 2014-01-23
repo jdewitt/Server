@@ -1550,7 +1550,7 @@ ENCODE(OP_PlayerProfile)
 	outapp->WriteUInt8(0);				// Unknown
 
 
-	_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
+	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes", outapp->GetWritePosition());
 
 	unsigned char *NewBuffer = new unsigned char[outapp->GetWritePosition()];
 	memcpy(NewBuffer, outapp->pBuffer, outapp->GetWritePosition());

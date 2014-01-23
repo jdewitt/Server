@@ -180,7 +180,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_cursor);
 	OUT(silver_cursor);
 	OUT(copper_cursor);
-//	OUT_array(skills, 75);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
 	//OUT(toxicity);
 	OUT(thirst_level);
@@ -231,10 +230,10 @@ ENCODE(OP_PlayerProfile) {
 	}
 //	OUT_str(groupLeader);	//this is prolly right after groupMembers, but I dont feel like checking.
 //	OUT(leadAAActive);
-	_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
+	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
 
-	char* packet_dump = "pp_dump.txt";
-	FileDumpPacketHex(packet_dump, __packet);
+	//char* packet_dump = "pp_dump.txt";
+	//FileDumpPacketHex(packet_dump, __packet);
 
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
 	EQApplicationPacket* outapp = new EQApplicationPacket();
@@ -242,7 +241,7 @@ ENCODE(OP_PlayerProfile) {
 	outapp->pBuffer = new uchar[10000];
 	outapp->size = DeflatePacket((unsigned char*)__packet->pBuffer, sizeof(structs::PlayerProfile_Struct), outapp->pBuffer, 10000);
 	EncryptProfilePacket(outapp->pBuffer, outapp->size);
-	_log(NET__STRUCTS, "Player Profile Packet is %i bytes compressed", outapp->size);
+	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes compressed", outapp->size);
 	dest->FastQueuePacket(&outapp);
 	delete[] __emu_buffer;
 	delete __packet;
@@ -326,7 +325,7 @@ ENCODE(OP_SendCharInfo) {
 	FINISH_ENCODE();	
 }
 
-ENCODE(OP_GuildsList) {
+/*ENCODE(OP_GuildsList) {
 	SETUP_DIRECT_ENCODE(GuildsList_Struct, structs::GuildsList_Struct);
 	OUT_array(head, 4);
 
@@ -339,15 +338,42 @@ ENCODE(OP_GuildsList) {
 			strn0cpy(eq->Guilds[r].name, emu->Guilds[r].name, 32);
 			eq->Guilds[r].exists = 1;
 			eq->Guilds[r].guildID = r;
+			eq->Guilds[r].unknown1 = 0xFFFFFFFF;
+			eq->Guilds[r].unknown3 = 0xFFFFFFFF;
 		}
 		else
 			eq->Guilds[r].guildID = 0xFFFFFFFF;
 	}
 
+	
+	char* packet_dump = "GuildsList.txt";
+	FileDumpPacketHex(packet_dump, __packet);
 	FINISH_ENCODE();	
+}*/
+
+DECODE(OP_SetGuildMOTD) {
+	SETUP_DIRECT_DECODE(GuildMOTD_Struct, structs::GuildMOTD_Struct);
+	strcpy(emu->name,eq->name);
+	strcpy(emu->motd,eq->motd);
+	FINISH_DIRECT_DECODE();
 }
 
+//ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_GuildMOTD); }
+ENCODE(OP_GuildMOTD) {
+	SETUP_DIRECT_ENCODE(GuildMOTD_Struct, structs::GuildMOTD_Struct);
+	strcpy(eq->name,emu->name);
+	strcpy(eq->motd,emu->motd);
+	FINISH_ENCODE();
+}
 
+DECODE(OP_GuildInviteAccept) {
+	SETUP_DIRECT_DECODE(GuildInviteAccept_Struct, structs::GuildInviteAccept_Struct);
+	strcpy(emu->inviter,eq->inviter);
+	strcpy(emu->newmember,eq->newmember);
+	IN(response);
+	emu->guildeqid = (int16)eq->guildeqid;
+	FINISH_DIRECT_DECODE();
+}
 
 ENCODE(OP_NewZone) {
 	SETUP_DIRECT_ENCODE(NewZone_Struct, structs::NewZone_Struct);
@@ -580,7 +606,7 @@ ENCODE(OP_ZoneSpawns){
 	//zero out the packet. We could avoid this memset by setting all fields (including unknowns)
 	//in the loop.
 	memset(out->pBuffer, 0, out->size);
-	_log(NET__STRUCTS, "Total size of bulkspawns packet STRUCT: %d", sizeof(structs::Spawn_Struct));
+	//_log(NET__STRUCTS, "Total size of bulkspawns packet STRUCT: %d", sizeof(structs::Spawn_Struct));
 
 	//do the transform...
 	int r;
@@ -696,12 +722,12 @@ ENCODE(OP_ZoneSpawns){
 		*/
 
 	}
-	_log(NET__STRUCTS, "Total size of bulkspawns packet uncompressed: %d", out->size);
+	//_log(NET__STRUCTS, "Total size of bulkspawns packet uncompressed: %d", out->size);
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneSpawns, sizeof(structs::Spawn_Struct)*entrycount);
 	outapp->pBuffer = new uchar[sizeof(structs::Spawn_Struct)*entrycount];
 	outapp->size = DeflatePacket((unsigned char*)out->pBuffer, out->size, outapp->pBuffer, sizeof(structs::Spawn_Struct)*entrycount);
 	EncryptZoneSpawnPacket(outapp->pBuffer, outapp->size);
-	_log(NET__STRUCTS, "Total size of bulkspawns packet compressed: %d", outapp->size);
+	//_log(NET__STRUCTS, "Total size of bulkspawns packet compressed: %d", outapp->size);
 
 	//kill off the emu structure and send the eq packet.
 	delete[] __emu_buffer;

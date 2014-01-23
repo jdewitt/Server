@@ -1120,6 +1120,38 @@ uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) co
 	return(buffer);
 }
 
+struct OldGuildsList_Struct *BaseGuildManager::MakeOldGuildList(uint32 &length) const {
+
+	int32 size = 4;
+	OldGuildsList_Struct* gl = new struct OldGuildsList_Struct;
+	memset(gl,0,sizeof(OldGuildsList_Struct));
+	OldGuildsListEntry_Struct* gle = new struct OldGuildsListEntry_Struct;
+	memset(gle,0,sizeof(OldGuildsListEntry_Struct));
+
+	int16 c = 1;
+	for (int16 r = 0; r < 512; r++) {
+		std::string tmp;
+		if(GetGuildNameByID(c,tmp))
+		{
+			const char * ctmp = tmp.c_str();
+			memcpy(gle->name,ctmp,64);
+			gle->guildID = c;
+			gle->exists = 1;
+			gle->unknown1 = 0xFFFFFFFF;
+			gle->unknown3 = 0xFFFFFFFF;
+
+			_log(GUILDS__ERROR,"Added Guild: %i (%s)",gle->guildID,gle->name);
+			memcpy(&gl->Guilds[c-1],gle,sizeof(OldGuildsListEntry_Struct));
+			size += sizeof(OldGuildsListEntry_Struct);
+			c++; //hehe
+		}
+	}
+	safe_delete_array(gle);
+	length = size;
+	_log(GUILDS__ERROR,"Length: %i", length);
+	return(gl);
+}
+
 const char *BaseGuildManager::GetRankName(uint32 guild_id, uint8 rank) const {
 	if(rank > GUILD_MAX_RANK)
 		return("Invalid Rank");

@@ -1812,15 +1812,31 @@ struct Guild_Struct
 	GuildRankLevel_Struct rank[512+1];	// Comment: 
 };
 
+struct GuildMOTD_Struct{
+/*0000*/	char	name[64];
+/*0064*/	uint32	unknown64;
+/*0068*/	char	motd[512];
+};
+
+struct GuildInviteAccept_Struct {
+	char inviter[64];
+	char newmember[64];
+	uint32 response;
+	uint16 guildeqid;
+	uint16 unknown;
+};
+
 struct GuildsListEntry_Struct 
 {
-	uint32 guildID;				// Comment: empty = 0xFFFFFFFF
-	char name[32];				// Comment: 
-	uint8 unknown1[4];			// Comment: = 0xFF
-	uint8 exists;				// Comment: = 1 if exists, 0 on empty
-	uint8 unknown2[7];			// Comment: = 0x00
-	uint8 unknown3[4];			// Comment: = 0xFF
-	uint8 unknown4[8];			// Comment: = 0x00
+/*0000*/	uint32 guildID;				// Comment: empty = 0xFFFFFFFF
+/*0004*/	char name[64];				// Comment: 
+/*0068*/	uint32 unknown1;			// Comment: = 0xFF
+/*0072*/	uint16 exists;				// Comment: = 1 if exists, 0 on empty
+/*0074*/	uint8 unknown2[6];			// Comment: = 0x00
+/*0080*/	uint32 unknown3;			// Comment: = 0xFF
+/*0084*/	uint8 unknown4[8];			// Comment: = 0x00
+/*0092*/	uint32 unknown5;
+/*0096*/
 };
 
 struct GuildsList_Struct 
@@ -2128,14 +2144,6 @@ struct Make_Pet_Struct { //Simple struct for getting pet info Tazadar 01/06/08
 	uint32 min_dmg;
 	uint32 max_dmg;
     int32  max_hp;
-};
-
-
-struct GuildInviteAccept_Struct {
-	char inviter[30];
-	char newmember[30];
-	uint32 rank;
-	uint32 guildeqid;
 };
 
 // 6-22-08 - Wizzel

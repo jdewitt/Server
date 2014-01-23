@@ -174,6 +174,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_DeleteSpawn] = &Client::Handle_OP_DeleteSpawn;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
+	ConnectedOpcodes[OP_Save2] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_GMZoneRequest] = &Client::Handle_OP_GMZoneRequest;
 	ConnectedOpcodes[OP_GMZoneRequest2] = &Client::Handle_OP_GMZoneRequest2;
@@ -384,7 +385,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_MercenaryDataUpdateRequest] = &Client::Handle_OP_MercenaryDataUpdateRequest;
 	ConnectedOpcodes[OP_MercenarySuspendRequest] = &Client::Handle_OP_MercenarySuspendRequest;
 	ConnectedOpcodes[OP_MercenaryDismiss] = &Client::Handle_OP_MercenaryDismiss;
-	ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
+	//ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -1941,9 +1942,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	}
 	Consume_Struct* pcs = (Consume_Struct*)app->pBuffer;
 	_log(ZONE__INIT, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
-	int value = 6000;
-	if(GetClientVersion() == EQClientMac)
-		value = 127;
+	int value = RuleI(Character,ConsumptionValue);
 
 	if(pcs->type == 0x01)
 	{
@@ -3165,8 +3164,8 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 		}
 		OldDeath_Struct* ds = (OldDeath_Struct*)app->pBuffer;
 
-		//Lava, Water, Falling, Freezing
-		if(ds->attack_skill >= 250 || ds->attack_skill <= 255) 
+		//Burning, Drowning, Falling, Freezing
+		if(ds->attack_skill >= 250 && ds->attack_skill <= 255) 
 		{ 
 			EnvDeath = true;
 		}
@@ -4080,7 +4079,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(GuildMOTD_Struct)) {
 		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i != size of GuildMOTD_Struct of %zu\n",app->size,sizeof(GuildMOTD_Struct));
+		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildMOTD_Struct of %zu\n",app->size,sizeof(GuildMOTD_Struct));
 		return;
 	}
 	if(!IsInAGuild()) {
@@ -4088,11 +4087,17 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 		return;
 	}
 	if(!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_MOTD)) {
-		Message(13, "You do not have permissions to edit your guild's MOTD.");
+		if(GetClientVersion() > EQClientMac)
+			Message(13, "You do not have permissions to edit your guild's MOTD.");
 		return;
 	}
 
 	GuildMOTD_Struct* gmotd=(GuildMOTD_Struct*)app->pBuffer;
+	if(GetClientVersion() == EQClientMac && gmotd->motd[0] == 0)
+	{
+		mlog(GUILDS__ERROR, "Client is trying to remove MOTD. This may be intentional but still will be prevented for now.");
+		return; //EQMac sends this on login, and it overwrites the existing MOTD. Need to figure out a better way to handle it
+	}
 
 	mlog(GUILDS__ACTIONS, "Setting MOTD for %s (%d) to: %s - %s",
 		guild_mgr.GetGuildName(GuildID()), GuildID(), GetName(), gmotd->motd);
@@ -4218,8 +4223,13 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 	else {
 
 		//NOTE: we could do cross-zone lookups here...
+		char target[64];
+		if(GetClientVersion() == EQClientMac)
+			strcpy(target,gml->name);
+		else
+			strcpy(target,gml->target);
 
-		Client* newleader = entity_list.GetClientByName(gml->target);
+		Client* newleader = entity_list.GetClientByName(target);
 		if(newleader) {
 
 			mlog(GUILDS__ACTIONS, "Transfering leadership of %s (%d) to %s (%d)",
@@ -4227,7 +4237,7 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 				newleader->GetName(), newleader->CharacterID());
 
 			if(guild_mgr.SetGuildLeader(GuildID(), newleader->CharacterID())){
-				Message(0,"Successfully Transfered Leadership to %s.",gml->target);
+				Message(0,"Successfully Transfered Leadership to %s.",target);
 				newleader->Message(15,"%s has transfered the guild leadership into your hands.",GetName());
 			}
 			else
@@ -4444,6 +4454,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 #endif
 		uint32 char_id;
 		Client* client = entity_list.GetClientByName(gc->othername);
+		Client* remover  = entity_list.GetClientByName(gc->myname);
 
 		if(client) {
 			if(!client->IsInGuild(GuildID())) {
@@ -4452,11 +4463,21 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			}
 			char_id = client->CharacterID();
 
+			if(client->GuildRank() >= remover->GuildRank() && client->GetName() != gc->othername){
+				Message(0, "You can't remove a player from the guild with an equal or higher rank to you!");
+				return;
+			}
+
 			mlog(GUILDS__ACTIONS, "Removing %s (%d) from guild %s (%d)",
 				client->GetName(), client->CharacterID(),
 				guild_mgr.GetGuildName(GuildID()), GuildID());
 		} else {
 			CharGuildInfo gci;
+			CharGuildInfo gci_;
+			if(!guild_mgr.GetCharInfo(gc->myname, gci_)) {
+				Message(0, "Unable to find '%s'", gc->myname);
+				return;
+			}
 			if(!guild_mgr.GetCharInfo(gc->othername, gci)) {
 				Message(0, "Unable to find '%s'", gc->othername);
 				return;
@@ -4465,6 +4486,11 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 				Message(0, "You aren't in the same guild, what do you think you are doing?");
 				return;
 			}
+			if(gci.rank >= gci_.rank) {
+				Message(0, "You can't remove a player from the guild with an equal or higher rank to you!");
+				return;
+			}
+
 			char_id = gci.char_id;
 
 			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)",
@@ -4482,7 +4508,10 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			safe_delete(outapp);
 		}
 		else
-			Message(0,"Unable to remove %s from your guild.",gc->othername);
+		{
+			if(GetClientVersion() > EQClientMac)
+				Message(0,"Unable to remove %s from your guild.",gc->othername);
+		}
 	}
 //	SendGuildMembers(GuildID(), true);
 	return;
@@ -7089,6 +7118,10 @@ void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
+
+	char* packet_dump = "Handle_OP_Bug.txt";
+	FileDumpPacketHex(packet_dump, app);
+
 	if(app->size!=sizeof(BugStruct))
 		printf("Wrong size of BugStruct got %d expected %zu!\n", app->size, sizeof(BugStruct));
 	else{
@@ -14097,7 +14130,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 	//SendMercMerchantResponsePacket(10);
 }
 
-void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
+/*void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 {
 	// The payload is 0 bytes.
 	if(app->size > 1)
@@ -14136,7 +14169,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 	if(entityID > 0) {
 		SendMercTimerPacket(entityID, mercState, suspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
 	}
-}
+}*/
 
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {
 	// Does not exist in Ti, UF or RoF clients

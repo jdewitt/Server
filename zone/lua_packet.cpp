@@ -643,7 +643,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("AdventurePointsUpdate", static_cast<int>(OP_AdventurePointsUpdate)),
 			luabind::value("ZoneInUnknown", static_cast<int>(OP_ZoneInUnknown)),
 			luabind::value("ZoneServerReady	", static_cast<int>(OP_ZoneServerReady	)),
-			luabind::value("ZoneGuildList", static_cast<int>(OP_ZoneGuildList)),
 			luabind::value("SendTitleList", static_cast<int>(OP_SendTitleList)),
 			luabind::value("NewTitlesAvailable", static_cast<int>(OP_NewTitlesAvailable)),
 			luabind::value("Bandolier", static_cast<int>(OP_Bandolier)),
@@ -807,7 +806,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("MercenaryUnsuspendResponse", static_cast<int>(OP_MercenaryUnsuspendResponse)),
 			luabind::value("MercenaryDataUpdateRequest", static_cast<int>(OP_MercenaryDataUpdateRequest)),
 			luabind::value("MercenaryDismiss", static_cast<int>(OP_MercenaryDismiss)),
-			luabind::value("MercenaryTimerRequest", static_cast<int>(OP_MercenaryTimerRequest)),
+//			luabind::value("MercenaryTimerRequest", static_cast<int>(OP_MercenaryTimerRequest)),
 			luabind::value("OpenInventory", static_cast<int>(OP_OpenInventory)),
 			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer))
 		];

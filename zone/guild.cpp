@@ -132,20 +132,28 @@ void Client::SendGuildSpawnAppearance() {
 
 void Client::SendGuildList() {
 	EQApplicationPacket *outapp;
-//	outapp = new EQApplicationPacket(OP_ZoneGuildList);
 	outapp = new EQApplicationPacket(OP_GuildsList);
 
 	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
+	if(GetClientVersion() == EQClientMac)
+	{
+		 OldGuildsList_Struct* guildstruct = guild_mgr.MakeOldGuildList(outapp->size);
+		 outapp->pBuffer = reinterpret_cast<uchar*>(guildstruct);
+		 safe_delete_array(guildstruct);
+	}
+	else
+		outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
 
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_ZoneGuildList of length %d", outapp->size);
-//	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
+	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
-	FastQueuePacket(&outapp);
+	//FastQueuePacket(&outapp);
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 

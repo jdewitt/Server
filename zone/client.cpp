@@ -699,7 +699,7 @@ bool Client::SendAllPackets() {
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
 		iterator.RemoveCurrent();
 #if EQDEBUG >= 6
-		LogFile->write(EQEMuLog::Normal, "Transmitting a packet");
+		//LogFile->write(EQEMuLog::Normal, "Transmitting a packet");
 #endif
 	}
 	return true;
@@ -7988,9 +7988,7 @@ bool Client::RemoveRespawnOption(uint8 position)
 
 void Client::SetHunger(int32 in_hunger)
 {
-	int value = 6000;
-	if(GetClientVersion() == EQClientMac)
-		value = 127;
+	int value = RuleI(Character,ConsumptionValue);
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
@@ -8006,9 +8004,7 @@ void Client::SetHunger(int32 in_hunger)
 
 void Client::SetThirst(int32 in_thirst)
 {
-	int value = 6000;
-	if(GetClientVersion() == EQClientMac)
-		value = 127;
+	int value = RuleI(Character,ConsumptionValue);
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));

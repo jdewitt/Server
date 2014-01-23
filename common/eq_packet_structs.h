@@ -1559,6 +1559,25 @@ struct GuildsList_Struct {
 	GuildsListEntry_Struct Guilds[MAX_NUMBER_GUILDS];
 };
 
+struct OldGuildsListEntry_Struct 
+{
+/*0000*/	uint32 guildID;				// Comment: empty = 0xFFFFFFFF
+/*0004*/	char name[64];				// Comment: 
+/*0068*/	uint32 unknown1;			// Comment: = 0xFF
+/*0072*/	uint16 exists;				// Comment: = 1 if exists, 0 on empty
+/*0074*/	uint8 unknown2[6];			// Comment: = 0x00
+/*0080*/	uint32 unknown3;			// Comment: = 0xFF
+/*0084*/	uint8 unknown4[8];			// Comment: = 0x00
+/*0092*/	uint32 unknown5;
+/*0096*/
+};
+
+struct OldGuildsList_Struct 
+{
+	uint8 head[4];							// Comment: 
+	OldGuildsListEntry_Struct Guilds[512];		// Comment: 
+};
+
 struct GuildUpdate_Struct {
 	uint32	guildID;
 	GuildsListEntry_Struct entry;

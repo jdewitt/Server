@@ -84,6 +84,7 @@ public:
 //	bool	EditGuild(uint32 guild_id, uint8 ranknum, GuildRankLevel_Struct* grl);
 
 	uint8 *MakeGuildList(const char *head_name, uint32 &length) const;	//make a guild list packet, returns ownership of the buffer.
+	struct OldGuildsList_Struct *MakeOldGuildList(uint32 &length) const;	//make a guild list packet, returns ownership of the buffer.
 
 	static const char *const GuildActionNames[_MaxGuildAction];
 	uint32	DoesAccountContainAGuildLeader(uint32 AccountID);
