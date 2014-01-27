@@ -139,7 +139,6 @@ void Client::SendGuildList() {
 	{
 		 OldGuildsList_Struct* guildstruct = guild_mgr.MakeOldGuildList(outapp->size);
 		 outapp->pBuffer = reinterpret_cast<uchar*>(guildstruct);
-		 safe_delete_array(guildstruct);
 	}
 	else
 		outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
@@ -151,9 +150,7 @@ void Client::SendGuildList() {
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
 	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
-	//FastQueuePacket(&outapp);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	FastQueuePacket(&outapp);
 }
 
 
