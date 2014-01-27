@@ -289,3 +289,4 @@
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);
+	void Handle_OP_Discipline(const EQApplicationPacket *app);

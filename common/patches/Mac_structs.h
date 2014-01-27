@@ -679,7 +679,8 @@ struct Beg_Struct
 struct ZoneChange_Struct {
 /*000*/	char	char_name[64];     // Character Name
 /*064*/	uint16	zoneID;
-/*066*/ uint16  unknown[3];
+/*066*/ uint16  zone_reason;
+/*068*/ uint16  unknown[2];
 /*072*/	int8	success;		// =0 client->server, =1 server->client, -X=specific error
 /*073*/	uint8	error[3]; // =0 ok, =ffffff error
 };

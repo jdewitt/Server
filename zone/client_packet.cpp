@@ -108,13 +108,13 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_TGB] = &Client::Handle_Connect_OP_TGB;
 	ConnectingOpcodes[OP_SendTributes] = &Client::Handle_Connect_OP_SendTributes;
 	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
-	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
 	ConnectingOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
 	ConnectingOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectingOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
+	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 //temporary hack:
 	ConnectingOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList;
 
@@ -389,6 +389,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
+	ConnectedOpcodes[OP_Discipline] = &Client::Handle_OP_Discipline;
 }
 
 void ClearMappedOpcode(EmuOpcode op) {
@@ -636,29 +637,18 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 		}
 		safe_delete(outapp);
 	}
-
-	// Send Zone Objects + Mac Spawns here
-
-	entity_list.SendZoneObjects(this);
-	SendZonePoints();
-
-	if(GetClientVersion() == EQClientMac)
+	else
 	{
-		SendAAStats();
-
-		SendNewZone(zone->newzone_data, m_pp.name);
-
 		if(entity_list.SendZoneDoorsBulk(outapp, this))
 		{
 			QueuePacket(outapp);
 		}
 		safe_delete(outapp);
-
-		entity_list.SendZoneSpawnsBulk(this);
-		// Tell client they can continue we're done
-		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-		FastQueuePacket(&outapp);
 	}
+	
+	entity_list.SendZoneObjects(this);
+	SendZonePoints();
+
 	// Live does this
 	if(GetClientVersion() > EQClientMac)
 	{
@@ -682,6 +672,11 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
+	else
+	{
+		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
+		FastQueuePacket(&outapp);
+	}
 
 	if(strncasecmp(zone->GetShortName(), "bazaar", 6) == 0)
 		SendBazaarWelcome();
@@ -703,6 +698,7 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 	NewZone_Struct* nz = (NewZone_Struct*)outapp->pBuffer;
 	memcpy(outapp->pBuffer, &zone->newzone_data, sizeof(NewZone_Struct));
 	strcpy(nz->char_name, m_pp.name);
+	_log(ZONE__INIT, "NewZone data for %s (%i). Underworld: %f max_z: %f", zone->newzone_data.zone_short_name, zone->newzone_data.zone_id, zone->newzone_data.underworld, zone->newzone_data.max_z);
 
 	FastQueuePacket(&outapp);
 
@@ -734,10 +730,11 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	//Send AA Exp packet:
 	if(GetLevel() >= 51)
 	{
+		//EQMac the struct may be wrong, here. I am seeing changing data in the final int8 which should be void.
 		SendAAStats();
-		SendAATimers();
-		if(GetClientVersion() == EQClientMac)
-			SendAATable();
+		
+		//We don't send the table here, need to figure out why EQMac doesn't load them from PP.
+		//	SendAATable();
 	}
 
 	// Send exp packets
@@ -755,11 +752,20 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	}
 	safe_delete(outapp);
 
-	//SendAATimers();
+	SendAATimers();
 
 	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
+
+	//This is sent again.
+	if(GetLevel() >= 51)
+	{
+		//Again, this may be using a bad struct. Maybe why AAs aren't working. 
+		SendAAStats();
+	}
+
+	//EQMac MSG_SET_AVATAR is sent.
 
 	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
 	ZoneInSendName_Struct* zonesendname=(ZoneInSendName_Struct*)outapp->pBuffer;
@@ -769,35 +775,27 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	/* this is actually the guild MOTD
-	outapp = new EQApplicationPacket(OP_ZoneInSendName2, sizeof(ZoneInSendName_Struct2));
-	ZoneInSendName_Struct2* zonesendname2=(ZoneInSendName_Struct2*)outapp->pBuffer;
-	strcpy(zonesendname2->name,m_pp.name);
-	QueuePacket(outapp);
-	safe_delete(outapp);*/
-
-	if(IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-		SendGuildLFGuildStatus();
-	}
-	SendLFGuildStatus();
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
-	SpawnMercOnZone();
-
-	//Mac and earlier just skip client connected for some reason...
-	if(GetClientVersionBit() == 1)
+	if(eqs->ClientVersion() > EQClientMac)
 	{
+		if(IsInAGuild()) {
+			SendGuildMembers();
+			SendGuildURL();
+			SendGuildChannel();
+			SendGuildLFGuildStatus();
+		}
+		SendLFGuildStatus();
+		SendGuildMOTD();
+		SpawnMercOnZone();
+
 		conn_state = ClientReadyReceived;
 		CompleteConnect();
 		SendHPUpdate();
 	}
-
-	if(eqs->ClientVersion() == EQClientMac)
+	else
 	{
+		SendLFGuildStatus();
+		SendGuildMOTD();
+
 		const ItemInst* inst = m_inv[SLOT_CURSOR];
 		if (inst){
 			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
@@ -9231,33 +9229,36 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	*/
 
 	//validate adventure points, this cap is arbitrary at 2,000,000,000
-	if(m_pp.ldon_points_guk < 0)
-		m_pp.ldon_points_guk = 0;
-	if(m_pp.ldon_points_guk > 0x77359400)
-		m_pp.ldon_points_guk = 0x77359400;
-	if(m_pp.ldon_points_mir < 0)
-		m_pp.ldon_points_mir = 0;
-	if(m_pp.ldon_points_mir > 0x77359400)
-		m_pp.ldon_points_mir = 0x77359400;
-	if(m_pp.ldon_points_mmc < 0)
-		m_pp.ldon_points_mmc = 0;
-	if(m_pp.ldon_points_mmc > 0x77359400)
-		m_pp.ldon_points_mmc = 0x77359400;
-	if(m_pp.ldon_points_ruj < 0)
-		m_pp.ldon_points_ruj = 0;
-	if(m_pp.ldon_points_ruj > 0x77359400)
-		m_pp.ldon_points_ruj = 0x77359400;
-	if(m_pp.ldon_points_tak < 0)
-		m_pp.ldon_points_tak = 0;
-	if(m_pp.ldon_points_tak > 0x77359400)
-		m_pp.ldon_points_tak = 0x77359400;
-	if(m_pp.ldon_points_available < 0)
-		m_pp.ldon_points_available = 0;
-	if(m_pp.ldon_points_available > 0x77359400)
-		m_pp.ldon_points_available = 0x77359400;
+	if(eqs->ClientVersion() > EQClientMac)
+	{
+		if(m_pp.ldon_points_guk < 0)
+			m_pp.ldon_points_guk = 0;
+		if(m_pp.ldon_points_guk > 0x77359400)
+			m_pp.ldon_points_guk = 0x77359400;
+		if(m_pp.ldon_points_mir < 0)
+			m_pp.ldon_points_mir = 0;
+		if(m_pp.ldon_points_mir > 0x77359400)
+			m_pp.ldon_points_mir = 0x77359400;
+		if(m_pp.ldon_points_mmc < 0)
+			m_pp.ldon_points_mmc = 0;
+		if(m_pp.ldon_points_mmc > 0x77359400)
+			m_pp.ldon_points_mmc = 0x77359400;
+		if(m_pp.ldon_points_ruj < 0)
+			m_pp.ldon_points_ruj = 0;
+		if(m_pp.ldon_points_ruj > 0x77359400)
+			m_pp.ldon_points_ruj = 0x77359400;
+		if(m_pp.ldon_points_tak < 0)
+			m_pp.ldon_points_tak = 0;
+		if(m_pp.ldon_points_tak > 0x77359400)
+			m_pp.ldon_points_tak = 0x77359400;
+		if(m_pp.ldon_points_available < 0)
+			m_pp.ldon_points_available = 0;
+		if(m_pp.ldon_points_available > 0x77359400)
+			m_pp.ldon_points_available = 0x77359400;
 
 	if(GetSkill(SkillSwimming) < 100)
 		SetSkill(SkillSwimming,100);
+	}
 
 	//pull AAs from the PP
 	for(uint32 a=0; a < MAX_PP_AA_ARRAY; a++){
@@ -9326,7 +9327,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 	}
 
-	KeyRingLoad();
+	if(eqs->ClientVersion() > EQClientMac)
+		KeyRingLoad();
 
 	uint32 groupid = database.GetGroupID(GetName());
 	Group* group = nullptr;
@@ -9497,25 +9499,29 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	if(m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
 
-	database.LoadPetInfo(this);
-	//this was moved before the spawn packets are sent
-	//in hopes that it adds more consistency...
-	//Remake pet
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
+	//pets don't save on zoning in EQMac
+	if(eqs->ClientVersion() > EQClientMac)
 	{
-		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-		if (GetPet() && GetPet()->IsNPC()) {
-			NPC *pet = GetPet()->CastToNPC();
-			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-			pet->CalcBonuses();
-			pet->SetHP(m_petinfo.HP);
-			pet->SetMana(m_petinfo.Mana);
+		database.LoadPetInfo(this);
+		//this was moved before the spawn packets are sent
+		//in hopes that it adds more consistency...
+		//Remake pet
+		if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
+		{
+			MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
+			if (GetPet() && GetPet()->IsNPC()) {
+				NPC *pet = GetPet()->CastToNPC();
+				pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
+				pet->CalcBonuses();
+				pet->SetHP(m_petinfo.HP);
+				pet->SetMana(m_petinfo.Mana);
+			}
+			m_petinfo.SpellID = 0;
 		}
-		m_petinfo.SpellID = 0;
+		// Moved here so it's after where we load the pet data.
+		if(!GetAA(aaPersistentMinion))
+			memset(&m_suspendedminion, 0, sizeof(PetInfo));
 	}
-	// Moved here so it's after where we load the pet data.
-	if(!GetAA(aaPersistentMinion))
-		memset(&m_suspendedminion, 0, sizeof(PetInfo));
 
 	////////////////////////////////////////////////////////////
 	// Server Zone Entry Packet
@@ -9548,18 +9554,15 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	FastQueuePacket(&outapp);
 	//safe_delete(outapp);
 
-	//I think this should happen earlier, not sure
-	/* if(GetHideMe())
-		SetHideMe(true); */
-	// Moved to Handle_Connect_OP_SendExpZonein();
-
-
 	////////////////////////////////////////////////////////////
 	// Tribute Packets
-	DoTributeUpdate();
-	if(m_pp.tribute_active) {
-		//restart the tribute timer where we left off
-		tribute_timer.Start(m_pp.tribute_time_remaining);
+	if(eqs->ClientVersion() > EQClientMac)
+	{
+		DoTributeUpdate();
+		if(m_pp.tribute_active) {
+			//restart the tribute timer where we left off
+			tribute_timer.Start(m_pp.tribute_time_remaining);
+		}
 	}
 
 	////////////////////////////////////////////////////////////
@@ -9584,7 +9587,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	////////////////////////////////////////////////////////////
 	// Task Packets
-	LoadClientTaskState();
+	if(eqs->ClientVersion() > EQClientMac)
+		LoadClientTaskState();
 
 	if (GetClientVersion() >= EQClientRoF)
 	{
@@ -14198,3 +14202,13 @@ void Client::Handle_OP_Action(const EQApplicationPacket *app) {
 	//EQmac sends this when drowning.
 }
 
+void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
+{
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+	InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
+	ic->messageid = 393;
+	ic->spawnid = GetID();
+	strcpy(ic->message, 0);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}

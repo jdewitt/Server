@@ -1479,7 +1479,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetRacialLanguages( &pp ); // bUsh
 	SetRaceStartingSkills( &pp ); // bUsh
 	SetClassStartingSkills( &pp ); // bUsh
-	pp.skills[SkillSenseHeading] = 200;
+	//pp.skills[SkillSenseHeading] = 200;
 	// Some one fucking fix this to use a field name. -Doodman
 	//pp.unknown3596[28] = 15; // @bp: This is to enable disc usage
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());

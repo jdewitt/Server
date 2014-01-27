@@ -1698,7 +1698,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 	MakeAnyLenString(&query, "SELECT x, y, z, target_x, target_y, "
 		"target_z, target_zone_id, heading, target_heading, number, "
 		"target_instance, client_version_mask FROM zone_points "
-		"WHERE zone='%s' AND (version=%i OR version=-1) order by number", zonename, version);
+		"WHERE zone='%s' AND (version=%i OR version=-1) order by number desc", zonename, version);
 	if (RunQuery(query, strlen(query), errbuf, &result))
 	{
 		safe_delete_array(query);

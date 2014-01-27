@@ -865,6 +865,7 @@ DECODE(OP_ZoneChange)
 	DECODE_LENGTH_EXACT(structs::ZoneChange_Struct);
 	SETUP_DIRECT_DECODE(ZoneChange_Struct, structs::ZoneChange_Struct);
 	memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+	IN(zone_reason);
 	IN(zoneID);
 	IN(success);
 	FINISH_DIRECT_DECODE();

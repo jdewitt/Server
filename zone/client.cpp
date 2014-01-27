@@ -6011,6 +6011,8 @@ void Client::SendZonePoints()
 	while(iterator.MoreElements())
 	{
 		ZonePoint* data = iterator.GetData();
+		if(GetClientVersion() == EQClientMac)
+			data->target_zone_instance = 0;
 		if(GetClientVersionBit() & data->client_version_mask)
 		{
 			zp->zpe[i].iterator = data->number;

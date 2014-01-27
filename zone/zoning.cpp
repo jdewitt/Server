@@ -123,7 +123,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//on a zone line.
 		if(zone_mode == ZoneUnsolicited)
 		{
-			if(target_zone_id == zone->GetZoneID())
+			if(target_zone_id == zone->GetZoneID() && GetClientVersion() != EQClientMac)
 			{
 				SendZoneCancel(zc);
 				return;
