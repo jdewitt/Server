@@ -629,23 +629,24 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	conn_state = ClientSpawnRequested;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket;
-
 	if(GetClientVersion() > EQClientMac)
 	{
 		// Send Zone Doors
+		
 		if(entity_list.MakeDoorSpawnPacket(outapp, this))
 		{
 			QueuePacket(outapp);
+			safe_delete(outapp);
 		}
-		safe_delete(outapp);
 	}
 	else
 	{
 		if(entity_list.SendZoneDoorsBulk(outapp, this))
 		{
 			QueuePacket(outapp);
+			if(GetZoneID() != 65)
+				safe_delete(outapp); //This crashes guktop. Workaround for now.
 		}
-		safe_delete(outapp);
 	}
 	
 	entity_list.SendZoneObjects(this);
