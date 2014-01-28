@@ -346,7 +346,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		if(CheckLosFN(mob)) {
 
 			// Aggro
-			#if EQDEBUG>=6
+			#if EQDEBUG>=11
 				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", GetName(), mob->GetName());
 			#endif
 			return( mod_will_aggro(mob, this) );
@@ -475,7 +475,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//attacking someone on same faction, or a friend
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
-#if (EQDEBUG>=5)
+#if (EQDEBUG>=11)
 						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
 						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
 #endif

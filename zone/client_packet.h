@@ -86,6 +86,7 @@
 	void Handle_OP_GuildPublicNote(const EQApplicationPacket *app);
 	void Handle_OP_GetGuildsList(const EQApplicationPacket *app);
 	void Handle_OP_SetGuildMOTD(const EQApplicationPacket *app);
+	void Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app);
 	void Handle_OP_GuildPeace(const EQApplicationPacket *app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_GuildLeader(const EQApplicationPacket *app);
@@ -290,3 +291,4 @@
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);
 	void Handle_OP_Discipline(const EQApplicationPacket *app);
+	void Handle_OP_ZoneEntryResend(const EQApplicationPacket *app);

@@ -115,6 +115,7 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectingOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
 	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
+	ConnectingOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTDCon;
 //temporary hack:
 	ConnectingOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList;
 
@@ -390,6 +391,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
 	ConnectedOpcodes[OP_Discipline] = &Client::Handle_OP_Discipline;
+	ConnectedOpcodes[OP_ZoneEntryResend] = &Client::Handle_OP_ZoneEntryResend;
 }
 
 void ClearMappedOpcode(EmuOpcode op) {
@@ -698,7 +700,7 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 	NewZone_Struct* nz = (NewZone_Struct*)outapp->pBuffer;
 	memcpy(outapp->pBuffer, &zone->newzone_data, sizeof(NewZone_Struct));
 	strcpy(nz->char_name, m_pp.name);
-	_log(ZONE__INIT, "NewZone data for %s (%i). Underworld: %f max_z: %f", zone->newzone_data.zone_short_name, zone->newzone_data.zone_id, zone->newzone_data.underworld, zone->newzone_data.max_z);
+	_log(ZONE__INIT, "NewZone data for %s (%i) successfully sent.", zone->newzone_data.zone_short_name, zone->newzone_data.zone_id);
 
 	FastQueuePacket(&outapp);
 
@@ -4104,6 +4106,12 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 		Message(0, "Motd update failed.");
 	}
 
+	return;
+}
+
+void Client::Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app)
+{
+	//EQMac sends this while connecting, and it will overwrite the MOTD if the player has permission.
 	return;
 }
 
@@ -9609,32 +9617,15 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Weather Packet
 	// This shouldent be moved, this seems to be what the client
 	// uses to advance to the next state (sending ReqNewZone)
-	// Can be blank, we send the real weather later on.
-	if(GetClientVersion() > EQClientMac)
-	{
-		outapp = new EQApplicationPacket(OP_Weather, 12);
-		Weather_Struct *ws = (Weather_Struct *) outapp->pBuffer;
-		ws->val1 = 0x000000FF;
-		if (zone->zone_weather == 1)
-			ws->type = 0x31; // Rain
-		if (zone->zone_weather == 2)
-		{
-			outapp->pBuffer[8] = 0x01;
-			ws->type = 0x02;
-		}
-		outapp->priority = 6;
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-	{
-		outapp = new EQApplicationPacket(OP_Weather, 8);
-		outapp->pBuffer[4] = 1;
 
-		outapp->priority = 6;
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+	outapp = new EQApplicationPacket(OP_Weather, 8);
+	outapp->pBuffer[0] = 0;
+	outapp->pBuffer[4] = 0;
+
+	outapp->priority = 6;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
 	//////////////////////////////////////
 	// Group Roles
 	//
@@ -9906,7 +9897,7 @@ void Client::CompleteConnect()
 	}
 
 	if(zone)
-		zone->weatherSend(); //Zone-iN WEATHER
+		zone->weatherSend();
 
 	TotalKarma = database.GetKarma(AccountID());
 
@@ -14211,4 +14202,18 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 	strcpy(ic->message, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)
+{
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
+	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
+
+	FillSpawnStruct(&sze->player,CastToMob());
+	sze->player.spawn.curHp=1;
+	sze->player.spawn.NPC=0;
+	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	sze->player.spawn.zoneID = zone->GetZoneID();
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
 }
