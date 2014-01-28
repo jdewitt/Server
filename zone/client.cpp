@@ -1458,7 +1458,7 @@ void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 	SetSkill(skillid, value);
 }
 
-void Client::SendSound(){//Makes a sound.
+void Client::SendSound(){//Makes a sound. EQMac is 48 bytes.
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, 68);
 	unsigned char x[68];
 	memset(x, 0, 68);
@@ -1466,11 +1466,14 @@ void Client::SendSound(){//Makes a sound.
 	memset(&x[4],0x8002,sizeof(uint16));
 	memset(&x[8],0x8624,sizeof(uint16));
 	memset(&x[12],0x4A01,sizeof(uint16));
-	x[16]=0x05;
-	x[28]=0x00;//change this value to give gold to the client
+	x[16]=0x00; //copper 
+	x[20]=0x00; //silver
+	x[24]=0x00; //gold
+	x[28]=0x00; //plat
+	x[32]=0x00; //item int16
 	memset(&x[40],0xFFFFFFFF,sizeof(uint32));
 	memset(&x[44],0xFFFFFFFF,sizeof(uint32));
-	memset(&x[48],0xFFFFFFFF,sizeof(uint32));
+	memset(&x[48],0xFFFFFFFF,sizeof(uint32)); //EQMac client ends here.
 	memset(&x[52],0xFFFFFFFF,sizeof(uint32));
 	memset(&x[56],0xFFFFFFFF,sizeof(uint32));
 	memset(&x[60],0xFFFFFFFF,sizeof(uint32));
