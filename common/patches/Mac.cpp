@@ -1456,6 +1456,10 @@ ENCODE(OP_ShopDelItem)
 	eq->npcid=emu->npcid;
 	OUT(playerid);
 	OUT(itemslot);
+	if(emu->type == 0)
+		eq->type=64;
+	else
+		OUT(type);
 	FINISH_ENCODE();
 }
 
@@ -1728,6 +1732,179 @@ ENCODE(OP_ZonePlayerToBind){
 	OUT(z);
 	OUT(heading);
 	FINISH_ENCODE();
+}
+
+ENCODE(OP_Trader) {
+
+	if((*p)->size == sizeof(Trader_Struct)) {
+		ENCODE_LENGTH_EXACT(Trader_Struct);
+		SETUP_DIRECT_ENCODE(Trader_Struct, structs::Trader_Struct);
+		OUT(Code);
+		int k;
+		for(k = 0; k < 80; k++) {
+			eq->Items[k] = emu->Items[k];
+		}
+		for(k = 0; k < 80; k++) {
+			eq->ItemCost[k] = emu->ItemCost[k];
+		}
+		FINISH_ENCODE();
+	}
+	else if((*p)->size == sizeof(Trader_ShowItems_Struct)) {
+		ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+		SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+		OUT(Code);
+		OUT(TraderID);
+		if(emu->SubAction == 0)
+			eq->SubAction = emu->Code;
+		else
+			OUT(SubAction);
+		eq->Items[0] = emu->Unknown08[0];
+		eq->Items[1] = emu->Unknown08[1];
+		FINISH_ENCODE();
+	}
+	else if((*p)->size == sizeof(TraderPriceUpdate_Struct)) {
+		ENCODE_LENGTH_EXACT(TraderPriceUpdate_Struct);
+		SETUP_DIRECT_ENCODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+		OUT(Action);
+		OUT(SubAction);
+		OUT(SerialNumber);
+		OUT(NewPrice);
+
+		FINISH_ENCODE();
+	}
+	else if((*p)->size == sizeof(TraderBuy_Struct)) {
+		ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+		SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+		OUT(Action);
+		OUT(TraderID);
+		OUT(ItemID);
+		OUT(Price);
+		OUT(Quantity);
+		//OUT(Slot);
+		strcpy(eq->ItemName,emu->ItemName);
+		FINISH_ENCODE();
+	}
+}
+
+DECODE(OP_Trader) {
+
+	if(__packet->size == sizeof(structs::Trader_Struct)) {
+		DECODE_LENGTH_EXACT(structs::Trader_Struct);
+		SETUP_DIRECT_DECODE(Trader_Struct, structs::Trader_Struct);
+		IN(Code);
+		int k;
+		for(k = 0; k < 80; k++) {
+			emu->Items[k] = eq->Items[k];
+		}
+		for(k = 0; k < 80; k++) {
+			emu->ItemCost[k] = eq->ItemCost[k];
+		}
+		FINISH_DIRECT_DECODE();
+	}
+	else if(__packet->size == sizeof(structs::TraderStatus_Struct)) {
+		DECODE_LENGTH_EXACT(structs::TraderStatus_Struct);
+		SETUP_DIRECT_DECODE(TraderStatus_Struct, structs::TraderStatus_Struct);
+		IN(Code);
+		IN(TraderID);
+		FINISH_DIRECT_DECODE();
+	}
+	else if(__packet->size == sizeof(structs::TraderPriceUpdate_Struct)) {
+		DECODE_LENGTH_EXACT(structs::TraderPriceUpdate_Struct);
+		SETUP_DIRECT_DECODE(TraderPriceUpdate_Struct, structs::TraderPriceUpdate_Struct);
+		IN(Action);
+		IN(SubAction);
+		IN(SerialNumber);
+		IN(NewPrice);
+		FINISH_DIRECT_DECODE();
+	}
+}
+
+ENCODE(OP_BecomeTrader)
+{
+	ENCODE_LENGTH_EXACT(BecomeTrader_Struct);
+	SETUP_DIRECT_ENCODE(BecomeTrader_Struct, structs::BecomeTrader_Struct);
+	OUT(Code);
+	OUT(ID);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_TraderBuy)
+{
+	ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+	SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+	OUT(Action);
+	OUT(TraderID);
+	OUT(ItemID);
+	OUT(Price);
+	OUT(Quantity);
+	eq->Slot = emu->AlreadySold;
+	strcpy(eq->ItemName,emu->ItemName);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_TraderBuy){
+	DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+	SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+	IN(Action);
+	IN(TraderID);
+	IN(ItemID);
+	IN(Price);
+	IN(Quantity);
+	emu->AlreadySold = eq->Slot;
+	strcpy(emu->ItemName,eq->ItemName);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_BazaarSearch)
+{
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	char *Buffer = (char *)in->pBuffer;
+
+	uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
+
+	if(SubAction != BazaarSearchResults)
+	{
+		dest->FastQueuePacket(&in, ack_req);
+
+		return;
+	}
+
+	unsigned char *__emu_buffer = in->pBuffer;
+
+	BazaarSearchResults_Struct *emu = (BazaarSearchResults_Struct *) __emu_buffer;
+
+	int EntryCount = in->size / sizeof(BazaarSearchResults_Struct);
+
+	if(EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
+	{
+		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
+		delete in;
+		return;
+	}
+	in->size = EntryCount * sizeof(structs::BazaarSearchResults_Struct);
+
+	in->pBuffer = new unsigned char[in->size];
+
+	memset(in->pBuffer, 0, in->size);
+
+	structs::BazaarSearchResults_Struct *eq = (structs::BazaarSearchResults_Struct *)in->pBuffer;
+
+	for(int i = 0; i < EntryCount; ++i, ++emu, ++eq)
+	{
+		OUT(Beginning.Action);
+		OUT(NumItems);
+		OUT(SerialNumber);
+		OUT(SellerID);
+		OUT(Cost);
+		OUT(ItemStat);
+		memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
+	}
+
+	delete[] __emu_buffer;
+
+	dest->FastQueuePacket(&in, ack_req);
 }
 
 /*ENCODE(OP_FormattedMessage)

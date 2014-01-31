@@ -1362,7 +1362,7 @@ struct Merchant_DelItem_Struct{
 /*000*/	uint16	npcid;			// Merchant NPC's entity id
 /*002*/	uint16	playerid;		// Player's entity id
 /*006*/	uint8	itemslot;       // Slot of the item you want to remove
-/*007*/	uint8	unknown007;     // 0x40
+/*007*/	uint8	type;     // 0x40
 };
 
 struct Illusion_Struct {
@@ -1491,6 +1491,70 @@ struct TradeCoin_Struct{
 	uint16	trader;	
 	uint16	slot;	
 	uint32	amount;	
+};
+
+struct Trader_Struct {
+/*000*/	uint16	Code;
+/*002*/ uint16  TraderID;
+/*004*/	uint32	Items[80];
+/*324*/	uint32	ItemCost[80];
+/*644*/
+};
+
+struct Trader_ShowItems_Struct{
+/*000*/	uint16 Code;
+/*002*/	uint16 TraderID;
+/*004*/ uint32 SubAction;
+/*008*/	uint32 Items[3];
+};
+
+struct TraderStatus_Struct{
+	uint16 Code;
+	uint16 Unkown04;
+	uint32 TraderID;
+	uint32 Unkown08[3];
+};
+
+struct BecomeTrader_Struct
+{
+/*000*/	uint16 ID;
+/*002*/ uint16 unknown;
+/*004*/	uint32 Code;
+
+};
+
+struct BazaarWindowStart_Struct {
+	uint8   Action;
+	uint8   Unknown001;
+};
+
+struct BazaarSearchResults_Struct {
+/*000*/	BazaarWindowStart_Struct Beginning;
+/*002*/	uint16  NumItems;
+/*004*/	uint16	SerialNumber;
+/*006*/	uint16	SellerID;
+/*008*/	uint16	Cost;
+/*010*/	uint16	ItemStat;
+/*012*/	char	ItemName[64];
+/*076*/
+};
+
+struct TraderBuy_Struct{
+/*000*/	uint16 Action;
+/*002*/	uint16 TraderID;
+/*004*/	uint32 ItemID;
+/*008*/	uint32 Price;
+/*012*/	uint16 Quantity;
+/*014*/ uint16 Slot; //EQEmu has as AlreadySold for for EQMac this is slot.
+/*016*/	char   ItemName[64];
+/*080*/
+};
+
+struct TraderPriceUpdate_Struct {
+/*000*/	uint16	Action;
+/*002*/	uint16	SubAction;
+/*004*/	int32	SerialNumber;
+/*008*/	uint32	NewPrice;
 };
 
 struct Give_Struct 

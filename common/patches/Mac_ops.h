@@ -103,5 +103,11 @@ D(OP_SetGuildMOTD)
 E(OP_GuildMOTD)
 //E(OP_GetGuildMOTDReply)
 D(OP_GuildInviteAccept)
+E(OP_Trader)
+D(OP_Trader)
+E(OP_BazaarSearch)
+E(OP_BecomeTrader)
+E(OP_TraderBuy)
+D(OP_TraderBuy)
 #undef E
 #undef D

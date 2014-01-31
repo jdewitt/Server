@@ -5489,10 +5489,10 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 
 	TraderClick_Struct* outtcs=(TraderClick_Struct*)outapp->pBuffer;
 
-	Client* Customer = entity_list.GetClientByID(tcs->TraderID);
+	Client* Trader = entity_list.GetClientByID(tcs->TraderID);
 
-	if (Customer)
-		outtcs->Approval = Customer->WithCustomer(GetID());
+	if (Trader)
+		outtcs->Approval = Trader->WithCustomer(GetID());
 	else {
 		_log(TRADING__CLIENT, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
 						" returned a nullptr pointer");
@@ -5508,8 +5508,8 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	_pkt(TRADING__PACKETS, outapp);
 
 	if(outtcs->Approval) {
-		this->BulkSendTraderInventory(Customer->CharacterID());
-		Customer->Trader_CustomerBrowsing(this);
+		this->BulkSendTraderInventory(Trader->CharacterID());
+		Trader->Trader_CustomerBrowsing(this);
 	}
 	else
 		Message_StringID(clientMessageYellow, TRADER_BUSY);
@@ -8154,7 +8154,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 				if(c)
 					c->WithCustomer(0);
 				else
-					_log(TRADING__CLIENT, "Client::Handle_OP_TraderBuy: Null Client Pointer");
+					_log(TRADING__CLIENT, "Client::Handle_OP_Trader: Null Client Pointer");
 
 				break;
 			}
@@ -8168,7 +8168,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			}
 		}
 	}
-	else if(app->size==sizeof(ClickTrader_Struct))
+	else if(app->size==sizeof(ClickTrader_Struct) || app->size==sizeof(TraderStatus_Struct))
 	{
 		if(Buyer) {
 			Trader_EndTrader();
@@ -8178,7 +8178,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 		ClickTrader_Struct* ints = (ClickTrader_Struct*)app->pBuffer;
 
-		if(ints->Code==BazaarTrader_StartTraderMode)
+		if(ints->Code==BazaarTrader_StartTraderMode && app->size==sizeof(ClickTrader_Struct))
 		{
 			GetItems_Struct* gis=GetTraderItems();
 
@@ -8245,6 +8245,22 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			if(tss->Code==BazaarTrader_ShowItems)
 			{
 				Trader_ShowItems();
+			}
+			else if(tss->Code==BazaarTrader_EndTraderMode)
+			{
+				Trader_EndTrader();
+			}
+			else if(tss->Code==BazaarTrader_EndTransaction)
+			{
+				Client* c=entity_list.GetClientByID(tss->TraderID);
+				if(c)
+					c->WithCustomer(0);
+				else
+					_log(TRADING__CLIENT, "Client::Handle_OP_Trader: Null Client Pointer");
+
+				EQApplicationPacket empty(OP_ShopEndConfirm);
+				QueuePacket(&empty);
+				Save();
 			}
 		}
 		else {

@@ -229,6 +229,7 @@ public:
 	void	AI_SpellCast();
 	void	Trader_ShowItems();
 	void	Trader_CustomerBrowsing(Client *Customer);
+	void	Trader_CustomerBought(Client *Customer, uint32 Price, uint32 ItemID, uint32 Quantity, const char* ItemName);
 	void	Trader_EndTrader();
 	void	Trader_StartTrader();
 	uint8	WithCustomer(uint16 NewCustomer);
@@ -253,9 +254,10 @@ public:
 	void	SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16	FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	ItemInst* FindTraderItemBySerialNumber(int32 SerialNumber);
+	ItemInst* FindTraderItemByID(int32 ItemID);
 	void	FindAndNukeTraderItem(int32 item_id,uint16 quantity,Client* customer,uint16 traderslot);
-	void	NukeTraderItem(uint16 slot,int16 charges,uint16 quantity,Client* customer,uint16 traderslot, int uniqueid);
-	void	ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges);
+	void	NukeTraderItem(uint16 slot, int16 charges,uint16 quantity,Client* customer,uint16 traderslot,int uniqueid, uint32 sellerid);
+	void	ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, int TraderSlot,uint32 price);
 	void	TradeRequestFailed(const EQApplicationPacket* app);
 	void	BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void	TraderUpdate(uint16 slot_id,uint32 trader_id);

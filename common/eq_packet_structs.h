@@ -1922,7 +1922,7 @@ struct Merchant_DelItem_Struct{
 /*000*/	uint32	npcid;			// Merchant NPC's entity id
 /*004*/	uint32	playerid;		// Player's entity id
 /*008*/	uint32	itemslot;
-/*012*/	uint32	unknown012;
+/*012*/	uint32	type;
 };
 struct Adventure_Purchase_Struct {
 /*000*/	uint32	Type;	// 1 = LDoN, 2 = Discord, 4 = Norrath's Keepers, 5 = Dark Reign
@@ -3110,13 +3110,14 @@ struct BecomeTrader_Struct
 struct TraderStatus_Struct{
 	uint32 Code;
 	uint32 Uknown04;
-	uint32 Uknown08;
+	uint32 TraderID;
 };
 
 struct Trader_ShowItems_Struct{
 /*000*/	uint32 Code;
 /*004*/	uint32 TraderID;
-/*008*/	uint32 Unknown08[3];
+/*012*/ uint32 SubAction;
+/*012*/	uint32 Unknown08[2];
 };
 
 struct TraderBuy_Struct{
