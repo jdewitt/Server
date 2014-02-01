@@ -1493,19 +1493,19 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		safe_delete_array(SafeName);
 		Search.append(Tmp);
 	}
-	if(Class_ != 0xFFFFFFFF){
+	if(Class_ != 0xFFFF){
 		sprintf(Tmp, " and mid(reverse(bin(items.classes)),%i,1)=1", Class_);
 		Search.append(Tmp);
 	}
-	if(Race!=0xFFFFFFFF){
+	if(Race!=0xFFFF){
 		sprintf(Tmp, " and mid(reverse(bin(items.races)),%i,1)=1", Race);
 		Search.append(Tmp);
 	}
-	if(Slot!=0xFFFFFFFF){
+	if(Slot!=0xFFFF){
 		sprintf(Tmp, " and mid(reverse(bin(items.slots)),%i,1)=1", Slot + 1);
 		Search.append(Tmp);
 	}
-	if(Type!=0xFFFFFFFF){
+	if(Type!=0xFFFF){
 
 		switch(Type){
 
@@ -1675,73 +1675,41 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			mysql_free_result(Result);
 			return;
 		}
-		Size = mysql_num_rows(Result) * sizeof(BazaarSearchResults_Struct);
+		Size = sizeof(OldBazaarSearchResults_Struct);
 		uchar *buffer = new uchar[Size];
-		uchar *bufptr = buffer;
-		memset(buffer, 0, Size);
 
-		int Action = BazaarSearchResults;
-		uint32 Cost = 0;
-		int32 SerialNumber = 0;
-		char Name[64] = {0};
-		int Count = 0;
-		uint32 StatValue=0;
-
+		OldBazaarSearchResults_Struct* bsrs = (OldBazaarSearchResults_Struct*)buffer;
 		while ((Row = mysql_fetch_row(Result))) {
-			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Action);
-			Count = atoi(Row[0]);
-			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Count);
-			SerialNumber = atoi(Row[3]);
-			VARSTRUCT_ENCODE_TYPE(int32, bufptr, SerialNumber);
+			memset(buffer, 0, Size);
+
+			bsrs->Action = BazaarSearchResults;
+			bsrs->NumItems = atoi(Row[0]);
 			Client* Trader2=entity_list.GetClientByCharID(atoi(Row[1]));
 			if(Trader2){
-				ID = Trader2->GetID();
-				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, ID);
+				bsrs->SellerID = Trader2->GetID();
 			}
 			else{
 				_log(TRADING__CLIENT, "Unable to find trader: %i\n",atoi(Row[1]));
-				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, 0);
 			}
-			Cost = atoi(Row[5]);
-			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Cost);
-			StatValue = atoi(Row[8]);
-			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, StatValue);
-			bool Stackable = atoi(Row[10]);
-			if(Stackable) {
-				int Charges = atoi(Row[9]);
-				sprintf(Name, "%s(%i)", Row[7], Charges);
-			}
-			else
-				sprintf(Name,"%s(%i)",Row[7], Count);
+			bsrs->ItemID = atoi(Row[2]);
+			//SerialNumber is atoi(Row[3]);
+			//Charges is Row[4]
+			bsrs->Cost = atoi(Row[5]);
+			//SlotID is Row[6]
+			memcpy(bsrs->ItemName, Row[7], strlen(Row[7]));
+			bsrs->ItemStat = atoi(Row[8]);
+			//SumCharges is Row[9]
+			//Stackable is Row[10]
 
-			memcpy(bufptr,&Name, strlen(Name));
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, Size);
+			memcpy(outapp->pBuffer, buffer, Size);
 
-			bufptr += 64;
-
-			// Extra fields for SoD+
-			//
-			if(Trader2)
-				sprintf(Name, "%s", Trader2->GetName());
-			else
-				sprintf(Name, "Unknown");
-
-			memcpy(bufptr,&Name, strlen(Name));
-
-			bufptr += 64;
-
-			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, atoi(Row[1]));	// ItemID
+			this->QueuePacket(outapp);
+			_pkt(TRADING__PACKETS,outapp);
+			safe_delete(outapp);
 		}
 		mysql_free_result(Result);
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, Size);
-
-		memcpy(outapp->pBuffer, buffer, Size);
-
-		this->QueuePacket(outapp);
-
-		_pkt(TRADING__PACKETS,outapp);
-
-		safe_delete(outapp);
+		
 		safe_delete_array(buffer);
 
 		EQApplicationPacket* outapp2 = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarReturnDone_Struct));

@@ -105,9 +105,14 @@ E(OP_GuildMOTD)
 D(OP_GuildInviteAccept)
 E(OP_Trader)
 D(OP_Trader)
-E(OP_BazaarSearch)
+//E(OP_BazaarSearch)
+D(OP_BazaarSearch)
 E(OP_BecomeTrader)
 E(OP_TraderBuy)
 D(OP_TraderBuy)
+E(OP_WearChange);
+D(OP_WearChange);
+E(OP_ExpUpdate);
+E(OP_Death);
 #undef E
 #undef D

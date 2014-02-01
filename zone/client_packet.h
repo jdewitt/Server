@@ -87,6 +87,7 @@
 	void Handle_OP_GetGuildsList(const EQApplicationPacket *app);
 	void Handle_OP_SetGuildMOTD(const EQApplicationPacket *app);
 	void Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app);
+	void Handle_OP_BazaarSearchCon(const EQApplicationPacket *app);
 	void Handle_OP_GuildPeace(const EQApplicationPacket *app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_GuildLeader(const EQApplicationPacket *app);

@@ -136,7 +136,7 @@ ENCODE(OP_PlayerProfile) {
 	eq->available_slots=0xffff;
 
 	int r = 0;
-	//	OUT(checksum);
+//	OUT(checksum);
 	OUT(gender);
 	OUT(race);
 	OUT(class_);
@@ -145,14 +145,8 @@ ENCODE(OP_PlayerProfile) {
 	eq->bind_location[0].x = emu->binds[0].x;
 	eq->bind_location[0].y = emu->binds[0].y;
 	eq->bind_location[0].z = emu->binds[0].z;
-	//eq->bind_heading[0] = emu->binds[0].heading;
-
-
 	OUT(deity);
 	OUT(intoxication);
-	//OUT_array(spellSlotRefresh, 8);
-	//OUT(abilitySlotRefresh);
-//	OUT(unknown0166[4]);
 	OUT(haircolor);
 	OUT(beardcolor);
 	OUT(eyecolor1);
@@ -181,7 +175,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-	//OUT(toxicity);
 	OUT(thirst_level);
 	OUT(hunger_level);
 	for(r = 0; r < 15; r++) {
@@ -191,9 +184,6 @@ ENCODE(OP_PlayerProfile) {
 		OUT(buffs[r].spellid);
 		OUT(buffs[r].duration);
 	}
-//	OUT_array(recastTimers, structs::MAX_RECAST_TYPES);
-//	OUT(endurance);
-//	OUT(aapoints_spent);
 	OUT(aapoints);
 	OUT_str(name);
 	strcpy(eq->Surname, emu->last_name);
@@ -216,24 +206,16 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_bank);
 	OUT(copper_bank);
 	OUT(level2);
-//	OUT(platinum_shared);
-//OUT(expansions);
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
 		OUT(aa_array[r].AA);
 		OUT(aa_array[r].value);
 	}
-	//OUT(zoneInstance);
 	for(r = 0; r < 6; r++) {
 		OUT_str(groupMembers[r]);
 	}
-//	OUT_str(groupLeader);	//this is prolly right after groupMembers, but I dont feel like checking.
-//	OUT(leadAAActive);
 	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
-
-	//char* packet_dump = "pp_dump.txt";
-	//FileDumpPacketHex(packet_dump, __packet);
 
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
 	EQApplicationPacket* outapp = new EQApplicationPacket();
@@ -325,32 +307,6 @@ ENCODE(OP_SendCharInfo) {
 	FINISH_ENCODE();	
 }
 
-/*ENCODE(OP_GuildsList) {
-	SETUP_DIRECT_ENCODE(GuildsList_Struct, structs::GuildsList_Struct);
-	OUT_array(head, 4);
-
-	int totalcount = (__packet->size - 64) / sizeof(GuildsListEntry_Struct);
-	int r = 0;
-	for(r = 0; r < totalcount; r++)
-	{
-		if(emu->Guilds[r].name[0] != '\0')
-		{
-			strn0cpy(eq->Guilds[r].name, emu->Guilds[r].name, 32);
-			eq->Guilds[r].exists = 1;
-			eq->Guilds[r].guildID = r;
-			eq->Guilds[r].unknown1 = 0xFFFFFFFF;
-			eq->Guilds[r].unknown3 = 0xFFFFFFFF;
-		}
-		else
-			eq->Guilds[r].guildID = 0xFFFFFFFF;
-	}
-
-	
-	char* packet_dump = "GuildsList.txt";
-	FileDumpPacketHex(packet_dump, __packet);
-	FINISH_ENCODE();	
-}*/
-
 DECODE(OP_SetGuildMOTD) {
 	SETUP_DIRECT_DECODE(GuildMOTD_Struct, structs::GuildMOTD_Struct);
 	strcpy(emu->name,eq->name);
@@ -358,7 +314,6 @@ DECODE(OP_SetGuildMOTD) {
 	FINISH_DIRECT_DECODE();
 }
 
-//ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_GuildMOTD); }
 ENCODE(OP_GuildMOTD) {
 	SETUP_DIRECT_ENCODE(GuildMOTD_Struct, structs::GuildMOTD_Struct);
 	strcpy(eq->name,emu->name);
@@ -612,61 +567,31 @@ ENCODE(OP_ZoneSpawns){
 	int r;
 	int k;
 	for(r = 0; r < entrycount; r++, eq++, emu++) {
-//		eq->unknown0000 = emu->unknown0000;
 		eq->GM = emu->gm;
-//		eq->unknown0003 = emu->unknown0003;
 		eq->title = emu->aaitle;
-//		eq->unknown0004 = emu->unknown0004;
 		eq->anon = emu->anon;
-		//eq->face = emu->face;
 		memcpy(eq->name, emu->name, 47);
 		eq->deity = emu->deity;
-//		eq->unknown0073 = emu->unknown0073;
 		eq->size = emu->size;
-//		eq->unknown0079 = emu->unknown0079;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
-//		eq->haircolor = emu->haircolor;
 		eq->cur_hp = emu->curHp;
-		//eq->max_hp = emu->max_hp;
-		//eq->findable = emu->findable;
-//		eq->unknown0089[5] = emu->unknown0089[5];
 		eq->deltaHeading = emu->deltaHeading;
 		eq->x_pos = (int16)emu->x;
-//		eq->padding0054 = emu->padding0054;
 		eq->y_pos = (int16)emu->y;
 		eq->animation = emu->animation;
-//		eq->padding0058 = emu->padding0058;
 		eq->z_pos = (int16)emu->z*10;
 		eq->deltaY = 0;
 		eq->deltaX = 0;
 		eq->heading = (uint8)emu->heading;
-//		eq->padding0066 = emu->padding0066;
 		eq->deltaZ = 0;
-//		eq->padding0070 = emu->padding0070;
-//		eq->eyecolor1 = emu->eyecolor1;
-//		eq->unknown0115[24] = emu->unknown0115[24];
-		//eq->showhelm = emu->showhelm;
-//		eq->unknown0140[4] = emu->unknown0140[4];
-		//eq->is_npc = emu->is_npc;
-//		eq->hairstyle = emu->hairstyle;
-
-		//if(emu->gender == 1){
-		//	eq->hairstyle = eq->hairstyle == 0xFF ? 0 : eq->hairstyle;
-		//}
 		eq->anim_type = 0x64;
-//		eq->beardcolor = emu->beardcolor;
-//		eq->unknown0147[4] = emu->unknown0147[4];
 		eq->level = emu->level;
-//		eq->unknown0259[4] = emu->unknown0259[4];
-	//	eq->beard = emu->beard;
 		eq->petOwnerId = emu->petOwnerId;
 		eq->guildrank = emu->guildrank;
 		if(emu->NPC == 1)
 			eq->guildrank = 0;
-
 		eq->texture = emu->equip_chest2;
-//		eq->unknown0194[3] = emu->unknown0194[3];
 		for(k = 0; k < 9; k++) {
 			eq->equipment[k] = emu->equipment[k];
 			eq->equipcolors[k].color = emu->colors[k].color;
@@ -676,15 +601,10 @@ ENCODE(OP_ZoneSpawns){
 		eq->GuildID = emu->guildID;
 		if(eq->GuildID == 0)
 			eq->GuildID = 0xFFFF;
-		//eq->title = emu->face;
-//		eq->unknown0274 = emu->unknown0274;
 		eq->helm = emu->helm;
 		eq->race = emu->race;
-//		eq->unknown0288 = emu->unknown0288;
 		strncpy(eq->Surname, emu->lastName, 20);
 		eq->walkspeed = emu->walkspeed;
-//		eq->unknown0328 = emu->unknown0328;
-//		eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
 		if(emu->class_ > 19 && emu->class_ < 35)
 			eq->class_ = emu->class_-3;
@@ -701,25 +621,9 @@ ENCODE(OP_ZoneSpawns){
 		eq->hairstyle = emu->hairstyle;
 		eq->beard = emu->beard;
 		eq->face = emu->face;
-//		eq->unknown0333 = emu->unknown0333;
-	//	eq->flymode = emu->flymode;
 		eq->gender = emu->gender;
 		eq->bodytype = emu->bodytype;
-//		eq->unknown0336[3] = emu->unknown0336[3];
-	//	eq->equip_chest2 = emu->equip_chest2;
 		eq->spawn_id = emu->spawnId;
-//		eq->unknown0344[4] = emu->unknown0344[4];
-		//eq->lfg = emu->lfg;
-
-		/*
-		if (emu->face == 99)	      {eq->face = 0;}
-		if (emu->eyecolor1 == 99)  {eq->eyecolor1 = 0;}
-		if (emu->eyecolor2 == 99)  {eq->eyecolor2 = 0;}
-		if (emu->hairstyle == 99)  {eq->hairstyle = 0;}
-		if (emu->haircolor == 99)  {eq->haircolor = 0;}
-		if (emu->beard == 99)      {eq->beard = 0;}
-		if (emu->beardcolor == 99) {eq->beardcolor = 0;}
-		*/
 
 	}
 	//_log(NET__STRUCTS, "Total size of bulkspawns packet uncompressed: %d", out->size);
@@ -742,49 +646,23 @@ ENCODE(OP_NewSpawn) {
 	//in the loop.
 	int k = 0;
 	//do the transform...
-//		eq->unknown0000 = emu->unknown0000;
 		eq->GM = emu->gm;
-//		eq->unknown0003 = emu->unknown0003;
-		//eq->title = emu->aaitle;
-//		eq->unknown0004 = emu->unknown0004;
 		eq->anon = emu->anon;
-		//eq->face = emu->face;
 		strncpy(eq->name, emu->name, 47);
 		eq->deity = emu->deity;
-//		eq->unknown0073 = emu->unknown0073
 		eq->size = emu->size;
-//		eq->unknown0079 = emu->unknown0079;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
-//		eq->haircolor = emu->haircolor;
 		eq->cur_hp = emu->curHp;
-		//eq->max_hp = emu->max_hp;
-		//eq->findable = emu->findable;
-//		eq->unknown0089[5] = emu->unknown0089[5];
 		eq->deltaHeading = 0;
 		eq->x_pos = (int16)emu->x;
-//		eq->padding0054 = emu->padding0054;
 		eq->y_pos = (int16)emu->y;
 		eq->animation = emu->animation;
-//		eq->padding0058 = emu->padding0058;
 		eq->z_pos = (int16)emu->z*10;
 		eq->deltaY = 0;
 		eq->deltaX = 0;
 		eq->heading = (uint8)emu->heading;
-//		eq->padding0066 = emu->padding0066;
 		eq->deltaZ = 0;
-//		eq->padding0070 = emu->padding0070;
-//		eq->eyecolor1 = emu->eyecolor1;
-//		eq->unknown0115[24] = emu->unknown0115[24];
-		//eq->showhelm = emu->showhelm;
-//		eq->unknown0140[4] = emu->unknown0140[4];
-		//eq->is_npc = emu->is_npc;
-//		eq->hairstyle = emu->hairstyle;
-
-		//if(emu->gender == 1){
-		//	eq->hairstyle = eq->hairstyle == 0xFF ? 0 : eq->hairstyle;
-		//}
-
 		eq->haircolor = emu->haircolor;
 		eq->beardcolor = emu->beardcolor;
 		eq->eyecolor1 = emu->eyecolor1;
@@ -792,13 +670,9 @@ ENCODE(OP_NewSpawn) {
 		eq->hairstyle = emu->hairstyle;
 		eq->beard = emu->beard;
 		eq->face = emu->face;
-//		eq->unknown0147[4] = emu->unknown0147[4];
 		eq->level = emu->level;
-//		eq->unknown0259[4] = emu->unknown0259[4];
-	//	eq->beard = emu->beard;
 		eq->petOwnerId = emu->petOwnerId;
 		eq->guildrank = emu->guildrank;
-//		eq->unknown0194[3] = emu->unknown0194[3];
 		for(k = 0; k < 9; k++) {
 			eq->equipment[k] = emu->equipment[k];
 			eq->equipcolors[k].color = emu->colors[k].color;
@@ -807,7 +681,6 @@ ENCODE(OP_NewSpawn) {
 		eq->AFK = emu->afk;
 		eq->GuildID = emu->guildID;
 		eq->title = emu->face;
-//		eq->unknown0274 = emu->unknown0274;
 		eq->anim_type = 0x64;
 		eq->texture = emu->equip_chest2;
         eq->helm = emu->helm;
@@ -815,14 +688,10 @@ ENCODE(OP_NewSpawn) {
 		eq->GuildID = emu->guildID;
 		if(eq->GuildID == 0)
 			eq->GuildID = 0xFFFF;
-
 		if(eq->guildrank == 0)
 			eq->guildrank = 0xFF;
-//		eq->unknown0288 = emu->unknown0288;
 		strncpy(eq->Surname, emu->lastName, 20);
 		eq->walkspeed = emu->walkspeed;
-//		eq->unknown0328 = emu->unknown0328;
-		//eq->is_pet = emu->is_pet;
 		eq->light = emu->light;
 		if(emu->class_ > 19 && emu->class_ < 35)
 			eq->class_ = emu->class_-3;
@@ -832,26 +701,9 @@ ENCODE(OP_NewSpawn) {
 			eq->class_ = 32;
 		else 
 			eq->class_ = emu->class_;
-//		eq->eyecolor2 = emu->eyecolor2;
-//		eq->unknown0333 = emu->unknown0333;
-	//	eq->flymode = emu->flymode;
 		eq->gender = emu->gender;
-	//	eq->bodytype = emu->bodytype;
-//		eq->unknown0336[3] = emu->unknown0336[3];
-	//	eq->equip_chest2 = emu->equip_chest2;
 		eq->spawn_id = emu->spawnId;
-//		eq->unknown0344[4] = emu->unknown0344[4];
-		//eq->lfg = emu->lfg;
 
-		/*
-		if (emu->face == 99)	      {eq->face = 0;}
-		if (emu->eyecolor1 == 99)  {eq->eyecolor1 = 0;}
-		if (emu->eyecolor2 == 99)  {eq->eyecolor2 = 0;}
-		if (emu->hairstyle == 99)  {eq->hairstyle = 0;}
-		if (emu->haircolor == 99)  {eq->haircolor = 0;}
-		if (emu->beard == 99)      {eq->beard = 0;}
-		if (emu->beardcolor == 99) {eq->beardcolor = 0;}
-		*/
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewSpawn, sizeof(structs::Spawn_Struct));
 	outapp->pBuffer = new uchar[sizeof(structs::Spawn_Struct)];
 	outapp->size = DeflatePacket((unsigned char*)__packet->pBuffer, __packet->size, outapp->pBuffer, sizeof(structs::Spawn_Struct));
@@ -1855,79 +1707,83 @@ DECODE(OP_TraderBuy){
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_BazaarSearch)
-{
-	EQApplicationPacket *in = *p;
-	*p = nullptr;
+DECODE(OP_BazaarSearch){
 
-	char *Buffer = (char *)in->pBuffer;
-
-	uint8 SubAction = VARSTRUCT_DECODE_TYPE(uint8, Buffer);
-
-	if(SubAction != BazaarSearchResults)
-	{
-		dest->FastQueuePacket(&in, ack_req);
-
-		return;
+	if(__packet->size == sizeof(structs::BazaarSearch_Struct)) {
+		DECODE_LENGTH_EXACT(structs::BazaarSearch_Struct);
+		SETUP_DIRECT_DECODE(BazaarSearch_Struct, structs::BazaarSearch_Struct);
+		IN(Beginning.Action);
+		IN(TraderID);
+		IN(Class_);
+		IN(Race);
+		IN(ItemStat);
+		IN(Slot);
+		IN(Type);
+		IN(MinPrice);
+		IN(MaxPrice);
+		strcpy(emu->Name,eq->Name);
+		FINISH_DIRECT_DECODE();
 	}
-
-	unsigned char *__emu_buffer = in->pBuffer;
-
-	BazaarSearchResults_Struct *emu = (BazaarSearchResults_Struct *) __emu_buffer;
-
-	int EntryCount = in->size / sizeof(BazaarSearchResults_Struct);
-
-	if(EntryCount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0)
-	{
-		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
-		delete in;
-		return;
+	else if(__packet->size == sizeof(structs::BazaarWelcome_Struct)) {
+		DECODE_LENGTH_EXACT(structs::BazaarWelcome_Struct);
+		SETUP_DIRECT_DECODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+		emu->Beginning.Action = eq->Action;
+		IN(Traders);
+		IN(Items);
+		FINISH_DIRECT_DECODE();
 	}
-	in->size = EntryCount * sizeof(structs::BazaarSearchResults_Struct);
-
-	in->pBuffer = new unsigned char[in->size];
-
-	memset(in->pBuffer, 0, in->size);
-
-	structs::BazaarSearchResults_Struct *eq = (structs::BazaarSearchResults_Struct *)in->pBuffer;
-
-	for(int i = 0; i < EntryCount; ++i, ++emu, ++eq)
+	else if(__packet->size == sizeof(BazaarInspect_Struct))
 	{
-		OUT(Beginning.Action);
-		OUT(NumItems);
-		OUT(SerialNumber);
-		OUT(SellerID);
-		OUT(Cost);
-		OUT(ItemStat);
-		memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
+		DECODE_LENGTH_EXACT(BazaarInspect_Struct);
 	}
-
-	delete[] __emu_buffer;
-
-	dest->FastQueuePacket(&in, ack_req);
 }
 
-/*ENCODE(OP_FormattedMessage)
-{
-	EQApplicationPacket *__packet = *p; 
-	*p = nullptr; 
-	unsigned char *__emu_buffer = __packet->pBuffer; 
-	FormattedMessage_Struct *emu = (FormattedMessage_Struct *) __emu_buffer; 
-	uint32 __i = 0; 
-	__i++; 
-	
-	int msglen = __packet->size - sizeof(FormattedMessage_Struct);
-	int len = sizeof(structs::FormattedMessage_Struct) + msglen - 6;
-	__packet->pBuffer = new unsigned char[len]; 
-	__packet->size = len; 
-	memset(__packet->pBuffer, 0, len); 
-	structs::FormattedMessage_Struct *eq = (structs::FormattedMessage_Struct *) __packet->pBuffer; 
-	eq->string_id = emu->string_id;
-	eq->type = emu->type;
-	eq->unknown0 = 0x0000;
-	strcpy(eq->message, emu->message);
+ENCODE(OP_WearChange) {
+	ENCODE_LENGTH_EXACT(WearChange_Struct);
+	SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
+	OUT(spawn_id);
+	OUT(material);
+	eq->color = emu->color.color;
+	eq->blue = emu->color.rgb.blue;
+	eq->green = emu->color.rgb.green;
+	eq->red = emu->color.rgb.red;
+	eq->use_tint = emu->color.rgb.use_tint;
+	OUT(wear_slot_id);
 	FINISH_ENCODE();
-}*/
+}
+
+DECODE(OP_WearChange) {
+	DECODE_LENGTH_EXACT(structs::WearChange_Struct);
+	SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
+	IN(spawn_id);
+	IN(material);
+	emu->color.color = eq->color;
+	emu->color.rgb.blue = eq->blue;
+	emu->color.rgb.green = eq->green;
+	emu->color.rgb.red = eq->red;
+	emu->color.rgb.use_tint = eq->use_tint;
+	OUT(wear_slot_id);
+	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_ExpUpdate) {
+	ENCODE_LENGTH_EXACT(ExpUpdate_Struct);
+	SETUP_DIRECT_ENCODE(ExpUpdate_Struct, structs::ExpUpdate_Struct);
+	OUT(exp);
+	FINISH_ENCODE();
+}
+
+ENCODE(OP_Death) {
+	ENCODE_LENGTH_EXACT(Death_Struct);
+	SETUP_DIRECT_ENCODE(Death_Struct, structs::Death_Struct);
+	OUT(spawn_id);
+	OUT(killer_id);
+	OUT(corpseid);
+	OUT(spell_id);
+	OUT(attack_skill);
+	OUT(damage);
+	FINISH_ENCODE();
+}
 
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 	const Item_Struct *item=inst->GetItem();

@@ -116,6 +116,7 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
 	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectingOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTDCon;
+	ConnectingOpcodes[OP_BazaarSearch] = &Client::Handle_OP_BazaarSearchCon;
 //temporary hack:
 	ConnectingOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList;
 
@@ -681,7 +682,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 		FastQueuePacket(&outapp);
 	}
 
-	if(strncasecmp(zone->GetShortName(), "bazaar", 6) == 0)
+	if(strncasecmp(zone->GetShortName(), "bazaar", 6) == 0 && GetClientVersion() > EQClientMac)
 		SendBazaarWelcome();
 
 	conn_state = ZoneContentsSent;
@@ -1300,7 +1301,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			CheckIncreaseSkill(SkillTracking, nullptr, -20);
 	}
 
-	// Break Hide if moving without sneaking and set rewind timer if moved
+	// Break Hide and Trader mode if moving without sneaking and set rewind timer if moved
 	if(ppu->y_pos != y_pos || ppu->x_pos != x_pos){
 		if((hidden || improved_hidden) && !sneaking){
 			hidden = false;
@@ -1315,6 +1316,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 				safe_delete(outapp);
 			}
 		}
+		if(Trader)
+			Trader_EndTrader();
 		rewind_timer.Start(30000, true);
 	}
 
@@ -4113,6 +4116,14 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 void Client::Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app)
 {
 	//EQMac sends this while connecting, and it will overwrite the MOTD if the player has permission.
+	return;
+}
+
+void Client::Handle_OP_BazaarSearchCon(const EQApplicationPacket *app)
+{
+	if(GetClientVersion() == EQClientMac)
+		SendBazaarWelcome();
+
 	return;
 }
 

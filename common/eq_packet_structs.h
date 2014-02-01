@@ -2786,6 +2786,17 @@ struct BazaarSearchResults_Struct {
 	uint32	ItemID;
 };
 
+struct OldBazaarSearchResults_Struct {
+/*000*/	uint16  Action;
+/*002*/	uint16  NumItems;
+/*004*/	uint16	ItemID;
+/*006*/	uint16	SellerID;
+/*008*/	uint16	Cost;
+/*010*/	uint16	ItemStat;
+/*012*/	char	ItemName[64];
+/*076*/
+
+};
 // Barter/Buyer
 //
 //

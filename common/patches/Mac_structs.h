@@ -538,13 +538,12 @@ struct WearChange_Struct
 {
 /*000*/ uint16 spawn_id;
 /*002*/ uint16 wear_slot_id;
-/*004*/ uint16 slot_graphic;
-/*006*/ uint8 color;
-/*007*/ uint8 unknown3;
-/*009*/ uint8 blue;
-/*010*/ uint8 green;
-/*011*/ uint8 red;
-/*012*/ uint8 unknown4;
+/*004*/ uint16 material;
+/*006*/ uint16 color;
+/*008*/ uint8  blue;
+		uint8  green;
+		uint8  red;
+		uint8  use_tint;	// if there's a tint this is FF
 };
 
 /*
@@ -1528,6 +1527,28 @@ struct BazaarWindowStart_Struct {
 	uint8   Unknown001;
 };
 
+struct BazaarWelcome_Struct {
+	uint32  Action;
+	uint32	Traders;
+	uint32	Items;
+	uint8	Unknown012[8];
+};
+
+struct BazaarSearch_Struct {
+/*000*/	BazaarWindowStart_Struct Beginning;
+/*002*/	uint16	TraderID;
+/*004*/	uint16	Class_;
+/*006*/	uint16	Race;
+/*008*/	uint16	ItemStat;
+/*010*/	uint16	Slot;
+/*012*/	uint16	Type;
+/*014*/	char	Name[64];
+/*078*/ uint16  unknown;
+/*080*/	uint32	MinPrice;
+/*084*/	uint32	MaxPrice;
+/*088*/
+};
+
 struct BazaarSearchResults_Struct {
 /*000*/	BazaarWindowStart_Struct Beginning;
 /*002*/	uint16  NumItems;
@@ -1537,6 +1558,7 @@ struct BazaarSearchResults_Struct {
 /*010*/	uint16	ItemStat;
 /*012*/	char	ItemName[64];
 /*076*/
+
 };
 
 struct TraderBuy_Struct{
@@ -2492,7 +2514,7 @@ struct PlayerProfile_Struct
 #define pp_bank_cont_inv_size 80
 /* ***************** */
 
-/*0000*/	uint8	checksum[4];		// Checksum
+/*0000*/	uint32  checksum;		    // Checksum
 /*0004*/	uint8	unknown0004[2];		// ***Placeholder
 /*0006*/	char	name[64];			// Player First Name
 /*0070*/	char	Surname[70];		// Player Last Name
