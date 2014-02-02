@@ -642,11 +642,12 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(entity_list.SendZoneDoorsBulk(outapp, this))
+		uint8 count = 0;
+		if(entity_list.SendZoneDoorsBulk(outapp, this, count))
 		{
 			QueuePacket(outapp);
-			if(GetZoneID() != 65)
-				safe_delete(outapp); //This crashes guktop. Workaround for now.
+			if(count > 1)
+				safe_delete(outapp);
 		}
 	}
 	

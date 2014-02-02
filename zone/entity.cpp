@@ -795,10 +795,9 @@ Object* EntityList::FindNearbyObject(float x, float y, float z, float radius)
 	return nullptr;
 }
 
-bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client){
+bool EntityList::SendZoneDoorsBulk(EQApplicationPacket* app, Client *client, uint8 &count){
 
 	uint32 mask_test = client->GetClientVersionBit();
-	int count = 0;
 	uchar doorstruct[sizeof(OldDoor_Struct)];
 	uchar packet[sizeof(OldDoor_Struct)*255];
 	int16 length = 0;
