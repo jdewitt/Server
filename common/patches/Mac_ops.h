@@ -114,5 +114,6 @@ E(OP_WearChange);
 D(OP_WearChange);
 E(OP_ExpUpdate);
 E(OP_Death);
+D(OP_Bug);
 #undef E
 #undef D

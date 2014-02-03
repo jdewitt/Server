@@ -1614,12 +1614,7 @@ struct Petition_Struct
 	char petitiontext[1024];	// Comment: 
 };
 
-/* 
-	Bug_Report tested by Sp0tter.  It is currently linked to the database 'bug_report'
-	table.  I've added the table to the /create fold in the database dir
-	so just source that and any bug reporting will go straight to the database.
-	It still needs sql injection handling.
-*/
+//For reference, possibly used by Mac client.
 struct Bug_Report_Struct
 {
 	char playername[72];		// Comment: Players name
@@ -1627,6 +1622,22 @@ struct Bug_Report_Struct
 	uint8 cannotuplicate;		// Comment: 1 for cannot duplicate, 0 for can duplicate
 	uint8 noncrashbug;			// Comment: 1 for does NOT crash, 0 for does cause crash
 	char bugdescription[1024];	// Comment: The bug description
+};
+
+struct BugStruct{
+/*0000*/	char	chartype[64];
+/*0064*/	char	name[96];
+/*0160*/	float	x;
+/*0164*/	float	y;
+/*0168*/	float	z;
+/*0172*/	float	heading;
+/*0176*/	char	unknown176[16];
+/*0192*/	char	target_name[64];
+/*0256*/	uint32	type;
+/*0260*/	char	unknown256[2052];
+/*2312*/	char	bug[1024];
+/*3336*/	uint32	unknown3336;
+/*3340*/
 };
 
 struct Who_All_Struct 
