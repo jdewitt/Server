@@ -421,7 +421,6 @@ void Client::MovePC(uint32 zoneID, float x, float y, float z, float heading, uin
 
 void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm){
 	ProcessMovePC(zoneID, instanceID, x, y, z, heading, ignorerestrictions, zm);
-	LogFile->write(EQEMuLog::Error, "MovePC ZM: %i zoneid: %i (%i)", zm, zoneID, instanceID);
 }
 
 

@@ -476,6 +476,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
 
 			char* packet_dump = "unhandled_packets.txt";
+			FilePrint(packet_dump,buffer);
 			FileDumpPacketHex(packet_dump, app);
 
 			if(app->size < 1000)

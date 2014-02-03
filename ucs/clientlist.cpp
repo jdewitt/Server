@@ -668,14 +668,14 @@ void Clientlist::Process() {
 
 					_log(UCS__TRACE, "Received login for user %s with key %s", MailBox, Key);
 
-					if(!database.VerifyMailKey(CharacterName, (*Iterator)->ClientStream->GetRemoteIP(), Key)) {
+					/*if(!database.VerifyMailKey(CharacterName, (*Iterator)->ClientStream->GetRemoteIP(), Key)) {
 
 						_log(UCS__ERROR, "Chat Key for %s does not match, closing connection.", MailBox);
 
 						KeyValid = false;
 
 						break;
-					}
+					}*/
 
 					(*Iterator)->SetAccountID(database.FindAccount(CharacterName.c_str(), (*Iterator)));
 
