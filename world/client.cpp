@@ -882,22 +882,25 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	QueuePacket(outapp2);
 	safe_delete(outapp2);
 
-	outapp2 = new EQApplicationPacket(OP_SetChatServer2);
+	if(ClientVersionBit & !BIT_Mac)
+	{
+		outapp2 = new EQApplicationPacket(OP_SetChatServer2);
 
-	if(ClientVersionBit & BIT_TitaniumAndEarlier)
-		ConnectionType = 'M';
+		if(ClientVersionBit & BIT_TitaniumAndEarlier)
+			ConnectionType = 'M';
 
-	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-		Config->MailHost.c_str(),
-		Config->MailPort,
-		Config->ShortName.c_str(),
-		this->GetCharName(), ConnectionType, MailKey
-	);
-	outapp2->size=strlen(buffer)+1;
-	outapp2->pBuffer = new uchar[outapp2->size];
-	memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	QueuePacket(outapp2);
-	safe_delete(outapp2);
+		sprintf(buffer,"%s,%i,%s.%s,%c%08X",
+			Config->MailHost.c_str(),
+			Config->MailPort,
+			Config->ShortName.c_str(),
+			this->GetCharName(), ConnectionType, MailKey
+		);
+		outapp2->size=strlen(buffer)+1;
+		outapp2->pBuffer = new uchar[outapp2->size];
+		memcpy(outapp2->pBuffer,buffer,outapp2->size);
+		QueuePacket(outapp2);
+		safe_delete(outapp2);
+	}
 
 	EnterWorld();
 

@@ -1627,6 +1627,11 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				SetSenseExemption(false);
 				return;
 			}
+			else if(IsXTarget(GetTarget()))
+			{
+				GetTarget()->IsTargeted(1);
+				return;
+			}
 			else if(GetBindSightTarget())
 			{
 				if(GetBindSightTarget()->DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
@@ -5054,8 +5059,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			trade->state = TradeCompleting;
 
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
-				Message_StringID(13,104);
-				other->Message_StringID(13,104);
+				Message_StringID(13, TRADE_CANCEL_LORE);
+				other->Message_StringID(13, TRADE_CANCEL_LORE);
 				this->FinishTrade(this);
 				other->FinishTrade(other);
 				other->trade->Reset();
@@ -7885,19 +7890,8 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
 	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
-		int criticalchance = 0;
-		switch(GetAA(aaCriticalMend)){
-		case 1:
-			criticalchance = 5;
-			break;
-		case 2:
-			criticalchance = 10;
-			break;
-		case 3:
-			criticalchance = 25;
-			break;
-		}
-		criticalchance += 5*GetAA(aaMendingoftheTranquil);
+		
+		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
 		if(MakeRandomInt(0,99) < criticalchance){
 			mendhp *= 2;
@@ -8021,7 +8015,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
 		{
 			if(m_epp.perAA == 0)
-				Message_StringID(0, 121); //ON
+				Message_StringID(0, AA_ON); //ON
 			m_epp.perAA = atoi((char *)&app->pBuffer[3]);
 			SendAAStats();
 			SendAATable();
@@ -8029,7 +8023,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		else if(strcmp((char *)app->pBuffer,"off") == 0) 
 		{
 			if(m_epp.perAA > 0)
-				Message_StringID(0, 119); //OFF
+				Message_StringID(0, AA_OFF); //OFF
 			m_epp.perAA = 0;
 			SendAAStats();
 		}
@@ -8087,13 +8081,12 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		}
 		else if(action->action == aaActionDisableEXP){ //Turn Off AA Exp
 			if(m_epp.perAA > 0)
-				Message_StringID(0, 119);	//119 Alternate Experience is *OFF*.
+				Message_StringID(0, AA_OFF);
 			m_epp.perAA = 0;
 			SendAAStats();
 		} else if(action->action == aaActionSetEXP) {
-			_log(ZONE__INIT, "Got precentage: %i", action->exp_value);
 			if(m_epp.perAA == 0)
-				Message_StringID(0, 121);	//121 Alternate Experience is *ON*.
+				Message_StringID(0, AA_ON);
 			m_epp.perAA = action->exp_value;
 			if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA=0;	// stop exploit with sanity check
 			// send an update
@@ -8103,6 +8096,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 			printf("Unknown AA action: %u %u 0x%x %d\n", action->action, action->ability, action->unknown08, action->exp_value);
 		}
 	}
+
 	return;
 }
 
@@ -10228,7 +10222,7 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 {
 	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
-			Message_StringID(MT_System, 4059); //You must wait a bit longer before using the rewind command again.
+			Message_StringID(MT_System, REWIND_WAIT);
 	} else {
 		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
 		rewind_timer.Start(30000, true);
@@ -11907,7 +11901,7 @@ void Client::Handle_OP_Report(const EQApplicationPacket *app)
 {
 	if(!CanUseReport)
 	{
-		Message_StringID(MT_System, 12945);
+		Message_StringID(MT_System, REPORT_ONCE);
 		return;
 	}
 

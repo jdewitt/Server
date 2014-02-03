@@ -136,6 +136,7 @@ public:
 
 	//Appearance
 	void SendLevelAppearance();
+	void SendStunAppearance();
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
 		Client *specific_target=nullptr);
 	void SendTargetable(bool on, Client *specific_target = nullptr);
@@ -206,6 +207,7 @@ public:
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
+	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
 
 	//Buff
 	void BuffProcess();
@@ -761,8 +763,8 @@ public:
 	bool Charmed() const { return charmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
-	virtual int32 CheckAggroAmount(uint16 spellid, bool isproc = false);
-	virtual int32 CheckHealAggroAmount(uint16 spellid, uint32 heal_possible = 0);
+	virtual int32 CheckAggroAmount(uint16 spell_id, bool isproc = false);
+	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
 	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
 	uint16 GetInstrumentMod(uint16 spell_id) const;

@@ -1614,6 +1614,21 @@ void Mob::SendLevelAppearance(){
 	safe_delete(outapp);
 }
 
+void Mob::SendStunAppearance()
+{
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
+	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
+	la->parm1 = 58;
+	la->parm2 = 60;
+	la->spawn_id = GetID();
+	la->value1a = 2;
+	la->value1b = 0;
+	la->value2a = 2;
+	la->value2b = 0;
+	entity_list.QueueCloseClients(this,outapp);
+	safe_delete(outapp);
+}
+
 void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
@@ -3217,7 +3232,7 @@ void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
 
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect || spells[spell_id].effectid[i] == SE_ApplyEffect2)
+		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
 		{
 			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 			{

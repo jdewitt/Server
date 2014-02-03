@@ -804,6 +804,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if (stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist) {
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
+						
+						if (caster->IsClient())
+							effect_value += effect_value*caster->CastToClient()->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
+
 						Stun(effect_value);
 					} else {
 						if (IsClient())
@@ -1139,12 +1143,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
-						spells[buffs[slot].spellid].dispel_flag < 1 &&
+						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
 					}
 				}
 				break;
@@ -1163,12 +1168,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
 						IsDetrimentalSpell(buffs[slot].spellid) &&
-						spells[buffs[slot].spellid].dispel_flag < 1)
+						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
 					}
 				}
 				break;
@@ -1187,12 +1193,29 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
 						IsBeneficialSpell(buffs[slot].spellid) &&
-						spells[buffs[slot].spellid].dispel_flag < 1)
+						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
+					}
+				}
+				break;
+			}
+
+			case SE_Purify:
+			{
+				//Attempt to remove all Deterimental buffs.
+				uint32 buff_count = GetMaxTotalSlots();
+				for(int slot = 0; slot < buff_count; slot++) {
+					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+						IsDetrimentalSpell(buffs[slot].spellid))
+					{
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+						}
 					}
 				}
 				break;
@@ -1525,6 +1548,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Memory Blur: %d", effect_value);
 #endif
 				int wipechance = spells[spell_id].base[i];
+				int bonus = spellbonuses.IncreaseChanceMemwipe + itembonuses.IncreaseChanceMemwipe + aabonuses.IncreaseChanceMemwipe;
+				wipechance += wipechance*bonus/100;
+				
 				if(MakeRandomInt(0, 100) < wipechance)
 				{
 					if(IsAIControlled())
@@ -2696,27 +2722,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
 			}
 
-			case SE_Purify:
-			{
-				/*
-				Guessing as to exactly how this effect works.
-				All spells that utilize it 'remove all determental effects'
-				with a value of (20). Lets assume the value determines
-				how many determental effects can be removed.
-				*/
-				uint32 buff_count = GetMaxTotalSlots();
-				int FadeCount = 0;
-
-				for (int j = 0; j <= buff_count; j++) {
-					if(buffs[j].spellid != SPELL_UNKNOWN) {
-						if((FadeCount <= spell.base[i]) && IsDetrimentalSpell(buffs[j].spellid)){
-							BuffFadeBySlot(j, false);
-							FadeCount++;
-						}
-					}
-				}
-			}
-
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2833,7 +2838,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_SpellVulnerability:
 			case SE_SpellTrigger:
 			case SE_ApplyEffect:
-			case SE_ApplyEffect2:
 			case SE_Twincast:
 			case SE_DelayDeath:
 			case SE_InterruptCasting:
@@ -2933,6 +2937,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitRace:
 			case SE_FcLimitUse:
 			case SE_FcMute:	
+			case SE_FfLimitUseType:
+			case SE_FcStunTimeMod:
+			case SE_StunBashChance:
+			case SE_IncreaseChanceMemwipe:
+			case SE_CriticalMend:
 			{
 				break;
 			}
@@ -3899,8 +3908,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			Numhits(false);
 	}
 
-	Numhits(false);
-
 	buffs[slot].spellid = SPELL_UNKNOWN;
 	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		SendPetBuffsToClient();
@@ -4167,6 +4174,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				LimitFound = true;
 			break;
 
+			case SE_FfLimitUseType:
+			if (base1 != spell.numhitstype)
+				LimitFound = true;
+			break;
+
 			//Handle Focus Effects
 			case SE_ImprovedDamage:
 				if (type == focusImprovedDamage && base1 > value)
@@ -4421,6 +4433,14 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
+			case SE_FcStunTimeMod:
+			{
+				if(type == focusFcStunTimeMod)
+					value = base1;
+
+				break;
+			}
+
 		}
 	}
 
@@ -4630,6 +4650,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_FfLimitUseMin:
 			if (focus_spell.base[i] > spell.numhits)
+				return 0;
+			break;
+
+		case SE_FfLimitUseType:
+			if (focus_spell.base[i] != spell.numhitstype)
 				return 0;
 			break;
 
@@ -4935,6 +4960,14 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_FcMute:
 		{
 			if(type == focusFcMute)
+				value = focus_spell.base[i];
+
+			break;
+		}
+
+		case SE_FcStunTimeMod:
+		{
+			if(type == focusFcStunTimeMod)
 				value = focus_spell.base[i];
 
 			break;
@@ -5710,5 +5743,33 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 		}
 	}
 	return resist_chance;
+}
+
+bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
+
+	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
+	//Effect value of dispels are treated as a level modifier.
+	//Values for scaling were obtain from live parses, best estimates.
+
+	caster_level += level_modifier - 1; 
+	int dispel_chance = 36; //Baseline chance if no level difference and no modifier
+	int level_diff = caster_level - buff_level;
+
+	if (level_diff > 0)
+		dispel_chance += level_diff * 8;
+
+	else if (level_diff < 0)
+		dispel_chance += level_diff * 2;
+
+	if (dispel_chance >= 100)
+		return true;
+
+	else if (dispel_chance < 10)
+		dispel_chance = 10;
+
+	if (MakeRandomInt(0,99) < dispel_chance)
+		return true;
+	else
+		return false;
 }
 

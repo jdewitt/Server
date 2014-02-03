@@ -430,8 +430,6 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can implement that later.
 	ClearDraggedCorpses();
 
-	LogFile->write(EQEMuLog::Error, "ProcessMovePC ZM: %i zoneid: %i (%i)", zm, zoneID, instance_id);
-
 	if(zoneID == 0)
 		zoneID = zone->GetZoneID();
 
@@ -562,8 +560,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			ReadyToZone = false;
 			break;
 	}
-
-	LogFile->write(EQEMuLog::Error, "Ready to zone. Method: %i", zm);
 
 	if(ReadyToZone) {
 		zone_mode = zm;
