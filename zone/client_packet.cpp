@@ -7143,10 +7143,6 @@ void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
-
-	char* packet_dump = "Handle_OP_Bug.txt";
-	FileDumpPacketHex(packet_dump, app);
-
 	if(app->size!=sizeof(BugStruct))
 		printf("Wrong size of BugStruct got %d expected %zu!\n", app->size, sizeof(BugStruct));
 	else{
