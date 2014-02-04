@@ -1945,7 +1945,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 	//Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if ((RuleB(Combat,TauntOverLevel) == false) && (level_difference < 0) || who->GetSpecialAbility(IMMUNE_TAUNT)){
-		Message_StringID(MT_SpellFailure,FAILED_TAUNT);
+		//Message_StringID(MT_SpellFailure,FAILED_TAUNT);
 		return;
 	}
 
@@ -1998,13 +1998,13 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 			if (who->CanTalk())
 				who->Say_StringID(SUCCESSFUL_TAUNT,GetCleanName());
 		}
-		else{
-			Message_StringID(MT_SpellFailure,FAILED_TAUNT);
-		}
+	//	else{
+		//	Message_StringID(MT_SpellFailure,FAILED_TAUNT);
+	//	}
 	}
 
-	else
-		Message_StringID(MT_SpellFailure,FAILED_TAUNT);
+	//else
+	//	Message_StringID(MT_SpellFailure,FAILED_TAUNT);
 
 	if (HasSkillProcs()){
 		float chance = (float)TauntReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;

@@ -115,5 +115,7 @@ D(OP_WearChange);
 E(OP_ExpUpdate);
 E(OP_Death);
 D(OP_Bug);
+D(OP_Taunt);
+D(OP_CombatAbility);
 #undef E
 #undef D

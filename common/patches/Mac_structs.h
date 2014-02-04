@@ -391,19 +391,6 @@ struct ClientTarget_Struct {
 /*000*/	uint16	new_target;			// Target ID
 };
 
-/*
-** Yeahlight
-** Client hits taunt
-** Length: 12 Bytes
-** OpCode: 3b21
-*/
-struct ClientTaunt_Struct
-{
-	uint16  tauntTarget;		// Comment: ID of target
-	uint16  buffer;          // Comment: ***Placeholder
-	uint16  tauntUser;		// Comment: ID of taunter
-	uint8   buffer2[6];		// Comment: ***Placeholder
-};
 
 struct Spawn_Struct
 {
@@ -1207,11 +1194,11 @@ int8 response[2];
 };
 
 //Combat Abilities
-struct CombatAbility_Struct
-{
-	uint32 m_id;			// Comment: 
-	uint32 m_atk;		// Comment: 
-	uint32 m_type;		// Comment: 
+struct CombatAbility_Struct {
+	uint16 m_target;		//the ID of the target mob
+	uint16 unknown;
+	uint32 m_atk;
+	uint32 m_skill;
 };
 
 //Instill Doubt

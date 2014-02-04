@@ -497,6 +497,13 @@ DECODE(OP_TargetCommand)
 	FINISH_DIRECT_DECODE();
 }
 
+DECODE(OP_Taunt)
+{
+	SETUP_DIRECT_DECODE(ClientTarget_Struct, structs::ClientTarget_Struct);
+	IN(new_target);
+	FINISH_DIRECT_DECODE();
+}
+
 DECODE(OP_SetServerFilter)
 {
 	DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
@@ -1798,6 +1805,15 @@ DECODE(OP_Bug) {
 	IN(z);
 	IN(heading);
 	IN(type);
+	FINISH_DIRECT_DECODE();
+}
+
+DECODE(OP_CombatAbility) {
+	DECODE_LENGTH_EXACT(structs::CombatAbility_Struct);
+	SETUP_DIRECT_DECODE(CombatAbility_Struct, structs::CombatAbility_Struct);
+	IN(m_target);
+	IN(m_atk);
+	IN(m_skill);
 	FINISH_DIRECT_DECODE();
 }
 
