@@ -798,7 +798,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	}
 
-	SendItemAnimation(GetTarget(), AmmoItem, SkillArchery);
+	//SendItemAnimation(GetTarget(), AmmoItem, SkillArchery);
+	ProjectileAnimation(GetTarget(), AmmoItem->ID,true,-1,-1,-1,-1,SkillArchery);
 
 	DoArcheryAttackDmg(GetTarget(), RangeWeapon, Ammo);
 
@@ -1017,7 +1018,8 @@ void NPC::RangedAttack(Mob* other)
 	}
 
 	if(ammo)
-		SendItemAnimation(GetTarget(), ammo, SkillArchery);
+		//SendItemAnimation(GetTarget(), ammo, SkillArchery);
+		ProjectileAnimation(GetTarget(), ammo->ID,true,-1,-1,-1,-1,SkillArchery);
 
 	// Face the Target
 	FaceTarget(GetTarget());
@@ -1193,7 +1195,8 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 	//send item animation, also does the throw animation
-	SendItemAnimation(GetTarget(), item, SkillThrowing);
+	//SendItemAnimation(GetTarget(), item, SkillThrowing);
+	ProjectileAnimation(GetTarget(), item->ID,true,-1,-1,-1,-1,SkillThrowing);
 
 	DoThrowingAttackDmg(GetTarget(), RangeWeapon, item);
 
@@ -1284,7 +1287,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 }
 
 void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SomeItemPacketMaybe, sizeof(Arrow_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Projectile, sizeof(Arrow_Struct));
 	Arrow_Struct *as = (Arrow_Struct *) outapp->pBuffer;
 	as->type = 1;
 	as->src_x = GetX();
@@ -1292,9 +1295,9 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 	as->src_z = GetZ();
 	as->source_id = GetID();
 	as->target_id = to->GetID();
-	as->item_id = item->ID;
+	as->object_id = item->ID;
 
-	as->item_type = item->ItemType;
+	as->effect_type = item->ItemType;
 	as->skill = (uint8)skillInUse;
 
 	strn0cpy(as->model_name, item->IDFile, 16);
@@ -1329,62 +1332,96 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 	safe_delete(outapp);
 }
 
-void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, float angle, float tilt, float arc) {
+void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float angle, float tilt, float arc, SkillUseTypes skillInUse) {
 
+	LogFile->write(EQEMuLog::Debug, "ProjectileAnimation for ID: %i", id);
 	const Item_Struct* item = nullptr;
-	uint8 item_type = 0;
+	uint8 effect_type = 0;
+	char name[16];
+	uint8 behavior = 0;
+	uint8 light = 0;
+	uint8 yaw = 0;
+	uint16 target_id = to->GetID();
 
-	if(!item_id) {
+	if(!id)
 		item = database.GetItem(8005); // Arrow will be default
-	}
-	else {
-		item = database.GetItem(item_id); // Use the item input into the command
+	else
+	{
+		if(IsItem) 
+			item = database.GetItem(id);
 	}
 
-	if(!item) {
-		return;
+	if(item)
+	{
+		effect_type = item->ItemType;
+		behavior = 1;
+		strn0cpy(name,item->IDFile, 16);
 	}
-	if(IsArrow) {
-		item_type = 27;
+	else
+	{
+		//28 is also a valid type. 
+		effect_type = 9;
+		light = 8;
+		strn0cpy(name,"PLAYER_1", 16);
 	}
-	if(!item_type) {
-		item_type = item->ItemType;
-	}
-	if(!speed) {
+
+	if(!speed || speed < 0)
 		speed = 4.0;
-	}
-	if(!angle) {
-		angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
-	}
-	if(!tilt) {
-		tilt = 125;
-	}
-	if(!arc) {
-		arc = 50;
+
+	if(!angle || angle < 0) 
+		if(IsItem)
+			angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
+		else
+			angle = to->GetHeading()*2;
+	
+	if(!tilt || tilt < 0)
+		if(IsItem) 
+			tilt = 125;
+		else
+			tilt = 0;
+	
+	if(!arc || arc < 0)
+		if(IsItem)
+			arc = 50;
+		else
+			arc = 0;
+
+	if(GetID() == to->GetID())
+	{
+		yaw = 0.001;
+		target_id = 0;
 	}
 
-
-	// See SendItemAnimation() for some notes on this struct
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SomeItemPacketMaybe, sizeof(Arrow_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Projectile, sizeof(Arrow_Struct));
 	Arrow_Struct *as = (Arrow_Struct *) outapp->pBuffer;
 	as->type = 1;
 	as->src_x = GetX();
 	as->src_y = GetY();
 	as->src_z = GetZ();
 	as->source_id = GetID();
-	as->target_id = to->GetID();
-	as->item_id = item->ID;
-	as->item_type = item_type;
-	as->skill = 0;	// Doesn't seem to have any effect
-	strn0cpy(as->model_name, item->IDFile, 16);
+	as->target_id = target_id;
+	as->object_id = id;
+	as->effect_type = effect_type;
+	as->skill = (uint8)skillInUse;
+	strn0cpy(as->model_name, name, 16);
 	as->velocity = speed;
 	as->launch_angle = angle;
 	as->tilt = tilt;
 	as->arc = arc;
-	as->unknown088 = 125;
+	as->light = light;
+	as->behavior = behavior;
+	as->pitch = 0;
+	as->yaw = yaw;
+
+	//For the benefit of modern clients
+	as->unknown088 = 125; 
 	as->unknown092 = 16;
 
-	entity_list.QueueCloseClients(this, outapp);
+	if(!IsItem)
+		entity_list.QueueClients(this, outapp, false);
+	else
+		entity_list.QueueCloseClients(this, outapp);
+
 	safe_delete(outapp);
 
 }

@@ -58,6 +58,7 @@
 	void Handle_OP_ItemLinkClick(const EQApplicationPacket *app);
 	void Handle_OP_ItemLinkResponse(const EQApplicationPacket *app);
 	void Handle_OP_MoveItem(const EQApplicationPacket *app);
+	void Handle_OP_DeleteCharge(const EQApplicationPacket *app);
 	void Handle_OP_Camp(const EQApplicationPacket *app);
 	void Handle_OP_Logout(const EQApplicationPacket *app);
 	void Handle_OP_SenseHeading(const EQApplicationPacket *app);

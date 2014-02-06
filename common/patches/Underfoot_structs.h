@@ -3706,10 +3706,10 @@ struct Arrow_Struct
 /*044*/	float	arc;
 /*048*/	uint32	source_id;
 /*052*/	uint32	target_id;	//entity ID
-/*056*/	uint32	item_id;
+/*056*/	uint32	object_id;
 /*060*/	uint8	unknown060[10];
 /*070*/	uint8	unknown070;
-/*071*/	uint8	item_type;
+/*071*/	uint8	effect_type;
 /*072*/	uint8	skill;
 /*073*/	uint8	unknown073[13];
 /*086*/	char	model_name[30];

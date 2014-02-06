@@ -2394,6 +2394,37 @@ struct ObjectDisplayOnly_Struct
 /*0084*/ char test4[40];
 };
 
+struct Arrow_Struct {
+/*000*/ uint32 type;			//Always 1
+/*004*/ uint32 unknown004;		//Always 0		
+/*008*/ uint32 unknown008;				
+/*012*/ float src_y;					
+/*016*/ float src_x;					
+/*020*/ float src_z;				
+/*024*/ float launch_angle;		//heading		
+/*028*/ float tilt;
+/*032*/ float velocity;
+/*036*/ float burstVelocity;		
+/*040*/ float burstHorizontal;		
+/*044*/ float burstVertical;		
+/*048*/ float yaw;			
+/*052*/ float pitch;	
+/*056*/ float arc;			
+/*060*/ uint8 unknown060[4];		
+/*064*/	uint16	source_id;
+/*066*/ uint16	target_id;	
+/*068*/ uint16  unknown068;
+/*070*/ uint16  unknown070;
+/*072*/ uint32	object_id; //Spell or ItemID
+/*076*/ uint8  light;
+/*077*/ uint8  unknown077;
+/*078*/ uint8  behavior;
+/*079*/ uint8  effect_type; //9 for spell, uses itemtype for items. 28 is also valid, possibly underwater attack?
+/*080*/ uint8  skill;
+/*081*/ char   model_name[16];
+/*097*/ char   buffer[15];
+
+};
 //Yeahlight: Size: 116 (0x74u)
 //           OpCode: 0x4520
 struct SpawnProjectile_Struct

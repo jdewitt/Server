@@ -160,6 +160,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ItemLinkClick] = &Client::Handle_OP_ItemLinkClick;
 	ConnectedOpcodes[OP_ItemLinkResponse] = &Client::Handle_OP_ItemLinkResponse;
 	ConnectedOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
+	ConnectedOpcodes[OP_DeleteCharge] = &Client::Handle_OP_DeleteCharge;
 	ConnectedOpcodes[OP_Camp] = &Client::Handle_OP_Camp;
 	ConnectedOpcodes[OP_Logout] = &Client::Handle_OP_Logout;
 	ConnectedOpcodes[OP_LDoNOpen] = &Client::Handle_OP_LDoNOpen;
@@ -736,11 +737,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	//Send AA Exp packet:
 	if(GetLevel() >= 51)
 	{
-		//EQMac the struct may be wrong, here. I am seeing changing data in the final int8 which should be void.
 		SendAAStats();
-		
-		//We don't send the table here, need to figure out why EQMac doesn't load them from PP.
-		//	SendAATable();
 	}
 
 	// Send exp packets
@@ -758,7 +755,10 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	}
 	safe_delete(outapp);
 
-	SendAATimers();
+	if(GetLevel() >= 51)
+	{
+		SendAATimers();
+	}
 
 	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
@@ -3418,6 +3418,12 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probably SwapItem(mi)");
 		SwapItemResync(mi); }
 
+	return;
+}
+
+void Client::Handle_OP_DeleteCharge(const EQApplicationPacket *app)
+{
+	//EQMac sends this for ammo, but we're already handling it server side. Just return.
 	return;
 }
 
@@ -8023,6 +8029,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 				Message_StringID(0, AA_OFF); //OFF
 			m_epp.perAA = 0;
 			SendAAStats();
+			SendAATable();
 		}
 		else if(strncmp((char *)app->pBuffer,"buy ",4) == 0) 
 		{
@@ -9690,7 +9697,7 @@ void Client::CompleteConnect()
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
-	//SendAATable();
+	SendAATable();
 
 	if (GetHideMe()) Message(13, "[GM] You are currently hidden to all clients");
 

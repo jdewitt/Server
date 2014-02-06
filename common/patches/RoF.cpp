@@ -2992,7 +2992,7 @@ ENCODE(OP_TributeItem) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_SomeItemPacketMaybe) {
+ENCODE(OP_Projectile) {
 	// This Opcode is not named very well. It is used for the animation of arrows leaving the player's bow
 	// and flying to the target.
 	//
@@ -3009,11 +3009,11 @@ ENCODE(OP_SomeItemPacketMaybe) {
 	OUT(arc);
 	OUT(source_id);
 	OUT(target_id);
-	OUT(item_id);
+	OUT(object_id);
 
 	eq->unknown070 = 175; // This needs to be set to something, else we get a 1HS animation instead of ranged.
 
-	OUT(item_type);
+	OUT(effect_type);
 	OUT(skill);
 
 	strncpy(eq->model_name, emu->model_name, sizeof(eq->model_name));

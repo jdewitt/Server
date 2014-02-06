@@ -6797,7 +6797,7 @@ XS(XS_Mob_ProjectileAnim)
 		Mob *		THIS;
 		Mob*		mob;
 		int         item_id = SvUV(ST(2));
-		bool		IsArrow = false;
+		bool		IsItem = false;
 		float		speed = 0;
 		float		angle = 0;
 		float		tilt = 0;
@@ -6822,7 +6822,7 @@ XS(XS_Mob_ProjectileAnim)
 			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		if(items > 3){
-			IsArrow = (bool)SvTRUE(ST(3));
+			IsItem = (bool)SvTRUE(ST(3));
 		}
 		if(items > 4){
 			speed = (float)SvNV(ST(4));
@@ -6837,7 +6837,7 @@ XS(XS_Mob_ProjectileAnim)
 			arc = (float)SvNV(ST(7));
 		}
 
-		THIS->ProjectileAnimation(mob, item_id, IsArrow, speed, angle, tilt, arc);
+		THIS->ProjectileAnimation(mob, item_id, IsItem, speed, angle, tilt, arc);
 
 	}
 	XSRETURN_EMPTY;

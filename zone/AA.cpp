@@ -1170,7 +1170,6 @@ void Client::SendAATable() {
 
 		OldAATable_Struct* aa2 = (OldAATable_Struct *)outapp->pBuffer;
 		aa2->unknown = 1;
-		aa2->unknown2 = 0;
 
 		uint32 i;
 		uint8 macaaid = 0;

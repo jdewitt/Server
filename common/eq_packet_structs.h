@@ -4084,18 +4084,20 @@ struct Arrow_Struct {
 /*040*/	float	velocity;		//4 is normal, 20 is quite fast
 /*044*/	float	launch_angle;	//0-450ish, not sure the units, 140ish is straight
 /*048*/	float	tilt;		//on the order of 125
-/*052*/	uint8	unknown052[8];
+/*052*/	float	yaw;
+/*056*/ float	pitch;
 /*060*/	float	arc;
 /*064*/	uint8	unknown064[12];
 /*076*/	uint32	source_id;
 /*080*/ uint32	target_id;	//entity ID
-/*084*/	uint32	item_id;	//1 to about 150ish
+/*084*/	uint32	object_id;	//1 to about 150ish
 /*088*/	uint32	unknown088;	//seen 125, dosent seem to change anything..
 /*092*/ uint32	unknown092;	//seen 16, dosent seem to change anything
-/*096*/	uint8	unknown096[2];
+/*096*/ uint8	light;
+/*097*/	uint8	unknown097;
 /*098*/	uint8	skill;
-/*099*/	uint8	item_type;
-/*100*/	uint8	unknown100;
+/*099*/	uint8	effect_type;
+/*100*/	uint8	behavior;
 /*101*/	char	model_name[16];
 /*117*/	uint8	unknown117[19];
 };
@@ -4212,7 +4214,6 @@ struct OldAA_Skills {
 struct OldAATable_Struct {
 	uint8 unknown;
 	OldAA_Skills aa_list[226];
-	uint8 unknown2;
 };
 
 struct AAExpUpdate_Struct {

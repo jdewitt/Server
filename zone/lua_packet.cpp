@@ -588,7 +588,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("ForceFindPerson", static_cast<int>(OP_ForceFindPerson)),
 			luabind::value("PlayMP3", static_cast<int>(OP_PlayMP3)),
 			luabind::value("RequestClientZoneChange", static_cast<int>(OP_RequestClientZoneChange)),
-			luabind::value("SomeItemPacketMaybe", static_cast<int>(OP_SomeItemPacketMaybe)),
+			luabind::value("SomeItemPacketMaybe", static_cast<int>(OP_Projectile)),
 			luabind::value("QueryResponseThing", static_cast<int>(OP_QueryResponseThing)),
 			luabind::value("Some6ByteHPUpdate", static_cast<int>(OP_Some6ByteHPUpdate)),
 			luabind::value("BankerChange", static_cast<int>(OP_BankerChange)),

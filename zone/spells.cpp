@@ -1377,6 +1377,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if(!spell_target)
 				spell_target = this;
 			CastAction = SingleTarget;
+			ProjectileAnimation(this, spell_id, false, 1.5);
 			break;
 		}
 

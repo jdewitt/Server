@@ -1091,6 +1091,7 @@ ENCODE(OP_ShopInventoryPacket)
 	delete[] __emu_buffer;
 }
 
+DECODE(OP_DeleteCharge) {  DECODE_FORWARD(OP_MoveItem); }
 DECODE(OP_MoveItem)
 {
 	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
@@ -1815,6 +1816,34 @@ DECODE(OP_CombatAbility) {
 	IN(m_atk);
 	IN(m_skill);
 	FINISH_DIRECT_DECODE();
+}
+
+ENCODE(OP_Projectile){
+	ENCODE_LENGTH_EXACT(Arrow_Struct);
+	SETUP_DIRECT_ENCODE(Arrow_Struct, structs::Arrow_Struct);
+	OUT(type);
+	OUT(src_x);
+	OUT(src_y);
+	OUT(src_z);
+	OUT(velocity);
+	OUT(launch_angle);
+	OUT(tilt);
+	OUT(arc);
+	OUT(source_id);
+	OUT(target_id);
+	OUT(skill);
+	OUT(object_id);
+	OUT(effect_type);
+	OUT(yaw);
+	OUT(pitch);
+	OUT(behavior);
+	OUT(light);
+	strcpy(eq->model_name,emu->model_name);
+
+	char* packet_dump = "Arrow.txt";
+	FileDumpPacketHex(packet_dump, __packet);
+
+	FINISH_ENCODE();
 }
 
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {

@@ -53,6 +53,7 @@ D(OP_MoveItem)
 E(OP_MoveItem)
 E(OP_DeleteItem)
 E(OP_DeleteCharge)
+D(OP_DeleteCharge)
 E(OP_Stamina)
 E(OP_HPUpdate)
 E(OP_MobHealth)
@@ -117,5 +118,6 @@ E(OP_Death);
 D(OP_Bug);
 D(OP_Taunt);
 D(OP_CombatAbility);
+E(OP_Projectile);
 #undef E
 #undef D

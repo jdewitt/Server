@@ -146,8 +146,8 @@ public:
 	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
-	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0);
+	void ProjectileAnimation(Mob* to, int item_id, bool IsItem = false, float speed = 0,
+		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
