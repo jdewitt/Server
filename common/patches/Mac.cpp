@@ -175,8 +175,17 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-	OUT(thirst_level);
-	OUT(hunger_level);
+
+	int value = RuleI(Character,ConsumptionValue);
+
+	float tpercent = (float)emu->thirst_level/(float)value;
+	float tlevel =  127.0f*tpercent;
+	eq->thirst_level = (int8)(tlevel + 0.5);
+
+	float hpercent = (float)emu->hunger_level/(float)value;
+	float hlevel =  127.0f*hpercent;
+	eq->hunger_level = (int8)(hlevel + 0.5);
+
 	for(r = 0; r < 15; r++) {
 		eq->buffs[r].visable = (emu->buffs[r].spellid == 0xFFFFFFFF || emu->buffs[r].spellid == 0) ? 0 : 2;
 		OUT(buffs[r].level);
@@ -1114,7 +1123,6 @@ DECODE(OP_MoveItem)
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_DeleteItem) {  ENCODE_FORWARD(OP_MoveItem); }
 ENCODE(OP_DeleteCharge) {  ENCODE_FORWARD(OP_MoveItem); }
 ENCODE(OP_MoveItem)
 {

@@ -1187,6 +1187,7 @@ public:
     int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
     int mod_food_value(const Item_Struct *item, int change);
     int mod_drink_value(const Item_Struct *item, int change);
+	void Starve();
 
 protected:
 	friend class Mob;

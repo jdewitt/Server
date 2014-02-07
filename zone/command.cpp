@@ -449,6 +449,7 @@ int command_init(void) {
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
 		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
+		command_add("starve", "Sets hunger and thirst to 0.", 100, command_starve) ||
 		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache)
 		)
 	{
@@ -11580,3 +11581,18 @@ void command_npctype_cache(Client *c, const Seperator *sep)
 		c->Message(0, "#npctype_cache all");
 	}
 }
+
+void command_starve(Client *c, const Seperator *sep) {
+
+	Client *t;
+
+	if(c->GetTarget() && c->GetTarget()->IsClient())
+		t = c->GetTarget()->CastToClient();
+	else
+		t = c;
+
+	t->Starve();
+	c->Message(0, "Target starved.");
+
+}
+

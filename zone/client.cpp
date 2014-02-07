@@ -8043,31 +8043,33 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 {
    if(!item) { return; }
 
-    uint16 cons_mod = 180;
+    float cons_mod = 0.0f;
 
     switch(GetAA(aaInnateMetabolism)){
         case 1:
-            cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            cons_mod = .10;
             break;
         case 2:
-            cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            cons_mod = .25;
             break;
         case 3:
-            cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            cons_mod = .50;
             break;
         default:
-            cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
+            cons_mod = 0;
             break;
     }
 
+   int value = RuleI(Character,ConsumptionValue);
    if(type == ItemTypeFood)
    {
-       int hchange = item->CastTime * cons_mod;
-       hchange = mod_food_value(item, hchange);
+	   float percent = (float)item->CastTime/100.0f;
+       float hchange = (cons_mod+percent) * value;
+      // hchange = mod_food_value(item, hchange);
 
        if(hchange < 0) { return; }
 
-       m_pp.hunger_level += hchange;
+       m_pp.hunger_level += (int)(hchange + 0.5);
        DeleteItemInInventory(slot, 1, false);
 
        if(!auto_consume) //no message if the client consumed for us
@@ -8079,12 +8081,13 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
    }
    else
    {
-       int tchange = item->CastTime * cons_mod;
-       tchange = mod_drink_value(item, tchange);
+       float percent = (float)item->CastTime/100.0f;
+       float tchange = (cons_mod+percent) * value;
+     //  tchange = mod_drink_value(item, tchange);
 
        if(tchange < 0) { return; }
 
-        m_pp.thirst_level += tchange;
+        m_pp.thirst_level += (int)(tchange + 0.5);
         DeleteItemInInventory(slot, 1, false);
 
         if(!auto_consume) //no message if the client consumed for us
@@ -8122,6 +8125,20 @@ void Client::PlayMP3(const char* fname)
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
 	PlayMP3_Struct* buf = (PlayMP3_Struct*)outapp->pBuffer;
 	strncpy(buf->filename, fname, filename.length());
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::Starve()
+{
+	m_pp.hunger_level = 0;
+	m_pp.thirst_level = 0;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
+	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
+	sta->food = m_pp.hunger_level;
+	sta->water = m_pp.thirst_level;
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }

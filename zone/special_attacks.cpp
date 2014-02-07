@@ -808,7 +808,10 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 
 	if (!ChanceAvoidConsume || (ChanceAvoidConsume < 100 && MakeRandomInt(0,99) > ChanceAvoidConsume)){
 
-		DeleteItemInInventory(ammo_slot, 1, true);
+		if(GetClientVersion() == EQClientMac)
+			DeleteItemInInventory(ammo_slot, 1, false);
+		else
+			DeleteItemInInventory(ammo_slot, 1, true);
 		mlog(COMBAT__RANGED, "Consumed one arrow from slot %d", ammo_slot);
 	} else {
 		mlog(COMBAT__RANGED, "Endless Quiver prevented ammo consumption.");
@@ -1201,7 +1204,10 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	DoThrowingAttackDmg(GetTarget(), RangeWeapon, item);
 
 	//consume ammo
-	DeleteItemInInventory(ammo_slot, 1, true);
+	if(GetClientVersion() == EQClientMac)
+		DeleteItemInInventory(ammo_slot, 1, false);
+	else
+		DeleteItemInInventory(ammo_slot, 1, true);
 	CheckIncreaseSkill(SkillThrowing, GetTarget());
 
 	//break invis when you attack
@@ -1334,7 +1340,6 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 
 void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float angle, float tilt, float arc, SkillUseTypes skillInUse) {
 
-	LogFile->write(EQEMuLog::Debug, "ProjectileAnimation for ID: %i", id);
 	const Item_Struct* item = nullptr;
 	uint8 effect_type = 0;
 	char name[16];

@@ -324,6 +324,7 @@ void command_enablerecipe(Client *c, const Seperator *sep);
 void command_disablerecipe(Client *c, const Seperator *sep);
 void command_showspellslist(Client *c, const Seperator *sep);
 void command_npctype_cache(Client *c, const Seperator *sep);
+void command_starve(Client *c, const Seperator *sep);
 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);

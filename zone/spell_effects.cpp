@@ -3421,8 +3421,8 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				// this procedure gets called 7 times for every once that the stamina update occurs so we add 1/7 of the subtraction.
 				// It's far from perfect, but works without any unnecessary buff checks to bog down the server.
 				if(IsClient()) {
-					CastToClient()->m_pp.hunger_level += 5;
-					CastToClient()->m_pp.thirst_level += 5;
+					CastToClient()->m_pp.hunger_level += 1;
+					CastToClient()->m_pp.thirst_level += 1;
 				}
 				break;
 			}

@@ -1958,7 +1958,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		return;
 	}
 	Consume_Struct* pcs = (Consume_Struct*)app->pBuffer;
-	_log(ZONE__INIT, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
+	LogFile->write(EQEMuLog::Debug, "Hit Consume! How consumed: %i. Slot: %i. Type: %i",pcs->auto_consumed, pcs->slot, pcs->type);
 	int value = RuleI(Character,ConsumptionValue);
 
 	if(pcs->type == 0x01)
@@ -1969,7 +1969,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
-			sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
+			sta->water = m_pp.thirst_level> value ? value : m_pp.thirst_level;
 
 			QueuePacket(outapp);
 			safe_delete(outapp);
@@ -1984,7 +1984,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
-			sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
+			sta->water = m_pp.thirst_level> value ? value : m_pp.thirst_level;
 
 			QueuePacket(outapp);
 			safe_delete(outapp);
@@ -2009,15 +2009,15 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Error, "OP_Consume: unknown type, type:%i", (int)pcs->type);
 		return;
 	}
-	if (m_pp.hunger_level > 50000 || (GetClientVersion() == EQClientMac && m_pp.hunger_level > 250))
+	if (m_pp.hunger_level > value)
 		m_pp.hunger_level = value;
-	if (m_pp.thirst_level > 50000 || (GetClientVersion() == EQClientMac && m_pp.thirst_level > 250))
+	if (m_pp.thirst_level > value)
 		m_pp.thirst_level = value;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = m_pp.hunger_level > value ? value : m_pp.hunger_level;
-	sta->water = m_pp.thirst_level > value ? value : m_pp.thirst_level;
+	sta->water = m_pp.thirst_level> value ? value : m_pp.thirst_level;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2213,12 +2213,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 					else
 					{
+						int value = RuleI(Character,ConsumptionValue);
 						//This is food/drink - consume it
-						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < 5000)
+						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < (value*.85))
 						{
 							Consume(item, item->ItemType, slot_id, false);
 						}
-						else if (item->ItemType == ItemTypeDrink && m_pp.thirst_level < 5000)
+						else if (item->ItemType == ItemTypeDrink && m_pp.thirst_level < (value*.85))
 						{
 							Consume(item, item->ItemType, slot_id, false);
 						}
@@ -2234,10 +2235,10 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
 						}
 
-						if (m_pp.hunger_level > 6000)
-							m_pp.hunger_level = 6000;
-						if (m_pp.thirst_level > 6000)
-							m_pp.thirst_level = 6000;
+						if (m_pp.hunger_level > value)
+							m_pp.hunger_level = value;
+						if (m_pp.thirst_level > value)
+							m_pp.thirst_level = value;
 
 						EQApplicationPacket *outapp2;
 						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
@@ -3423,7 +3424,36 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DeleteCharge(const EQApplicationPacket *app)
 {
-	//EQMac sends this for ammo, but we're already handling it server side. Just return.
+		if (app->size != sizeof(DeleteItem_Struct)) {
+		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
+		return;
+	}
+	
+	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
+
+	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
+	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
+		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
+		CheckIncreaseSkill(SkillAlcoholTolerance, nullptr, 25);
+
+		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
+		int16 IntoxicationIncrease;
+
+		if(GetClientVersion() < EQClientSoD)
+			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
+		else
+			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
+
+		if(IntoxicationIncrease < 0)
+			IntoxicationIncrease = 1;
+
+		m_pp.intoxication += IntoxicationIncrease;
+
+		if(m_pp.intoxication > 200)
+			m_pp.intoxication = 200;
+	}
+	DeleteItemInInventory(alc->from_slot, 1);
+
 	return;
 }
 
@@ -5701,7 +5731,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != MERCHANT)
 		return;
 
-	_log(ZONE__INIT, "Hit OP_ShopPlayerBuy. npcid: %i playerid: %i itemslot: %i quantity: %i  price: %i", mp->npcid, mp->playerid, mp->itemslot, mp->quantity, mp->price);
 	if (mp->quantity < 1) return;
 
 	//you have to be somewhat close to them to be properly using them

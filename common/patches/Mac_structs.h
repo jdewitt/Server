@@ -2636,8 +2636,8 @@ struct PlayerProfile_Struct
 /*4948*/	uint32  birthday;
 /*4952*/	uint32  lastlogin;
 /*4956*/	uint32  timePlayedMin;
-/*4960*/	uint8   thirst_level;
-/*4961*/    uint8   hunger_level;
+/*4960*/	int8    thirst_level;
+/*4961*/    int8    hunger_level;
 /*4962*/	uint8   fatigue;
 /*4963*/	uint8	pvp;				// Player PVP Flag
 /*4964*/	uint8	level2;		// ***Placeholder
