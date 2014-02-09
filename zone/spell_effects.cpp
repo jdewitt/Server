@@ -1504,7 +1504,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						SendAppearancePacket(AT_Size, 3);
 					}
 					else if(spell.base[i] == WOLF) {
-						SendAppearancePacket(AT_Size, 2);
+						SendAppearancePacket(AT_Size, 5);
 					}
 					else{
 						SendAppearancePacket(AT_Size, 6);
@@ -3617,10 +3617,10 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else if(GetRace() == HALF_ELF || GetRace() == WOOD_ELF || GetRace() == DARK_ELF){
 					SendAppearancePacket(AT_Size, 5);
 				}
-				else if(GetRace() == DWARF){
+				else if(GetRace() == DWARF || GetRace() == HALFLING){
 					SendAppearancePacket(AT_Size, 4);
 				}
-				else if(GetRace() == HALFLING || GetRace() == GNOME){
+				else if(GetRace() == GNOME){
 					SendAppearancePacket(AT_Size, 3);
 				}
 				else{

@@ -153,6 +153,36 @@ void Client::SendGuildList() {
 	FastQueuePacket(&outapp);
 }
 
+void Client::SendPlayerGuild() {
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildAdded);
+	OldGuildPlayerEntry_Struct* gle=(OldGuildPlayerEntry_Struct*)outapp->pBuffer;
+
+	int16 guid = this->GuildID();
+	std::string tmp;
+		
+	if(guild_mgr.GetGuildNameByID(guid,tmp))
+	{
+		const char * ctmp = tmp.c_str();
+		memcpy(gle->name,ctmp,64);
+		gle->guildID=guid;
+		gle->guildID_=guid;
+		gle->exists=1;
+	}
+	else
+	{
+		gle->guildID=0xFFFFFFFF;
+		gle->guildID_=0xFFFFFFFF;
+		gle->exists=0;
+	}
+
+	gle->unknown1=0xFFFFFFFF;
+	gle->unknown3=0xFFFFFFFF;
+
+	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildAdded of length %d", outapp->size);
+	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+
+	FastQueuePacket(&outapp);
+}
 
 void Client::SendGuildMembers() {
 	uint32 len;

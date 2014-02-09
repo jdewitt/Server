@@ -2359,9 +2359,10 @@ void command_size(Client *c, const Seperator *sep)
 			uint32 DrakkinTattoo = target->GetDrakkinTattoo();
 			uint32 DrakkinDetails = target->GetDrakkinDetails();
 
-			target->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
-										EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
-										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, newsize);
+		//	target->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
+		//								EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
+		//								DrakkinHeritage, DrakkinTattoo, DrakkinDetails, newsize);
+			target->SendAppearancePacket(AT_Size,newsize);
 
 			c->Message(0,"Size = %f", atof(sep->arg[1]));
 		}

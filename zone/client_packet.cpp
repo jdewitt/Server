@@ -443,9 +443,11 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 
 #if EQDEBUG >= 10
-			LogFile->write(EQEMuLog::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode:"
-				" %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
-			DumpPacket(app);
+			//LogFile->write(EQEMuLog::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode:"
+			//	" %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
+			_log(ZONE__INIT_ERR,"Received unknown EQApplicationPacket during CLIENT_CONNECTING");
+			_pkt(ZONE__INIT_ERR,app);
+			//DumpPacket(app);
 #endif
 			break;
 		}
@@ -4116,7 +4118,11 @@ void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildsList");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
-	SendGuildList();
+	if(GetClientVersion() == EQClientMac)
+		SendPlayerGuild();
+
+	else
+		SendGuildList();
 }
 
 void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
@@ -9816,10 +9822,10 @@ void Client::CompleteConnect()
 						case FROGLOK:
 							SendAppearancePacket(AT_Size, 5);
 							break;
+						case HALFLING:
 						case DWARF:
 							SendAppearancePacket(AT_Size, 4);
 							break;
-						case HALFLING:
 						case GNOME:
 							SendAppearancePacket(AT_Size, 3);
 							break;

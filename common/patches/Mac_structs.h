@@ -449,9 +449,9 @@ struct Spawn_Struct
 /*0119*/	uint8	unknown0207;
 /*0120*/	uint16	deity;				// Deity.
 /*0122*/	uint8	unknown0122;			// ***Placeholder
-/*0123*/	char	name[47];			// Name of spawn (len is 30 or less)
-/*0170*/	char	Surname[20];		// Last Name of player
-/*0190*/	uint8	unknown207[22];
+/*0123*/	char	name[64];			// Name of spawn (len is 30 or less)
+/*0187*/	char	Surname[20];		// Last Name of player
+/*0207*/	uint8	unknown207[5];
 /*0212*/	uint8	title;				//Face Overlay? (barbarian only)
 /*0213*/	uint8	unknownpop[7];
 };
@@ -1356,13 +1356,14 @@ struct Illusion_Struct {
 /*002*/	int16	race;
 /*004*/	int8	gender;
 /*005*/ int8	texture;
-/*006*/	int8	helmtexture;
-/*007*/ int8	face; 
-/*008*/	int8	hairstyle;
-/*009*/	int8	haircolor;
-/*010*/	int8	beard;
-/*011*/	int8	beardcolor;
-/*012*/	float	size;
+/*006*/ int8	helmtexture;
+/*007*/	int8	unknown007; //Always seems to be 0xFF
+/*008*/ int16	face;
+/*010*/ int8	hairstyle;
+/*011*/	int8	haircolor; 
+/*012*/	int8	beard;
+/*013*/	int8	beardcolor;
+/*014*/	int16	size;		  //Client has height (int) listed for this, but it doesn't line up with what ShowEQ caught at all.
 /*016*/ int32	unknown_void; // Always 0xFFFFFFFF it seems.
 };
 
@@ -2546,14 +2547,15 @@ struct PlayerProfile_Struct
 /*0000*/	uint32  checksum;		    // Checksum
 /*0004*/	uint8	unknown0004[2];		// ***Placeholder
 /*0006*/	char	name[64];			// Player First Name
-/*0070*/	char	Surname[70];		// Player Last Name
+/*0070*/	char	Surname[66];		// Surname OR title.
+/*0136*/	uint32	uniqueGuildID;
 /*0140*/	uint8	gender;				// Player Gender
-/*0141*/	uint8	unknown0141;		// ***Placeholder
+/*0141*/	char	genderchar[1];		// ***Placeholder
 /*0142*/	uint16	race;				// Player Race (Lyenu: Changed to an int16, since races can be over 255)
 /*0144*/	uint16	class_;				// Player Class
 /*0146*/	uint16	bodytype;
 /*0148*/	uint8	level;				// Player Level
-/*0149*/	uint8	unknown0149[3];		// ***Placeholder
+/*0149*/	char	levelchar[3];		// ***Placeholder
 /*0152*/	uint32	exp;				// Current Experience
 /*0156*/	uint16	trainingpoints;				// Players Points
 /*0158*/	uint16	mana;				// Player Mana
@@ -2660,10 +2662,28 @@ struct PlayerProfile_Struct
 /*5432*/	uint8	face;			// Player Face Type (Is that right?)
 /*5433*/	uint8	unknown5225[179];	// ***Placeholder
 /*5612*/	AA_Array aa_array[120];
-/*5852*/    uint32   aa_timers[12];
-/*5900*/    uint16   air_remaining;
+/*5852*/	uint32	ATR_DIVINE_RES_timer;
+/*5856*/    uint32  ATR_FREE_HOT_timer;
+/*5860*/	uint32	ATR_TARGET_DA_timer;
+/*5864*/	uint32	SptWoodTimer;
+/*5868*/	uint32	DireCharmTimer;
+/*5872*/	uint32	ATR_STRONG_ROOT_timer;
+/*5876*/	uint32	ATR_MASOCHISM_timer;
+/*5880*/	uint32	ATR_MANA_BURN_timer;
+/*5884*/	uint32	ATR_GATHER_MANA_timer;
+/*5888*/	uint32	ATR_PET_LOH_timer;
+/*5892*/	uint32	ExodusTimer;
+/*5896*/	uint32	ATR_MASS_FEAR_timer;
+/*5900*/    uint16  air_remaining;
 /*5902*/    uint16  aapoints;
-/*5904*/	uint8   unknown5904[2556];
+/*5904*/	uint32	MGBTimer;
+/*5908*/	uint8   unknown5908[90];
+/*5998*/	uint8	mBitFlags[6];
+/*6004*/	uint8	Unknown6004[708];
+/*6712*/	uint32	WrathWildTimer;
+/*6716*/	uint32	UnknownTimer;
+/*6720*/	uint32	UnknownTimer2;
+/*6724*/	uint8	Unknown6724[1736];
 };
 
 /*

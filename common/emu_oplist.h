@@ -266,6 +266,7 @@ N(OP_CharacterCreate),
 N(OP_CharacterCreateRequest),
 N(OP_RandomNameGenerator),
 N(OP_GuildsList),
+N(OP_GuildAdded),
 N(OP_ApproveName),
 N(OP_EnterWorld),
 N(OP_PostEnterWorld),	//this is really OP_WorldAccessGranted

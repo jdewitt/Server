@@ -586,9 +586,12 @@ ENCODE(OP_ZoneSpawns){
 		eq->GM = emu->gm;
 		eq->title = emu->aaitle;
 		eq->anon = emu->anon;
-		memcpy(eq->name, emu->name, 47);
+		memcpy(eq->name, emu->name, 64);
 		eq->deity = emu->deity;
-		eq->size = emu->size;
+		if(emu->race == 42)
+			eq->size = emu->size + 2.0f;
+		else
+			eq->size = emu->size;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
 		eq->cur_hp = emu->curHp;
@@ -664,9 +667,12 @@ ENCODE(OP_NewSpawn) {
 	//do the transform...
 		eq->GM = emu->gm;
 		eq->anon = emu->anon;
-		strncpy(eq->name, emu->name, 47);
+		strncpy(eq->name, emu->name, 64);
 		eq->deity = emu->deity;
-		eq->size = emu->size;
+		if(emu->race == 42)
+			eq->size = emu->size + 2.0f;
+		else
+			eq->size = emu->size;
 		eq->NPC = emu->NPC;
 		eq->invis = emu->invis;
 		eq->cur_hp = emu->curHp;
@@ -1228,7 +1234,6 @@ ENCODE(OP_Illusion)
 	ENCODE_LENGTH_EXACT(Illusion_Struct);
 	SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
 	OUT(spawnid);
-	//OUT_str(charname);
 	OUT(race);
 	OUT(gender);
 	OUT(texture);
@@ -1238,7 +1243,8 @@ ENCODE(OP_Illusion)
 	OUT(haircolor);
 	OUT(beard);
 	OUT(beardcolor);
-	OUT(size);
+	eq->size = (int16) (emu->size + 0.5);
+	eq->unknown007=0xFF;
 	eq->unknown_void=0xFFFFFFFF;
 
 	FINISH_ENCODE();

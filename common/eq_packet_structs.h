@@ -1572,6 +1572,20 @@ struct OldGuildsListEntry_Struct
 /*0096*/
 };
 
+struct OldGuildPlayerEntry_Struct 
+{
+/*0000*/	uint32 guildID;				// Comment: empty = 0xFFFFFFFF
+/*0004*/	uint32 guildID_;
+/*0008*/	char name[64];				// Comment: 
+/*0072*/	uint32 unknown1;			// Comment: = 0xFF
+/*0076*/	uint16 exists;				// Comment: = 1 if exists, 0 on empty
+/*0078*/	uint8 unknown2[6];			// Comment: = 0x00
+/*0084*/	uint32 unknown3;			// Comment: = 0xFF
+/*0088*/	uint8 unknown4[8];			// Comment: = 0x00
+/*0096*/	uint32 unknown5;
+/*0100*/
+};
+
 struct OldGuildsList_Struct 
 {
 	uint8 head[4];							// Comment: 
