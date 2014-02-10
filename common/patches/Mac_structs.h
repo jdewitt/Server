@@ -177,7 +177,7 @@ struct ServerZoneEntry_Struct {
 /*0132*/	int32	corpse;
 /*0136*/	int32	LocalInfo;
 /*0140*/	int32	My_Char;
-/*0144*/	float	size;
+/*0144*/	float	view_height;
 /*0148*/	float	sprite_oheight;
 /*0152*/	uint16	sprite_oheights;
 /*0154*/	uint16	GroupLeader;
@@ -196,18 +196,18 @@ struct ServerZoneEntry_Struct {
 /*0181*/	uint8	anim_type;
 /*0182*/	uint8	light;
 /*0183*/	int8	face;				// Face Type
-/*0197*/    uint16  equipment[9]; // Array elements correspond to struct equipment above
-/*0202*/	uint16	unknown;			// ***Placeholder
-/*0206*/	Color_Struct equipcolors[9]; // Array elements correspond to struct equipment_colors above
-/*0240*/	uint8	texture;	// Texture (0xFF=Player - See list of textures for more)
-/*0241*/	float	height;
-/*0245*/	float	width;
-/*0249*/	float	length;
-/*0253*/	uint8	unknown0241[6];	// ***Placeholder
-/*0258*/	uint8	helm;
+/*0184*/    uint16  equipment[9]; // Array elements correspond to struct equipment above
+/*0202*/	uint16	unknown; //Probably part of equipment
+/*0204*/	Color_Struct equipcolors[9]; // Array elements correspond to struct equipment_colors above
+/*0240*/	uint32	texture;	// Texture (0xFF=Player - See list of textures for more)
+/*0244*/	float	size;
+/*0248*/	float	width;
+/*0252*/	float	length;
+/*0256*/	uint32	helm;
 /*0260*/	float	walkspeed;			// Speed when you walk
 /*0264*/	float	runspeed;			// Speed when you run
-/*0268*/	char	zonecontrol[2];
+/*0268*/	int8	LD;
+/*0269*/	int8	GM;
 /*0270*/	int16	flymode;
 /*0272*/	int8	bodytype;
 /*0273*/	int8	view_player[7];
@@ -288,7 +288,7 @@ struct NewZone_Struct
 			uint32	fishing_novice;
 			uint32	fishing_medium;
 			uint32	fishing_advanced;
-/*0540*/	uint32	sky_lock;
+/*0540*/	uint32	skylock;
 			uint16	graveyard_tme;
 			uint32	scriptPeriodicHour;
 			uint32	scriptPeriodicMinute;

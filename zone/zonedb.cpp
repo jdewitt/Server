@@ -98,7 +98,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"rain_chance1,rain_chance2,rain_chance3,rain_chance4,"
 		"rain_duration1,rain_duration2,rain_duration3,rain_duration4,"
 		"snow_chance1,snow_chance2,snow_chance3,snow_chance4,"
-		"snow_duration1,snow_duration2,snow_duration3,snow_duration4"
+		"snow_duration1,snow_duration2,snow_duration3,snow_duration4,skylock,timezone"
 		" from zone where zoneidnumber=%i and version=%i",zoneid, instance_id), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
@@ -162,6 +162,8 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 			for(i=0;i<4;i++){
 				zone_data->snow_duration[i]=atof(row[r++]);
 			}
+			zone_data->skylock = atoi(row[r++]);
+			zone_data->timezone = atoi(row[r++]);
 			good = true;
 		}
 		mysql_free_result(result);

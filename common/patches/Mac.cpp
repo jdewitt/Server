@@ -157,26 +157,26 @@ ENCODE(OP_ZoneEntry) {
 		eq->beard = emu->player.spawn.beard;
 		eq->face = emu->player.spawn.face;
 		eq->level = emu->player.spawn.level;
-		eq->guildrank = emu->player.spawn.guildrank;
 		for(k = 0; k < 9; k++) {
 			eq->equipment[k] = emu->player.spawn.equipment[k];
 			eq->equipcolors[k].color = emu->player.spawn.colors[k].color;
 		}
-		eq->runspeed = emu->player.spawn.runspeed;
 		eq->AFK = emu->player.spawn.afk;
-		eq->GuildID = emu->player.spawn.guildID;
 		eq->title = emu->player.spawn.face;
 		eq->anim_type = 0x64;
 		eq->texture = emu->player.spawn.equip_chest2;
         eq->helm = emu->player.spawn.helm;
 		eq->race = emu->player.spawn.race;
+		eq->GM = emu->player.spawn.gm;
 		eq->GuildID = emu->player.spawn.guildID;
 		if(eq->GuildID == 0)
 			eq->GuildID = 0xFFFF;
+		eq->guildrank = emu->player.spawn.guildrank;
 		if(eq->guildrank == 0)
 			eq->guildrank = 0xFF;
 		strncpy(eq->Surname, emu->player.spawn.lastName, 20);
 		eq->walkspeed = emu->player.spawn.walkspeed;
+		eq->runspeed = emu->player.spawn.runspeed;
 		eq->light = emu->player.spawn.light;
 		if(emu->player.spawn.class_ > 19 && emu->player.spawn.class_ < 35)
 			eq->class_ = emu->player.spawn.class_-3;
@@ -188,6 +188,17 @@ ENCODE(OP_ZoneEntry) {
 			eq->class_ = emu->player.spawn.class_;
 		eq->gender = emu->player.spawn.gender;
 		eq->flymode = emu->player.spawn.flymode;
+		eq->prev = 0xa0ae0e00;
+		eq->next = 0xa0ae0e00;
+		eq->view_height = 0x6666c640;
+		eq->sprite_oheight = 0x00004840;
+		eq->extra[10] = 0xFF;
+		eq->extra[11] = 0xFF;
+		eq->extra[12] = 0xFF;
+		eq->extra[13] = 0xFF;
+		eq->type = 0;
+		eq->size = emu->player.spawn.size;
+		//Need to export leaderid;
 
 		CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::ServerZoneEntry_Struct));
 
@@ -426,8 +437,12 @@ ENCODE(OP_NewZone) {
 	eq->underworld=emu->underworld;
 	OUT(minclip);
 	OUT(maxclip);
-	if(strncmp(eq->zone_short_name,"pofire",32) == 0)
-		eq->sky_lock = 17;
+	OUT(skylock);
+	OUT(timezone);
+	OUT_array(snow_chance, 4);
+	OUT_array(snow_duration, 4);
+	OUT_array(rain_chance, 4);
+	OUT_array(rain_duration, 4);
 	FINISH_ENCODE();	
 }
 
@@ -454,7 +469,6 @@ ENCODE(OP_ChannelMessage) {
 	FINISH_ENCODE();
 }
 
-
 ENCODE(OP_SpecialMesg) {
 	EQApplicationPacket *__packet = *p; 
 	*p = nullptr; 
@@ -473,8 +487,6 @@ ENCODE(OP_SpecialMesg) {
 	strcpy(eq->message, emu->message);
 	FINISH_ENCODE();
 }
-
-
 
 DECODE(OP_ChannelMessage)
 {
@@ -719,7 +731,6 @@ ENCODE(OP_ZoneSpawns){
 	outapp->size = DeflatePacket((unsigned char*)out->pBuffer, out->size, outapp->pBuffer, sizeof(structs::Spawn_Struct)*entrycount);
 	EncryptZoneSpawnPacket(outapp->pBuffer, outapp->size);
 	//_log(NET__STRUCTS, "Total size of bulkspawns packet compressed: %d", outapp->size);
-
 	//kill off the emu structure and send the eq packet.
 	delete[] __emu_buffer;
 	delete out;

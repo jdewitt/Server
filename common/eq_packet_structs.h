@@ -386,7 +386,9 @@ struct NewZone_Struct {
 /*0429*/    uint8   rain_duration[4];
 /*0433*/    uint8   snow_chance[4];
 /*0437*/    uint8   snow_duration[4];
-/*0441*/	uint8	unknown360[33];
+/*0441*/	uint8	specialdates[16];
+/*0457*/	uint8	specialcodes[16];
+/*0473*/	uint8	timezone;
 /*0474*/	uint8	sky;					// Sky Type
 /*0475*/	uint8	unknown331[13];			// ***Placeholder
 /*0488*/	float	zone_exp_multiplier;	// Experience Multiplier
@@ -397,7 +399,8 @@ struct NewZone_Struct {
 /*0508*/	float	underworld;				// Underworld, min z (Not Sure?)
 /*0512*/	float	minclip;				// Minimum View Distance
 /*0516*/	float	maxclip;				// Maximum View DIstance
-/*0520*/	uint8	unknown_end[84];		// ***Placeholder
+/*0520*/	uint32	skylock;				// This is the wrong position, just for EQMac's benefit atm.
+/*0524*/	uint8	unknown_end[80];		// ***Placeholder
 /*0604*/	char	zone_short_name2[68];
 /*0672*/	char	unknown672[12];
 /*0684*/	uint16	zone_id;

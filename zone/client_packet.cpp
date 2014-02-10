@@ -14268,14 +14268,20 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
-	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
+	//EQMac doesn't reply to this according to ShowEQ captures.
+	if(GetClientVersion() == EQClientMac)
+		return;
+	else
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
+		ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
 
-	FillSpawnStruct(&sze->player,CastToMob());
-	sze->player.spawn.curHp=1;
-	sze->player.spawn.NPC=0;
-	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
-	sze->player.spawn.zoneID = zone->GetZoneID();
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
+		FillSpawnStruct(&sze->player,CastToMob());
+		sze->player.spawn.curHp=1;
+		sze->player.spawn.NPC=0;
+		//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+		sze->player.spawn.zoneID = zone->GetZoneID();
+		outapp->priority = 6;
+		FastQueuePacket(&outapp);
+	}
 }
