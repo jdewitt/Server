@@ -128,7 +128,71 @@ ENCODE(OP_ZoneServerInfo) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_NewSpawn); }
+ENCODE(OP_ZoneEntry) { 
+	SETUP_DIRECT_ENCODE(ServerZoneEntry_Struct, structs::ServerZoneEntry_Struct);
+
+		int k = 0;
+		eq->zoneID = emu->player.spawn.zoneID;
+		eq->anon = emu->player.spawn.anon;
+		strncpy(eq->name, emu->player.spawn.name, 64);
+		eq->deity = emu->player.spawn.deity;
+		if(emu->player.spawn.race == 42)
+			eq->size = emu->player.spawn.size + 2.0f;
+		else
+			eq->size = emu->player.spawn.size;
+		eq->NPC = emu->player.spawn.NPC;
+		eq->invis = emu->player.spawn.invis;
+		eq->max_hp = emu->player.spawn.max_hp;
+		eq->curHP = emu->player.spawn.curHp;
+		eq->x_pos = (float)emu->player.spawn.x;
+		eq->y_pos = (float)emu->player.spawn.y;
+		eq->animation = emu->player.spawn.animation;
+		eq->z_pos = (float)emu->player.spawn.z;///10.0f;
+		eq->heading = (float)emu->player.spawn.heading;
+		eq->haircolor = emu->player.spawn.haircolor;
+		eq->beardcolor = emu->player.spawn.beardcolor;
+		eq->eyecolor1 = emu->player.spawn.eyecolor1;
+		eq->eyecolor2 = emu->player.spawn.eyecolor2;
+		eq->hairstyle = emu->player.spawn.hairstyle;
+		eq->beard = emu->player.spawn.beard;
+		eq->face = emu->player.spawn.face;
+		eq->level = emu->player.spawn.level;
+		eq->guildrank = emu->player.spawn.guildrank;
+		for(k = 0; k < 9; k++) {
+			eq->equipment[k] = emu->player.spawn.equipment[k];
+			eq->equipcolors[k].color = emu->player.spawn.colors[k].color;
+		}
+		eq->runspeed = emu->player.spawn.runspeed;
+		eq->AFK = emu->player.spawn.afk;
+		eq->GuildID = emu->player.spawn.guildID;
+		eq->title = emu->player.spawn.face;
+		eq->anim_type = 0x64;
+		eq->texture = emu->player.spawn.equip_chest2;
+        eq->helm = emu->player.spawn.helm;
+		eq->race = emu->player.spawn.race;
+		eq->GuildID = emu->player.spawn.guildID;
+		if(eq->GuildID == 0)
+			eq->GuildID = 0xFFFF;
+		if(eq->guildrank == 0)
+			eq->guildrank = 0xFF;
+		strncpy(eq->Surname, emu->player.spawn.lastName, 20);
+		eq->walkspeed = emu->player.spawn.walkspeed;
+		eq->light = emu->player.spawn.light;
+		if(emu->player.spawn.class_ > 19 && emu->player.spawn.class_ < 35)
+			eq->class_ = emu->player.spawn.class_-3;
+		else if(emu->player.spawn.class_ == 40)
+			eq->class_ = 16;
+		else if(emu->player.spawn.class_ == 41)
+			eq->class_ = 32;
+		else 
+			eq->class_ = emu->player.spawn.class_;
+		eq->gender = emu->player.spawn.gender;
+		eq->flymode = emu->player.spawn.flymode;
+
+		CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::ServerZoneEntry_Struct));
+
+	FINISH_ENCODE();
+}
 
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
@@ -208,7 +272,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT_array(languages, 26);
 	OUT(x);
 	OUT(y);
-	eq->z=emu->z*10;
+	//eq->z=emu->z/10;
+	OUT(z);
 	OUT(heading);
 	OUT(platinum_bank);
 	OUT(gold_bank);
@@ -361,6 +426,8 @@ ENCODE(OP_NewZone) {
 	eq->underworld=emu->underworld;
 	OUT(minclip);
 	OUT(maxclip);
+	if(strncmp(eq->zone_short_name,"pofire",32) == 0)
+		eq->sky_lock = 17;
 	FINISH_ENCODE();	
 }
 
@@ -643,6 +710,7 @@ ENCODE(OP_ZoneSpawns){
 		eq->gender = emu->gender;
 		eq->bodytype = emu->bodytype;
 		eq->spawn_id = emu->spawnId;
+		eq->flymode = emu->flymode;
 
 	}
 	//_log(NET__STRUCTS, "Total size of bulkspawns packet uncompressed: %d", out->size);
@@ -725,6 +793,7 @@ ENCODE(OP_NewSpawn) {
 			eq->class_ = emu->class_;
 		eq->gender = emu->gender;
 		eq->spawn_id = emu->spawnId;
+		eq->flymode = emu->flymode;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewSpawn, sizeof(structs::Spawn_Struct));
 	outapp->pBuffer = new uchar[sizeof(structs::Spawn_Struct)];
@@ -1854,9 +1923,15 @@ ENCODE(OP_Projectile){
 	OUT(light);
 	strcpy(eq->model_name,emu->model_name);
 
-	char* packet_dump = "Arrow.txt";
-	FileDumpPacketHex(packet_dump, __packet);
+	FINISH_ENCODE();
+}
 
+ENCODE(OP_Charm){
+	ENCODE_LENGTH_EXACT(Charm_Struct);
+	SETUP_DIRECT_ENCODE(Charm_Struct, structs::Charm_Struct);
+	OUT(owner_id);
+	OUT(pet_id);
+	OUT(command);
 	FINISH_ENCODE();
 }
 

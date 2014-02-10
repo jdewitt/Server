@@ -118,5 +118,6 @@ D(OP_Bug);
 D(OP_Taunt);
 D(OP_CombatAbility);
 E(OP_Projectile);
+E(OP_Charm);
 #undef E
 #undef D

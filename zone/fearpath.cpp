@@ -132,13 +132,13 @@ float Mob::GetFearSpeed() {
 		float ratio = GetHPRatio();
 		float multiplier = 3;
 
-		// mob's movement will halt with a decent snare at HP specified by rule.
-		if (GetSnaredAmount() > 40) {
-				multiplier = 0.5;
-		}
+		// mob's movement will halt with a decent snare.
+		if (GetSnaredAmount() > 40)
+			multiplier = 0.5;
 
 		speed = speed * ratio * multiplier / 100;
 
+		//NPC will eventually stop. Without snare around 2% HP, with snare around 15% HP.
 		if(speed < 0.1)
 			speed = 0.0001f;
 		

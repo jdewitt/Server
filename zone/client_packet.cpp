@@ -9601,7 +9601,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	FillSpawnStruct(&sze->player,CastToMob());
 	sze->player.spawn.curHp=1;
 	sze->player.spawn.NPC=0;
-	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 	sze->player.spawn.zoneID = zone->GetZoneID();
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);

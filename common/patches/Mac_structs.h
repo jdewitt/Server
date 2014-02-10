@@ -162,53 +162,74 @@ struct CharWeapon_Struct
 
 struct ServerZoneEntry_Struct {
 /*0000*/	uint8	checksum[4];		// Checksum
-/*0004*/	uint8	unknown0004;		// ***Placeholder
+/*0004*/	uint8	type;		// ***Placeholder
 /*0005*/	char	name[64];			// Name
 /*0069*/	uint8	sze_unknown0069;	// ***Placeholder
 /*0070*/	uint16	unknown0070;		// ***Placeholder
-/*0072*/	uint32	zone;				// Current Zone
-#ifndef INVERSEXY
-/*0076*/	float	x;					// X Position (Not Inversed)
-/*0080*/	float	y;					// Y Position (Not Inversed)
-#else
-/*0076*/	float	y;					// Y Position (Inversed)
-/*0080*/	float	x;					// X Position (Inversed)
-#endif
-/*0084*/	float	z;					// Z Position
-/*0088*/	float	heading;			// Heading
-/*0092*/	uint32	unknown0092[18];	// ***Placeholder
-/*0164*/	uint16	guildeqid;			// Guild ID Number
-/*0166*/	uint8	unknown0166[7];		// ***Placeholder
+/*0072*/	uint32	zoneID;				// Current Zone
+/*0076*/	float	y_pos;				// Y Position
+/*0080*/	float	x_pos;				// X Position
+/*0084*/	float	z_pos;				// Z Position
+/*0088*/	float	heading;
+/*0092*/	float	physicsinfo[8];
+/*0124*/	int32	prev;
+/*0128*/	int32	next;
+/*0132*/	int32	corpse;
+/*0136*/	int32	LocalInfo;
+/*0140*/	int32	My_Char;
+/*0144*/	float	size;
+/*0148*/	float	sprite_oheight;
+/*0152*/	uint16	sprite_oheights;
+/*0154*/	uint16	GroupLeader;
+/*0156*/	uint32	max_hp;
+/*0160*/	uint32	curHP;
+/*0164*/	uint16	GuildID;			// Guild ID Number
+/*0166*/	uint8	my_socket[6];		// ***Placeholder
+/*0172*/	uint8	NPC;
 /*0173*/	uint8	class_;				// Class
 /*0174*/	uint16	race;				// Race
 /*0176*/	uint8	gender;				// Gender
 /*0177*/	uint8	level;				// Level
-/*0178*/	uint16	unknown0178;		// ***Placeholder	
+/*0178*/	uint8	invis;
+/*0179*/	uint8	sneaking;
 /*0180*/	uint8	pvp;				// PVP Flag
-/*0181*/	uint16	unknown0181;		// ***Placeholder
+/*0181*/	uint8	anim_type;
+/*0182*/	uint8	light;
 /*0183*/	int8	face;				// Face Type
 /*0197*/    uint16  equipment[9]; // Array elements correspond to struct equipment above
 /*0202*/	uint16	unknown;			// ***Placeholder
-/*0206*/	Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
-/*0240*/	uint8	npc_armor_graphic;	// Texture (0xFF=Player - See list of textures for more)
-/*0241*/	uint8	unknown0241[19];	// ***Placeholder
+/*0206*/	Color_Struct equipcolors[9]; // Array elements correspond to struct equipment_colors above
+/*0240*/	uint8	texture;	// Texture (0xFF=Player - See list of textures for more)
+/*0241*/	float	height;
+/*0245*/	float	width;
+/*0249*/	float	length;
+/*0253*/	uint8	unknown0241[6];	// ***Placeholder
+/*0258*/	uint8	helm;
 /*0260*/	float	walkspeed;			// Speed when you walk
 /*0264*/	float	runspeed;			// Speed when you run
-/*0268*/	uint32	unknown0268[3];		// ***Placeholder (At least one flag in here disables a zone point or all)
+/*0268*/	char	zonecontrol[2];
+/*0270*/	int16	flymode;
+/*0272*/	int8	bodytype;
+/*0273*/	int8	view_player[7];
 /*0280*/	uint8	anon;				// Anon. Flag
-/*0281*/	uint8	unknown0281[23];	// ***Placeholder (At least one flag in here disables a zone point or all)
-/*0304*/	char	Surname[34];		// Lastname (This has to be wrong.. but 70 is to big =/..)
+/*0281*/	uint16	avatar;
+/*0283*/	uint8	AFK;
+/*0284*/	uint8	summoned;
+/*0285*/	uint8	title;
+/*0286*/	uint8	extra[18];	// ***Placeholder (At least one flag in here disables a zone point or all)
+/*0304*/	char	Surname[32];		// Lastname (This has to be wrong.. but 70 is to big =/..)
+/*0336*/	uint16  guildrank;
 /*0338*/	uint16	deity;				// Diety (Who you worship for those less literate)
-/*0340*/	uint8	unknown0340;		// ***Placeholder
+/*0340*/	uint8	animation;		// ***Placeholder
 /*0341*/	uint8	haircolor;			// Hair Color
 /*0342*/	uint8	beardcolor;			// Beard Color
 /*0343*/	uint8	eyecolor1;			// Left Eye Color
 /*0344*/	uint8	eyecolor2;			// Right Eye Color
 /*0345*/	uint8	hairstyle;			// Hair Style
-/*0346*/	uint8	title;				// AA Title
-/*0347*/	uint8	luclinface;			// Face Type
-/*0348*/	uint8	skyradius;			// Skyradius (Lyenu: Not sure myself what this is)
-/*0349*/	uint8	unknown321[7];		// ***Placeholder
+/*0346*/	uint8	beard;				// AA Title
+/*0347*/	uint32	SerialNumber;
+/*0351*/	char	m_bTemporaryPet[4];
+/*0355*/	uint8	void_;		
 };
 
 struct ZoneServerInfo_Struct
@@ -248,9 +269,11 @@ struct NewZone_Struct
 /*0429*/    uint8   rain_duration[4];
 /*0433*/    uint8   snow_chance[4];
 /*0437*/    uint8   snow_duration[4];
-/*0441*/	uint8	unknown360[33];
+/*0441*/	uint8	specialdates[16];
+/*0457*/	uint8	specialcodes[16];
+/*0473*/	uint8	timezone;
 /*0474*/	uint8	sky;					// Sky Type
-/*0475*/	uint8	unknown331[9];			// ***Placeholder
+/*0475*/	uint8	unknown331[9];			// Music work out positions.
 /*0484*/	float	zone_exp_multiplier;	// Experience Multiplier
 /*0488*/	float	safe_y;					// Zone Safe Y
 /*0492*/	float	safe_x;					// Zone Safe X
@@ -259,7 +282,22 @@ struct NewZone_Struct
 /*0504*/	float	underworld;				// Underworld, min z (Not Sure?)
 /*0508*/	float	minclip;				// Minimum View Distance
 /*0512*/	float	maxclip;				// Maximum View DIstance
-/*0516*/	uint8	unknown_end[56];		// ***Placeholder
+/*0516*/	uint32	forage_novice;
+			uint32	forage_medium;
+			uint32	forage_advanced;
+			uint32	fishing_novice;
+			uint32	fishing_medium;
+			uint32	fishing_advanced;
+/*0540*/	uint32	sky_lock;
+			uint16	graveyard_tme;
+			uint32	scriptPeriodicHour;
+			uint32	scriptPeriodicMinute;
+			uint32	scriptPeriodicFast;
+			uint32	scriptPlayerDead;
+			uint32	scriptNpcDead;
+/*0566*/	uint32  scriptPlayerEntering;
+/*0570*/	uint16	unknown570;		// ***Placeholder
+/*0572*/
 };
 
 
@@ -415,7 +453,7 @@ struct Spawn_Struct
 /*0020*/	uint8	eyecolor2; 
 /*0021*/	uint8	hairstyle; 
 /*0022*/	uint8	beard;
-/*0023*/    uint8   unknown0023; //0xff
+/*0023*/    uint8   title_nbr; //0xff
 /*0024*/	float	size;
 /*0028*/	float	walkspeed;
 /*0032*/	float	runspeed;
@@ -431,24 +469,23 @@ struct Spawn_Struct
 /*0084*/	uint8	gender;				// Gender Flag, 0 = Male, 1 = Female, 2 = Other
 /*0085*/	uint8	level;				// Level of spawn (might be one int8)
 /*0086*/	uint8	invis;				// 0=visable, 1=invisable
-/*0087*/	uint8	unknown0087;
+/*0087*/	uint8	sneaking;
 /*0088*/	uint8	pvp;
 /*0089*/	uint8	anim_type;
 /*0090*/	uint8	light;				// Light emitting
 /*0091*/	uint8	anon;				// 0=normal, 1=anon, 2=RP
 /*0092*/	uint8	AFK;				// 0=off, 1=on
-/*0093*/	uint8	unknown078;
+/*0093*/	uint8	summoned;
 /*0094*/	uint8	LD;					// 0=NotLD, 1=LD
 /*0095*/	uint8	GM;					// 0=NotGM, 1=GM
-/*0096*/	uint8	unknown;				
+/*0096*/	uint8	flymode;				
 /*0097*/	uint8	texture;
 /*0098*/	uint8	helm; 
 /*0099*/	uint8	face;		
 /*0100*/	uint16	equipment[9];		// Equipment worn: 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2
-/*0118*/	int8	guildrank;			// ***Placeholder
-/*0119*/	uint8	unknown0207;
+/*0118*/	int16	guildrank;			// ***Placeholder
 /*0120*/	uint16	deity;				// Deity.
-/*0122*/	uint8	unknown0122;			// ***Placeholder
+/*0122*/	uint8	temp_pet;			
 /*0123*/	char	name[64];			// Name of spawn (len is 30 or less)
 /*0187*/	char	Surname[20];		// Last Name of player
 /*0207*/	uint8	unknown207[5];
@@ -476,23 +513,6 @@ struct DeleteSpawn_Struct
 {
 /*00*/ uint16 spawn_id;				// Comment: Spawn ID to delete
 };
-
-/*
-** Channel Message received or sent
-** Length: 71 Bytes + Variable Length + 4 Bytes
-** OpCode: 0721
-*/
-//Yeahlight: Old ChannelMessage_Struct struct (DO NOT DELETE)
-//struct ChannelMessage_Struct
-//{
-//	char  targetname[32];		// Comment:  Tell recipient
-//	char  sender[23];           // Comment:  The senders name (len might be wrong)
-//	uint8  cm_unknown2[9];       // Comment:  ***Placeholder
-//	uint16  language;            // Comment:  Language
-//	uint16  chan_num;            // Comment:  Channel
-//	uint8  cm_unknown4[5-1];     // Comment:  ***Placeholder
-//	char  message[0];           // Comment:  Variable length message
-//};
 
 //Yeahlight: New ChannelMessage_Struct struct
 struct ChannelMessage_Struct
@@ -648,6 +668,12 @@ struct Beg_Struct
 	uint8	unknown3[6];	// Not sure.  Maybe we'll find out one day.
 };
 
+struct Charm_Struct {
+/*00*/	uint16	owner_id;
+/*02*/	uint16	pet_id;
+/*04*/	uint16	command; // 1: make pet, 0: release pet
+/*06*/
+};
 
 /*
 ** Type:   Zone Change Request (before hand)
