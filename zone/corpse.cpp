@@ -1010,8 +1010,10 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			ServerLootItem_Struct* item_data = *cur;
 			item_data->lootslot = 0xFFFF;
 
+			int8 offset = 22;
+			if(client->GetClientVersion() == EQClientMac)
+				offset = 0;
 			// Dont display the item if it's in a bag
-
 			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
 			if(!IsPlayerCorpse() || item_data->equipSlot <= 30 || item_data->equipSlot == 9999 || tCanLoot>=3 ||
 				(item_data->equipSlot >= 8000 && item_data->equipSlot <= 8999)) {
@@ -1020,7 +1022,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 					if(client && item) {
 						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug1, item_data->aug2, item_data->aug3, item_data->aug4, item_data->aug5);
 						if(inst) {
-							client->SendItemPacket(i + 22, inst, ItemPacketLoot); // 22 is the corpse inventory start offset for Ti(EMu)
+							client->SendItemPacket(i + offset, inst, ItemPacketLoot); // 22 is the corpse inventory start offset for Ti(EMu) but not EQMac!
 							safe_delete(inst);
 						}
 
@@ -1096,8 +1098,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		return;
 	}
 	if (pLocked && client->Admin() < 100) {
-		SendLootReqErrorPacket(client, 0);
 		client->Message(13, "Error: Corpse locked by GM.");
+		SendLootReqErrorPacket(client, 0);
 		return;
 	}
 	if(IsPlayerCorpse() && (charid != client->CharacterID()) && CanMobLoot(client->CharacterID()) && GetPKItem()==0){
@@ -1110,13 +1112,17 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	ItemInst *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
+	int offset = 22;
+	if(client->GetClientVersion() == EQClientMac)
+		offset = 0;
+
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if(GetPKItem()>1)
 		item = database.GetItem(GetPKItem());
 	else if(GetPKItem()==-1 || GetPKItem()==1)
-		item_data = GetItem(lootitem->slot_id - 22); //dont allow them to loot entire bags of items as pvp reward
+		item_data = GetItem(lootitem->slot_id - offset); //dont allow them to loot entire bags of items as pvp reward
 	else
-		item_data = GetItem(lootitem->slot_id - 22, bag_item_data);
+		item_data = GetItem(lootitem->slot_id - offset, bag_item_data);
 
 	if (GetPKItem()<=1 && item_data != 0)
 	{

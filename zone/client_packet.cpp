@@ -9543,6 +9543,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
 		memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
 
+		pps->perAA = m_epp.perAA;
 		int r = 0;
 		for(r = 0; r < MAX_PP_AA_ARRAY; r++) 
 		{

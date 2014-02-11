@@ -1032,7 +1032,8 @@ struct PlayerProfile_Struct
 /*12796*/	uint32				aapoints_spent;
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
-/*12808*/	uint8				unknown12844[36];
+/*12808*/	uint8				perAA;				//For Mac
+/*12809*/	uint8				unknown12844[35];
 /*12844*/	Bandolier_Struct	bandoliers[MAX_PLAYER_BANDOLIER];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use

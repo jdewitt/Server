@@ -2620,7 +2620,7 @@ struct PlayerProfile_Struct
 /*2908*/	float	x;					// Player X
 /*2912*/	float	z;					// Player Z
 /*2916*/	float	heading;			// Player Heading
-/*2920*/	uint8	unknown2920[4];		// ***Placeholder
+/*2920*/	uint32	position;		// ***Placeholder
 /*2924*/	uint32	platinum;			// Player Platinum (Character)
 /*2928*/	uint32	gold;				// Player Gold (Character)
 /*2932*/	uint32	silver;				// Player Silver (Character)
@@ -2636,7 +2636,7 @@ struct PlayerProfile_Struct
 /*2972*/	uint8	currency[16];	    //Unused currency?
 /*2988*/	uint16	skills[75];			// Player Skills
 /*3138*/	uint8	innate[99];
-/*3237*/    uint16  air_remaining_;
+/*3237*/    uint16  air_supply;
 /*3239*/    uint8   texture;
 /*3240*/	float   height;
 /*3244*/	float	width;
@@ -2656,7 +2656,7 @@ struct PlayerProfile_Struct
 /*3864*/	uint8	unknown3656[20];	// ***Placeholder
 /*3884*/	OldItemProperties_Struct	bankinvitemproperties[8];
 /*3964*/	OldItemProperties_Struct	bankbagitemproperties[80];
-/*4764*/	uint8	unknown4556[4];
+/*4764*/	uint32	login_time;
 /*4768*/	uint16	bank_inv[8];		// Player Bank Inventory Item Numbers
 /*4784*/	uint16	bank_cont_inv[80];	// Player Bank Inventory Item Numbers (Bags)
 /*4944*/	uint16	deity;		// ***Placeholder

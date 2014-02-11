@@ -268,7 +268,6 @@ ENCODE(OP_PlayerProfile) {
 		OUT(buffs[r].spellid);
 		OUT(buffs[r].duration);
 	}
-	OUT(aapoints);
 	OUT_str(name);
 	strcpy(eq->Surname, emu->last_name);
 	OUT(guild_id);
@@ -293,6 +292,9 @@ ENCODE(OP_PlayerProfile) {
 	OUT(level2);
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
+	OUT(aapoints);
+	OUT(expAA);
+	OUT(perAA);
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
 		OUT(aa_array[r].AA);
 		OUT(aa_array[r].value);
