@@ -482,30 +482,47 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		return;	//no change
 	}
 
+	uint32 timer_remaining = 0;
 	switch(c.on_change) {
 	case SpawnCondition::DoNothing:
 		//that was easy.
-		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Taking no action on existing spawn.", spawn2_id, new_state?"enabed":"disabled");
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Taking no action on existing spawn.", spawn2_id, new_state?"enabled":"disabled");
 		break;
 	case SpawnCondition::DoDepop:
-		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Depoping our mob.", spawn2_id, new_state?"enabed":"disabled");
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Depoping our mob.", spawn2_id, new_state?"enabled":"disabled");
 		if(npcthis != nullptr)
 			npcthis->Depop(false);	//remove the current mob
 		Reset();	//reset our spawn timer
 		break;
 	case SpawnCondition::DoRepop:
-		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Preforming a repop.", spawn2_id, new_state?"enabed":"disabled");
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Forcing a repop.", spawn2_id, new_state?"enabled":"disabled");
 		if(npcthis != nullptr)
 			npcthis->Depop(false);	//remove the current mob
 		Repop();	//repop
 		break;
+	case SpawnCondition::DoRepopIfReady:
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Forcing a repop if repsawn timer is expired.", spawn2_id, new_state?"enabled":"disabled");
+		if(npcthis != nullptr) {
+			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our npcthis is currently not null. The zone thinks it is %s. Forcing a depop.", spawn2_id, npcthis->GetName());
+			npcthis->Depop(false);	//remove the current mob
+			npcthis = nullptr;
+		}
+		if(new_state) { // only get repawn timer remaining when the SpawnCondition is enabled.
+			timer_remaining = database.GetSpawnTimeLeft(spawn2_id,zone->GetInstanceID());
+			_log(SPAWNS__CONDITIONS,"Spawn2 %d: Our condition is now %s. The respawn timer_remaining is %d. Forcing a repop if it is <= 0.", spawn2_id, new_state?"enabled":"disabled", timer_remaining);
+			if(timer_remaining <= 0)
+				Repop();
+		} else {
+			_log(SPAWNS__CONDITIONS,"Spawn2 %d: Our condition is now %s. Not checking respawn timer.", spawn2_id, new_state?"enabled":"disabled");
+		}
+		break;
 	default:
 		if(c.on_change < SpawnCondition::DoSignalMin) {
-			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Invalid on-change action %d.", spawn2_id, new_state?"enabed":"disabled", c.on_change);
+			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Invalid on-change action %d.", spawn2_id, new_state?"enabled":"disabled", c.on_change);
 			return;	//unknown onchange action
 		}
 		int signal_id = c.on_change - SpawnCondition::DoSignalMin;
-		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Signaling our mob with %d.", spawn2_id, new_state?"enabed":"disabled", signal_id);
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Signaling our mob with %d.", spawn2_id, new_state?"enabled":"disabled", signal_id);
 		if(npcthis != nullptr)
 			npcthis->SignalNPC(signal_id);
 	}

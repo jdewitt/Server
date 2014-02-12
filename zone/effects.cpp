@@ -40,23 +40,6 @@ float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 }
 
 
-int32 Client::Additional_SpellDmg(uint16 spell_id, bool bufftick)
-{
-	int32 spell_dmg = 0;
-	spell_dmg += GetFocusEffect(focusFcDamageAmtCrit, spell_id);
-	spell_dmg += GetFocusEffect(focusFcDamageAmt, spell_id);
-
-	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
-	if (bufftick){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return spell_dmg /= duration;
-		else
-			return 0;
-	}
-	return spell_dmg;
-}
-
 int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 
 	//Quest scale all NPC spell damage via $npc->SetSpellFocusDMG(value)
@@ -138,7 +121,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
 
@@ -162,7 +145,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	 value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
 	 
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
+         value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
 
 	return value;
  }
@@ -184,7 +167,7 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (chance > 0 && (MakeRandomInt(1, 100) <= chance)) {
 	
-		int32 ratio = 100;
+		int32 ratio = 200;
 		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 
 		value = value_BaseEffect*ratio/100;  
@@ -199,8 +182,11 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
 					GetFocusEffect(focusFcDamageAmt, spell_id);
 
-		if (extra_dmg)
-			extra_dmg /= CalcBuffDuration(this, this, spell_id);
+		if (extra_dmg) {
+			int duration = CalcBuffDuration(this, this, spell_id);
+			if (duration > 0)
+				extra_dmg /= duration; 
+		}
 
 		value -= extra_dmg;
 
@@ -220,41 +206,18 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 				GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
 				GetFocusEffect(focusFcDamageAmt, spell_id); 
 
-	if (extra_dmg)
-		extra_dmg /= CalcBuffDuration(this, this, spell_id); 
+	if (extra_dmg) {
+		int duration = CalcBuffDuration(this, this, spell_id);
+		if (duration > 0)
+			extra_dmg /= duration; 
+	} 
 	
 	value -= extra_dmg;
 
 	return value;
 }
 
-	/*
-	int32 modifier = 100;
-	int16 spell_dmg = 0;
-	int16 critChance = 0;
-	int32 ratio = 0;
-
-	modifier += GetFocusEffect(focusImprovedDamage, spell_id);
-	critChance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
-	ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
-	spell_dmg += Additional_SpellDmg(spell_id,true);
-
-	if (spellbonuses.CriticalDotDecay)
-			critChance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
-
-	if (critChance > 0){
-		if (MakeRandomInt(0, 99) < critChance){
-			modifier += modifier*ratio/100;
-			return (((value*modifier/100)-spell_dmg)*2);
-		}
-	}
-
-	return ((value*modifier/100)-spell_dmg);
-	*/
-
-
-
-int32 Mob::GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_spell_dmg)
+int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
 	int total_cast_time = 0;
 
@@ -264,104 +227,97 @@ int32 Mob::GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_s
 		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
 
 	if (total_cast_time > 0 && total_cast_time <= 2500)
-		extra_spell_dmg = extra_spell_dmg*25/100; 
+		extra_spell_amt = extra_spell_amt*25/100; 
 	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_dmg = extra_spell_dmg*(0.167*((total_cast_time - 1000)/1000)); 
+		 extra_spell_amt = extra_spell_amt*(0.167*((total_cast_time - 1000)/1000)); 
 	 else 
-		 extra_spell_dmg = extra_spell_dmg * total_cast_time / 7000; 
+		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
 
-		extra_spell_dmg = -extra_spell_dmg;
-
-		if(extra_spell_dmg*2 < base_spell_dmg)
+		if(extra_spell_amt*2 < base_spell_dmg)
 			return 0;
 
-		return extra_spell_dmg;
+		return extra_spell_amt;
 }
 
 
-//Scale all NPC spell healing via SetSpellFocusHeal(value)
-int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value) {
+int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
-	int32 modifier = 100;
-	modifier += SpellFocusHeal;
+	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-		// Check for buffs that affect the healrate of the target
-		if(this->GetTarget())
-		{
-			value += value * GetHealRate(spell_id) / 100;
-		}
+	value += value*SpellFocusHeal/100; 
 
-	return (value * modifier / 100);
+	 if (target) {
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+		value += value*target->GetHealRate(spell_id, this)/100;
+	 }
+	 
+	return value;
 }
 
-int32 Client::Additional_Heal(uint16 spell_id)
-{
-	int32 heal_amt = 0;
+int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+	
+	if (target == nullptr)
+		target = this;
 
-	heal_amt += GetFocusEffect(focusAdditionalHeal, spell_id);
-	heal_amt += GetFocusEffect(focusAdditionalHeal2, spell_id);
-	heal_amt -= GetFocusEffect(focusFcHealAmtIncoming, spell_id);
+	int32 value_BaseEffect = 0;
+	int16 chance = 0;
+	int8 modifier = 1;
+	bool Critical = false;
+		
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100); 
+		
+	value = value_BaseEffect;
 
-	if (heal_amt){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return heal_amt /= duration;
-	}
-
-	return heal_amt;
-}
-
-int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
-
-	int32 modifier = 100;
-	int16 heal_amt = 0;
-	modifier += GetFocusEffect(focusImprovedHeal, spell_id);
-	modifier += GetFocusEffect(focusFcBaseEffects, spell_id);
-	heal_amt += Additional_Heal(spell_id);
-	int chance = 0;
-
+	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100); 
+ 
 	// Instant Heals
-	if(spells[spell_id].buffduration < 1)
-	{
-		// Formula = HealAmt * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant heal more than the spell itself.
-		if(this->itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
-			heal_amt = this->itembonuses.HealAmt * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
-			if(heal_amt > value)
-				heal_amt = value;
-		}
+	if(spells[spell_id].buffduration < 1) {
 
-		// Check for buffs that affect the healrate of the target and critical heal rate of target
-		if(GetTarget()){
-			value += value * GetHealRate(spell_id) / 100;
-			chance += GetCriticalHealRate(spell_id);
-		}
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
 
-		//Live AA - Healing Gift, Theft of Life
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
 						
-		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+		if (spellbonuses.CriticalHealDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
+	
+		if(chance && (MakeRandomInt(0,99) < chance)) {
+			Critical = true;
+			modifier = 2; //At present time no critical heal amount modifier SPA exists.
+		}
+		
+		value *= modifier;
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier; 
+		value += GetFocusEffect(focusFcHealAmt, spell_id); 
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+	
+		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-		if(MakeRandomInt(0,99) < chance) {
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), ((value * modifier / 50) + heal_amt*2));
-			return ((value * modifier / 50) + heal_amt*2);
-		}
-		else{
-			return ((value * modifier / 100) + heal_amt);
-		}
+		value += value*target->GetHealRate(spell_id, this)/100; 
+
+		if (Critical)
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
+
+		return value;
 	}
-	// Hots
+
+	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-		chance += itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
 		
 		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
 		
-		if(MakeRandomInt(0,99) < chance)
-			return ((value * modifier / 50) + heal_amt*2);
+		if(chance && (MakeRandomInt(0,99) < chance))
+			return (value * 2);
 	}
-	return ((value * modifier / 100) + heal_amt);
+
+	return value;
 }
+
 
 int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 {
@@ -696,31 +652,27 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	return(true);
 }
 
-void EntityList::AETaunt(Client* taunter, float range) {
-	LinkedListIterator<NPC*> iterator(npc_list);
-
-	if(range == 0) {
+void EntityList::AETaunt(Client* taunter, float range)
+{
+	if (range == 0)
 		range = 100;		//arbitrary default...
-	}
 
 	range = range * range;
 
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		NPC * them = iterator.GetData();
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC *them = it->second;
 		float zdiff = taunter->GetZ() - them->GetZ();
 		if (zdiff < 0)
 			zdiff *= -1;
 		if (zdiff < 10
-			&& taunter->IsAttackAllowed(them)
-			&& taunter->DistNoRootNoZ(*them) <= range) {
-
+				&& taunter->IsAttackAllowed(them)
+				&& taunter->DistNoRootNoZ(*them) <= range) {
 			if (taunter->CheckLosFN(them)) {
 				taunter->Taunt(them, true);
 			}
 		}
-		iterator.Advance();
+		++it;
 	}
 }
 
@@ -729,7 +681,6 @@ void EntityList::AETaunt(Client* taunter, float range) {
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
 {
-	LinkedListIterator<Mob*> iterator(mob_list);
 	Mob *curmob;
 
 	float dist = caster->GetAOERange(spell_id);
@@ -740,66 +691,59 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	const int MAX_TARGETS_ALLOWED = 4;
 	int iCounter = 0;
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance())
-	{
-		curmob = iterator.GetData();
-		if(curmob == center)	//do not affect center
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		curmob = it->second;
+		if (curmob == center)	//do not affect center
 			continue;
-		if(curmob == caster && !affect_caster)	//watch for caster too
+		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if(center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
 			continue;
-		if(isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
-			if(bad) {
+			if (bad) {
 				//affect mobs that are on our hate list, or
 				//which have bad faction with us
-				if( ! (caster->CheckAggro(curmob) || f == FACTION_THREATENLY || f == FACTION_SCOWLS) )
+				if (!(caster->CheckAggro(curmob) || f == FACTION_THREATENLY || f == FACTION_SCOWLS) )
 					continue;
 			} else {
 				//only affect mobs we would assist.
-				if( ! (f <= FACTION_AMIABLE))
+				if (!(f <= FACTION_AMIABLE))
 					continue;
 			}
 		}
 		//finally, make sure they are within range
-		if(bad) {
-			if(!caster->IsAttackAllowed(curmob, true))
+		if (bad) {
+			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if(!center->CheckLosFN(curmob))
+			if (!center->CheckLosFN(curmob))
 				continue;
-		}
-		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.
 			// I've tested for spells that I can find without problem, but a faction-based
 			// check may still be needed. Any changes here should also reflect in BardAEPulse() -U
-			if(caster->IsAttackAllowed(curmob, true))
+			if (caster->IsAttackAllowed(curmob, true))
 				continue;
-			if(caster->CheckAggro(curmob))
+			if (caster->CheckAggro(curmob))
 				continue;
 		}
 
 		//if we get here... cast the spell.
-		if(IsTargetableAESpell(spell_id) && bad)
-		{
-			if(iCounter < MAX_TARGETS_ALLOWED)
-			{
+		if (IsTargetableAESpell(spell_id) && bad) {
+			if (iCounter < MAX_TARGETS_ALLOWED) {
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			}
-		}
-		else
-		{
+		} else {
 			caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 		}
 
-		if(!isnpc) //npcs are not target limited...
+		if (!isnpc) //npcs are not target limited...
 			iCounter++;
 	}
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	LinkedListIterator<Mob*> iterator(mob_list);
 	Mob *curmob;
 
 	float dist = caster->GetAOERange(spell_id);
@@ -807,35 +751,28 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 
 	bool bad = IsDetrimentalSpell(spell_id);
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance())
-	{
-		curmob = iterator.GetData();
-		if(curmob == center)	//do not affect center
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		curmob = it->second;
+		if (curmob == center)	//do not affect center
 			continue;
-		if(curmob == caster && !affect_caster)	//watch for caster too
+		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if(center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
 			continue;
 
 		//Only npcs mgb should hit are client pets...
-		if(curmob->IsNPC())
-		{
+		if (curmob->IsNPC()) {
 			Mob *owner = curmob->GetOwner();
-			if(owner)
-			{
-				if(!owner->IsClient())
-				{
+			if (owner) {
+				if (!owner->IsClient()) {
 					continue;
 				}
-			}
-			else
-			{
+			} else {
 				continue;
 			}
 		}
 
-		if(bad)
-		{
+		if (bad) {
 			continue;
 		}
 
@@ -848,7 +785,6 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	LinkedListIterator<Mob*> iterator(mob_list);
 	Mob *curmob;
 
 	float dist = caster->GetAOERange(spell_id);
@@ -857,45 +793,43 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance())
-	{
-		curmob = iterator.GetData();
-		if(curmob == center)	//do not affect center
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		curmob = it->second;
+		if (curmob == center)	//do not affect center
 			continue;
-		if(curmob == caster && !affect_caster)	//watch for caster too
+		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
-		if(center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
+		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
 			continue;
-		if(isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
-			if(bad) {
+			if (bad) {
 				//affect mobs that are on our hate list, or
 				//which have bad faction with us
-				if( ! (caster->CheckAggro(curmob) || f == FACTION_THREATENLY || f == FACTION_SCOWLS) )
+				if (!(caster->CheckAggro(curmob) || f == FACTION_THREATENLY || f == FACTION_SCOWLS) )
 					continue;
 			} else {
 				//only affect mobs we would assist.
-				if( ! (f <= FACTION_AMIABLE))
+				if (!(f <= FACTION_AMIABLE))
 					continue;
 			}
 		}
 		//finally, make sure they are within range
-		if(bad) {
-			if(!center->CheckLosFN(curmob))
+		if (bad) {
+			if (!center->CheckLosFN(curmob))
 				continue;
-		}
-		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// See notes in AESpell() above for more info. 
-			if(caster->IsAttackAllowed(curmob, true))
+			if (caster->IsAttackAllowed(curmob, true))
 				continue;
-			if(caster->CheckAggro(curmob))
+			if (caster->CheckAggro(curmob))
 				continue;
 		}
 
 		//if we get here... cast the spell.
 		curmob->BardPulse(spell_id, caster);
 	}
-	if(caster->IsClient())
+	if (caster->IsClient())
 		caster->CastToClient()->CheckSongSkillIncrease(spell_id);
 }
 
@@ -903,24 +837,23 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 //NPCs handle it differently in Mob::Rampage
 void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
 //Dook- Will need tweaking, currently no pets or players or horses
-	LinkedListIterator<Mob*> iterator(mob_list);
 	Mob *curmob;
 
 	float dist2 = dist * dist;
 
 	int hit = 0;
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		curmob = iterator.GetData();
-		if(curmob->IsNPC()
-			&& curmob != attacker //this is not needed unless NPCs can use this
-			&&(attacker->IsAttackAllowed(curmob))
-			&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
-			&& (curmob->DistNoRoot(*attacker) <= dist2)
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		curmob = it->second;
+		if (curmob->IsNPC()
+				&& curmob != attacker //this is not needed unless NPCs can use this
+				&&(attacker->IsAttackAllowed(curmob))
+				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
+				&& (curmob->DistNoRoot(*attacker) <= dist2)
 		) {
 			attacker->Attack(curmob, Hand, false, false, IsFromSpell);
 			hit++;
-			if(count != 0 && hit >= count)
+			if (count != 0 && hit >= count)
 				return;
 		}
 	}
