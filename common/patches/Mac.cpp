@@ -1123,9 +1123,12 @@ ENCODE(OP_CharInventory){
 	{
 		structs::Item_Struct* weasel = WeaselTheJuice((ItemInst*)eq->inst,eq->slot_id);
 
-		char *weasel_char = reinterpret_cast<char*>(weasel);
-		weasel_string.append(weasel_char,sizeof(structs::Item_Struct));
-		safe_delete_array(weasel_char);	
+		if(weasel != 0)
+		{
+			char *weasel_char = reinterpret_cast<char*>(weasel);
+			weasel_string.append(weasel_char,sizeof(structs::Item_Struct));
+			safe_delete_array(weasel_char);	
+		}
 	}
 	int32 length = 5000;
 	int buffer = 2;
@@ -1154,6 +1157,8 @@ ENCODE(OP_ShopInventoryPacket)
 		delete in;
 		return;
 	}
+	if(itemcount > 80)
+		itemcount = 80;
 
 	int pisize = sizeof(structs::MerchantItems_Struct) + (80 * sizeof(structs::MerchantItemsPacket_Struct));
 	structs::MerchantItems_Struct* pi = (structs::MerchantItems_Struct*) new uchar[pisize];
@@ -1167,14 +1172,17 @@ ENCODE(OP_ShopInventoryPacket)
 	{
 		structs::Item_Struct* weasel = WeaselTheJuice((ItemInst*)eq->inst,eq->slot_id,1);
 
-		structs::MerchantItemsPacket_Struct* merchant = new struct structs::MerchantItemsPacket_Struct;
-		memset(merchant,0,sizeof(structs::MerchantItemsPacket_Struct));
-		memcpy(&merchant->item,weasel,sizeof(structs::Item_Struct));
-		merchant->itemtype = weasel->ItemClass;
+		if(weasel != 0)
+		{
+			structs::MerchantItemsPacket_Struct* merchant = new struct structs::MerchantItemsPacket_Struct;
+			memset(merchant,0,sizeof(structs::MerchantItemsPacket_Struct));
+			memcpy(&merchant->item,weasel,sizeof(structs::Item_Struct));
+			merchant->itemtype = weasel->ItemClass;
 
-		char *weasel_char = reinterpret_cast<char*>(merchant);
-		weasel_string.append(weasel_char,sizeof(structs::MerchantItemsPacket_Struct));
-		safe_delete_array(weasel_char);	
+			char *weasel_char = reinterpret_cast<char*>(merchant);
+			weasel_string.append(weasel_char,sizeof(structs::MerchantItemsPacket_Struct));
+			safe_delete_array(weasel_char);	
+		}
 	}
 	int32 length = 5000;
 	int buffer = 2;
@@ -1949,6 +1957,10 @@ ENCODE(OP_Charm){
 }
 
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
+
+	if(!inst)
+		return 0;
+
 	const Item_Struct *item=inst->GetItem();
 
 	structs::Item_Struct *thejuice = new struct structs::Item_Struct;

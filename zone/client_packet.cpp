@@ -3835,7 +3835,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
-		Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
+		//Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
 		if(GetClientVersion() >= EQClientSoD)
 			Corpse::SendEndLootErrorPacket(this);
 		else
@@ -3843,7 +3843,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 		return;
 	}
 	else if (!entity->IsCorpse()) {
-		Message(13, "Error: OP_EndLootRequest: Corpse not found (!entity->IsCorpse())");
+		//Message(13, "Error: OP_EndLootRequest: Corpse not found (!entity->IsCorpse())");
 		Corpse::SendLootReqErrorPacket(this);
 		return;
 	}
@@ -3875,7 +3875,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 
 	Entity* ent = entity_list.GetID(*((uint32*)app->pBuffer));
 	if (ent == 0) {
-		Message(13, "Error: OP_LootRequest: Corpse not found (ent = 0)");
+	//	Message(13, "Error: OP_LootRequest: Corpse not found (ent = 0)");
 		Corpse::SendLootReqErrorPacket(this);
 		return;
 	}
@@ -4027,7 +4027,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = 0;
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
-		Message(13, "Error: OP_LootItem: Corpse not found (ent = 0)");
+	//	Message(13, "Error: OP_LootItem: Corpse not found (ent = 0)");
 		outapp = new EQApplicationPacket(OP_LootComplete, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -4039,7 +4039,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 	else {
-		Message(13, "Error: Corpse not found! (!ent->IsCorpse())");
+	//	Message(13, "Error: Corpse not found! (!ent->IsCorpse())");
 		Corpse::SendEndLootErrorPacket(this);
 	}
 

@@ -946,6 +946,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 	}
 	if(GetClientVersion() == EQClientMac)
 	{
+		int8 count = 0;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, size);
 		uchar* ptr = outapp->pBuffer;
 		for(mer_itr = ser_items.begin(); mer_itr != ser_items.end(); mer_itr++){
@@ -953,8 +954,12 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 			if(length > 5) {
 				memcpy(ptr, mer_itr->second.c_str(), length);
 				ptr += length;
+				count++;
 			}
+			if(count >= 79)
+				break;
 		}
+
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

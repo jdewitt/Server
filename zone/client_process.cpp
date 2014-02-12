@@ -1047,8 +1047,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					if(inst) 
 					{
 						std::string packet = inst->Serialize(ml.slot-1);
-						ser_items[m++] = packet;
+						ser_items[m] = packet;
 						size += packet.length();
+						m++;
 					}
 				}
 				else
@@ -1096,8 +1097,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					if(inst) 
 					{
 						std::string packet = inst->Serialize(ml.slot-1);
-						ser_items[m++] = packet;
+						ser_items[m] = packet;
 						size += packet.length();
+						m++;
 					}
 
 				}
@@ -1145,6 +1147,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 	if(GetClientVersion() == EQClientMac)
 	{
+		int8 count = 0;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, size);
 		uchar* ptr = outapp->pBuffer;
 		for(mer_itr = ser_items.begin(); mer_itr != ser_items.end(); mer_itr++){
@@ -1152,7 +1155,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			if(length > 5) {
 				memcpy(ptr, mer_itr->second.c_str(), length);
 				ptr += length;
+				count++;
 			}
+			if(count >= 79)
+				break;
 		}
 		QueuePacket(outapp);
 		safe_delete(outapp);
