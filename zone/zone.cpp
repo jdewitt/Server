@@ -542,7 +542,7 @@ void Zone::GetMerchantDataForZoneLoad(){
 		"select ml.merchantid,ml.slot,ml.item,ml.faction_required,ml.level_required,ml.alt_currency_cost,ml.classes_required "
 		"from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 "
 		"where nt.merchant_id=ml.merchantid and nt.id=se.npcid "
-		"and se.spawngroupid=s2.spawngroupid and s2.zone='%s' and s2.version=%u "
+		"and se.spawngroupid=s2.spawngroupid and s2.zone='%s' and s2.version=%u group by ml.merchantid,ml.slot "
 		//"group by ml.merchantid,slot order by merchantid,slot asc"		//this made the query use a temp table/filesort (very slow)... so we handle unsorted data on our end.
 		, GetShortName(), GetInstanceVersion()));
 	if (!(pQueuedMerchantsWorkID = dbasync->AddWork(&dbaw))) {

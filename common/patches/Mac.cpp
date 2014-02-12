@@ -1036,6 +1036,12 @@ ENCODE(OP_ItemPacket) {
 	{
 		structs::Item_Struct* weasel = WeaselTheJuice((ItemInst*)int_struct->inst,int_struct->slot_id);
 
+		if(weasel == 0)
+		{
+			delete in;
+			return;
+		}
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPacket,sizeof(structs::Item_Struct));
 		memcpy(outapp->pBuffer,weasel,sizeof(structs::Item_Struct));
 
@@ -1079,6 +1085,12 @@ ENCODE(OP_TradeItemPacket){
 	if(item)
 	{
 		structs::Item_Struct* weasel = WeaselTheJuice((ItemInst*)int_struct->inst,int_struct->slot_id);
+
+		if(weasel == 0)
+		{
+			delete in;
+			return;
+		}
 
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeItemPacket,sizeof(structs::TradeItemsPacket_Struct));
 		structs::TradeItemsPacket_Struct* myitem = (structs::TradeItemsPacket_Struct*) outapp->pBuffer;
