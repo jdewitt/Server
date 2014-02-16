@@ -1171,26 +1171,21 @@ void Client::SendAATable() {
 		OldAATable_Struct* aa2 = (OldAATable_Struct *)outapp->pBuffer;
 		aa2->unknown = 1;
 
-		uint32 i;
 		uint8 macaaid = 0;
-		for(i=0;i < 226;i++){
+		for(uint32 i=0;i < 226;i++,macaaid = 0){
 		
 			if(aa[i]->AA > 0)
 				macaaid = zone->EmuToEQMacAA(aa[i]->AA);
 			if(macaaid > 0)
 			{
-				uint8 value = 0;
-				uint32 r;
-				for(r=0;r < 226;r++){
+				for(int r=0;r < 226;r++){
 					if(macaaid == r+1)
 					{
-						value = aa[i]->value;
-						aa2->aa_list[r].aa_value = value;
+						aa2->aa_list[r].aa_value = aa[i]->value;
 						break;
 					}
 				}
 			}
-			macaaid = 0;
 		}	
 		QueuePacket(outapp);
 		safe_delete(outapp);

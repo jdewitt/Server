@@ -597,15 +597,25 @@ uint8	charges;
 uint8	unknown02[13];
 };
 
-struct GMTrainee_Struct{
-     //       uint16 unknown0; //Always seems to be 0x9c 0x40
-	/*002*/ uint16 npcid;
-			uint16 playerid;
-	/*004*/ uint16 skills[73];
-	/*004*/ uint8  unknown[54];
-			uint16 unknown1;
-			uint8  unknown2;
-			uint8  ending[37];
+struct GMTrainee_Struct
+{
+	/*000*/ uint32 npcid;
+	/*004*/ uint32 playerid;
+	/*008*/ uint32 skills[73];
+	/*300*/ uint8 unknown300[148];
+	/*448*/
+};
+
+struct OldGMTrainee_Struct{
+	/*000*/ uint16 npcid;
+	/*002*/	uint16 playerid;
+	/*004*/ uint16 skills[74];
+	/*152*/ uint8  unknown154[52];
+	/*204*/	float  greed;
+	/*208*/ uint8  unknown208; //Always 0x01
+	/*209*/	uint8  language[32];
+	/*241*/	uint8  ending[3]; //Copied from client packet (probably void)
+	/*244*/
 };
 
 struct GMTrainEnd_Struct
@@ -1579,7 +1589,7 @@ struct OldGuildsListEntry_Struct
 struct OldGuildPlayerEntry_Struct 
 {
 /*0000*/	uint32 guildID;				// Comment: empty = 0xFFFFFFFF
-/*0004*/	uint32 guildID_;
+/*0004*/	uint32 ID;
 /*0008*/	char name[64];				// Comment: 
 /*0072*/	uint32 unknown1;			// Comment: = 0xFF
 /*0076*/	uint16 exists;				// Comment: = 1 if exists, 0 on empty
@@ -3198,6 +3208,13 @@ struct TraderClick_Struct{
 };
 
 struct FormattedMessage_Struct{
+	uint32	unknown0;
+	uint32	string_id;
+	uint32	type;
+	char	message[0];
+};
+
+struct OldFormattedMessage_Struct{
 	uint16	unknown0;
 	uint16	string_id;
 	uint16	type;

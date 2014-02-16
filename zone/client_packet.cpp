@@ -2862,10 +2862,21 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(GMTrainee_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(GMTrainee_Struct), app->size);
-		DumpPacket(app);
-		return;
+	if(GetClientVersion() > EQClientMac)
+	{
+		if (app->size != sizeof(GMTrainee_Struct)) {
+			LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(GMTrainee_Struct), app->size);
+			DumpPacket(app);
+			return;
+		}
+	}
+	else
+	{
+		if (app->size != sizeof(OldGMTrainee_Struct)) {
+			LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(OldGMTrainee_Struct), app->size);
+			DumpPacket(app);
+			return;
+		}
 	}
 	OPGMTraining(app);
 	return;

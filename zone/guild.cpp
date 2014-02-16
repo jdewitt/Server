@@ -165,13 +165,13 @@ void Client::SendPlayerGuild() {
 		const char * ctmp = tmp.c_str();
 		memcpy(gle->name,ctmp,64);
 		gle->guildID=guid;
-		gle->guildID_=guid;
+		gle->ID=guid;
 		gle->exists=1;
 	}
 	else
 	{
 		gle->guildID=0xFFFFFFFF;
-		gle->guildID_=0xFFFFFFFF;
+		gle->ID=0xFFFFFFFF;
 		gle->exists=0;
 	}
 

@@ -1448,7 +1448,7 @@ ENCODE(OP_ItemPacket) {
 
 	delete[] __emu_buffer;
 	safe_delete_array(serialized);
-	dest->FastQueuePacket(&in, ack_req);
+	dest->QueuePacket(in);
 }
 
 ENCODE(OP_CharInventory) {

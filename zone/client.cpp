@@ -2937,7 +2937,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 	else
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, 12);
-		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
 		fm->string_id = string_id;
 		fm->type = type;
 
@@ -2997,23 +2997,46 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	for(argcount = length = 0; message_arg[argcount]; argcount++)
 		length += strlen(message_arg[argcount]) + 1;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
-	for(i = 0; i < argcount; i++)
+	if(GetClientVersion() == EQClientMac)
 	{
-		strcpy(bufptr, message_arg[i]);
-		bufptr += strlen(message_arg[i]) + 1;
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
+		fm->string_id = string_id;
+		fm->type = type;
+		bufptr = fm->message;
+		for(i = 0; i < argcount; i++)
+		{
+			strcpy(bufptr, message_arg[i]);
+			bufptr += strlen(message_arg[i]) + 1;
+		}
+
+
+		if(distance>0)
+			entity_list.QueueCloseClients(this,outapp,false,distance);
+		else
+			QueuePacket(outapp);
+		safe_delete(outapp);
 	}
-
-
-	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
 	else
-		QueuePacket(outapp);
-	safe_delete(outapp);
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+		fm->string_id = string_id;
+		fm->type = type;
+		bufptr = fm->message;
+		for(i = 0; i < argcount; i++)
+		{
+			strcpy(bufptr, message_arg[i]);
+			bufptr += strlen(message_arg[i]) + 1;
+		}
+
+
+		if(distance>0)
+			entity_list.QueueCloseClients(this,outapp,false,distance);
+		else
+			QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 

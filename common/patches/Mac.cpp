@@ -21,6 +21,7 @@ static OpcodeManager *opcodes = NULL;
 static Strategy struct_strategy;
 
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type = 0);
+structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct*, int type);
 
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
@@ -162,7 +163,7 @@ ENCODE(OP_ZoneEntry) {
 			eq->equipcolors[k].color = emu->player.spawn.colors[k].color;
 		}
 		eq->AFK = emu->player.spawn.afk;
-		eq->title = emu->player.spawn.face;
+		eq->title = emu->player.spawn.aaitle;
 		eq->anim_type = 0x64;
 		eq->texture = emu->player.spawn.equip_chest2;
         eq->helm = emu->player.spawn.helm;
@@ -174,7 +175,7 @@ ENCODE(OP_ZoneEntry) {
 		eq->guildrank = emu->player.spawn.guildrank;
 		if(eq->guildrank == 0)
 			eq->guildrank = 0xFF;
-		strncpy(eq->Surname, emu->player.spawn.lastName, 20);
+		strncpy(eq->Surname, emu->player.spawn.lastName, 32);
 		eq->walkspeed = emu->player.spawn.walkspeed;
 		eq->runspeed = emu->player.spawn.runspeed;
 		eq->light = emu->player.spawn.light;
@@ -198,7 +199,7 @@ ENCODE(OP_ZoneEntry) {
 		eq->extra[13] = 0xFF;
 		eq->type = 0;
 		eq->size = emu->player.spawn.size;
-		//Need to export leaderid;
+		eq->petOwnerId = emu->player.spawn.petOwnerId;
 
 		CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::ServerZoneEntry_Struct));
 
@@ -211,7 +212,6 @@ ENCODE(OP_PlayerProfile) {
 	eq->available_slots=0xffff;
 
 	int r = 0;
-//	OUT(checksum);
 	OUT(gender);
 	OUT(race);
 	OUT(class_);
@@ -353,13 +353,14 @@ ENCODE(OP_EnterWorld) {
 	FINISH_ENCODE();	
 }
 
-
 ENCODE(OP_ExpansionInfo) {
 	SETUP_DIRECT_ENCODE(ExpansionInfo_Struct, structs::ExpansionInfo_Struct);
-	eq->flag = 15;
+	if(emu->Expansions > 15)
+		eq->Expansions = 15;
+	else
+		OUT(Expansions);
 	FINISH_ENCODE();	
 }
-
 
 ENCODE(OP_SendCharInfo) {
 	int r;
@@ -604,14 +605,14 @@ DECODE(OP_SetServerFilter)
 	emu->filters[3]=eq->filters[8]; //Shouts
 	emu->filters[4]=eq->filters[9]; //Auctions
 	emu->filters[5]=eq->filters[10];//OOC
-	emu->filters[6]=1;				//BadWords
+	emu->filters[6]=1;				//BadWords (Handled by LogServer?)
 	emu->filters[7]=eq->filters[2]; //PC Spells 0 is on
 	emu->filters[8]=0;				//NPC Spells Client has it but it doesn't work. 0 is on.
 	emu->filters[9]=eq->filters[3]; //Bard Songs 0 is on
 	emu->filters[10]=eq->filters[15]; //Spell Crits 0 is on
 	int critm = eq->filters[16];
 	if(critm > 0){critm = critm-1;}
-	emu->filters[11]=critm;			//Melee Crits 0 is on EQMac has 3 options, Emu only 2.
+	emu->filters[11]=critm;			//Melee Crits 0 is on. EQMac has 3 options, Emu only 2.
 	emu->filters[12]=eq->filters[0]; //Spell Damage 0 is on
 	emu->filters[13]=eq->filters[11]; //My Misses
 	emu->filters[14]=eq->filters[12]; //Others Misses
@@ -656,84 +657,19 @@ ENCODE(OP_ZoneSpawns){
 	structs::Spawn_Struct *eq = (structs::Spawn_Struct *) out->pBuffer;
 
 	//zero out the packet. We could avoid this memset by setting all fields (including unknowns)
-	//in the loop.
 	memset(out->pBuffer, 0, out->size);
-	//_log(NET__STRUCTS, "Total size of bulkspawns packet STRUCT: %d", sizeof(structs::Spawn_Struct));
 
 	//do the transform...
-	int r;
-	int k;
-	for(r = 0; r < entrycount; r++, eq++, emu++) {
-		eq->GM = emu->gm;
-		eq->title = emu->aaitle;
-		eq->anon = emu->anon;
-		memcpy(eq->name, emu->name, 64);
-		eq->deity = emu->deity;
-		if(emu->race == 42)
-			eq->size = emu->size + 2.0f;
-		else
-			eq->size = emu->size;
-		eq->NPC = emu->NPC;
-		eq->invis = emu->invis;
-		eq->cur_hp = emu->curHp;
-		eq->deltaHeading = emu->deltaHeading;
-		eq->x_pos = (int16)emu->x;
-		eq->y_pos = (int16)emu->y;
-		eq->animation = emu->animation;
-		eq->z_pos = (int16)emu->z*10;
-		eq->deltaY = 0;
-		eq->deltaX = 0;
-		eq->heading = (uint8)emu->heading;
-		eq->deltaZ = 0;
-		eq->anim_type = 0x64;
-		eq->level = emu->level;
-		eq->petOwnerId = emu->petOwnerId;
-		eq->guildrank = emu->guildrank;
-		if(emu->NPC == 1)
-			eq->guildrank = 0;
-		eq->texture = emu->equip_chest2;
-		for(k = 0; k < 9; k++) {
-			eq->equipment[k] = emu->equipment[k];
-			eq->equipcolors[k].color = emu->colors[k].color;
-		}
-		eq->runspeed = emu->runspeed;
-		eq->AFK = emu->afk;
-		eq->GuildID = emu->guildID;
-		if(eq->GuildID == 0)
-			eq->GuildID = 0xFFFF;
-		eq->helm = emu->helm;
-		eq->race = emu->race;
-		strncpy(eq->Surname, emu->lastName, 20);
-		eq->walkspeed = emu->walkspeed;
-		eq->light = emu->light;
-		if(emu->class_ > 19 && emu->class_ < 35)
-			eq->class_ = emu->class_-3;
-		else if(emu->class_ == 40)
-			eq->class_ = 16;
-		else if(emu->class_ == 41)
-			eq->class_ = 32;
-		else 
-			eq->class_ = emu->class_;
-		eq->haircolor = emu->haircolor;
-		eq->beardcolor = emu->beardcolor;
-		eq->eyecolor1 = emu->eyecolor1;
-		eq->eyecolor2 = emu->eyecolor2;
-		eq->hairstyle = emu->hairstyle;
-		eq->beard = emu->beard;
-		eq->face = emu->face;
-		eq->gender = emu->gender;
-		eq->bodytype = emu->bodytype;
-		eq->spawn_id = emu->spawnId;
-		eq->flymode = emu->flymode;
+	for(int r = 0; r < entrycount; r++, eq++, emu++) {
+
+		struct structs::Spawn_Struct* spawns = WeaselTheSpawns(emu,0);
+		memcpy(eq,spawns,sizeof(structs::Spawn_Struct));
 
 	}
-	//_log(NET__STRUCTS, "Total size of bulkspawns packet uncompressed: %d", out->size);
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneSpawns, sizeof(structs::Spawn_Struct)*entrycount);
 	outapp->pBuffer = new uchar[sizeof(structs::Spawn_Struct)*entrycount];
 	outapp->size = DeflatePacket((unsigned char*)out->pBuffer, out->size, outapp->pBuffer, sizeof(structs::Spawn_Struct)*entrycount);
 	EncryptZoneSpawnPacket(outapp->pBuffer, outapp->size);
-	//_log(NET__STRUCTS, "Total size of bulkspawns packet compressed: %d", outapp->size);
-	//kill off the emu structure and send the eq packet.
 	delete[] __emu_buffer;
 	delete out;
 	dest->FastQueuePacket(&outapp, ack_req);
@@ -742,71 +678,9 @@ ENCODE(OP_ZoneSpawns){
 
 ENCODE(OP_NewSpawn) {
 	SETUP_DIRECT_ENCODE(Spawn_Struct, structs::Spawn_Struct);
-	//zero out the packet. We could avoid this memset by setting all fields (including unknowns)
-	//in the loop.
-	int k = 0;
-	//do the transform...
-		eq->GM = emu->gm;
-		eq->anon = emu->anon;
-		strncpy(eq->name, emu->name, 64);
-		eq->deity = emu->deity;
-		if(emu->race == 42)
-			eq->size = emu->size + 2.0f;
-		else
-			eq->size = emu->size;
-		eq->NPC = emu->NPC;
-		eq->invis = emu->invis;
-		eq->cur_hp = emu->curHp;
-		eq->deltaHeading = 0;
-		eq->x_pos = (int16)emu->x;
-		eq->y_pos = (int16)emu->y;
-		eq->animation = emu->animation;
-		eq->z_pos = (int16)emu->z*10;
-		eq->deltaY = 0;
-		eq->deltaX = 0;
-		eq->heading = (uint8)emu->heading;
-		eq->deltaZ = 0;
-		eq->haircolor = emu->haircolor;
-		eq->beardcolor = emu->beardcolor;
-		eq->eyecolor1 = emu->eyecolor1;
-		eq->eyecolor2 = emu->eyecolor2;
-		eq->hairstyle = emu->hairstyle;
-		eq->beard = emu->beard;
-		eq->face = emu->face;
-		eq->level = emu->level;
-		eq->petOwnerId = emu->petOwnerId;
-		eq->guildrank = emu->guildrank;
-		for(k = 0; k < 9; k++) {
-			eq->equipment[k] = emu->equipment[k];
-			eq->equipcolors[k].color = emu->colors[k].color;
-		}
-		eq->runspeed = emu->runspeed;
-		eq->AFK = emu->afk;
-		eq->GuildID = emu->guildID;
-		eq->title = emu->face;
-		eq->anim_type = 0x64;
-		eq->texture = emu->equip_chest2;
-        eq->helm = emu->helm;
-		eq->race = emu->race;
-		eq->GuildID = emu->guildID;
-		if(eq->GuildID == 0)
-			eq->GuildID = 0xFFFF;
-		if(eq->guildrank == 0)
-			eq->guildrank = 0xFF;
-		strncpy(eq->Surname, emu->lastName, 20);
-		eq->walkspeed = emu->walkspeed;
-		eq->light = emu->light;
-		if(emu->class_ > 19 && emu->class_ < 35)
-			eq->class_ = emu->class_-3;
-		else if(emu->class_ == 40)
-			eq->class_ = 16;
-		else if(emu->class_ == 41)
-			eq->class_ = 32;
-		else 
-			eq->class_ = emu->class_;
-		eq->gender = emu->gender;
-		eq->spawn_id = emu->spawnId;
-		eq->flymode = emu->flymode;
+
+	struct structs::Spawn_Struct* spawns = WeaselTheSpawns(emu,1);
+	memcpy(eq,spawns,sizeof(structs::Spawn_Struct));
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewSpawn, sizeof(structs::Spawn_Struct));
 	outapp->pBuffer = new uchar[sizeof(structs::Spawn_Struct)];
@@ -1008,8 +882,6 @@ ENCODE(OP_InterruptCast) {
 	eq->message[0] = emu->message[0];
 	FINISH_ENCODE();
 }
-
-
 
 DECODE(OP_GMEndTraining) {
 	DECODE_LENGTH_EXACT(structs::GMTrainEnd_Struct);
@@ -1283,7 +1155,6 @@ ENCODE(OP_MobHealth)
 	eq->max_hp=100;
 	FINISH_ENCODE();
 }
-
 
 DECODE(OP_Consume) 
 {
@@ -1594,7 +1465,6 @@ DECODE(OP_TradeRequestAck) {
 	IN(to_mob_id);
 	FINISH_DIRECT_DECODE();
 }
-
 
 ENCODE(OP_TradeRequestAck) {
 
@@ -2132,6 +2002,83 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		}
 
 	return thejuice;
+}
+
+structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
+
+	if(sizeof(emu) == 0)
+		return 0;
+
+	structs::Spawn_Struct *eq = new struct structs::Spawn_Struct;
+	memset(eq,0,sizeof(structs::Spawn_Struct));
+
+	if(type == 0)
+		eq->deltaHeading = emu->deltaHeading;
+	if(type == 1)
+		eq->deltaHeading = 0;
+	eq->GM = emu->gm;
+	eq->title = emu->aaitle;
+	eq->anon = emu->anon;
+	memcpy(eq->name, emu->name, 64);
+	eq->deity = emu->deity;
+	if(emu->race == 42)
+		eq->size = emu->size + 2.0f;
+	else
+		eq->size = emu->size;
+	eq->NPC = emu->NPC;
+	eq->invis = emu->invis;
+	eq->cur_hp = emu->curHp;
+	
+	eq->x_pos = (int16)emu->x;
+	eq->y_pos = (int16)emu->y;
+	eq->animation = emu->animation;
+	eq->z_pos = (int16)emu->z*10;
+	eq->deltaY = 0;
+	eq->deltaX = 0;
+	eq->heading = (uint8)emu->heading;
+	eq->deltaZ = 0;
+	eq->anim_type = 0x64;
+	eq->level = emu->level;
+	eq->petOwnerId = emu->petOwnerId;
+	eq->guildrank = emu->guildrank;
+	if(emu->NPC == 1)
+		eq->guildrank = 0;
+	eq->texture = emu->equip_chest2;
+	for(int k = 0; k < 9; k++) {
+		eq->equipment[k] = emu->equipment[k];
+		eq->equipcolors[k].color = emu->colors[k].color;
+	}
+	eq->runspeed = emu->runspeed;
+	eq->AFK = emu->afk;
+	eq->GuildID = emu->guildID;
+	if(eq->GuildID == 0)
+		eq->GuildID = 0xFFFF;
+	eq->helm = emu->helm;
+	eq->race = emu->race;
+	strncpy(eq->Surname, emu->lastName, 32);
+	eq->walkspeed = emu->walkspeed;
+	eq->light = emu->light;
+	if(emu->class_ > 19 && emu->class_ < 35)
+		eq->class_ = emu->class_-3;
+	else if(emu->class_ == 40)
+		eq->class_ = 16;
+	else if(emu->class_ == 41)
+		eq->class_ = 32;
+	else 
+		eq->class_ = emu->class_;
+	eq->haircolor = emu->haircolor;
+	eq->beardcolor = emu->beardcolor;
+	eq->eyecolor1 = emu->eyecolor1;
+	eq->eyecolor2 = emu->eyecolor2;
+	eq->hairstyle = emu->hairstyle;
+	eq->beard = emu->beard;
+	eq->face = emu->face;
+	eq->gender = emu->gender;
+	eq->bodytype = emu->bodytype;
+	eq->spawn_id = emu->spawnId;
+	eq->flymode = emu->flymode;
+
+	return eq;
 }
 
 } //end namespace Mac

@@ -1651,47 +1651,89 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 {
 
 	EQApplicationPacket* outapp = app->Copy();
-	GMTrainee_Struct* gmtrain = (GMTrainee_Struct*) outapp->pBuffer;
 
-	Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
-
-	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
-		return;
-
-	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
-
-	//you have to be somewhat close to a trainer to be properly using them
-	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
-		return;
-
-	SkillUseTypes sk;
-	for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) 
+	if(GetClientVersion() == EQClientMac)
 	{
-		if(sk == SkillTinkering && GetRace() != GNOME) 
+		OldGMTrainee_Struct* gmtrain = (OldGMTrainee_Struct*) outapp->pBuffer;
+
+		Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
+
+		if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
+			return;
+
+		//you can only use your own trainer, client enforces this, but why trust it
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if(GetClass() != trains_class)
+			return;
+
+		//you have to be somewhat close to a trainer to be properly using them
+		if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+			return;
+
+		SkillUseTypes sk;
+		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) 
 		{
-			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
-		} 
-		else 
+			if(sk == SkillTinkering && GetRace() != GNOME) 
+				gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
+			else 
+				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
+		}
+		gmtrain->greed = 1.25; //Todo: Dynamically calculate using faction/charisma
+		gmtrain->unknown208 = 1;
+		for(int l = 0; l < 32; l++) {
+			gmtrain->language[l] = 201;
+		}
+
+		FastQueuePacket(&outapp);
+
+		// welcome message
+		if (pTrainer && pTrainer->IsNPC())
 		{
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
-			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
-			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
+			pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
 		}
 	}
-
-	uchar ending[]={0x3f, 0x01, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9,
-		0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 
-		0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xc9, 0xf5, 0x85, 0x1a}; 
-	memcpy(gmtrain->ending,ending,sizeof(ending));
-	FastQueuePacket(&outapp);
-
-	// welcome message
-	if (pTrainer && pTrainer->IsNPC())
+	else
 	{
-		pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
+		EQApplicationPacket* outapp = app->Copy();
+		GMTrainee_Struct* gmtrain = (GMTrainee_Struct*) outapp->pBuffer;
+
+		Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
+
+		if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
+			return;
+
+		//you can only use your own trainer, client enforces this, but why trust it
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if(GetClass() != trains_class)
+			return;
+
+		//you have to be somewhat close to a trainer to be properly using them
+		if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
+			return;
+
+		SkillUseTypes sk;
+		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
+			if(sk == SkillTinkering && GetRace() != GNOME) {
+				gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
+			} else {
+				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
+				//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
+				//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
+			}
+		}
+
+		uchar ending[]={0x34,0x87,0x8a,0x3F,0x01
+			,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
+			,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
+			,0x76,0x75,0x3f};
+		memcpy(&outapp->pBuffer[outapp->size-40],ending,sizeof(ending));
+		FastQueuePacket(&outapp);
+
+		// welcome message
+		if (pTrainer && pTrainer->IsNPC())
+		{
+			pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
+		}
 	}
 }
 
