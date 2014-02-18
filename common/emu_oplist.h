@@ -372,7 +372,7 @@ N(OP_RequestTitles),
 N(OP_PurchaseLeadershipAA),
 N(OP_UpdateLeadershipAA),
 N(OP_AdventurePointsUpdate),
-N(OP_ZoneInUnknown),
+N(OP_ZoneInAvatarSet),
 N(OP_ZoneServerReady),	//terrible name.
 N(OP_SendTitleList),
 N(OP_NewTitlesAvailable),

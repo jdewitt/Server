@@ -396,7 +396,7 @@ OUT(OP_TributeTimer, uint32);
 OUT(OP_UpdateLeadershipAA, UpdateLeadershipAA_Struct);
 OUT(OP_Weather, Weather_Struct);
 OUT(OP_ZoneChange, ZoneChange_Struct);
-OUT(OP_ZoneInUnknown, ZoneInUnknown_Struct);
+OUT(OP_ZoneInAvatarSet, ZoneInUnknown_Struct);
 
 //this is the set of opcodes which are allready listed
 //in the IN section above, but are also sent OUT

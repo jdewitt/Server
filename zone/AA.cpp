@@ -1104,41 +1104,37 @@ void Client::SendAATimers() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 
+	//EQMac sends timers for all the abilities you have, even if they have never been used.
 	if(GetClientVersion() == EQClientMac)
 	{
-		uint32 i;
 		uint8 macaaid = 0;
-		for(i=0;i < MAX_PP_AA_ARRAY;i++)
+		for(uint32 i=0;i < MAX_PP_AA_ARRAY;i++)
 		{
 			if(aa[i]->AA > 0)
 			{
 				SendAA_Struct* aa2 = nullptr;
 				aa2 = zone->FindAA(aa[i]->AA);
-				if(aa2)
+				if(aa2 && aa2->spell_refresh > 0)
 				{
-					if(aa2->spell_refresh > 0) //&& aa2->classes & (1 << GetClass()))
-					{
-						int32 starttime = 0; 
-						PTimerList::iterator c,e;
-						c = p_timers.begin();
-						e = p_timers.end();
-						for(; c != e; ++c) {
-							PersistentTimer *cur = c->second;
-							if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
-								continue;	//not an AA timer
-							else
-							{
-								if(cur->GetType() + pTimerAAStart == aa2->id)
-									starttime = cur->GetStartTime();
-									break;
-							}
+					int32 starttime = 0; 
+					PTimerList::iterator c,e;
+					c = p_timers.begin();
+					e = p_timers.end();
+					for(; c != e; ++c) {
+						PersistentTimer *cur = c->second;
+						if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
+							continue;	//not an AA timer
+						else if(cur->GetType() + pTimerAAStart == aa2->id)
+						{
+							starttime = cur->GetStartTime();
+							break;
 						}
-						uaaout->begin = starttime;
-						uaaout->end = static_cast<uint32>(time(nullptr));
-						uaaout->ability = zone->EmuToEQMacAA(aa2->id);
-						QueuePacket(outapp);
-						_log(ZONE__INIT, "Sending out timer for AA: %i. Timer start: %i Timer end: %i Recast Time: %i", uaaout->ability, uaaout->begin, uaaout->end, aa2->spell_refresh);
 					}
+					uaaout->begin = starttime;
+					uaaout->end = static_cast<uint32>(time(nullptr));
+					uaaout->ability = zone->EmuToEQMacAA(aa2->id);
+					QueuePacket(outapp);
+					_log(ZONE__INIT, "Sending out timer for AA: %i. Timer start: %i Timer end: %i Recast Time: %i", uaaout->ability, uaaout->begin, uaaout->end, aa2->spell_refresh);
 				}
 			}
 		}
@@ -1169,11 +1165,11 @@ void Client::SendAATable() {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(OldAATable_Struct));
 
 		OldAATable_Struct* aa2 = (OldAATable_Struct *)outapp->pBuffer;
-		aa2->unknown = 1;
+		aa2->unknown = GetAAPointsSpent();
 
+		//EQMac's AAs have to be in order based on its IDs, not EQEmu's
 		uint8 macaaid = 0;
 		for(uint32 i=0;i < 226;i++,macaaid = 0){
-		
 			if(aa[i]->AA > 0)
 				macaaid = zone->EmuToEQMacAA(aa[i]->AA);
 			if(macaaid > 0)

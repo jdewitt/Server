@@ -479,7 +479,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
 
 			char* packet_dump = "unhandled_packets.txt";
-			FilePrint(packet_dump,buffer);
 			FileDumpPacketHex(packet_dump, app);
 
 			if(app->size < 1000)
@@ -766,14 +765,13 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	//This is sent again.
-	if(GetLevel() >= 51)
-	{
-		//Again, this may be using a bad struct. Maybe why AAs aren't working. 
-		SendAAStats();
-	}
 
-	//EQMac MSG_SET_AVATAR is sent.
+	if(GetClientVersion() == EQClientMac)
+	{
+		outapp = new EQApplicationPacket(OP_ZoneInAvatarSet,1);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 
 	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
 	ZoneInSendName_Struct* zonesendname=(ZoneInSendName_Struct*)outapp->pBuffer;
@@ -9563,6 +9561,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			if(pps->aa_array[r].AA > 0)
 			{
 				pps->aa_array[r].AA = zone->EmuToEQMacAA(pps->aa_array[r].AA);
+				pps->aa_array[r].value = pps->aa_array[r].value*16;
 			}
 		}
 		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
@@ -9932,8 +9931,11 @@ void Client::CompleteConnect()
 	//sends appearances for all mobs not doing anim_stand aka sitting, looting, playing dead
 	entity_list.SendZoneAppearance(this);
 
-	//sends the Nimbus particle effects (up to 3) for any mob using them
-	entity_list.SendNimbusEffects(this);
+	if(GetClientVersion() > EQClientMac)
+	{
+		//sends the Nimbus particle effects (up to 3) for any mob using them
+		entity_list.SendNimbusEffects(this);
+	}
 
 	entity_list.SendUntargetable(this);
 
@@ -9951,17 +9953,20 @@ void Client::CompleteConnect()
 
 	zoneinpacket_timer.Start();
 
-	if(GetPet()){
+	if(GetPet() && GetClientVersion() > EQClientMac){
 		GetPet()->SendPetBuffsToClient();
 	}
 
 	if(GetGroup())
 		database.RefreshGroupFromDB(this);
 
-	if(RuleB(TaskSystem, EnableTaskSystem))
-		TaskPeriodic_Timer.Start();
-	else
-		TaskPeriodic_Timer.Disable();
+	if(GetClientVersion() > EQClientMac)
+	{
+		if(RuleB(TaskSystem, EnableTaskSystem))
+			TaskPeriodic_Timer.Start();
+		else
+			TaskPeriodic_Timer.Disable();
+	}
 
 	conn_state = ClientConnectFinished;
 
@@ -9977,7 +9982,10 @@ void Client::CompleteConnect()
 
 	TotalKarma = database.GetKarma(AccountID());
 
-	SendDisciplineTimers();
+	if(GetClientVersion() > EQClientMac)
+	{
+		SendDisciplineTimers();
+	}
 
 	parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 
@@ -9985,7 +9993,7 @@ void Client::CompleteConnect()
 	if(firstlogon == 1)
 		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
 
-	if(zone)
+	if(zone && GetClientVersion() > EQClientMac)
 	{
 		if(zone->GetInstanceTimer())
 		{
@@ -10018,16 +10026,19 @@ void Client::CompleteConnect()
 	}
 
 	SendRewards();
-	SendAltCurrencies();
-	database.LoadAltCurrencyValues(CharacterID(), alternate_currency);
-	SendAlternateCurrencyValues();
-	alternate_currency_loaded = true;
-	ProcessAlternateCurrencyQueue();
+	if(GetClientVersion() > EQClientMac)
+	{
+		SendAltCurrencies();
+		database.LoadAltCurrencyValues(CharacterID(), alternate_currency);
+		SendAlternateCurrencyValues();
+		alternate_currency_loaded = true;
+		ProcessAlternateCurrencyQueue();
+	}
 
 	CalcItemScale();
 	DoItemEnterZone();
 
-	if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
+	if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks && GetClientVersion() > EQClientMac)
 		GuildBanks->SendGuildBank(this);
 
 	if(GetClientVersion() >= EQClientSoD)
@@ -10039,19 +10050,22 @@ void Client::CompleteConnect()
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
-	/** Request adventure info **/
-	ServerPacket *pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
-	strcpy((char*)pack->pBuffer, GetName());
-	worldserver.SendPacket(pack);
-	delete pack;
-
-	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
+	if(GetClientVersion() > EQClientMac)
 	{
-		EQApplicationPacket *outapp = MakeBuffsPacket(false);
-		CastToClient()->FastQueuePacket(&outapp);
-	}
+		/** Request adventure info **/
+		ServerPacket *pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
+		strcpy((char*)pack->pBuffer, GetName());
+		worldserver.SendPacket(pack);
+		delete pack;
 
-	entity_list.RefreshClientXTargets(this);
+		if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
+		{
+			EQApplicationPacket *outapp = MakeBuffsPacket(false);
+			CastToClient()->FastQueuePacket(&outapp);
+		}
+
+		entity_list.RefreshClientXTargets(this);
+	}
 }
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
@@ -14272,13 +14286,36 @@ void Client::Handle_OP_Action(const EQApplicationPacket *app) {
 
 void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
-	InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
-	ic->messageid = 393;
-	ic->spawnid = GetID();
-	strcpy(ic->message, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	char* packet_dump = "Disc.txt";
+	FileDumpPacketHex(packet_dump, app);
+
+	bool message = true;
+	if(GetClientVersion() == EQClientMac)
+	{
+		ClientDiscipline_Struct* cds = (ClientDiscipline_Struct*)app;
+
+		int32 target;
+		if(GetTarget() && GetTarget()->IsClient())
+			target = GetTarget()->GetID();
+		else
+			target = GetID();
+		if(cds->disc_id > 0)
+		{
+			UseDiscipline(cds->disc_id,target);
+			message = false;
+		}
+	}
+
+	if(GetClientVersion() > EQClientMac || message == true)
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
+		ic->messageid = 393;
+		ic->spawnid = GetID();
+		strcpy(ic->message, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)

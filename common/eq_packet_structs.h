@@ -737,6 +737,11 @@ struct Disciplines_Struct {
 	uint32 values[MAX_PP_DISCIPLINES];
 };
 
+struct ClientDiscipline_Struct {
+    uint8	disc_id;	// There are only a few discs < 60
+    uint8	unknown3[3];	// Which leaves room for ??
+};
+
 static const uint32 TRIBUTE_SLOT_START = 400;
 static const uint32 MAX_PLAYER_TRIBUTES = 5;
 static const uint32 MAX_PLAYER_BANDOLIER = 4;

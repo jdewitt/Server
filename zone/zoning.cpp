@@ -36,11 +36,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	// This block is necessary to clean up any bot objects owned by a Client
 	Bot::ProcessClientZoneChange(this);
 #endif
-
-	
-	char* packet_dump = "ZoneChange.txt";
-	FileDumpPacketHex(packet_dump, app);
-
 	zoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Wrong size: OP_ZoneChange, size=%d, expected %d", app->size, sizeof(ZoneChange_Struct));

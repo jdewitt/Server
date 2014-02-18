@@ -578,14 +578,18 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return(false);
 	}
 
-	//make sure we have the spell...
-	int r;
-	for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
-		if(m_pp.disciplines.values[r] == spell_id)
-			break;
+	//EQMac can assume we have all discs if we are here.
+	if(GetClientVersion() > EQClientMac)
+	{
+		//make sure we have the spell...
+		int r;
+		for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
+			if(m_pp.disciplines.values[r] == spell_id)
+				break;
+		}
+		if(r == MAX_PP_DISCIPLINES)
+			return(false);	//not found.
 	}
-	if(r == MAX_PP_DISCIPLINES)
-		return(false);	//not found.
 
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spells[spell_id].EndurTimerIndex;

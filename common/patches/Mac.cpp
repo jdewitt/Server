@@ -104,7 +104,6 @@ const EQClientVersion Strategy::ClientVersion() const
 	return EQClientMac;
 }
 
-
 DECODE(OP_SendLoginInfo) {
 	DECODE_LENGTH_EXACT(structs::LoginInfo_Struct);
 	SETUP_DIRECT_DECODE(LoginInfo_Struct, structs::LoginInfo_Struct);
@@ -227,7 +226,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(eyecolor1);
 	OUT(eyecolor2);
 	OUT(hairstyle);
-	eq->beard_t = emu->beard;
+	OUT(beard);
 	eq->trainingpoints = emu->points;
 	OUT(mana);
 	OUT(cur_hp);
@@ -282,7 +281,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT_array(languages, 26);
 	OUT(x);
 	OUT(y);
-	//eq->z=emu->z/10;
 	OUT(z);
 	OUT(heading);
 	OUT(platinum_bank);
@@ -301,6 +299,9 @@ ENCODE(OP_PlayerProfile) {
 	}
 	for(r = 0; r < 6; r++) {
 		OUT_str(groupMembers[r]);
+	}
+	for(r = 0; r < 9; r++) {
+		OUT(item_material[r]);
 	}
 	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
 
@@ -2028,7 +2029,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	eq->NPC = emu->NPC;
 	eq->invis = emu->invis;
 	eq->cur_hp = emu->curHp;
-	
 	eq->x_pos = (int16)emu->x;
 	eq->y_pos = (int16)emu->y;
 	eq->animation = emu->animation;

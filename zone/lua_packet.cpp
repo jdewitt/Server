@@ -641,7 +641,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("PurchaseLeadershipAA", static_cast<int>(OP_PurchaseLeadershipAA)),
 			luabind::value("UpdateLeadershipAA", static_cast<int>(OP_UpdateLeadershipAA)),
 			luabind::value("AdventurePointsUpdate", static_cast<int>(OP_AdventurePointsUpdate)),
-			luabind::value("ZoneInUnknown", static_cast<int>(OP_ZoneInUnknown)),
+			luabind::value("ZoneInAvatarSet", static_cast<int>(OP_ZoneInAvatarSet)),
 			luabind::value("ZoneServerReady	", static_cast<int>(OP_ZoneServerReady	)),
 			luabind::value("SendTitleList", static_cast<int>(OP_SendTitleList)),
 			luabind::value("NewTitlesAvailable", static_cast<int>(OP_NewTitlesAvailable)),
