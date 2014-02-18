@@ -586,6 +586,8 @@ public:
 	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect); 
 	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
+	void MeleeLifeTap(int32 damage);
+	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -877,7 +879,7 @@ protected:
 	bool IsFullHP;
 	bool moved;
 
-	std::vector<std::string> RampageArray;
+	std::vector<uint16> RampageArray;
 	std::map<std::string, std::string> m_EntityVariables;
 
 	int16 SkillDmgTaken_Mod[HIGHEST_SKILL+2];
