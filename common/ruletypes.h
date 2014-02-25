@@ -311,8 +311,8 @@ RULE_INT ( Combat, ClientBaseCritChance, 0 ) //The base crit chance for all clie
 RULE_BOOL ( Combat, UseIntervalAC, true)
 RULE_INT ( Combat, PetAttackMagicLevel, 30)
 RULE_BOOL ( Combat, EnableFearPathing, true)
-RULE_INT ( Combat, FleeHPRatio, 25)
-RULE_INT ( Combat, FleeSnareHPRatio, 11) // HP at which snare will halt movement of a fleeing NPC.
+RULE_INT ( Combat, FleeHPRatio, 25)	  //HP % when a NPC starts to flee.
+RULE_REAL ( Combat, FleeMultiplier, 3.0) // Determines how quickly a NPC will slow down while fleeing. Decrease multiplier to slow NPC down quicker.
 RULE_BOOL ( Combat, FleeIfNotAlone, false) // If false, mobs won't flee if other mobs are in combat with it.
 RULE_BOOL ( Combat, AdjustProcPerMinute, true)
 RULE_REAL ( Combat, AvgProcsPerMinute, 2.0)

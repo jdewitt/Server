@@ -216,6 +216,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	roambox_min_y = -2;
 	roambox_movingto_x = -2;
 	roambox_movingto_y = -2;
+	roambox_min_delay = 1000;
 	roambox_delay = 1000;
 	org_heading = heading;
 	p_depop = false;

@@ -4768,11 +4768,19 @@ void Client::BuryPlayerCorpses()
 
 void Client::NotifyNewTitlesAvailable()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_NewTitlesAvailable, 0);
+	if(GetClientVersion() == EQClientMac)
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitle, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 
-	QueuePacket(outapp);
-
-	safe_delete(outapp);
+	else
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_NewTitlesAvailable, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 
 }
 

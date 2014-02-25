@@ -9,6 +9,7 @@
 #include "SoD.h"
 #include "RoF.h"
 #include "Mac.h"
+#include "Evolution.h"
 
 void RegisterAllPatches(EQStreamIdentifier &into) {
 	Client62::Register(into);
@@ -18,6 +19,7 @@ void RegisterAllPatches(EQStreamIdentifier &into) {
 	Underfoot::Register(into);
 	RoF::Register(into);
 	Mac::Register(into);
+	Evolution::Register(into);
 
 }
 
@@ -29,5 +31,6 @@ void ReloadAllPatches() {
 	Underfoot::Reload();
 	RoF::Reload();
 	Mac::Reload();
+	Evolution::Reload();
 }
 

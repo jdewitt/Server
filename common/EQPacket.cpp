@@ -523,7 +523,7 @@ EQOldPacket::EQOldPacket()
 // deletes pExtra
 EQOldPacket::~EQOldPacket()
 {
-	_log(NET__DEBUG, "Killing old packet"); 
+	//_log(NET__DEBUG, "Killing old packet"); 
 	if (pExtra)
 	{
 		safe_delete(pExtra);//delete pExtra;

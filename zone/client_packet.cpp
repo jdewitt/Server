@@ -177,7 +177,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_DeleteSpawn] = &Client::Handle_OP_DeleteSpawn;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
-	ConnectedOpcodes[OP_Save2] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_GMZoneRequest] = &Client::Handle_OP_GMZoneRequest;
 	ConnectedOpcodes[OP_GMZoneRequest2] = &Client::Handle_OP_GMZoneRequest2;
@@ -476,7 +475,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 #if (EQDEBUG >= 10)
 			char buffer[64];
 			app->build_header_dump(buffer);
-			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
+			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: 0x%x", buffer);
 
 			char* packet_dump = "unhandled_packets.txt";
 			FileDumpPacketHex(packet_dump, app);

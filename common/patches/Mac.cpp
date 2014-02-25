@@ -1570,17 +1570,6 @@ ENCODE(OP_RequestClientZoneChange){
 	FINISH_ENCODE();
 }
 
-//Just using OP_RequestClientZoneChange to keep the zoning code as stock as possible.
-ENCODE(OP_ZonePlayerToBind){
-	SETUP_DIRECT_ENCODE(ZonePlayerToBind_Struct, structs::RequestClientZoneChange_Struct);
-	eq->zone_id = emu->bind_zone_id;
-	OUT(x);
-	OUT(y);
-	OUT(z);
-	OUT(heading);
-	FINISH_ENCODE();
-}
-
 ENCODE(OP_Trader) {
 
 	if((*p)->size == sizeof(Trader_Struct)) {

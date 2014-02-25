@@ -19,6 +19,7 @@ static const uint32 BIT_AllClients = 0xFFFFFFFF;
 typedef enum {
 	EQClientUnknown = 0,
 	EQClientMac,
+	EQClientEvolution,
 	EQClient62,
 	EQClientTitanium,
 	EQClientSoF,

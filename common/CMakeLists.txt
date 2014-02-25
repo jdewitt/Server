@@ -72,6 +72,7 @@ SET(common_sources
 	patches/Titanium.cpp
 	patches/Underfoot.cpp
 	patches/Mac.cpp
+	patches/Evolution.cpp
 	SocketLib/Base64.cpp
 	SocketLib/File.cpp
 	SocketLib/HttpdCookies.cpp
@@ -202,6 +203,9 @@ SET(common_headers
 	patches/Mac.h
 	patches/Mac_structs.h
 	patches/Mac_ops.h
+	patches/Evolution.h
+	patches/Evolution_structs.h
+	patches/Evolution_ops.h
 	patches/SSDeclare.h
 	patches/SSDefine.h
 	patches/SSRegister.h
@@ -275,6 +279,10 @@ SOURCE_GROUP(Patches FILES
 	patches/Mac.h
 	patches/Mac_ops.h
 	patches/Mac_structs.h
+	patches/Evolution.cpp
+	patches/Evolution.h
+	patches/Evolution_structs.h
+	patches/Evolution_ops.h
 )
 
 SOURCE_GROUP(SocketLib FILES

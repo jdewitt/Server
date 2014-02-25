@@ -1886,7 +1886,8 @@ bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
 	else 
 	{
 		EQRawApplicationPacket *app = new EQRawApplicationPacket(pack->dwOpCode ,pack->pExtra, pack->dwExtraSize);   
-		_log(NET__DEBUG, "Received old opcode - 0x%x", app->GetRawOpcode());
+		if(app->GetRawOpcode() != 62272 && (app->GetRawOpcode() != 0 || app->Size() > 2)) //ClientUpdate
+			_log(NET__DEBUG, "Received old opcode - 0x%x size: %i", app->GetRawOpcode(), app->Size());
 		OutQueue.push(app);
 		return true;
 	}
@@ -2260,7 +2261,8 @@ void EQOldStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 	}
 	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, pack->pBuffer, pack->size);
 
-	_log(NET__DEBUG, "Sending old opcode 0x%x", opcode);
+	if(pack->emu_opcode != OP_MobUpdate && pack->emu_opcode != OP_MobHealth && pack->emu_opcode != OP_HPUpdate)
+		_log(NET__DEBUG, "Sending old opcode 0x%x", opcode);
 	MakeEQPacket(pack2, ack_req);
 	delete pack;
 	delete pack2;
