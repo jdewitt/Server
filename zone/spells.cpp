@@ -461,8 +461,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if (IsAIControlled())
 	{
 		SetRunAnimSpeed(0);
-		if(this != pMob)
-			this->FaceTarget(pMob);
+		pMob = entity_list.GetMob(target_id);
+		if (pMob && this != pMob)
+			FaceTarget(pMob);
 	}
 
 	// if we got here we didn't fizzle, and are starting our cast
@@ -2954,8 +2955,11 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].numhits = spells[spell_id].numhits;
 	buffs[emptyslot].client = caster ? caster->IsClient() : 0;
 	buffs[emptyslot].persistant_buff = 0;
-	buffs[emptyslot].deathsaveCasterAARank = 0;
-	buffs[emptyslot].deathSaveSuccessChance = 0;
+	buffs[emptyslot].caston_x = 0;
+	buffs[emptyslot].caston_y = 0;
+	buffs[emptyslot].caston_z = 0;
+	buffs[emptyslot].dot_rune = 0;
+	buffs[emptyslot].ExtraDIChance = 0;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
@@ -4825,7 +4829,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	return false;
 }
 
-bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
+bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id) {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
 
@@ -4835,7 +4839,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 			if (PermaProcs[i].spellID == SPELL_UNKNOWN) {
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
-				PermaProcs[i].base_spellID = SPELL_UNKNOWN;
+				PermaProcs[i].base_spellID = base_spell_id;
 				mlog(SPELLS__PROCS, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 
 				return true;
@@ -4847,7 +4851,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
-				SpellProcs[i].base_spellID = SPELL_UNKNOWN;;
+				SpellProcs[i].base_spellID = base_spell_id;;
 				mlog(SPELLS__PROCS, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 				return true;
 			}

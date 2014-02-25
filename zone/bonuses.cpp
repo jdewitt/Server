@@ -1607,12 +1607,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->reflect_chance += effect_value;
 				break;
 
-			case SE_SingingSkill:
-			{
-				if(effect_value > newbon->singingMod)
-					newbon->singingMod = effect_value;
+			case SE_Amplification:
+				newbon->Amplification += effect_value;
 				break;
-			}
 
 			case SE_ChangeAggro:
 				newbon->hatemod += effect_value;
@@ -2239,6 +2236,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 			}
+
+			case SE_MitigateDotDamage:
+			{
+				if (newbon->MitigateDotRune[0] < effect_value){
+					newbon->MitigateDotRune[0] = effect_value;
+					newbon->MitigateDotRune[1] = buffslot;
+				}
+				break;
+			}
 			
 			case SE_ManaAbsorbPercentDamage:
 			{
@@ -2496,12 +2502,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
-			case SE_TriggerOnValueAmount:
+			case SE_TriggerOnReqTarget:
+			case SE_TriggerOnReqCaster:
 				newbon->TriggerOnValueAmount = true;
 				break;
 
 			case SE_DivineAura:
 				newbon->DivineAura = true;
+				break;
+
+			case SE_ImprovedTaunt:
+				if (newbon->ImprovedTaunt[0] < effect_value) {
+					newbon->ImprovedTaunt[0] = effect_value;
+					newbon->ImprovedTaunt[1] = spells[spell_id].base2[i];
+					newbon->ImprovedTaunt[2] = buffslot;
+				}
+				break;
+
+
+			case SE_DistanceRemoval:
+				newbon->DistanceRemoval = true;
 				break;
 
 		}
@@ -3115,10 +3135,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.reflect_chance = effect_value;
 					break;
 
-				case SE_SingingSkill:
-					spellbonuses.singingMod = effect_value;
-					itembonuses.singingMod = effect_value;
-					aabonuses.singingMod = effect_value;
+				case SE_Amplification:
+					spellbonuses.Amplification = effect_value;
+					itembonuses.Amplification = effect_value;
+					aabonuses.Amplification = effect_value;
 					break;
 
 				case SE_ChangeAggro:
@@ -3549,6 +3569,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.MitigateSpellRune[1] = -1;
 					break;
 
+				case SE_MitigateDotDamage:
+					spellbonuses.MitigateDotRune[0] = effect_value;
+					spellbonuses.MitigateDotRune[1] = -1;
+					break;
+
 				case SE_ManaAbsorbPercentDamage:
 					spellbonuses.ManaAbsorbPercentDamage[0] = effect_value;
 					spellbonuses.ManaAbsorbPercentDamage[1] = -1;
@@ -3832,7 +3857,16 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.CriticalMend = effect_value;
 					aabonuses.CriticalMend = effect_value;
 					break;
-			
+
+				case SE_DistanceRemoval:
+					spellbonuses.DistanceRemoval = effect_value;
+					break;
+
+				case SE_ImprovedTaunt:
+					spellbonuses.ImprovedTaunt[0] = effect_value;
+					spellbonuses.ImprovedTaunt[1] = effect_value;
+					spellbonuses.ImprovedTaunt[2] = -1;
+		
 			}
 		}
 	}

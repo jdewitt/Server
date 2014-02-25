@@ -2476,7 +2476,7 @@ void Bot::SaveBuffs() {
 
 			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
 				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"DeathSaveSuccessChance, CasterAARank, Persistent) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
 				GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
 				buffs[BuffCount].ticsremaining,
 				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
@@ -2484,8 +2484,12 @@ void Bot::SaveBuffs() {
 				CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
-				buffs[BuffCount].deathSaveSuccessChance,
-				buffs[BuffCount].deathsaveCasterAARank, IsPersistent), TempErrorMessageBuffer)) {
+				buffs[BuffCount].dot_rune,
+				buffs[BuffCount].caston_x, 
+				IsPersistent, 
+				buffs[BuffCount].caston_y,
+				buffs[BuffCount].caston_z, 
+				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
 				Query = 0;
@@ -2515,7 +2519,7 @@ void Bot::LoadBuffs() {
 
 	bool BuffsLoaded = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, DeathSaveSuccessChance, CasterAARank, Persistent FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -2541,14 +2545,18 @@ void Bot::LoadBuffs() {
 			buffs[BuffCount].numhits = atoi(DataRow[8]);
 			buffs[BuffCount].melee_rune = atoi(DataRow[9]);
 			buffs[BuffCount].magic_rune = atoi(DataRow[10]);
-			buffs[BuffCount].deathSaveSuccessChance = atoi(DataRow[11]);
-			buffs[BuffCount].deathsaveCasterAARank = atoi(DataRow[12]);
+			buffs[BuffCount].dot_rune = atoi(DataRow[11]);
+			buffs[BuffCount].caston_x = atoi(DataRow[12]);
 			buffs[BuffCount].casterid = 0;
 
 			bool IsPersistent = false;
 
 			if(atoi(DataRow[13]))
 				IsPersistent = true;
+
+			buffs[BuffCount].caston_y = atoi(DataRow[14]);
+			buffs[BuffCount].caston_z = atoi(DataRow[15]);
+			buffs[BuffCount].ExtraDIChance = atoi(DataRow[16]);
 
 			buffs[BuffCount].persistant_buff = IsPersistent;
 
@@ -6818,13 +6826,6 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 					SpellSkill_Found = true;
 			break;
 
-			case SE_LimitSpellSubclass:{
-			int16 spell_skill = spell.skill * -1;
-			if(base1 == spell_skill)
-				LimitFound = true;
-			break;
-			}
-
 			case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(base1, GetClass()))
@@ -7422,13 +7423,6 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 				if(focus_spell.base[i] == spell.skill)
 					SpellSkill_Found = true;
 			break;
-
-		case SE_LimitSpellSubclass:{
-			int16 spell_skill = spell.skill * -1;
-			if(focus_spell.base[i] == spell_skill)
-				return 0;
-			break;
-			}
 
 		case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
@@ -12973,7 +12967,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						pacer->Say("Trying to pacify %s \n", target->GetCleanName());
 
 						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_Calm))
+							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
 							//if(pacer->IsPacified(target))
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 								return;
@@ -12989,7 +12983,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						pacer->Say("Trying to pacify %s \n", target->GetCleanName());
 
 						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_Calm))
+							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
 							//if(pacer->IsPacified(target))
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 								return;
