@@ -128,7 +128,7 @@ void Mob::ProcessFlee() {
 float Mob::GetFearSpeed() {
 	if(flee_mode) {
 		//we know ratio < FLEE_HP_RATIO
-		float speed = GetRunspeed();
+		float speed = GetBaseRunspeed();
 		float ratio = GetHPRatio();
 		float multiplier = RuleR(Combat, FleeMultiplier);
 
@@ -137,8 +137,8 @@ float Mob::GetFearSpeed() {
 
 		speed = speed * ratio * multiplier / 100;
 
-		//NPC will eventually stop. Default rule without snare around 2% HP, with snare around 15% HP.
-		if(speed < 0.1)
+		//NPC will eventually stop. Snares speeds this up.
+		if(speed < 0.09)
 			speed = 0.0001f;
 		
 		return(speed);
