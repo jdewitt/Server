@@ -1631,12 +1631,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Root: %+i", effect_value);
 #endif
 				rooted = true;
-				rooted_mod = 0;
 
 				if (caster){
-					rooted_mod = caster->aabonuses.RootBreakChance +
-								caster->itembonuses.RootBreakChance +
-								caster->spellbonuses.RootBreakChance;
+					buffs[buffslot].RootBreakChance = caster->aabonuses.RootBreakChance + 
+													caster->itembonuses.RootBreakChance +
+													caster->spellbonuses.RootBreakChance;
 				}
 
 				break;
@@ -3230,7 +3229,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				if(caster)
 					effect_value = caster->GetActSpellHealing(spell_id, effect_value);
 
-				HealDamage(effect_value, caster);
+				HealDamage(effect_value, caster, spell_id);
 				//healing aggro would go here; removed for now
 				break;
 			}
@@ -3322,9 +3321,23 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			}
 
 			case SE_Root: {
-				float SpellEffectiveness = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
-				if(SpellEffectiveness < 25) {
-					BuffFadeByEffect(SE_Root);
+				
+				/* Root formula derived from extensive personal live parses - Kayen
+				ROOT has a 40% chance to do a resist check to break.
+				Resist check has NO LOWER bounds.
+				If multiple roots on target. Root in first slot will be checked first to break from nukes.
+				If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+				*/
+
+				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
+				
+					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
+
+					if(resist_check == 100) 
+						break;
+					else
+						if(!TryFadeEffect(slot))
+							BuffFadeBySlot(slot);
 				}
 
 				break;
@@ -3694,8 +3707,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_Root:
 			{
+				buffs[slot].RootBreakChance = 0;
 				rooted = false;
-				rooted_mod = 0;
 				break;
 			}
 

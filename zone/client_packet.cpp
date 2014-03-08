@@ -1682,7 +1682,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	if (shield_target)
 	{
-		entity_list.MessageClose(this,false,100,0,"%s ceases shielding %s.",GetName(),shield_target->GetName());
+		entity_list.MessageClose_StringID(this, false, 100, 0,
+			END_SHIELDING, GetName(), shield_target->GetName());
 		for (int y = 0; y < 2; y++)
 		{
 			if (shield_target->shielder[y].shielder_id == GetID())
@@ -1707,7 +1708,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			{
 				if (shield_target->shielder[x].shielder_id == 0)
 				{
-					entity_list.MessageClose(this,false,100,0,"%s uses their shield to guard %s.",GetName(),shield_target->GetName());
+					entity_list.MessageClose_StringID(this ,false, 100, 0,
+						START_SHIELDING, GetName(), shield_target->GetName());
 					shield_target->shielder[x].shielder_id = GetID();
 					int shieldbonus = shield->AC*2;
 					switch (GetAA(197))
@@ -1744,7 +1746,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	if (!ack)
 	{
-		Message(0, "No more than two warriors may shield the same being.");
+		Message_StringID(0, ALREADY_SHIELDED);
 		shield_target = 0;
 		return;
 	}
@@ -3638,21 +3640,23 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	}
 	if(GetClass() == ROGUE){
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (!auto_attack && entity_list.Fighting(this)) {
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+		msg->color = 0x010E;
+		Mob *evadetar = GetTarget();
+		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
+					&& evadetar->IsNPC())) {
 			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id=343;
-				entity_list.Evade(this);
+				msg->string_id = EVADE_SUCCESS;
+				RogueEvade(evadetar);
 			} else {
-				msg->string_id=344;
+				msg->string_id = EVADE_FAIL;
 			}
 		} else {
 			if (hidden){
-				msg->string_id=346;
+				msg->string_id = HIDE_SUCCESS;
 			}
 			else {
-				msg->string_id=345;
+				msg->string_id = HIDE_FAIL;
 			}
 		}
 		FastQueuePacket(&outapp);
@@ -13079,32 +13083,38 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app) 
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
-		bool found = false;
-		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
-		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
-			MerchantList ml = *itr;
-			if(GetLevel() < ml.level_required) {
-				continue;
+
+		if (RuleB(Merchant, EnableAltCurrencySell))	{
+			bool found = false;
+			std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
+			std::list<MerchantList>::const_iterator itr;
+			for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+				MerchantList ml = *itr;
+				if (GetLevel() < ml.level_required) {
+					continue;
+				}
+
+				int32 fac = tar->GetPrimaryFaction();
+				if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+					continue;
+				}
+
+				item = database.GetItem(ml.item);
+				if (!item)
+					continue;
+
+				if (item->ID == inst->GetItem()->ID) {
+					cost = ml.alt_currency_cost;
+					found = true;
+					break;
+				}
 			}
 
-			int32 fac = tar->GetPrimaryFaction();
-			if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-				continue;
-			}
-
-			item = database.GetItem(ml.item);
-			if(!item)
-				continue;
-
-			if(item->ID == inst->GetItem()->ID) {
-				cost = ml.alt_currency_cost;
-				found = true;
-				break;
+			if (!found) {
+				cost = 0;
 			}
 		}
-
-		if(!found) {
+		else {
 			cost = 0;
 		}
 
@@ -13254,6 +13264,10 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			return;
 		}
 
+		if (!RuleB(Merchant, EnableAltCurrencySell))	{
+			return;
+		}
+
 		const Item_Struct* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
@@ -13276,7 +13290,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			if(!item)
 				continue;
 
-			if(item->ID == inst->GetItem()->ID) {
+			if(item->ID == inst->GetItem()->ID)	{
 				cost = ml.alt_currency_cost;
 				found = true;
 				break;

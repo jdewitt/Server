@@ -123,21 +123,12 @@ void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
 
-	if(GetSwarmInfo()){
-		Mob *swp_o = GetSwarmInfo()->GetOwner();
-		if(!swp_o)
-		{
+	if (GetSwarmInfo()) {
+		if (GetSwarmInfo()->duration->Check(false))
 			Depop();
-		}
-
-		if(GetSwarmInfo()->duration->Check(false))
-		{
-			Depop();
-		}
 
 		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
-		if(GetSwarmInfo()->target != 0)
-		{
+		if (GetSwarmInfo()->target != 0) {
 			if(!targMob || (targMob && targMob->IsCorpse()))
 				Depop();
 		}
@@ -445,7 +436,8 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	casting_spell_resist_adjust = resist_adjust;
 
-	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d", orgcasttime, cast_time, mana_cost);
+	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d",
+			spell_id, cast_time, orgcasttime, mana_cost);
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
@@ -2960,6 +2952,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].caston_z = 0;
 	buffs[emptyslot].dot_rune = 0;
 	buffs[emptyslot].ExtraDIChance = 0;
+	buffs[emptyslot].RootBreakChance = 0;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
@@ -3417,7 +3410,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// not all unresistable, so changing this to only check certain spells
 	if(IsResistableSpell(spell_id))
 	{
-		spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+		if (IsCharmSpell(spell_id))
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust,true);
+		else
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+
 		if(spell_effectiveness < 100)
 		{
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
@@ -4044,7 +4041,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 // pvp_resist_base
 // pvp_resist_calc
 // pvp_resist_cap
-float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck)
+float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick)
 {
 
 	if(!caster)
@@ -4177,16 +4174,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Setup our base resist chance.
-	//Lulls have a slightly higher chance to resist than normal 15/200 or ~ 7.5%
-	int resist_chance;
-	if(IsHarmonySpell(spell_id))
-	{
-		resist_chance = 15;
-	}
-	else
-	{
-		resist_chance = 0;
-	}
+	int resist_chance = 0;
 
 	//Adjust our resist chance based on level modifiers
 	int temp_level_diff = GetLevel() - caster->GetLevel();
@@ -4245,11 +4233,21 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (CharismaCheck)
 	{
-		//For charm chance to break checks, Default 10 CHA = -1 resist mod.
-		int16 cha_resist_modifier = 0;
-		cha_resist_modifier	= caster->GetCHA()/RuleI(Spells, CharismaEffectiveness);
-		resist_modifier -= cha_resist_modifier;
+		//Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+		//'Lull' spells only check charisma if inital cast is resisted to see if mob will aggro, same modifier/cap as above.
+		//Charisma DOES NOT extend charm durations.
+		int16 charisma = caster->GetCHA();
+
+		if (charisma > RuleI(Spells, CharismaEffectivenessCap))
+			charisma = RuleI(Spells, CharismaEffectivenessCap);
+
+		resist_modifier -= charisma/RuleI(Spells, CharismaEffectiveness);
 	}
+
+	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
+	//Regular resists are used when checking if mob will aggro off of a lull resist.
+	if(!CharismaCheck && IsHarmonySpell(spell_id))
+		target_resist = 15;
 
 	//Add our level, resist and -spell resist modifier to our roll chance
 	resist_chance += level_mod;
@@ -4269,6 +4267,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_chance = spells[spell_id].MinResist;
 	}
 
+	//Charm can not have less than 5% chance to fail.
+	if (CharmTick && (resist_chance < 10))
+		resist_chance = 10;
+	
 	//Finally our roll
 	int roll = MakeRandomInt(0, 200);
 	if(roll > resist_chance)

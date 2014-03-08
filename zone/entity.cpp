@@ -1972,6 +1972,24 @@ void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist,
 	}
 }
 
+void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
+		float dist, uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	Client *c;
+	float dist2 = dist * dist;
+
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		c = it->second;
+		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
+			c->FilteredMessage_StringID(sender, type, filter, string_id,
+					message1, message2, message3, message4, message5,
+					message6, message7, message8, message9);
+	}
+}
+
 void EntityList::Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9)
 {
 	Client *c;
@@ -1980,6 +1998,23 @@ void EntityList::Message_StringID(Mob *sender, bool skipsender, uint32 type, uin
 		c = it->second;
 		if(c && (!skipsender || c != sender))
 			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
+	}
+}
+
+void EntityList::FilteredMessage_StringID(Mob *sender, bool skipsender,
+		uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	Client *c;
+
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		c = it->second;
+		if (c && (!skipsender || c != sender))
+			c->FilteredMessage_StringID(sender, type, filter, string_id,
+					message1, message2, message3, message4, message5, message6,
+					message7, message8, message9);
 	}
 }
 
@@ -3046,6 +3081,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 {
 	NPC *cur = nullptr;
 	uint16 count = 0;
+	std::list<NPC *> npc_sub_list;
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		cur = it->second;
@@ -3055,10 +3091,12 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 			continue;
 		}
 		if (!cur->IsMezzed() && !cur->IsStunned() && !cur->IsFeared()) {
+			npc_sub_list.push_back(cur);
 			++count;
 		}
 		++it;
 	}
+
 
 	if (thedam > 1) {
 		if (count > 0)
@@ -3069,32 +3107,26 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 	}
 
 	cur = nullptr;
-	it = npc_list.begin();
-	while (it != npc_list.end()) {
-		cur = it->second;
-		if (!cur->CheckAggro(target)) {
-			++it;
-			continue;
-		}
+	auto sit = npc_sub_list.begin();
+	while (sit != npc_sub_list.end()) {
+		cur = *sit;
 
-		if (!cur->IsMezzed() && !cur->IsStunned() && !cur->IsFeared()) {
-			if (cur->IsPet()) {
-				if (caster) {
-					if (cur->CheckAggro(caster)) {
-						cur->AddToHateList(caster, thedam);
-					}
+		if (cur->IsPet()) {
+			if (caster) {
+				if (cur->CheckAggro(caster)) {
+					cur->AddToHateList(caster, thedam);
 				}
-			} else {
-				if (caster) {
-					if (cur->CheckAggro(caster)) {
-						cur->AddToHateList(caster, thedam);
-					} else {
-						cur->AddToHateList(caster, thedam * 0.33);
-					}
+			}
+		} else {
+			if (caster) {
+				if (cur->CheckAggro(caster)) {
+					cur->AddToHateList(caster, thedam);
+				} else {
+					cur->AddToHateList(caster, thedam * 0.33);
 				}
 			}
 		}
-		++it;
+		++sit;
 	}
 }
 
