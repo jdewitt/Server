@@ -396,10 +396,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			}
 
 			case SE_Succor:
-			{
+			{				
+				
 				float x, y, z, heading;
 				const char *target_zone;
-
+				
 				x = spell.base[1];
 				y = spell.base[0];
 				z = spell.base[2];
@@ -426,6 +427,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient())
 				{
+					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
+
+						if(IsClient()) {
+							CastToClient()->Message_StringID(MT_SpellFailure,SUCCOR_FAIL);
+						}
+						break;
+					}
+
 					// Below are the spellid's for known evac/succor spells that send player
 					// to the current zone's safe points.
 
@@ -441,10 +450,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 						LogFile->write(EQEMuLog::Debug, "Succor/Evacuation Spell In Same Zone.");
 #endif
-						if(IsClient())
-							CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
-						else
-							GMMove(x, y, z, heading);
+							if(IsClient())
+								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
+							else
+								GMMove(x, y, z, heading);
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
@@ -457,7 +466,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				break;
 			}
-			case SE_YetAnotherGate: //Shin: Used on Teleport Bind.
+			case SE_GateCastersBindpoint: //Shin: Used on Teleport Bind.
 			case SE_Teleport:	// gates, rings, circles, etc
 			case SE_Teleport2:
 			{
@@ -489,7 +498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				if (effect == SE_YetAnotherGate && caster->IsClient())
+				if (effect == SE_GateCastersBindpoint && caster->IsClient())
 				{ //Shin: Teleport Bind uses caster's bind point
 					x = caster->CastToClient()->GetBindX();
 					y = caster->CastToClient()->GetBindY();
@@ -830,14 +839,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fear: %+i", effect_value);
 #endif
-				//use resistance value for duration...
-				buffs[buffslot].ticsremaining = ((buffs[buffslot].ticsremaining * partial) / 100);
-
 				if(IsClient())
 				{
 					if(buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter))
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxFearDurationForPlayerCharacter);
 				}
+				
 
 				if(RuleB(Combat, EnableFearPathing)){
 					if(IsClient())
@@ -859,7 +866,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_BindAffinity:
+			case SE_BindAffinity: //TO DO: Add support for secondary and tertiary gate abilities
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Bind Affinity");
@@ -991,13 +998,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Gate:
+			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
 #endif
-				if(!spellbonuses.AntiGate)
-					Gate();
+				if(!spellbonuses.AntiGate){
+
+					if(MakeRandomInt(0, 99) < effect_value)
+						Gate();						
+					else
+						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
+				}
 				break;
 			}
 
@@ -1242,7 +1254,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				effect_value = ApplySpellEffectiveness(caster, spell_id, effect_value);
 				buffs[buffslot].melee_rune = effect_value;
-				SetHasRune(true);
 				break;
 			}
 
@@ -1251,17 +1262,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
-				if(effect_value > 0) {
-				buffs[buffslot].magic_rune = effect_value;
-					SetHasSpellRune(true);
-				}
+				if(effect_value > 0) 
+					buffs[buffslot].magic_rune = effect_value;
+
 				break;
 			}
 
 			case SE_MitigateMeleeDamage:
 			{
-				buffs[buffslot].melee_rune = GetPartialMeleeRuneAmount(spell_id);
-				SetHasPartialMeleeRune(true);
+				buffs[buffslot].melee_rune = spells[spell_id].max[i];
 				break;
 			}
 
@@ -1279,8 +1288,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_MitigateSpellDamage:
 			{
-				buffs[buffslot].magic_rune = GetPartialMagicRuneAmount(spell_id);
-				SetHasPartialSpellRune(true);
+				buffs[buffslot].magic_rune = spells[spell_id].max[i];
 				break;
 			}
 
@@ -1384,7 +1392,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					(
 						spell.base[i],
 						Mob::GetDefaultGender(spell.base[i], GetGender()),
-						spell.base2[i]
+						spell.base2[i],
+						spell.max[i]
 					);
 					if(spell.base[i] == OGRE){
 						SendAppearancePacket(AT_Size, 9);
@@ -1560,8 +1569,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(spell_id == 2488) //Dook- Lifeburn fix
 					break;
 
-				if(IsClient())
-					CastToClient()->SetFeigned(true);
+				if(IsClient()) {
+
+					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
+						CastToClient()->SetFeigned(false);
+						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
+						}
+					else
+						CastToClient()->SetFeigned(true);
+				}
 				break;
 			}
 
@@ -1697,19 +1713,25 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					// Now we should either be casting this on self or its being cast on a valid group member
 					if(TargetClient) {
-						Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
-						if(corpse) {
-							if(TargetClient == this->CastToClient())
-								Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
-							else
-								Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
 
-							corpse->Summon(CastToClient(), true, true);
+						if (TargetClient->GetLevel() <= effect_value){
+
+							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
+							if(corpse) {
+								if(TargetClient == this->CastToClient())
+									Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
+								else
+									Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
+
+								corpse->Summon(CastToClient(), true, true);
+							}
+							else {
+								// No corpse found in the zone
+								Message_StringID(4, CORPSE_CANT_SENSE);
+							}
 						}
-						else {
-							// No corpse found in the zone
-							Message_StringID(4, CORPSE_CANT_SENSE);
-						}
+						else
+							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
@@ -3330,6 +3352,22 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				*/
 
 				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
+				
+					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0,0,0,true);
+
+					if(resist_check == 100) 
+						break;
+					else
+						if(!TryFadeEffect(slot))
+							BuffFadeBySlot(slot);
+				}
+
+				break;
+			}
+
+			case SE_Fear:
+			{
+				if (MakeRandomInt(0, 99) < RuleI(Spells, FearBreakCheckChance)){
 				
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
 

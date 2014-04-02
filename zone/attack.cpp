@@ -91,7 +91,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			case ItemType2HBlunt: // 2H Blunt
 			{
 				skillinuse = Skill2HBlunt;
-				type = anim2HWeapon;
+				type = anim2HSlashing; //anim2HWeapon
 				break;
 			}
 			case ItemType2HPiercing: // 2H Piercing
@@ -140,7 +140,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			}
 			case Skill2HBlunt: // 2H Blunt
 			{
-				type = anim2HWeapon;
+				type = anim2HSlashing; //anim2HWeapon
 				break;
 			}
 			case 99: // 2H Piercing // change to Skill2HPiercing once activated
@@ -1371,6 +1371,9 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		invisible_animals = false;
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(hidden || improved_hidden){
 		hidden = false;
 		improved_hidden = false;
@@ -1983,6 +1986,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(hidden || improved_hidden)
 	{
@@ -3192,7 +3198,6 @@ int32 Mob::ReduceDamage(int32 damage)
 				damage -= damage_to_reduce;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
-				//UpdateRuneFlags();
 			}
 			else
 			{
@@ -3217,7 +3222,6 @@ int32 Mob::ReduceDamage(int32 damage)
 				damage -= damage_to_reduce;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
-				UpdateRuneFlags();
 			}
 			else
 			{
@@ -3225,7 +3229,6 @@ int32 Mob::ReduceDamage(int32 damage)
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
-				UpdateRuneFlags();
 			}
 		}
 	}
@@ -3247,7 +3250,7 @@ int32 Mob::ReduceDamage(int32 damage)
 	if(damage < 1)
 		return -6;
 
-	if (HasRune())
+	if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
 		damage = RuneAbsorb(damage, SE_Rune);
 
 	if(damage < 1)
@@ -3321,7 +3324,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					//UpdateRuneFlags();
 				}
 				else
 				{
@@ -3345,7 +3347,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
 				}
 				else
 				{
@@ -3353,7 +3354,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 						" damage remaining.", damage_to_reduce, buffs[slot].magic_rune);
 					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
 					damage -= damage_to_reduce;
-					UpdateRuneFlags();
 				}
 			}
 		}
@@ -3376,7 +3376,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			return 0;
 
 
-		if (HasSpellRune())
+		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
 
 		if(damage < 1)
@@ -3690,7 +3690,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(spell_id != SPELL_UNKNOWN && !iBuffTic) {
 			//see if root will break
 			if (IsRooted() && !FromDamageShield)  // neotoyko: only spells cancel root
-				TryRootFadeByDamage(buffslot);
+				TryRootFadeByDamage(buffslot, attacker);
 		}
 		else if(spell_id == SPELL_UNKNOWN)
 		{
@@ -4559,34 +4559,43 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 	}
 }
 
-bool Mob::TryRootFadeByDamage(int buffslot)
-{
-	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
-	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
-	There is no distinction of any kind between the caster inflicted damage, or anyone
-	else's damage. There is also no distinction between Direct and DOT damage in the root code.
-	There is however, a provision that if the damage inflicted is greater than 500 per hit, the
-	chance to break root is increased. My guess is when this code was put in place, the devs at
-	the time couldn't imagine DOT damage getting that high.
-	*/
-
-	/* General Mechanics
-	- Check buffslot to make sure damage from a root does not cancel the root
-	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
-	- Only roots on determental spells can be broken by damage.
-	*/
-	
-	if (!spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
-		return false;
-
-	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
-	
-		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
+ 
+ 	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
+ 	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
+ 	There is no distinction of any kind between the caster inflicted damage, or anyone
+ 	else's damage. There is also no distinction between Direct and DOT damage in the root code.
+ 
+ 	/* General Mechanics
+ 	- Check buffslot to make sure damage from a root does not cancel the root
+ 	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
+ 	- Only roots on determental spells can be broken by damage.
+	- Root break chance values obtained from live parses.
+ 	*/
+ 	
+	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
+ 		return false;
+ 
+ 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
+ 	
+ 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
 		
-		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
+ 		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
+		int level_diff = attacker->GetLevel() - GetLevel();
 
-		if (BreakChance < 1)
-			BreakChance = 1;
+		//Use baseline if level difference <= 1 (ie. If target is (1) level less than you, or equal or greater level)
+
+		if (level_diff == 2)
+			BreakChance = (BreakChance * 80) /100; //Decrease by 20%;
+ 
+		else if (level_diff >= 3 && level_diff <= 20)
+			BreakChance = (BreakChance * 60) /100; //Decrease by 40%;
+
+		else if (level_diff > 21)
+			BreakChance = (BreakChance * 20) /100; //Decrease by 80%;
+		
+ 		if (BreakChance < 1)
+ 			BreakChance = 1;
 
 		if (MakeRandomInt(0, 99) < BreakChance) {
 
@@ -4607,9 +4616,10 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	uint32 buff_max = GetMaxTotalSlots();
 	if (type == SE_Rune){
 		for(uint32 slot = 0; slot < buff_max; slot++) {
-			if((buffs[slot].spellid != SPELL_UNKNOWN) && (buffs[slot].melee_rune) && IsEffectInSpell(buffs[slot].spellid, type)){
+			if(slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 melee_rune_left = buffs[slot].melee_rune;
-				if(melee_rune_left >= damage)
+				
+				if(melee_rune_left > damage)
 				{
 					melee_rune_left -= damage;
 					buffs[slot].melee_rune = melee_rune_left;
@@ -4620,22 +4630,20 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 				{
 					if(melee_rune_left > 0)
 						damage -= melee_rune_left;
+						
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
-					continue;
 				}
 			}
 		}
-		return damage;
 	}
 
-
+		
 	else{
 		for(uint32 slot = 0; slot < buff_max; slot++) {
-			if((buffs[slot].spellid != SPELL_UNKNOWN) && (buffs[slot].magic_rune) && IsEffectInSpell(buffs[slot].spellid, type)){
+			if(slot == spellbonuses.AbsorbMagicAtt[1] && spellbonuses.AbsorbMagicAtt[0] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 magic_rune_left = buffs[slot].magic_rune;
-				if(magic_rune_left >= damage)
+				if(magic_rune_left > damage)
 				{
 					magic_rune_left -= damage;
 					buffs[slot].magic_rune = magic_rune_left;
@@ -4646,14 +4654,14 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 				{
 					if(magic_rune_left > 0)
 						damage -= magic_rune_left;
+					
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
-					continue;
 				}
 			}
 		}
-		return damage;
 	}
+
+	return damage;
 }
 

@@ -1358,16 +1358,27 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_AttackSpeed2:
 			{
 				if ((effect_value - 100) > 0) { // Haste V2 - Stacks with V1 but does not Overcap
+					if (newbon->hastetype2 < 0) break; //Slowed - Don't apply haste2
 					if ((effect_value - 100) > newbon->hastetype2) {
 						newbon->hastetype2 = effect_value - 100;
 					}
+				}
+				else if ((effect_value - 100) < 0) { // Slow
+					int real_slow_value = (100 - effect_value) * -1;
+					if (real_slow_value < newbon->hastetype2)
+						newbon->hastetype2 = real_slow_value;
 				}
 				break;
 			}
 
 			case SE_AttackSpeed3:
 			{
-				if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
+				if (effect_value < 0){ //Slow
+					if (effect_value < newbon->hastetype3)
+						newbon->hastetype3 = effect_value;
+				}
+
+				else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
 					if (effect_value > newbon->hastetype3) {
 						newbon->hastetype3 = effect_value;
 					}
@@ -1377,18 +1388,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AttackSpeed4:
 			{
-				if (effect_value > 0) {
+				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
+					effect_value = effect_value * -1;
+
+				if (effect_value > 0 && effect_value > newbon->inhibitmelee) {
+
 					if (slow_mitigation){
 						int new_effect_value = SlowMitigation(false,caster,effect_value);
 						if (new_effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = new_effect_value;
-								SlowMitigation(true,caster);
+							newbon->inhibitmelee = new_effect_value;
+							SlowMitigation(true,caster);
 						}
 					}
+
 					else if (effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = effect_value;
+						newbon->inhibitmelee = effect_value;
 					}
 				}
+			
 				break;
 			}
 
@@ -2538,11 +2555,39 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->Root[0] = 1;
 					newbon->Root[1] = buffslot;
 				}
-				else {
+				else if (!newbon->Root[0]){
 					newbon->Root[0] = 1;
 					newbon->Root[1] = buffslot;
 				}
 				break;
+
+			case SE_Rune:
+
+				if (newbon->MeleeRune[0] && (newbon->MeleeRune[1] > buffslot)){
+
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+				else if (!newbon->MeleeRune[0]){
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+
+				break;
+
+			case SE_AbsorbMagicAtt:
+				if (newbon->AbsorbMagicAtt[0] && (newbon->AbsorbMagicAtt[1] > buffslot)){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
+				}
+				else if (!newbon->AbsorbMagicAtt[0]){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
+				}
+				break;
+
+			case SE_NegateIfCombat:
+				newbon->NegateIfCombat = true;
 		}
 	}
 }
@@ -3896,7 +3941,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_Root:
 					spellbonuses.Root[0] = effect_value;
 					spellbonuses.Root[1] = -1;
+					break;
 
+				case SE_Rune:
+					spellbonuses.MeleeRune[0] = effect_value;
+					spellbonuses.MeleeRune[1] = -1;
+					break;
+
+				case SE_AbsorbMagicAtt:
+					spellbonuses.AbsorbMagicAtt[0] = effect_value;
+					spellbonuses.AbsorbMagicAtt[1] = -1;
+					break;
+				
 			}
 		}
 	}

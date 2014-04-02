@@ -191,7 +191,7 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
-		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false);
+		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -248,14 +248,6 @@ public:
 	virtual int GetMaxTotalSlots() const { return 0; }
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
-	inline bool HasRune() const { return m_hasRune; }
-	inline bool HasSpellRune() const { return m_hasSpellRune; }
-	inline bool HasPartialMeleeRune() const { return m_hasPartialMeleeRune; }
-	inline bool HasPartialSpellRune() const { return m_hasPartialSpellRune; }
-	inline void SetHasRune(bool hasRune) { m_hasRune = hasRune; }
-	inline void SetHasSpellRune(bool hasSpellRune) { m_hasSpellRune = hasSpellRune; }
-	inline void SetHasPartialMeleeRune(bool hasPartialMeleeRune) { m_hasPartialMeleeRune = hasPartialMeleeRune; }
-	inline void SetHasPartialSpellRune(bool hasPartialSpellRune) { m_hasPartialSpellRune = hasPartialSpellRune; }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
@@ -600,7 +592,7 @@ public:
 	void MeleeLifeTap(int32 damage);
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
-	bool TryRootFadeByDamage(int buffslot);
+	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -992,7 +984,6 @@ protected:
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	VERTEX UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
-	void UpdateRuneFlags();
 
 	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
 
@@ -1191,11 +1182,6 @@ protected:
 	float tar_vz;
 	float test_vector;
 
-	bool m_hasRune;
-	bool m_hasSpellRune;
-	bool m_hasPartialMeleeRune;
-	bool m_hasPartialSpellRune;
-	bool m_hasDeathSaveChance;
 	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
 	int flymode;
 	bool m_targetable;
