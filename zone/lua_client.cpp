@@ -1245,6 +1245,18 @@ void Lua_Client::PlayMP3(std::string file)
 	self->PlayMP3(file.c_str());
 }
 
+int Lua_Client::GetBoatID() 
+{
+	Lua_Safe_Call_Int();
+	return self->GetBoatNPCID();
+}
+
+void Lua_Client::SetBoatID(uint32 in_boatid) 
+{
+	Lua_Safe_Call_Void();
+	self->SetBoatID(in_boatid);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1492,7 +1504,9 @@ luabind::scope lua_register_client() {
 		.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
 		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
-		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3);
+		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
+		.def("GetBoatID", (int(Lua_Client::*)(void))&Lua_Client::GetBoatID)
+		.def("SetBoatID", (void(Lua_Client::*)(int))&Lua_Client::SetBoatID);
 }
 
 luabind::scope lua_register_inventory_where() {

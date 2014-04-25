@@ -976,10 +976,13 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 			{
-				Message(13, "Large warp detected.");
-				char hString[250];
-				sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+				if(GetClientVersion() == EQClientMac && GetBoatNPCID() == 0)
+				{
+					Message(13, "Large warp detected.");
+					char hString[250];
+					sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+					database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+				}
 			}
 			break;
 		case MQWarpShadowStep:
@@ -4739,6 +4742,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 #endif
 	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
+	if(this->BoatNPCID != 0)
+	{
+		InterruptSpell(castspell->spell_id);
+		return;
+	}
+
 	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
 	{
 		//discipline, using the item spell slot
@@ -5229,7 +5238,13 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 
 	Mob* boat = entity_list.GetMob(boatname);
 	if (boat)
+	{
+		this->BuffFadeByEffect(SE_Levitate);
 		this->BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
+		this->BoatNPCID = boat->GetNPCTypeID(); //For EQMac's boat system.
+		strncpy(m_pp.boat,boatname,16);
+		this->Message(0,"I'm on a boat named: %s Its ID is: %i", boatname,this->BoatNPCID);
+	}
 	safe_delete_array(boatname);
 	return;
 }
@@ -5241,7 +5256,10 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0)	// if the client somehow left while still controlling the boat (and the boat isn't attacking them)
 			boat->SetTarget(0);			// fix it to stop later problems
 	}
+	this->Message(0,"I left a boat!");
 	this->BoatID = 0;
+	this->BoatNPCID = 0;
+	m_pp.boat[0] = 0;
 	return;
 }
 
@@ -9629,7 +9647,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	FillSpawnStruct(&sze->player,CastToMob());
 	sze->player.spawn.curHp=1;
 	sze->player.spawn.NPC=0;
-	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 	sze->player.spawn.zoneID = zone->GetZoneID();
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);

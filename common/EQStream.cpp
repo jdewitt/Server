@@ -1632,7 +1632,7 @@ EQOldStream::EQOldStream(sockaddr_in in, int fd_sock)
 	LOG_PACKETS = false;
 	isWriting = false;
 	OpMgr = nullptr;
-	remote_ip = in.sin_addr.S_un.S_addr; 
+	remote_ip = in.sin_addr.s_addr; //in.sin_addr.S_un.S_addr; 
 	remote_port = in.sin_port;
 	packetspending = 0;
 	active_users = 0;

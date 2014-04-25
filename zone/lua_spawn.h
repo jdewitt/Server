@@ -26,6 +26,7 @@ public:
 	}
 
 	void LoadGrid();
+	uint16 GetGrid();
 	void Enable();
 	void Disable();
 	bool Enabled();

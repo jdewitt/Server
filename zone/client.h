@@ -1059,7 +1059,9 @@ public:
 	void Signal(uint32 data);
 	Mob *GetBindSightTarget() { return bind_sight_target; }
 	void SetBindSightTarget(Mob *n) { bind_sight_target = n; }
-	const uint16 GetBoatID() const { return BoatID; }
+	uint16 GetBoatID() const { return BoatID; }
+	uint16 GetBoatNPCID();
+	void SetBoatID(uint32 boatid);
 	void SendRewards();
 	bool TryReward(uint32 claim_id);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
@@ -1331,6 +1333,7 @@ private:
 	bool				berserk;
 	bool				dead;
 	uint16				BoatID;
+	uint16				BoatNPCID;
 	uint16				TrackingID;
 	uint16				CustomerID;
 	uint32				account_creation;

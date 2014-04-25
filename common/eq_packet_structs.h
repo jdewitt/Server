@@ -978,7 +978,7 @@ struct PlayerProfile_Struct
 /*5408*/	uint32				autosplit;			//not used right now
 /*5412*/	uint8				unknown5448[8];
 /*5420*/	uint32				zone_change_count;	// Number of times user has zoned in their career (guessing)
-/*5424*/	uint8				unknown5460[16];	//
+/*5424*/	char				boat[16];	//
 /*5440*/	uint32				drakkin_heritage;	//
 /*5444*/	uint32				drakkin_tattoo;		//
 /*5448*/	uint32				drakkin_details;	//

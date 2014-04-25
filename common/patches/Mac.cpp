@@ -227,7 +227,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(eyecolor2);
 	OUT(hairstyle);
 	OUT(beard);
-	eq->trainingpoints = emu->points;
+	OUT(points);
 	OUT(mana);
 	OUT(cur_hp);
 	OUT(STR);
@@ -290,6 +290,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(level2);
 	OUT(autosplit);
 	eq->current_zone = emu->zone_id;
+	OUT_str(boat);
 	OUT(aapoints);
 	OUT(expAA);
 	OUT(perAA);

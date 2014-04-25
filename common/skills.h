@@ -168,7 +168,7 @@ enum SkillUseTypes : uint32
 };
 
 // temporary until it can be sorted out...
-#define HIGHEST_SKILL	SkillFrenzy
+#define HIGHEST_SKILL	SkillTaunt
 
 // TODO: add string return for skill names
 

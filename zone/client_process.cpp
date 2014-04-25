@@ -1674,10 +1674,26 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		SkillUseTypes sk;
 		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) 
 		{
-			if(sk == SkillTinkering && GetRace() != GNOME) 
-				gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
+			//Only Gnomes can tinker, and Vah Shir can Safe Fall.
+			if((sk == SkillTinkering && GetRace() != GNOME) || (sk == SkillSafeFall && GetRace() != VAHSHIR))
+				gmtrain->skills[sk] = 0;
+			else if((sk == SkillHide || sk == SkillSneak) && GetRace() == HALFLING)
+				gmtrain->skills[sk] = 50;
 			else 
 				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
+
+			//The below is being used for troubleshooting. Don't delete!
+
+			/*if(sk == 0 || sk == 1 || sk == 2 || sk == 3 || sk == 15 || sk == 20 || sk == 22 || sk == 28 || sk == 33 || sk == 36) 
+				gmtrain->skills[sk] = 250;
+			else if(sk == 4 || sk == 5 || sk == 7 || sk == 9 || sk == 13 || sk == 14 || sk == 18 || sk == 19 || sk == 24 || sk == 27 || sk == 31 || sk == 40 || sk == 43 || sk == 44 || sk == 45 || sk == 46 || sk ==47 || sk == 50 || sk == 51 || sk == 53 || sk == 59 || sk == 60 || sk == 61 || sk == 63 || sk == 64 || sk == 65 || sk == 66 || sk == 67 || sk == 68 || sk == 69)
+				gmtrain->skills[sk] = 200;
+			else
+				gmtrain->skills[sk] = 0;
+			if(gmtrain->skills[sk] > 0)
+				_log(CLIENT__ERROR, "Skill: %i has value: %i",sk, gmtrain->skills[sk]);*/
+
+
 		}
 		gmtrain->greed = 1.25; //Todo: Dynamically calculate using faction/charisma
 		gmtrain->unknown208 = 1;
@@ -1685,6 +1701,8 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			gmtrain->language[l] = 201;
 		}
 
+		char* packet_dump = "GM_OUT.txt";
+		FileDumpPacketHex(packet_dump, outapp);
 		FastQueuePacket(&outapp);
 
 		// welcome message

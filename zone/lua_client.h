@@ -276,6 +276,8 @@ public:
 	void SetConsumption(int in_hunger, int in_thirst);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
 	void PlayMP3(std::string file);
+	int GetBoatID();
+	void SetBoatID(uint32 in_boatid);
 };
 
 #endif

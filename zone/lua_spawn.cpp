@@ -12,6 +12,11 @@ void Lua_Spawn::LoadGrid() {
 	self->LoadGrid();
 }
 
+uint16 Lua_Spawn::GetGrid() {
+	Lua_Safe_Call_Int();
+	self->GetGrid();
+}
+
 void Lua_Spawn::Enable() {
 	Lua_Safe_Call_Void();
 	return self->Enable();
@@ -144,6 +149,7 @@ luabind::scope lua_register_spawn() {
 		.property("null", &Lua_Spawn::Null)
 		.property("valid", &Lua_Spawn::Valid)
 		.def("LoadGrid", (void(Lua_Spawn::*)(void))&Lua_Spawn::LoadGrid)
+		.def("GetGrid", (uint16(Lua_Spawn::*)(void))&Lua_Spawn::GetGrid)
 		.def("Enable", (void(Lua_Spawn::*)(void))&Lua_Spawn::Enable)
 		.def("Disable", (void(Lua_Spawn::*)(void))&Lua_Spawn::Disable)
 		.def("Enabled", (bool(Lua_Spawn::*)(void))&Lua_Spawn::Enabled)

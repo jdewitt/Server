@@ -2448,7 +2448,7 @@ struct AA_Array
 };
 
 static const uint32  MAX_PP_AA_ARRAY		= 120;
-static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_SKILL		= 74; // _SkillPacketArraySize;	// 100 - actual skills buffer size
 struct PlayerProfile_Struct
 {
 	#define pp_inventory_size 30
@@ -2470,7 +2470,7 @@ struct PlayerProfile_Struct
 	/*0148*/	uint8	level;				// Player Level
 	/*0149*/	char	levelchar[3];		// ***Placeholder
 	/*0152*/	uint32	exp;				// Current Experience
-	/*0156*/	uint16	trainingpoints;				// Players Points
+	/*0156*/	uint16	points;				// Players Points
 	/*0158*/	uint16	mana;				// Player Mana
 	/*0160*/	uint16	cur_hp;				// Player Health
 	/*0162*/	uint16	status;				
@@ -2516,15 +2516,15 @@ struct PlayerProfile_Struct
 	/*2964*/	uint32	silver_cursor;
 	/*2968*/	uint32	copper_cursor;
 	/*2972*/	uint8	currency[16];	    //Unused currency?
-	/*2988*/	uint16	skills[75];			// Player Skills
-	/*3138*/	uint8	innate[99];
+	/*2988*/	uint16	skills[74];			// Player Skills
+	/*3136*/	uint8	innate[101];
 	/*3237*/    uint16  air_supply;
 	/*3239*/    uint8   texture;
 	/*3240*/	float   height;
 	/*3244*/	float	width;
 	/*3248*/	float   length;
 	/*3252*/	float   view_height;
-	/*3256*/    uint8   boat_name[16];
+	/*3256*/    char    boat[16];
 	/*3272*/    uint8   unknown[76];
 	/*3348*/	uint8	autosplit;
 	/*3349*/	uint8	unknown3449[95];
