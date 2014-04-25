@@ -605,12 +605,8 @@ void SpawnConditionManager::Process() {
 					//this event has been triggered.
 					//execute the event
 					if(!cevent.strict || (cevent.strict && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
-					{
 						ExecEvent(cevent, true);
-						_log(SPAWNS__CONDITIONS, "Event %d: Is ExecEvent. Hour is: %i Next Hour is: %i", cevent.id, tod.hour, cevent.next.hour);
-					}
-					else
-						_log(SPAWNS__CONDITIONS, "Event %d: Is strict and event time has passed. Skipping ExecEvent.", cevent.id);
+
 					//add the period of the event to the trigger time
 					EQTime::AddMinutes(cevent.period, &cevent.next);
 					std::string t;
@@ -942,14 +938,8 @@ void SpawnConditionManager::FindNearestEvent() {
 			//see if this event is before our last nearest
 			if(EQTime::IsTimeBefore(&next_event, &cevent.next)) 
 			{
-		//TimeOfDay_Struct tod;
-		//zone->zone_time.getEQTimeOfDay(&tod);
-
-		//if(!cevent.strict || (cevent.strict && cevent.next.hour >= tod.hour && cevent.next.day >= tod.day && cevent.next.month >= tod.month && cevent.next.year >= tod.year))
-		//{
-					memcpy(&next_event, &cevent.next, sizeof(next_event));
-					next_id = cevent.id;
-		//}
+				memcpy(&next_event, &cevent.next, sizeof(next_event));
+				next_id = cevent.id;
 			}
 		}
 	}
