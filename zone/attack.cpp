@@ -3620,6 +3620,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//fade mez if we are mezzed
 		if (IsMezzed()) {
 			mlog(COMBAT__HITS, "Breaking mez due to attack.");
+			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
+					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
 		}
 
@@ -4090,6 +4092,10 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			}
 		}
 	}
+	//If OneProcPerWeapon is not enabled, we reset the try for that weapon regardless of if we procced or not.
+	//This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
+	if(!RuleB(Combat, OneProcPerWeapon))
+		proced = false;
 
 	if (!proced && inst) {
 		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
@@ -4114,7 +4120,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 						}
 					} else {
 						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-						break;
+						if (RuleB(Combat, OneProcPerWeapon))
+							break;
 					}
 				}
 			}

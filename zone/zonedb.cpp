@@ -1049,6 +1049,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.FR,"
 			"npc_types.PR,"
 			"npc_types.Corrup,"
+			"npc_types.PhR,"
 			"npc_types.mindmg,"
 			"npc_types.maxdmg,"
 			"npc_types.attack_count,"
@@ -1100,7 +1101,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.underwater,"
 			"npc_types.emoteid,"
 			"npc_types.spellscale,"
-			"npc_types.healscale";
+			"npc_types.healscale,"
+			"npc_types.no_target_hotkey";
 
 		MakeAnyLenString(&query, "%s FROM npc_types WHERE id=%d", basic_query, id);
 
@@ -1145,6 +1147,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->FR = atoi(row[r++]);
 				tmpNPCType->PR = atoi(row[r++]);
 				tmpNPCType->Corrup = atoi(row[r++]);
+				tmpNPCType->PhR = atoi(row[r++]);
 				tmpNPCType->min_dmg = atoi(row[r++]);
 				tmpNPCType->max_dmg = atoi(row[r++]);
 				tmpNPCType->attack_count = atoi(row[r++]);
@@ -1191,7 +1194,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF) << 8;
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF);
 				tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
-
+				
 				int i;
 				if (armor_tint_id > 0)
 				{
@@ -1272,7 +1275,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->see_improved_hide = atoi(row[r++])==0?false:true;
 				tmpNPCType->ATK = atoi(row[r++]);
 				tmpNPCType->accuracy_rating = atoi(row[r++]);
-				tmpNPCType->slow_mitigation = atof(row[r++]);
+				tmpNPCType->slow_mitigation = atoi(row[r++]);
 				tmpNPCType->maxlevel = atoi(row[r++]);
 				tmpNPCType->scalerate = atoi(row[r++]);
 				tmpNPCType->private_corpse = atoi(row[r++]) == 1 ? true : false;
@@ -1281,7 +1284,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->emoteid = atoi(row[r++]);
 				tmpNPCType->spellscale = atoi(row[r++]);
 				tmpNPCType->healscale = atoi(row[r++]);
-
+				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
+				
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())

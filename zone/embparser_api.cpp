@@ -1678,7 +1678,7 @@ XS(XS__toggle_spawn_event);
 XS(XS__toggle_spawn_event)
 {
 	dXSARGS;
-	if (items != 3)
+	if (items != 4)
 		Perl_croak(aTHX_ "Usage: toggle_spawn_event(event_id, enabled?, strict, reset_base)");
 
 	uint32	event_id = (int)SvIV(ST(0));

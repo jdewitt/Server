@@ -161,7 +161,7 @@ public:
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsItem = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt);
+		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt, const char *IDFile = nullptr);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
@@ -170,7 +170,7 @@ public:
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
-
+	
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
 	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot);
@@ -192,6 +192,7 @@ public:
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
+	int ResistPhysical(int level_diff, uint8 caster_level);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -222,6 +223,8 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
+	void SpellProjectileEffect();
+	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 
 	//Buff
 	void BuffProcess();
@@ -336,6 +339,7 @@ public:
 	inline virtual int16 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
 	inline virtual int16 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
 	inline virtual int16 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
+	inline virtual int16 GetPhR() const { return PhR; }
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }
@@ -495,6 +499,7 @@ public:
 	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
+	bool IsCombatProc(uint16 spell_id);
 
 	//Logging
 	bool IsLoggingEnabled() const { return(logging_enabled); }
@@ -575,7 +580,7 @@ public:
 	void CastOnCurer(uint32 spell_id);
 	void CastOnCure(uint32 spell_id);
 	void CastOnNumHitFade(uint32 spell_id);
-	int SlowMitigation(bool slow_msg=false, Mob *caster = nullptr,int slow_value = 0);
+	void SlowMitigation(Mob* caster);
 	int16 GetCritDmgMob(uint16 skill);
 	int16 GetMeleeDamageMod_SE(uint16 skill);
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
@@ -593,6 +598,7 @@ public:
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
+	int16 GetSlowMitigation() const {return slow_mitigation;}
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -914,6 +920,7 @@ protected:
 	int16 DR;
 	int16 PR;
 	int16 Corrup;
+	int16 PhR;
 	bool moving;
 	int targeted;
 	bool findable;
@@ -939,6 +946,7 @@ protected:
 	int16 petpower;
 	uint32 follow;
 	uint32 follow_dist;
+	bool no_target_hotkey;
 
 	uint8 gender;
 	uint16 race;
@@ -1016,7 +1024,7 @@ protected:
 	Timer attack_dw_timer;
 	Timer ranged_timer;
 	float attack_speed; //% increase/decrease in attack speed (not haste)
-	float slow_mitigation; // Allows for a slow mitigation based on a % in decimal form. IE, 1 = 100% mitigation, .5 is 50%
+	float slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
 
@@ -1038,6 +1046,12 @@ protected:
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
+
+	Timer projectile_timer;
+	uint32 projectile_spell_id[MAX_SPELL_PROJECTILE];
+	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
+	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
+	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
 
 	float rewind_x;
 	float rewind_y;
