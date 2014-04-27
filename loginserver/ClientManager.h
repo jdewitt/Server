@@ -74,6 +74,8 @@ private:
 	EQStreamFactory *titanium_stream;
 	OpcodeManager *sod_ops;
 	EQStreamFactory *sod_stream;
+	OpcodeManager *old_ops;
+	EQStreamFactory *old_stream;
 };
 
 #endif

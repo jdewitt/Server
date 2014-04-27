@@ -19,12 +19,15 @@
 #include "ErrorLog.h"
 #include "LoginServer.h"
 #include "LoginStructures.h"
+#include "../common/md5.h"
 #include "../common/MiscFunctions.h"
+#include "EQCrypto.h"
 
+extern EQCrypto eq_crypto;
 extern ErrorLog *server_log;
 extern LoginServer server;
 
-Client::Client(EQStream *c, ClientVersion v)
+Client::Client(EQStreamInterface *c, ClientVersion v)
 {
 	connection = c;
 	version = v;
@@ -73,7 +76,21 @@ bool Client::Process()
 					server_log->Log(log_network, "Login received from client.");
 				}
 
-				Handle_Login((const char*)app->pBuffer, app->Size());
+				if(version != cv_old)
+					Handle_Login((const char*)app->pBuffer, app->Size());
+				else
+					Handle_OldLogin((const char*)app->pBuffer, app->Size());
+				break;
+			}
+		case OP_LoginComplete:
+			{
+				Handle_LoginComplete((const char*)app->pBuffer, app->Size());
+				break;
+			}
+		case OP_LoginUnknown1: //Seems to be related to world status in older clients; we use our own logic for that though.
+			{
+				EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginUnknown2, 0);
+				connection->QueuePacket(outapp);
 				break;
 			}
 		case OP_ServerListRequest:
@@ -88,7 +105,7 @@ bool Client::Process()
 			}
 		case OP_PlayEverquestRequest:
 			{
-				if(app->Size() < sizeof(PlayEverquestRequest_Struct))
+				if(app->Size() < sizeof(PlayEverquestRequest_Struct) && version != cv_old)
 				{
 					server_log->Log(log_network_error, "Play received but it is too small, discarding.");
 					break;
@@ -120,18 +137,21 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 		return;
 	}
 
-	if(size < sizeof(unsigned int))
+	if(version != cv_old)
 	{
-		server_log->Log(log_network_error, "Session ready was too small.");
-		return;
-	}
+		if(size < sizeof(unsigned int))
+		{
+			server_log->Log(log_network_error, "Session ready was too small.");
+			return;
+		}
 
-	unsigned int mode = *((unsigned int*)data);
-	if(mode == (unsigned int)lm_from_world)
-	{
-		server_log->Log(log_network, "Session ready indicated logged in from world(unsupported feature), disconnecting.");
-		connection->Close();
-		return;
+		unsigned int mode = *((unsigned int*)data);
+		if(mode == (unsigned int)lm_from_world)
+		{
+			server_log->Log(log_network, "Session ready indicated logged in from world(unsupported feature), disconnecting.");
+			connection->Close();
+			return;
+		}
 	}
 
 	status = cs_waiting_for_login;
@@ -154,7 +174,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 		connection->QueuePacket(outapp);
 		delete outapp;
 	}
-	else
+	else if (version == cv_titanium)
 	{
 		const char *msg = "ChatMessage";
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
@@ -168,6 +188,16 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 			DumpPacket(outapp);
 		}
 
+		connection->QueuePacket(outapp);
+		delete outapp;
+	}
+	else if(version == cv_old)
+	{
+		//Special logic for old streams.
+		char buf[20];
+		strcpy(buf, "12-4-2002 1800");
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SessionReady, strlen(buf) + 1);
+		strcpy((char*) outapp->pBuffer, buf);
 		connection->QueuePacket(outapp);
 		delete outapp;
 	}
@@ -327,6 +357,93 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	}
 }
 
+void Client::FatalError(const char* message) {
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ClientError, strlen(message) + 1);
+	if (strlen(message) > 1) {
+		strcpy((char*)outapp->pBuffer, message);
+	}
+	connection->QueuePacket(outapp);
+	delete outapp;
+	return;
+}
+
+void Client::Handle_LoginComplete(const char* data, unsigned int size) {
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginComplete, 20);
+	outapp->pBuffer[0] = 1;
+	connection->QueuePacket(outapp);
+	delete outapp;
+	return;
+}
+
+
+void Client::Handle_OldLogin(const char* data, unsigned int size)
+{
+	if(status != cs_waiting_for_login)
+	{
+		server_log->Log(log_network_error, "Login received after already having logged in.");
+		return;
+	}
+
+	if (size < sizeof(LoginServerInfo_Struct)) {
+		return;
+	}
+
+	status = cs_logged_in;
+
+	string e_user;
+	string e_hash;
+	char *e_buffer = nullptr;
+	unsigned int d_account_id = 0;
+	string d_pass_hash;
+	uchar eqlogin[40];
+	MD5 md5pass;
+	eq_crypto.DoEQDecrypt((unsigned char*)data, eqlogin, 40);
+	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
+
+	bool result;
+
+	if(server.db->GetLoginDataFromAccountName(lcs->username, d_pass_hash, d_account_id) == false)
+	{
+		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
+		result = false;
+	}
+	else
+	{
+		md5pass.Generate(lcs->password);
+		if(d_pass_hash.compare(string(md5pass)) == 0)
+		{
+			result = true;
+		}
+		else
+		{
+			result = false;
+		}
+	}
+
+	if(result)
+	{
+		server.CM->RemoveExistingClient(d_account_id);
+		in_addr in;
+		in.s_addr = connection->GetRemoteIP();
+		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
+		GenerateKey();
+		account_id = d_account_id;
+		account_name = e_user;
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(SessionId_Struct));
+		SessionId_Struct* s_id = (SessionId_Struct*)outapp->pBuffer;
+		// this is submitted to world server as "username"
+		sprintf(s_id->session_id, "LS#%i", account_id);
+		strcpy(s_id->unused, "unused");
+		s_id->unknown = 4;
+		connection->QueuePacket(outapp);
+		delete outapp;
+	}
+	else
+	{
+		FatalError("Shit didn't happen");
+	}
+}
+
 void Client::Handle_Play(const char* data)
 {
 	if(status != cs_logged_in)
@@ -335,32 +452,57 @@ void Client::Handle_Play(const char* data)
 		return;
 	}
 
-	const PlayEverquestRequest_Struct *play = (const PlayEverquestRequest_Struct*)data;
-	unsigned int server_id_in = (unsigned int)play->ServerNumber;
-	unsigned int sequence_in = (unsigned int)play->Sequence;
-
-	if(server.options.IsTraceOn())
+	if(version == cv_old)
 	{
-		server_log->Log(log_network, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
+		if(data)
+		{
+		server.SM->SendOldUserToWorldRequest(data, account_id);
+		}
 	}
+	else
+	{
+		const PlayEverquestRequest_Struct *play = (const PlayEverquestRequest_Struct*)data;
+		unsigned int server_id_in = (unsigned int)play->ServerNumber;
+		unsigned int sequence_in = (unsigned int)play->Sequence;
 
-	this->play_server_id = (unsigned int)play->ServerNumber;
-	play_sequence_id = sequence_in;
-	play_server_id = server_id_in;
-	server.SM->SendUserToWorldRequest(server_id_in, account_id);
+		if(server.options.IsTraceOn())
+		{
+			server_log->Log(log_network, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
+		}
+
+		this->play_server_id = (unsigned int)play->ServerNumber;
+		play_sequence_id = sequence_in;
+		play_server_id = server_id_in;
+		server.SM->SendUserToWorldRequest(server_id_in, account_id);
+	}
 }
 
 void Client::SendServerListPacket()
 {
-	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
-
-	if(server.options.IsDumpOutPacketsOn())
+	if(version == cv_old)
 	{
-		DumpPacket(outapp);
-	}
+		EQApplicationPacket *outapp = server.SM->CreateOldServerListPacket(this);
 
-	connection->QueuePacket(outapp);
-	delete outapp;
+		if(server.options.IsDumpOutPacketsOn())
+		{
+			DumpPacket(outapp);
+		}
+
+		connection->QueuePacket(outapp);
+		delete outapp;
+	}
+	else
+	{
+		EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
+
+		if(server.options.IsDumpOutPacketsOn())
+		{
+			DumpPacket(outapp);
+		}
+
+		connection->QueuePacket(outapp);
+		delete outapp;
+	}
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)

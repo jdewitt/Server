@@ -6,6 +6,7 @@ SET(eqlogin_sources
 	Config.cpp
 	DatabaseMySQL.cpp
 	DatabasePostgreSQL.cpp
+	EQCrypto.cpp
 	ErrorLog.cpp
 	Main.cpp
 	ServerManager.cpp
@@ -25,6 +26,7 @@ SET(eqlogin_headers
 	DatabaseMySQL.h
 	DatabasePostgreSQL.h
 	Encryption.h
+	EQCrypto.h
 	EQCryptoAPI.h
 	ErrorLog.h
 	LoginServer.h
@@ -43,7 +45,7 @@ ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 
 INSTALL(TARGETS loginserver RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-TARGET_LINK_LIBRARIES(loginserver Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
+TARGET_LINK_LIBRARIES(loginserver Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${OpenSSL_SSL_LIBRARY} ${OpenSSL_LIB_LIBRARY})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(loginserver PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")

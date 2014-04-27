@@ -22,6 +22,7 @@
 #include "../common/timer.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "EQCrypto.h"
 #include "LoginServer.h"
 #include <time.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 TimeoutManager timeout_manager;
 LoginServer server;
 ErrorLog *server_log;
+EQCrypto eq_crypto;
 bool run_server = true;
 
 void CatchSignal(int sig_num)

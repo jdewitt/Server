@@ -143,7 +143,38 @@ bool WorldServer::Process()
 				UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)app->pBuffer;
 				server_log->Log(log_client, "Trying to find client with user id of %u.", utwr->lsaccountid);
 				Client *c = server.CM->GetClient(utwr->lsaccountid);
-				if(c)
+				if(c && c->GetClientVersion() == cv_old)
+				{
+						if(utwr->response > 0)
+						{
+							SendClientAuth(c->GetConnection()->GetRemoteIP(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+						}
+
+						switch(utwr->response)
+						{
+							case 1:
+								break;
+							case 0:
+								c->FatalError("That server is locked.");
+								break;
+							case -1:
+								c->FatalError("You have been suspended from the worldserver.");
+								break;
+							case -2:
+								c->FatalError("You have been banned from the worldserver.");
+								break;
+							case -3:
+								c->FatalError("That server is full.");
+								break;
+						}
+
+						server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
+						EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestRequest, 17);
+						strncpy((char*) &outapp->pBuffer[1], c->GetKey().c_str(), c->GetKey().size());
+
+						c->SendPlayResponse(outapp);
+				}
+				else if(c)
 				{
 					server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
 					EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestResponse, sizeof(PlayEverquestResponse_Struct));

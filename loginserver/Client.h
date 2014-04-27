@@ -32,7 +32,8 @@ using namespace std;
 enum ClientVersion
 {
 	cv_titanium,
-	cv_sod
+	cv_sod,
+	cv_old
 };
 
 enum ClientStatus
@@ -58,7 +59,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(EQStream *c, ClientVersion v);
+	Client(EQStreamInterface *c, ClientVersion v);
 
 	/**
 	* Destructor.
@@ -79,6 +80,21 @@ public:
 	* Verifies login and send a reply.
 	*/
 	void Handle_Login(const char* data, unsigned int size);
+
+	/**
+	* Verifies login and sends a reply for older client cryptos.
+	*/
+	void Handle_OldLogin(const char* data, unsigned int size);
+
+	/**
+	* Not sure what this is, old clients need it to continue.
+	*/
+	void Handle_LoginComplete(const char* data, unsigned int size);
+
+	/**
+	* For all old clients, this disconnects them.
+	*/
+	void FatalError(const char* message);
 
 	/**
 	* Sends a packet to the requested server to see if the client is allowed or not.
@@ -126,11 +142,16 @@ public:
 	unsigned int GetPlaySequence() const { return play_sequence_id; }
 
 	/**
+	* Gets the client version for this client.
+	*/
+	unsigned int GetClientVersion() const { return version; }
+
+	/**
 	* Gets the connection for this client.
 	*/
-	EQStream *GetConnection() { return connection; }
+	EQStreamInterface *GetConnection() { return connection; }
 private:
-	EQStream *connection;
+	EQStreamInterface *connection;
 	ClientVersion version;
 	ClientStatus status;
 

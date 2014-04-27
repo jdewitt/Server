@@ -64,6 +64,27 @@ ClientManager::ClientManager()
 		server_log->Log(log_error, "ClientManager fatal error: couldn't open SoD stream.");
 		run_server = false;
 	}
+
+	int old_port = atoi(server.config->GetVariable("Old", "port").c_str());
+	old_stream = new EQStreamFactory(OldStream, old_port);
+	old_ops = new RegularOpcodeManager;
+	if(!old_ops->LoadOpcodes(server.config->GetVariable("Old", "opcodes").c_str()))
+	{
+		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Old file %s.",
+			server.config->GetVariable("Old", "opcodes").c_str());
+		run_server = false;
+	}
+
+	if(old_stream->Open())
+	{
+		server_log->Log(log_network, "ClientManager listening on Old stream.");
+	}
+	else
+	{
+		server_log->Log(log_error, "ClientManager fatal error: couldn't open Old stream.");
+		run_server = false;
+	}
+
 }
 
 ClientManager::~ClientManager()
@@ -88,6 +109,17 @@ ClientManager::~ClientManager()
 	if(sod_ops)
 	{
 		delete sod_ops;
+	}
+
+	if(old_stream)
+	{
+		old_stream->Close();
+		delete old_stream;
+	}
+
+	if(old_ops)
+	{
+		delete old_ops;
 	}
 }
 
@@ -119,6 +151,18 @@ void ClientManager::Process()
 		clients.push_back(c);
 		cur = sod_stream->Pop();
 	}
+	EQOldStream *oldcur = old_stream->PopOld();
+	while(oldcur)
+	{
+		struct in_addr in;
+		in.s_addr = oldcur->GetRemoteIP();
+		server_log->Log(log_network, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(oldcur->GetRemotePort()));
+
+		oldcur->SetOpcodeManager(&old_ops);
+		Client *c = new Client(oldcur, cv_old);
+		clients.push_back(c);
+		oldcur = old_stream->PopOld();
+	}
 
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
@@ -141,8 +185,8 @@ void ClientManager::ProcessDisconnect()
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
-		EQStream *c = (*iter)->GetConnection();
-		if(c->CheckClosed())
+		EQStreamInterface *c = (*iter)->GetConnection();
+		if(c->CheckState(CLOSED))
 		{
 			server_log->Log(log_network, "Client disconnected from the server, removing client.");
 			delete (*iter);

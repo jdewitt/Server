@@ -29,6 +29,37 @@ struct LoginChatMessage_Struct {
 	char ChatMessage[1];
 };
 
+struct LoginCrypt_struct {
+	char	username[20];
+	char	password[20];
+};
+
+struct SessionId_Struct {
+  char	session_id[10];
+  char	unused[7];
+  int32	unknown; // legends? dunno, seen a 4 here, so gonna use that for now
+};
+
+struct ServerListServerFlags_Struct {
+	int8 greenname;
+	int32 usercount;
+	int8 unknown[8];
+};
+
+struct ServerListEndFlags_Struct {
+	int32 admin;
+	int8 zeroes_a[8];
+	int8 kunark;
+	int8 velious;
+	int8 zeroes_b[11];
+};
+
+
+struct LoginServerInfo_Struct {
+	int8	crypt[40];
+	int8	unknown[0];	// in here is the server name you just logged out of, variable length
+};
+
 struct LoginLoginRequest_Struct {
 	short unknown1;
 	short unknown2;
@@ -75,6 +106,14 @@ struct LoginLoginFailed_Struct {
 	short unknown4;
 	short unknown5;
 	char unknown6[74];
+};
+
+struct ServerList_Struct {
+	int16	numservers;
+	int8	unknown1;
+	int8	unknown2;
+	int8	showusercount; // 0xFF = show numbers, 0x0 = show "UP"
+	uchar	data[0];
 };
 
 struct ServerListHeader_Struct {

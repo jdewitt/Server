@@ -55,9 +55,21 @@ public:
 	void SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id);
 
 	/**
+	* Sends a request to world to see if the client is banned or suspended.
+	*/
+	void SendOldUserToWorldRequest(const char* ServerIP, unsigned int client_account_id);
+
+
+	/**
 	* Creates a server list packet for the client.
 	*/
 	EQApplicationPacket *CreateServerListPacket(Client *c);
+
+	
+	/**
+	* Creates a server list packet for the older client.
+	*/
+	EQApplicationPacket *CreateOldServerListPacket(Client *c);
 
 	/**
 	* Checks to see if there is a server exists with this name, ignoring option.
