@@ -22,6 +22,7 @@
 #include "../common/md5.h"
 #include "../common/MiscFunctions.h"
 #include "EQCrypto.h"
+#include "../common/sha1.h"
 
 extern EQCrypto eq_crypto;
 extern ErrorLog *server_log;
@@ -396,7 +397,8 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	unsigned int d_account_id = 0;
 	string d_pass_hash;
 	uchar eqlogin[40];
-	MD5 md5pass;
+	uchar sha1pass[40];
+	char sha1hash[40];
 	eq_crypto.DoEQDecrypt((unsigned char*)data, eqlogin, 40);
 	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
 
@@ -409,13 +411,16 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		md5pass.Generate(lcs->password);
-		if(d_pass_hash.compare(string(md5pass)) == 0)
+
+		sha1::calc(lcs->password, strlen(lcs->password), sha1pass);
+		sha1::toHexString(sha1pass,sha1hash);
+		if(d_pass_hash.compare((char*)sha1hash) == 0)
 		{
 			result = true;
 		}
 		else
 		{
+			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
 		}
 	}

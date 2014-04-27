@@ -52,6 +52,7 @@ SET(common_sources
 	rdtsc.cpp
 	rulesys.cpp
 	serverinfo.cpp
+	sha1.cpp
 	shareddb.cpp
 	spdat.cpp
     StringUtil.cpp
@@ -168,6 +169,7 @@ SET(common_headers
 	seperator.h
 	serverinfo.h
 	servertalk.h
+	sha1.h
 	shareddb.h
 	skills.h
 	spdat.h
