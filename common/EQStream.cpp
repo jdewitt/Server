@@ -2227,6 +2227,7 @@ void EQOldStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 	uint16 opcode = (*OpMgr)->EmuToEQ(p->emu_opcode);
 	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, p->pBuffer, p->size);
 	MakeEQPacket( pack2, ack_req);
+	delete p;
 	delete pack2;
 	MOutboundQueue.unlock();
 }
