@@ -182,7 +182,8 @@ public:
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
-		bool item_bonus = false, uint32 ticsremaining = 0, int buffslot = -1);
+		bool item_bonus = false, uint32 ticsremaining = 0, int buffslot = -1,
+		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
 	void NegateSpellsBonuses(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false) { return range;}
 	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr) { return value; }
@@ -413,7 +414,7 @@ public:
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
 	void SetFlyMode(uint8 flymode);
-	inline void Teleport(VERTEX NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
+	inline void Teleport(Map::Vertex NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
 		z_pos = NewPosition.z; };
 
 	//AI
@@ -443,7 +444,6 @@ public:
 	void ClearFeignMemory();
 	void PrintHateListToClient(Client *who) { hate_list.PrintToClient(who); }
 	std::list<tHateEntry*>& GetHateList() { return hate_list.GetHateList(); }
-	bool CheckLos(Mob* other);
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	inline void SetChanged() { pLastChange = Timer::GetCurrentTime(); }
@@ -990,7 +990,7 @@ protected:
 	bool HasDied();
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
-	VERTEX UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
+	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 
 	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
@@ -1159,8 +1159,8 @@ protected:
 
 	// Pathing
 	//
-	VERTEX PathingDestination;
-	VERTEX PathingLastPosition;
+	Map::Vertex PathingDestination;
+	Map::Vertex PathingLastPosition;
 	int PathingLoopCount;
 	int PathingLastNodeVisited;
 	std::list<int> Route;
