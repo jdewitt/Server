@@ -199,7 +199,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 
 	haskey = sender->GetInv().HasItem(keyneeded, 1);
 
-	if(haskey != SLOT_INVALID)
+	if(haskey == SLOT_CURSOR)
 	{
 		playerkey = keyneeded;
 	}
