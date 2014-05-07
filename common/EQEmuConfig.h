@@ -80,7 +80,6 @@ public:
 	// From <files/>
 	std::string SpellsFile;
 	std::string OpCodesFile;
-	std::string EQTimeFile;
 	std::string LogSettingsFile;
 
 	// From <directories/>
@@ -164,7 +163,6 @@ protected:
 		// Files
 		SpellsFile="spells_us.txt";
 		OpCodesFile="opcodes.conf";
-		EQTimeFile="eqtime.cfg";
 		LogSettingsFile="log.ini";
 
 		// Dirs
