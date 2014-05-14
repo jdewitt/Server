@@ -71,9 +71,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	stringstream query(stringstream::in | stringstream::out);
-	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '";
-	query << name;
-	query << "'";
+	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << name << "'";
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
@@ -193,7 +191,7 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 	}
 }
 
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email)
+void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason)
 {
 	if(!db)
 	{
@@ -201,14 +199,69 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 	}
 
 	stringstream query(stringstream::in | stringstream::out);
-	query << "REPLACE " << server.options.GetAccountTable() << " SET LoginServerID = ";
-	query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
-	query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
-	query << "', LastIPAddress = '0.0.0.0', LastLoginDate = now()";
+	query << "INSERT INTO " << server.options.GetAccessLogTable() << " SET account_id = " << account_id;
+	query << ", account_name = '" << account_name << "', IP = '" << IP << "', accessed = '" << accessed << "', reason = '" << reason << "'";
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
 		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+	}
+}
+
+void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email, string LastIPAddress)
+{
+	if (!db)
+	{
+		return;
+	}
+	if (email == "PC_generated@server.com")
+	{
+		stringstream query(stringstream::in | stringstream::out);
+		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
+		query << id << ", AccountName = '" << name << "', AccountPassword = '";
+		query << password << "', AccountCreateDate = now(), AccountEmail = '" << email;
+		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
+
+		if (mysql_query(db, query.str().c_str()) != 0)
+		{
+			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		}
+	}
+	else
+	{
+		stringstream query(stringstream::in | stringstream::out);
+		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
+		query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
+		query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
+		query << "', LastIPAddress = '0.0.0.0', LastLoginDate = now()";
+
+		if (mysql_query(db, query.str().c_str()) != 0)
+		{
+			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		}
+	}
+}
+
+void DatabaseMySQL::UpdateLSWorldAccountInfo(unsigned int id, string name, string password, unsigned int lsaccount_id)
+{
+	if (!db)
+	{
+		return;
+	}
+	stringstream query(stringstream::in | stringstream::out);
+	if (server.db->GetLSWorldAccountTable(id, name, password) == true)
+	{
+		server_log->Log(log_database, "User exists, not overwriting. %s", query.str().c_str());
+	}
+	else
+	{
+		query << "INSERT INTO " << server.options.GetWorldAccountTable() << " SET id = ";
+		query << id << ", name = '" << name << "', password = md5('" << password << "'), lsaccount_id = '" << lsaccount_id << "' ";
+
+		if (mysql_query(db, query.str().c_str()) != 0)
+		{
+			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		}
 	}
 }
 

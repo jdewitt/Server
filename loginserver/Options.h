@@ -29,6 +29,9 @@ public:
 	* Constructor, sets the default options.
 	*/
 	Options() :
+		auto_account_create(false),
+		ID_normalization(false),
+		Login_Fails(false),
 		allow_unregistered(true),
 		trace(false),
 		dump_in_packets(false),
@@ -36,6 +39,36 @@ public:
 		encryption_mode(5),
 		local_network("127.0.0.1"),
 		reject_duplicate_servers(false) { }
+
+	/**
+	* Sets allow_auto_account_create.
+	*/
+	inline void AutoCreate(bool b) { auto_account_create = b; }
+
+	/**
+	* Returns the value of auto_account_create.
+	*/
+	inline bool IsCreateOn() const { return auto_account_create; }
+
+	/**
+	* Sets login ID to account ID normalization.
+	*/
+	inline void IDnormals(bool b) { ID_normalization = b; }
+
+	/**
+	* Returns the value of ID_normalization.
+	*/
+	inline bool IsIDnormalsOn() const { return ID_normalization; }
+
+	/**
+	* Sets logging of failed logins.
+	*/
+	inline void LoginFails(bool b) { Login_Fails = b; }
+
+	/**
+	* Returns the value of ID_normalization.
+	*/
+	inline bool IsLoginFailsOn() const { return Login_Fails; }
 
 	/**
 	* Sets allow_unregistered.
@@ -113,9 +146,29 @@ public:
 	inline void AccountTable(std::string t) { account_table = t; }
 
 	/**
+	* Gets access log table.
+	*/
+	inline std::string GetAccessLogTable() const { return access_log_table; }
+
+	/**
+	* Sets access log table.
+	*/
+	inline void AccountAccessLogTable(std::string t) { access_log_table = t; }
+
+	/**
+	* Sets world account table.
+	*/
+	inline void WorldAccountTable(std::string t) { world_account_table = t; }
+
+	/**
 	* Return the value of local_network.
 	*/
 	inline std::string GetAccountTable() const { return account_table; }
+
+	/**
+	* Return the value of local_network.
+	*/
+	inline std::string GetWorldAccountTable() const { return world_account_table; }
 
 	/**
 	* Sets world account table.
@@ -158,6 +211,9 @@ public:
 	inline bool IsRejectingDuplicateServers() { return reject_duplicate_servers; }
 
 private:
+	bool auto_account_create;
+	bool ID_normalization;
+	bool Login_Fails;
 	bool allow_unregistered;
 	bool trace;
 	bool world_trace;
@@ -166,7 +222,9 @@ private:
 	bool reject_duplicate_servers;
 	int encryption_mode;
 	std::string local_network;
+	std::string access_log_table;
 	std::string account_table;
+	std::string world_account_table;
 	std::string world_registration_table;
 	std::string world_admin_registration_table;
 	std::string world_server_type_table;

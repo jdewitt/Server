@@ -60,6 +60,24 @@ int main()
 	server_log->Log(log_debug, "Config System Init.");
 	server.config->Parse("login.ini");
 
+	//Parse auto account creation option.
+	if (server.config->GetVariable("options", "auto_account_create").compare("TRUE") == 0)
+	{
+		server.options.AutoCreate(true);
+	}
+
+	//Parse login ID to account ID normalization option.
+	if (server.config->GetVariable("options", "ID_normalization").compare("TRUE") == 0)
+	{
+		server.options.IDnormals(true);
+	}
+
+	//Parse failed access log option.
+	if (server.config->GetVariable("options", "failed_login_log").compare("TRUE") == 0)
+	{
+		server.options.LoginFails(true);
+	}
+
 	//Parse unregistered allowed option.
 	if(server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
 	{
@@ -115,6 +133,20 @@ int main()
 	if(ln.size() > 0)
 	{
 		server.options.AccountTable(ln);
+	}
+
+	//Parse access log table option.
+	ln = server.config->GetVariable("schema", "access_log_table");
+	if (ln.size() > 0)
+	{
+		server.options.AccountAccessLogTable(ln);
+	}
+
+	//Parse world account table option.
+	ln = server.config->GetVariable("schema", "world_account_table");
+	if (ln.size() > 0)
+	{
+		server.options.WorldAccountTable(ln);
 	}
 
 	//Parse world account table option.
