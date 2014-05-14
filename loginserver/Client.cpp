@@ -24,6 +24,8 @@
 #include "EQCrypto.h"
 #include "../common/sha1.h"
 
+#include "ClientManager.h"
+
 extern EQCrypto eq_crypto;
 extern ErrorLog *server_log;
 extern LoginServer server;
@@ -260,6 +262,24 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
+
+		in_addr in;
+		in.s_addr = connection->GetRemoteIP();
+
+		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
+		{
+			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Account not exist, PC");
+		}
+		if (server.options.IsCreateOn() && server.options.IsLoginFailsOn())
+		{
+			if (server.options.IsLoginFailsOn())
+			{
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Account created, PC");
+			}
+			/*eventually add a unix time stamp calculator from last id in log that matches IP
+			to limit account creations per time specified by an interval set in the ini.*/
+			server.db->UpdateLSAccountInfo(NULL, e_user, e_hash, "PC_generated@server.com", string(inet_ntoa(in)));
+		}
 		result = false;
 	}
 	else
@@ -270,6 +290,12 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		}
 		else
 		{
+			if (server.options.IsLoginFailsOn())
+			{
+				in_addr in;
+				in.s_addr = connection->GetRemoteIP();
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "PC bad password");
+			}
 			result = false;
 		}
 	}
@@ -335,6 +361,10 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		connection->QueuePacket(outapp);
 		delete outapp;
+		if (server.options.IsIDnormalsOn())
+		{
+			server.db->UpdateLSWorldAccountInfo(d_account_id, e_user, e_hash, d_account_id);
+		}
 	}
 	else
 	{
@@ -376,7 +406,6 @@ void Client::Handle_LoginComplete(const char* data, unsigned int size) {
 	return;
 }
 
-
 void Client::Handle_OldLogin(const char* data, unsigned int size)
 {
 	if(status != cs_waiting_for_login)
@@ -407,11 +436,30 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	if(server.db->GetLoginDataFromAccountName(lcs->username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
+
+		in_addr in;
+		in.s_addr = connection->GetRemoteIP();
+
+		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
+		{
+			server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Account not exist, Mac");
+		}
+		if (server.options.IsCreateOn())
+		{
+			if (server.options.IsLoginFailsOn())
+			{
+				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Account created, Mac");
+			}
+			/*eventually add a unix time stamp calculator from last id that matches IP
+			to limit account creations per time specified by an interval set in the ini.*/
+			server.db->UpdateLSAccountInfo(NULL, lcs->username, lcs->password, "MAC_generated@server.com", string(inet_ntoa(in)));
+			FatalError("Account did not exist so it was created. Hit connect again to login.");
+			return;
+		}
 		result = false;
 	}
 	else
 	{
-
 		sha1::calc(lcs->password, strlen(lcs->password), sha1pass);
 		sha1::toHexString(sha1pass,sha1hash);
 		if(d_pass_hash.compare((char*)sha1hash) == 0)
@@ -420,6 +468,12 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		}
 		else
 		{
+			if (server.options.IsLoginFailsOn())
+			{
+				in_addr in;
+				in.s_addr = connection->GetRemoteIP();
+				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Mac bad password");
+			}
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
 		}
@@ -442,6 +496,10 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		s_id->unknown = 4;
 		connection->QueuePacket(outapp);
 		delete outapp;
+		if (server.options.IsIDnormalsOn())
+		{
+			server.db->UpdateLSWorldAccountInfo(account_id, lcs->username, lcs->password, account_id);
+		}
 	}
 	else
 	{

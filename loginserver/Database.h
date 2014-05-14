@@ -45,6 +45,13 @@ public:
 	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id) { return false; }
 
 	/**
+	* Retrieves the login data (password hash and account id) from the account name provided
+	* Needed for client login procedure.
+	* Returns true if the record was found, false otherwise.
+	*/
+	virtual bool GetLSWorldAccountTable(unsigned int &id, std::string name, std::string &password) { return false; }
+
+	/**
 	* Retrieves the world registration from the long and short names provided.
 	* Needed for world login procedure.
 	* Returns true if the record was found, false otherwise.
@@ -58,9 +65,19 @@ public:
 	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address) { }
 
 	/**
+	* Updates or creates the world account with info from the login server
+	*/
+	virtual void UpdateLSWorldAccountInfo(unsigned int id, std::string name, std::string password, unsigned int lsaccount_id) { }
+
+	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email) { }
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string LastIPAddress) { }
+
+	/**
+	* Updates or creates the creation log table
+	*/
+	virtual void UpdateAccessLog(unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason) { }
 
 	/**
 	* Updates the ip address of the world with account id = id

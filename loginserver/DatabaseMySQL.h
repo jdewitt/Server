@@ -73,9 +73,19 @@ public:
 	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address);
 
 	/**
+	* Updates or creates the login server world account with info
+	*/
+	virtual void UpdateLSWorldAccountInfo(unsigned int id, std::string name, std::string password, unsigned int lsaccount_id);
+
+	/**
+	* Updates or creates the access log
+	*/
+	virtual void UpdateAccessLog(unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason);
+
+	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email);
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string LastIPAddress);
 
 	/**
 	* Updates the ip address of the world with account id = id
