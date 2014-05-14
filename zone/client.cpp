@@ -4075,6 +4075,9 @@ void Client::KeyRingLoad()
 
 void Client::KeyRingAdd(uint32 item_id)
 {
+	if(GetClientVersion() == EQClientMac)
+		return;
+
 	if(0==item_id)return;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -4100,6 +4103,9 @@ void Client::KeyRingAdd(uint32 item_id)
 
 bool Client::KeyRingCheck(uint32 item_id)
 {
+	if(GetClientVersion() == EQClientMac)
+		return false;
+
 	for(std::list<uint32>::iterator iter = keyring.begin();
 		iter != keyring.end();
 		++iter)

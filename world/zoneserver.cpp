@@ -963,7 +963,7 @@ bool ZoneServer::Process() {
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zoneserver_list.worldclock.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				zlog(WORLD__ZONE,"New time = %d-%d-%d %d:%d (%d)\n", newtime->start_eqtime.year, newtime->start_eqtime.month, (int)newtime->start_eqtime.day, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.minute, (int)newtime->start_realtime);
-				zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str());
+				database.SaveTime((int)newtime->start_eqtime.minute, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.day, newtime->start_eqtime.month, newtime->start_eqtime.year);
 				zoneserver_list.SendTimeSync();
 				break;
 			}

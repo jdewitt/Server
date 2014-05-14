@@ -2754,7 +2754,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 		}
 		else if (initiator->GetClientVersion() == EQClientMac)
 		{
-			static char itemid[6];
+			static char itemid[7];
 			sprintf(itemid, "%06d", sayid);
 			sprintf(linktext,"%c%c%s%s%s%c",0x12,0x30,itemid,"",LinkName,0x12);
 		}

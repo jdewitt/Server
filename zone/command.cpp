@@ -2831,7 +2831,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 			}
 			else if (c->GetClientVersion() == EQClientMac)
 			{
-				static char itemid[6];
+				static char itemid[7];
 				sprintf(itemid, "%06d", (item==0)?0:item->ID);
 				c->Message((item==0), "WornSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
 					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
@@ -2862,7 +2862,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 			}
 			else if (c->GetClientVersion() == EQClientMac)
 			{
-				static char itemid[6];
+				static char itemid[7];
 				sprintf(itemid, "%06d", (item==0)?0:item->ID);
 				c->Message((item==0), "InvSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
 					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
@@ -2891,7 +2891,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 					}
 					else if (c->GetClientVersion() == EQClientMac)
 					{
-						static char itemid[6];
+						static char itemid[7];
 						sprintf(itemid, "%06d", (item==0)?0:item->ID);
 						c->Message((item==0), "   InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
 							Inventory::CalcSlotId(i, j),
@@ -2959,7 +2959,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 				}
 				else if (c->GetClientVersion() == EQClientMac)
 				{
-					static char itemid[6];
+					static char itemid[7];
 					sprintf(itemid, "%06d", (item==0)?0:item->ID);
 					c->Message((item==0), "CursorSlot: %i, Depth: %i, Item: %i (%c%c%s%s%c), Charges: %i", SLOT_CURSOR,i,
 						((item==0)?0:item->ID),0x12, 0x30,((item==0)?0:itemid),
@@ -2988,7 +2988,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 						}
 						else if (c->GetClientVersion() == EQClientMac)
 						{
-							static char itemid[6];
+							static char itemid[7];
 							sprintf(itemid, "%06d", (item==0)?0:item->ID);
 							c->Message((item==0), "   CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
 								Inventory::CalcSlotId(SLOT_CURSOR, j),
@@ -3049,7 +3049,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 			}
 			else if (c->GetClientVersion() == EQClientMac)
 			{
-				static char itemid[6];
+				static char itemid[7];
 				sprintf(itemid, "%06d", (item==0)?0:item->ID);
 				c->Message((item==0), "BankSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
 				((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
@@ -3078,7 +3078,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 					}
 					else if (c->GetClientVersion() == EQClientMac)
 					{
-						static char itemid[6];
+						static char itemid[7];
 						sprintf(itemid, "%06d", (item==0)?0:item->ID);
 						c->Message((item==0), "   BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
 							Inventory::CalcSlotId(i, j),
@@ -3154,7 +3154,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 			}
 			else if (c->GetClientVersion() == EQClientMac)
 			{
-				static char itemid[6];
+				static char itemid[7];
 				sprintf(itemid, "%06d", (item==0)?0:item->ID);
 				c->Message((item==0), "TradeSlot: %i, Item: %i (%c%c%s%s%c), Charges: %i", i,
 					((item==0)?0:item->ID),0x12, 0x30, ((item==0)?0:itemid),
@@ -3183,7 +3183,7 @@ void command_peekinv(Client *c, const Seperator *sep){
 					}
 					else if (c->GetClientVersion() == EQClientMac)
 					{
-						static char itemid[6];
+						static char itemid[7];
 						sprintf(itemid, "%06d", (item==0)?0:item->ID);
 						c->Message((item==0), "   TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%c%c%s%s%c), Charges: %i",
 							Inventory::CalcSlotId(i, j),
@@ -6006,23 +6006,26 @@ void command_summonitem(Client *c, const Seperator *sep){
 			item_status = static_cast<int16>(item->MinStatus);
 		}
 
+		int16 charges = 0;
+		if(sep->argnum<2 || !sep->IsNumber(2))
+			charges = 0;
+		else
+			charges = atoi(sep->arg[2]);
+
 		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
-		else if (sep->argnum==2 && sep->IsNumber(2)) {
-			c->SummonItem(itemid, atoi(sep->arg[2]) );
-		} else if (sep->argnum==3) {
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]) );
-		} else if (sep->argnum==4)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]) );
+		else if (sep->argnum==3)
+			c->SummonItem(itemid, charges, atoi(sep->arg[3]) );
+		else if (sep->argnum==4)
+			c->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]) );
 		else if (sep->argnum==5)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]) );
+			c->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]) );
 		else if (sep->argnum==6)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]) );
+			c->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]) );
 		else if (sep->argnum==7)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]) );
-		else {
-			c->SummonItem(itemid);
-		}
+			c->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]) );
+		else 
+			c->SummonItem(itemid,charges);
 	}
 }
 
@@ -6042,23 +6045,26 @@ void command_giveitem(Client *c, const Seperator *sep){
 			item_status = static_cast<int16>(item->MinStatus);
 		}
 
+		int16 charges = 0;
+		if(sep->argnum<2 || !sep->IsNumber(2))
+			charges = 0;
+		else
+			charges = atoi(sep->arg[2]);
+
 		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
-		else if (sep->argnum==2 && sep->IsNumber(2)) {
-			t->SummonItem(itemid, atoi(sep->arg[2]) );
-		} else if (sep->argnum==3) {
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]) );
-		} else if (sep->argnum==4)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]) );
+		else if (sep->argnum==3)
+			t->SummonItem(itemid, charges, atoi(sep->arg[3]) );
+		else if (sep->argnum==4)
+			t->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]) );
 		else if (sep->argnum==5)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]) );
+			t->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]) );
 		else if (sep->argnum==6)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]) );
+			t->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]) );
 		else if (sep->argnum==7)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]) );
-		else {
-			t->SummonItem(itemid);
-		}
+			t->SummonItem(itemid, charges, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]) );
+		else
+			t->SummonItem(itemid, charges);
 	}
 }
 
@@ -6100,9 +6106,10 @@ void command_itemsearch(Client *c, const Seperator *sep){
 				}
 				else if (c->GetClientVersion() == EQClientMac)
 				{
-					static char itemid[6];
-					sprintf(itemid, "%06d", (item==0)?0:item->ID);
+					static char itemid[7];
+					sprintf(itemid, "%06d", item->ID);
 					c->Message(0, "  %i: %c%c%s%s%c",(int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
+					//c->Message(0, "%i: %s", (int) item->ID, item->Name);
 				}
 				else
 				{
@@ -6135,9 +6142,10 @@ void command_itemsearch(Client *c, const Seperator *sep){
 				}
 			    else if (c->GetClientVersion() == EQClientMac)
 				{
-					static char itemid[6];
-					sprintf(itemid, "%06d", (item==0)?0:item->ID);
+					static char itemid[7];
+					sprintf(itemid, "%06d", item->ID);
 					c->Message(0, "  %i: %c%c%s%s%c",(int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
+					//c->Message(0, "%i: %s", (int) item->ID, item->Name);
 				}
 				else
 				{
