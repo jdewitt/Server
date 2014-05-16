@@ -1133,6 +1133,17 @@ ENCODE(OP_Stamina)
 {
 	ENCODE_LENGTH_EXACT(Stamina_Struct);
 	SETUP_DIRECT_ENCODE(Stamina_Struct, structs::Stamina_Struct);
+
+	int value = RuleI(Character,ConsumptionValue);
+
+	float tpercent = (float)emu->water/(float)value;
+	float tlevel =  127.0f*tpercent;
+	eq->water = (int8)(tlevel + 0.5);
+
+	float hpercent = (float)emu->food/(float)value;
+	float hlevel =  127.0f*hpercent;
+	eq->food = (int8)(hlevel + 0.5);
+
 	OUT(food);
 	OUT(water);
 	FINISH_ENCODE();

@@ -561,6 +561,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			//TODO: Find a better packet that works with EQMac on death.
 			if(eqs->ClientVersion() == EQClientMac)
 			{
+				_log(EQMAC__LOG, "Zoning packet about to be sent (ZTB). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
 				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
@@ -599,55 +600,27 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			}
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
-			//EQMac's Teleport opcode forces a zone, so use GMGoto for intrazone moves for now.
-			if(eqs->ClientVersion() == EQClientMac && zoneID == GetZoneID())
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
-				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
-
-				strcpy(gmg->charname,this->name);
-				strcpy(gmg->gmname,this->name);
-				gmg->zoneID = zoneID;
-				gmg->x = x;
-				gmg->y = y;
-				gmg->z = z;
-
-				outapp->priority = 6;
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-			}
-			else
-			{
-			
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
-				RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
-
-				gmg->zone_id = zoneID;
-
-				gmg->x = x;
-				gmg->y = y;
-				gmg->z = z;
-				gmg->heading = heading;
-				gmg->instance_id = instance_id;
-				gmg->type = 0x01;				//an observed value, not sure of meaning
-
-				outapp->priority = 6;
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-			}
-		}
-		else if(zm == EvacToSafeCoords) {
+			_log(EQMAC__LOG, "Zoning packet about to be sent (ZS/ZTSC). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
-			// if we are in the same zone we want to evac to, client will not send OP_ZoneChange back to do an actual
-			// zoning of the client, so we have to send a viable zoneid that the client *could* zone to to make it believe
-			// we are leaving the zone, even though we are not. We have to do this because we are missing the correct op code
-			// and struct that should be used for evac/succor.
-			// 213 is Plane of War
-			// 76 is orignial Plane of Hate
-			// WildcardX 27 January 2008. Tested this for 6.2 and Titanium clients.
+			gmg->zone_id = zoneID;
 
+			gmg->x = x;
+			gmg->y = y;
+			gmg->z = z;
+			gmg->heading = heading;
+			gmg->instance_id = instance_id;
+			gmg->type = 0x01;				//an observed value, not sure of meaning
+
+			outapp->priority = 6;
+			FastQueuePacket(&outapp);
+			safe_delete(outapp);
+		}
+		else if(zm == EvacToSafeCoords  || (zm == GateToBindPoint && GetClientVersion() == EQClientMac)) {
+			_log(EQMAC__LOG, "Zoning packet about to be sent (ETSC). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
 			if(this->GetZoneID() == 1)
 				gmg->zone_id = 2;
@@ -672,6 +645,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		}
 		else {
 			if(zoneID == GetZoneID()) {
+				_log(EQMAC__LOG, "Zoning packet about to be sent (GOTO). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
 				//properly handle proximities
 				entity_list.ProcessMove(this, x_pos, y_pos, z_pos);
 				proximity_x = x_pos;
@@ -680,7 +654,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 				//send out updates to people in zone.
 				SendPosition();
-				LogFile->write(EQEMuLog::Error, "Intrazone port.");
 			}
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
@@ -698,7 +671,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 
-		_log(NET__DEBUG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
+		_log(EQMAC__LOG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i and type=%i", GetName(), x, y, z, heading, zoneID, zm);
 		//Clear zonesummon variables if we're zoning to our own zone
 		//Client wont generate a zone change packet to the server in this case so
 		//They aren't needed and it keeps behavior on next zone attempt from being undefined.
@@ -733,6 +706,11 @@ void Mob::Gate() {
 }
 
 void Client::Gate() {
+	if(GetClientVersion() == EQClientMac)
+	{
+		ZoneChange_Struct *zc = new struct ZoneChange_Struct;
+		SendZoneCancel(zc);
+	}
 	Mob::Gate();
 }
 

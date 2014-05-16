@@ -259,7 +259,6 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingTranslocate = false;
 	PendingSacrifice = false;
 	BoatID = 0;
-	BoatNPCID = 0;
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
@@ -8329,58 +8328,10 @@ void Client::Starve()
 	safe_delete(outapp);
 }
 
-uint16 Client::GetBoatNPCID()
-{
-	//If we've zoned, boatid will be 0. Check pp.
-	if(this->BoatNPCID == 0)
-	{
-		int check = m_pp.boat[0];
-		if(check != 0)
-		{
-			LogFile->write(EQEMuLog::Debug, "We're on a boat! %s", m_pp.boat);
-			//If we're here, we're actively on a boat or should be. We need to iterate through and find a boat currently spawned.
-			//Copy boat name and remove numbers
-			char *temp = new char[16];
-			strncpy(temp,m_pp.boat,16);
-			std::string str = temp;
-			char chars[] = "1234567890";
-			for (unsigned int i = 0; i < strlen(chars); ++i)
-			{
-				str.erase (std::remove(str.begin(), str.end(), chars[i]), str.end());
-			}
-
-			//Set base boat name "Boat0"
-			char *baseboatname = strdup(str.c_str());
-			strcat(baseboatname,"0");
-
-			char *boatname = new char[16];
-			for(int r = 0; r < 100; r++) {
-				strncpy(boatname,baseboatname,16);
-
-				//Append final numbers to boat name "Boat001" until we find a valid entity.
-				if(r < 10)
-					strcat(boatname,"0");
-				std::string s = std::to_string(r);
-				char const *number = strdup(s.c_str());
-				strcat(boatname,number);
-
-				Mob* boat = entity_list.GetMob(boatname);
-				if(boat)
-				{
-					LogFile->write(EQEMuLog::Debug, "Boat found! ID is: %i, name in pp is: %s",boat->GetNPCTypeID(), m_pp.boat);
-					this->BoatNPCID = boat->GetNPCTypeID();
-					break;
-				}
-			}
-		}
-	}
-	LogFile->write(EQEMuLog::Debug, "Boat being returned! ID is: %i, name in pp is: %s",this->BoatNPCID, m_pp.boat);
-	return this->BoatNPCID;
-}
 
 void Client::SetBoatID(uint32 boatid)
 {
-	this->BoatNPCID = boatid;
+	m_pp.boatid = boatid;
 }
 
 void Client::ExpeditionSay(const char *str, int ExpID) {

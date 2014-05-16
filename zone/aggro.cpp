@@ -345,7 +345,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			return( mod_will_aggro(mob, this) );
 		}
 	}
-#if EQDEBUG >= 6
+#if EQDEBUG >= 11
 	printf("Is In zone?:%d\n", mob->InZone());
 	printf("Dist^2: %f\n", dist2);
 	printf("Range^2: %f\n", iAggroRange2);

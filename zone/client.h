@@ -1060,7 +1060,8 @@ public:
 	Mob *GetBindSightTarget() { return bind_sight_target; }
 	void SetBindSightTarget(Mob *n) { bind_sight_target = n; }
 	uint16 GetBoatID() const { return BoatID; }
-	uint16 GetBoatNPCID();
+	uint16 GetBoatNPCID() { return m_pp.boatid; }
+	char* GetBoatName() { return m_pp.boat; }
 	void SetBoatID(uint32 boatid);
 	void SendRewards();
 	bool TryReward(uint32 claim_id);
@@ -1334,7 +1335,6 @@ private:
 	bool				berserk;
 	bool				dead;
 	uint16				BoatID;
-	uint16				BoatNPCID;
 	uint16				TrackingID;
 	uint16				CustomerID;
 	uint32				account_creation;

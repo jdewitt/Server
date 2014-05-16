@@ -1022,10 +1022,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
+					if(CastToClient()->GetClientVersion() == EQClientMac)
+						effect_value = 98;
+
 					if(MakeRandomInt(0, 99) < effect_value)
-						Gate();						
+					{
+						Gate();				
+					}
 					else
+					{
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
+						if(CastToClient()->GetClientVersion() == EQClientMac)
+						{
+							ZoneChange_Struct *zc = new struct ZoneChange_Struct;
+							CastToClient()->SendZoneCancel(zc);
+						}
+						_log(EQMAC__LOG, "Gate failed. Wah wah.");
+					}
 				}
 				break;
 			}

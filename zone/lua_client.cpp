@@ -1257,6 +1257,12 @@ void Lua_Client::SetBoatID(uint32 in_boatid)
 	self->SetBoatID(in_boatid);
 }
 
+char* Lua_Client::GetBoatName() 
+{
+	Lua_Safe_Call_Int();
+	return self->GetBoatName();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1506,7 +1512,8 @@ luabind::scope lua_register_client() {
 		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
 		.def("GetBoatID", (int(Lua_Client::*)(void))&Lua_Client::GetBoatID)
-		.def("SetBoatID", (void(Lua_Client::*)(int))&Lua_Client::SetBoatID);
+		.def("SetBoatID", (void(Lua_Client::*)(int))&Lua_Client::SetBoatID)
+		.def("GetBoatName", (char *(Lua_Client::*)(void))&Lua_Client::GetBoatName);
 }
 
 luabind::scope lua_register_inventory_where() {

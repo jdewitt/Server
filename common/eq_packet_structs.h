@@ -976,7 +976,8 @@ struct PlayerProfile_Struct
 /*5396*/	uint32				ability_down;		// Guessing
 /*5400*/	uint8				unknown5436[8];		//
 /*5408*/	uint32				autosplit;			//not used right now
-/*5412*/	uint8				unknown5448[8];
+/*5412*/	uint8				unknown5448[6];
+/*5418*/	uint16				boatid;
 /*5420*/	uint32				zone_change_count;	// Number of times user has zoned in their career (guessing)
 /*5424*/	char				boat[16];	//
 /*5440*/	uint32				drakkin_heritage;	//

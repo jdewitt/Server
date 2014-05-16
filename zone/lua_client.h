@@ -278,6 +278,7 @@ public:
 	void PlayMP3(std::string file);
 	int GetBoatID();
 	void SetBoatID(uint32 in_boatid);
+	char* GetBoatName();
 };
 
 #endif

@@ -420,7 +420,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		return true;
 	}
 
-	#if EQDEBUG >= 9
+	#if EQDEBUG >= 11
 		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
 	#endif
 
@@ -4742,7 +4742,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 #endif
 	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
-	if(this->BoatNPCID != 0)
+	if(m_pp.boatid != 0)
 	{
 		InterruptSpell(castspell->spell_id);
 		return;
@@ -5241,9 +5241,9 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 	{
 		this->BuffFadeByEffect(SE_Levitate);
 		this->BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
-		this->BoatNPCID = boat->GetNPCTypeID(); //For EQMac's boat system.
+		m_pp.boatid = boat->GetNPCTypeID(); //For EQMac's boat system.
 		strncpy(m_pp.boat,boatname,16);
-		this->Message(0,"I'm on a boat named: %s Its ID is: %i", boatname,this->BoatNPCID);
+		this->Message(0,"I'm on a boat named: %s Its ID is: %i", boatname,boat->GetNPCTypeID());
 	}
 	safe_delete_array(boatname);
 	return;
@@ -5258,7 +5258,7 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 	}
 	this->Message(0,"I left a boat!");
 	this->BoatID = 0;
-	this->BoatNPCID = 0;
+	m_pp.boatid = 0;
 	m_pp.boat[0] = 0;
 	return;
 }
