@@ -4231,10 +4231,12 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	if (damage < 1) //We can't critical hit if we don't hit.
 		return;
 
-	if (!IsPet())
+	if (IsPet())
+		owner = GetOwner();
+	else if ((IsNPC() && CastToNPC()->GetSwarmOwner()))
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+	else
 		return;
-
-	owner = GetOwner();
 
 	if (!owner)
 		return;
@@ -4272,7 +4274,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 	// decided to branch this into it's own function since it's going to be duplicating a lot of the
 	// code in here, but could lead to some confusion otherwise
-	if (IsPet() && GetOwner()->IsClient()) {
+	if (IsPet() && GetOwner()->IsClient() || (IsNPC() && CastToNPC()->GetSwarmOwner())) {
 		TryPetCriticalHit(defender,skill,damage);
 		return;
 	}
@@ -4461,6 +4463,7 @@ void Mob::DoRiposte(Mob* defender) {
 
 	//Double Riposte effect, allows for a chance to do RIPOSTE with a skill specfic special attack (ie Return Kick).
 	//Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
+
 	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[1];
 
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
