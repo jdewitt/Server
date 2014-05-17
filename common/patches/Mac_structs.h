@@ -768,7 +768,7 @@ struct Item_Struct
 	/*0176*/ int8      NoDrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
 	/*0177*/ uint8     Size;            // Size of item
 	/*0178*/ int16     ItemClass;
-	/*0180*/ uint16    ID;         // Unique Item number
+	/*0180*/ int16	   ID;         // Unique Item number confirmed to be signed.
 	/*0182*/ uint16    Icon;         // Icon Number
 	/*0184*/ int16     equipSlot;       // Current slot location of item
 	/*0186*/ uint8     unknown0186[2];   // Client dump has equipSlot/location as a short so this is still unknown

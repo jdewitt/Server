@@ -1847,6 +1847,9 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 
 	const Item_Struct *item=inst->GetItem();
 
+	if(item->ID > 32767)
+		return 0 ;
+
 	structs::Item_Struct *thejuice = new struct structs::Item_Struct;
 	memset(thejuice,0,sizeof(structs::Item_Struct));
 
