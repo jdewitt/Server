@@ -8334,6 +8334,11 @@ void Client::SetBoatID(uint32 boatid)
 	m_pp.boatid = boatid;
 }
 
+void Client::SetBoatName(const char* boatname)
+{
+	strncpy(m_pp.boat,boatname,16);
+}
+
 void Client::ExpeditionSay(const char *str, int ExpID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;

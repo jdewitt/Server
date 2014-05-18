@@ -3478,6 +3478,12 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app) {
 	Bot::BotHealRotationsClear(this);
 	Bot::BotOrderCampAll(this);
 #endif
+	if(GetBoatNPCID() > 0)
+	{
+		Stand();
+		return;
+	}
+
 	if(IsLFP())
 		worldserver.StopLFP(CharacterID());
 

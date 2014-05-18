@@ -279,6 +279,7 @@ public:
 	int GetBoatID();
 	void SetBoatID(uint32 in_boatid);
 	char* GetBoatName();
+	void SetBoatName(const char* in_boatname);
 };
 
 #endif

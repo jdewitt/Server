@@ -1900,7 +1900,10 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ReqLevel = item->ReqLevel; 
 		thejuice->BardType = item->BardType;
 		thejuice->BardValue = item->BardValue;
-		thejuice->FocusEffect = item->Focus.Effect;
+		if(item->Focus.Effect < 0)
+			thejuice->FocusEffect = 0;
+		else
+			thejuice->FocusEffect = item->Focus.Effect;
 	/*	thejuice->unknown0212=0x8a;
 		thejuice->unknown0213=0x26;
 		thejuice->unknown0216=0x01;
@@ -1949,6 +1952,9 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->common.Races = item->Races;  
 		thejuice->common.Stackable = item->Stackable_; 
 		}
+
+		//FocusEffect is already handled above. Now figure out click, scroll, proc, and worn.
+
 		if(item->Click.Effect > 0){
 			thejuice->common.Effect1 = item->Click.Effect;
 			thejuice->Effect2 = item->Click.Effect; 
@@ -1981,6 +1987,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 				thejuice->EffectLevel2 = item->Scroll.Level2;  
 			}
 		}
+		//We have some worn effect items (Lodizal Shell Shield) as proceffect in db.
 		else if(item->Proc.Effect > 0){
 			thejuice->common.Effect1 = item->Proc.Effect;
 			thejuice->Effect2 = item->Proc.Effect; 
@@ -2003,6 +2010,22 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 			{
 				thejuice->common.EffectLevel1 = item->Proc.Level2; 
 				thejuice->EffectLevel2 = item->Proc.Level2;  
+			}
+		}
+		else if(item->Worn.Effect > 0){
+			thejuice->common.Effect1 = item->Worn.Effect;
+			thejuice->Effect2 = item->Worn.Effect; 
+			thejuice->EffectType2 = item->Worn.Type;  
+			thejuice->common.EffectType1 = item->Worn.Type;
+			if(item->Worn.Level > 0)
+			{
+				thejuice->common.EffectLevel1 = item->Worn.Level; 
+				thejuice->EffectLevel2 = item->Worn.Level;
+			}
+			else
+			{
+				thejuice->common.EffectLevel1 = item->Worn.Level2; 
+				thejuice->EffectLevel2 = item->Worn.Level2;  
 			}
 		}
 

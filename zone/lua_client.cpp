@@ -1263,6 +1263,12 @@ char* Lua_Client::GetBoatName()
 	return self->GetBoatName();
 }
 
+void Lua_Client::SetBoatName(const char* in_boatname) 
+{
+	Lua_Safe_Call_Void();
+	self->SetBoatName(in_boatname);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1512,8 +1518,9 @@ luabind::scope lua_register_client() {
 		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
 		.def("GetBoatID", (int(Lua_Client::*)(void))&Lua_Client::GetBoatID)
-		.def("SetBoatID", (void(Lua_Client::*)(int))&Lua_Client::SetBoatID)
-		.def("GetBoatName", (char *(Lua_Client::*)(void))&Lua_Client::GetBoatName);
+		.def("SetBoatID", (void(Lua_Client::*)(uint32))&Lua_Client::SetBoatID)
+		.def("GetBoatName", (char *(Lua_Client::*)(void))&Lua_Client::GetBoatName)
+		.def("SetBoatName", (void(Lua_Client::*)(const char *))&Lua_Client::SetBoatName);
 }
 
 luabind::scope lua_register_inventory_where() {

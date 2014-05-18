@@ -1063,6 +1063,7 @@ public:
 	uint16 GetBoatNPCID() { return m_pp.boatid; }
 	char* GetBoatName() { return m_pp.boat; }
 	void SetBoatID(uint32 boatid);
+	void SetBoatName(const char* boatname);
 	void SendRewards();
 	bool TryReward(uint32 claim_id);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
