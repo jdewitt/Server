@@ -118,5 +118,7 @@ D(OP_Taunt);
 D(OP_CombatAbility);
 E(OP_Projectile);
 E(OP_Charm);
+E(OP_Emote);
+D(OP_Emote);
 #undef E
 #undef D

@@ -604,8 +604,11 @@ void SpawnConditionManager::Process() {
 				if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
 					//this event has been triggered.
 					//execute the event
-					if(!cevent.strict || (cevent.strict && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
+					uint8 min = cevent.next.minute + 3; // Need to add a buffer, this is 9 real time seconds.
+					if(!cevent.strict || (cevent.strict && tod.minute < min && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
 						ExecEvent(cevent, true);
+					else
+						_log(SPAWNS__CONDITIONS, "Event %d: Is strict, ExecEvent is skipped.", cevent.id);
 
 					//add the period of the event to the trigger time
 					EQTime::AddMinutes(cevent.period, &cevent.next);
@@ -636,6 +639,7 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 
 	TimeOfDay_Struct tod;
 	zone->zone_time.getEQTimeOfDay(&tod);
+	//If we're here, strict has already been checked. Check again in case hour has changed.
 	if(event.strict && (event.next.hour != tod.hour || event.next.day != tod.day || event.next.month != tod.month || event.next.year != tod.year))
 	{
 		_log(SPAWNS__CONDITIONS, "Event %d: Unable to execute. Condition is strict, and event time has already passed.", event.id);

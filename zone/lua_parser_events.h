@@ -92,6 +92,10 @@ void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, s
 		std::vector<void*> *extra_pointers);
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
+void handle_board_boat(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
+void handle_leave_boat(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
 
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,

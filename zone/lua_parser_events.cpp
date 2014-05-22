@@ -688,4 +688,16 @@ void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 					   std::vector<void*> *extra_pointers) {
 }
 
+void handle_board_boat(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+									   std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "boat_id");
+}
+
+void handle_leave_boat(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+									   std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "boat_id");
+}
+
 #endif

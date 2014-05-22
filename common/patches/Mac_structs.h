@@ -1645,9 +1645,9 @@ struct Combine_Struct
 	/*000*/	uint16 containerID;		// Comment: ID of container item
 };
 
-struct Emote_Text
+struct Emote_Struct
 {
-	/*000*/	uint16 unknown1;			// Comment: 
+	/*000*/	uint16 unknown01;			// Comment: 
 	/*000*/	char message[1024];		// Comment: 
 };
 

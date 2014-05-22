@@ -475,9 +475,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 #if (EQDEBUG >= 10)
 			char buffer[64];
 			app->build_header_dump(buffer);
-			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: 0x%x", buffer);
+			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
 
 			char* packet_dump = "unhandled_packets.txt";
+			FilePrintLine(packet_dump,true,"Unhandled incoming opcode: %s", buffer);
 			FileDumpPacketHex(packet_dump, app);
 
 			if(app->size < 1000)
@@ -5249,8 +5250,13 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 		this->BoatID = boat->GetID();	// set the client's BoatID to show that it's on this boat
 		m_pp.boatid = boat->GetNPCTypeID(); //For EQMac's boat system.
 		strncpy(m_pp.boat,boatname,16);
-		this->Message(0,"I'm on a boat named: %s Its ID is: %i", boatname,boat->GetNPCTypeID());
+
+		char buf[24];
+		snprintf(buf, 23, "%d", boat->GetNPCTypeID());
+		buf[23] = '\0';
+		parse->EventPlayer(EVENT_BOARD_BOAT, this, buf, 0);
 	}
+
 	safe_delete_array(boatname);
 	return;
 }
@@ -5261,8 +5267,13 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 	if (boat) {
 		if ((boat->GetTarget() == this) && boat->GetHateAmount(this) == 0)	// if the client somehow left while still controlling the boat (and the boat isn't attacking them)
 			boat->SetTarget(0);			// fix it to stop later problems
+
+		char buf[24];
+		snprintf(buf, 23, "%d", boat->GetNPCTypeID());
+		buf[23] = '\0';
+		parse->EventPlayer(EVENT_LEAVE_BOAT, this, buf, 0);
 	}
-	this->Message(0,"I left a boat!");
+
 	this->BoatID = 0;
 	m_pp.boatid = 0;
 	m_pp.boat[0] = 0;

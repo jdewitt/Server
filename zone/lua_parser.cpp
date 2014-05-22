@@ -114,7 +114,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_leave_area",
 	"event_respawn",
 	"event_death_complete",
-	"event_unhandled_opcode"
+	"event_unhandled_opcode",
+	"event_board_boat",
+	"event_leave_boat"
 };
 
 extern Zone *zone;
@@ -192,6 +194,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_LEAVE_AREA] = handle_player_area;
 	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
 	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE] = handle_player_packet;
+	PlayerArgumentDispatch[EVENT_BOARD_BOAT] = handle_board_boat;
+	PlayerArgumentDispatch[EVENT_LEAVE_BOAT] = handle_leave_boat;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

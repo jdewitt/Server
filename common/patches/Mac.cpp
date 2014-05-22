@@ -1840,6 +1840,22 @@ ENCODE(OP_Charm){
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_Emote){
+	ENCODE_LENGTH_EXACT(Emote_Struct);
+	SETUP_DIRECT_ENCODE(Emote_Struct, structs::Emote_Struct);
+	OUT(unknown01);
+	OUT_str(message);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_Emote) {
+	DECODE_LENGTH_EXACT(structs::Emote_Struct);
+	SETUP_DIRECT_DECODE(Emote_Struct, structs::Emote_Struct);
+	IN(unknown01);
+	memcpy(emu->message,eq->message,1024);
+	FINISH_DIRECT_DECODE();
+}
+
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)

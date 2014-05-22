@@ -112,7 +112,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_LEAVE_AREA",
 	"EVENT_RESPAWN",
 	"EVENT_DEATH_COMPLETE",
-	"EVENT_UNHANDLED_OPCODE"
+	"EVENT_UNHANDLED_OPCODE",
+	"EVENT_BOARD_BOAT",
+	"EVENT_LEAVE_BOAT"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr) {
@@ -1377,7 +1379,14 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
 			break;
 		}
-
+		
+		case EVENT_BOARD_BOAT:
+		case EVENT_LEAVE_BOAT: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "boat_id", sep.arg[0]);
+			break;
+		}
+			
 		default: {
 			break;
 		}
