@@ -2382,6 +2382,13 @@ struct Emote_Struct {
 /*1028*/
 };
 
+// OP_Emote
+struct OldEmote_Struct {
+/*0000*/	uint16 unknown01;
+/*0002*/	char message[1024];
+/*1026*/
+};
+
 // Inspect
 struct Inspect_Struct {
 	uint16 TargetID;

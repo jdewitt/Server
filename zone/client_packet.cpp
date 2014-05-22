@@ -7727,16 +7727,25 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 {
-	if(app->size != sizeof(Emote_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Received invalid sized "
-										"OP_Emote: got %d, expected %d", app->size,
-			sizeof(Emote_Struct));
-		DumpPacket(app);
-		return;
+	if(GetClientVersion() == EQClientMac)
+	{
+		if(app->size != sizeof(OldEmote_Struct)) {
+			LogFile->write(EQEMuLog::Error, "Received invalid sized ""OP_Emote: got %d, expected %d", app->size, sizeof(OldEmote_Struct));
+			DumpPacket(app);
+			return;
+		}
+	}
+	else
+	{
+		if(app->size != sizeof(Emote_Struct)) {
+			LogFile->write(EQEMuLog::Error, "Received invalid sized ""OP_Emote: got %d, expected %d", app->size, sizeof(Emote_Struct));
+			DumpPacket(app);
+			return;
+		}
 	}
 
 	// Calculate new packet dimensions
-	Emote_Struct* in	= (Emote_Struct*)app->pBuffer;
+	OldEmote_Struct* in	= (OldEmote_Struct*)app->pBuffer;
 	in->message[1023] = '\0';
 
 	const char* name	= GetName();
@@ -7752,29 +7761,11 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 
 	// Construct outgoing packet
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, len_packet);
-	Emote_Struct* out = (Emote_Struct*)outapp->pBuffer;
+	OldEmote_Struct* out = (OldEmote_Struct*)outapp->pBuffer;
 	out->unknown01 = in->unknown01;
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
-	/*
-	if (target && target->IsClient()) {
-		entity_list.QueueCloseClients(this, outapp, false, 100, target);
-
-		cptr = outapp->pBuffer + 2;
-
-		// not sure if live does this or not. thought it was a nice feature, but would take a lot to
-		// clean up grammatical and other errors. Maybe with a regex parser...
-		replacestr((char *)cptr, target->GetName(), "you");
-		replacestr((char *)cptr, " he", " you");
-		replacestr((char *)cptr, " she", " you");
-		replacestr((char *)cptr, " him", " you");
-		replacestr((char *)cptr, " her", " you");
-		target->CastToClient()->QueuePacket(outapp);
-
-	}
-	else
-	*/
 	entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
 
 	safe_delete(outapp);

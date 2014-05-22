@@ -1565,9 +1565,10 @@ ENCODE(OP_LogServer) {
 
 	ENCODE_LENGTH_EXACT(LogServer_Struct);
 	SETUP_DIRECT_ENCODE(LogServer_Struct, structs::LogServer_Struct);
-	eq->pk_active = emu->enable_pvp;
-	eq->rp_active = emu->enable_FV;
+	OUT(enable_pvp);
+	OUT(enable_FV);
 	strcpy(eq->worldshortname, emu->worldshortname);
+	eq->ProfanityFilter = 1;
 	FINISH_ENCODE();
 }
 
@@ -1840,22 +1841,6 @@ ENCODE(OP_Charm){
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_Emote){
-	ENCODE_LENGTH_EXACT(Emote_Struct);
-	SETUP_DIRECT_ENCODE(Emote_Struct, structs::Emote_Struct);
-	OUT(unknown01);
-	OUT_str(message);
-	FINISH_ENCODE();
-}
-
-DECODE(OP_Emote) {
-	DECODE_LENGTH_EXACT(structs::Emote_Struct);
-	SETUP_DIRECT_DECODE(Emote_Struct, structs::Emote_Struct);
-	IN(unknown01);
-	memcpy(emu->message,eq->message,1024);
-	FINISH_DIRECT_DECODE();
-}
-
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)
@@ -1969,7 +1954,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->common.Stackable = item->Stackable_; 
 		}
 
-		//FocusEffect is already handled above. Now figure out click, scroll, proc, and worn.
+		//FocusEffect and BardEffect is already handled above. Now figure out click, scroll, proc, and worn.
 
 		if(item->Click.Effect > 0){
 			thejuice->common.Effect1 = item->Click.Effect;

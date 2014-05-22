@@ -2742,8 +2742,8 @@ struct AA_Skills
 struct AATable_Struct
 {
 	/*000*/	uint8 unknown;
-	/*000*/	structs::AA_Skills aa_list[MAX_PP_AA_ARRAY];
-	/*000*/	
+	/*001*/	structs::AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	/*121*/	
 };
 
 //Server sends this packet for reuse timers
@@ -2780,8 +2780,8 @@ struct	ItemViewRequest_Struct
 /*_MAC_NET_MSG_rpServer, size: 244*/
 struct LogServer_Struct
 {
-	/*000*/	uint32	rp_active; //Is FV ruleset?
-	/*004*/	uint32	pk_active; //Is a Zek-era server?
+	/*000*/	uint32	enable_FV; //Is FV ruleset?
+	/*004*/	uint32	enable_pvp; //Is a Zek-era server?
 	/*008*/	uint32	auto_identify; //Dunno, keep 0
 	/*012*/	uint32	NameGen;	// Name generator enabled?
 	/*016*/	uint32	Gibberish;	// Disables chat if enabled.
