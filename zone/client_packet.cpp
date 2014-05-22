@@ -4672,6 +4672,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 			}
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
+			SendGuildRanks();
 
 		}
 	}
@@ -8563,7 +8564,10 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
 	if(IsInAGuild())
+	{
+		SendGuildRanks();
 		SendGuildMembers();
+	}
 	return;
 }
 
@@ -10078,6 +10082,7 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
+		SendGuildRanks();
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
@@ -13006,6 +13011,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
+			SendGuildRanks();
 		}
 	}
 }

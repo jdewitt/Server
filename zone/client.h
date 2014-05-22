@@ -623,6 +623,7 @@ public:
 	void	SendGuildURL();
 	void	SendGuildChannel();
 	void	SendGuildSpawnAppearance();
+	void	SendGuildRanks();
 	void	SendGuildMembers();
 	void	SendGuildList();
 	void	SendPlayerGuild();
