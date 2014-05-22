@@ -1759,7 +1759,7 @@ DECODE(OP_WearChange) {
 	emu->color.rgb.green = eq->green;
 	emu->color.rgb.red = eq->red;
 	emu->color.rgb.use_tint = eq->use_tint;
-	OUT(wear_slot_id);
+	IN(wear_slot_id);
 	FINISH_DIRECT_DECODE();
 }
 
