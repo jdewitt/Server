@@ -230,8 +230,6 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 			check_level = 127;
 			break;
 		}
-		if(GetMercID())
-			UpdateMercLevel();
 	}
 	//see if we lost any levels
 	while (set_exp < GetEXPForLevel(check_level-1)) {
@@ -240,8 +238,6 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 			check_level = 2;
 			break;
 		}
-		if(GetMercID())
-			UpdateMercLevel();
 	}
 	check_level--;
 
@@ -449,8 +445,6 @@ void Client::SetLevel(uint8 set_level, bool command)
 	SendHPUpdate();
 	SetMana(CalcMaxMana());
 	UpdateWho();
-		if(GetMerc())
-			UpdateMercLevel();
 	Save();
 }
 
