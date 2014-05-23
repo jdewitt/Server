@@ -3463,11 +3463,7 @@ void Client::Handle_OP_DeleteCharge(const EQApplicationPacket *app)
 }
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app) {
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	Bot::BotHealRotationsClear(this);
-	Bot::BotOrderCampAll(this);
-#endif
+
 	if(GetBoatNPCID() > 0)
 	{
 		Stand();
@@ -4497,13 +4493,6 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				return;
 			}
 		}
-#ifdef BOTS
-		else if (invitee->IsBot()) {
-			// The guild system is too tightly coupled with the character_ table so we have to avoid using much of the system
-			Bot::ProcessGuildInvite(this, invitee->CastToBot());
-			return;
-		}
-#endif
 	}
 }
 
@@ -4526,10 +4515,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-#ifdef BOTS
-		if(Bot::ProcessGuildRemoval(this, gc->othername))
-			return;
-#endif
 		uint32 char_id;
 		Client* client = entity_list.GetClientByName(gc->othername);
 		Client* remover  = entity_list.GetClientByName(gc->myname);
@@ -5019,11 +5004,7 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 	if (tradee && tradee->IsClient()) {
 		tradee->CastToClient()->QueuePacket(app);
 	}
-#ifndef BOTS
 	else if (tradee && tradee->IsNPC()) {
-#else
-	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
-#endif
 		//npcs always accept
 		trade->Start(msg->to_mob_id);
 
@@ -5193,10 +5174,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				FinishTrade(with->CastToNPC());
 			}
 		}
-#ifdef BOTS
-		else if(with->IsBot())
-			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
-#endif
 		trade->Reset();
 	}
 
@@ -6638,11 +6615,6 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 				}
 			}
 		}
-#ifdef BOTS
-		else if(Invitee->IsBot()) {
-			Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
-		}
-#endif
 	}
 	else
 	{
@@ -6921,22 +6893,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	if(!group)
 		return;
 
-#ifdef BOTS
-	// this block is necessary to allow more control over controlling how bots are zoned or camped.
-	if(Bot::GroupHasBot(group)) {
-		if(group->IsLeader(this)) {
-			if((GetTarget() == 0 || GetTarget() == this) || (group->GroupCount() < 3)) {
-				Bot::ProcessBotGroupDisband(this, std::string());
-			} else {
-				Mob* tempMember = entity_list.GetMob(gd->name2);
-				if(tempMember) {
-					if(tempMember->IsBot())
-						Bot::ProcessBotGroupDisband(this, std::string(tempMember->GetCleanName()));
-				}
-			}
-		}
-	}
-#endif
 	if((group->IsLeader(this) && (GetTarget() == 0 || GetTarget() == this)) || (group->GroupCount()<3)) {
 		group->DisbandGroup();
 	} else {
@@ -7053,10 +7009,6 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 		// Inspecting an SoF or later client will make the server handle the request
 		else { ProcessInspectRequest(tmp->CastToClient(), this); }
 	}
-
-#ifdef BOTS
-	if(tmp != 0 && tmp->IsBot()) { Bot::ProcessBotInspectionRequest(tmp->CastToBot(), this); }
-#endif
 
 	return;
 }
@@ -9457,10 +9409,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 		LFG = false;
 	}
-
-#ifdef BOTS
-	Bot::LoadAndSpawnAllZonedBots(this);
-#endif
 
 	CalcBonuses();
 	if (m_pp.cur_hp <= 0)

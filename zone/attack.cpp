@@ -2162,11 +2162,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 		give_exp = give_exp->GetUltimateOwner();
 
-#ifdef BOTS
-		if(!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
-			give_exp = nullptr;
-		}
-#endif //BOTS
 	}
 
 	int PlayerCount = 0; // QueryServ Player Counting
@@ -2536,20 +2531,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 
 	if(other->IsClient())
 		other->CastToClient()->AddAutoXTarget(this);
-
-#ifdef BOTS
-	// if other is a bot, add the bots client to the hate list
-	if(other->IsBot()) {
-		if(other->CastToBot()->GetBotOwner() && other->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
-		}
-		else {
-			if(!hate_list.IsOnHateList(other->CastToBot()->GetBotOwner()))
-				hate_list.Add(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
-		}
-	}
-#endif //BOTS
-
 
 	// then add pet owner if there's one
 	if (owner) { // Other is a pet, add him and it
@@ -4263,14 +4244,6 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 		TryPetCriticalHit(defender,skill,damage);
 		return;
 	}
-
-#ifdef BOTS
-	if (this->IsPet() && this->GetOwner()->IsBot()) {
-		this->TryPetCriticalHit(defender,skill,damage);
-		return;
-	}
-#endif //BOTS
-
 
 	float critChance = 0.0f;
 

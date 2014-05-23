@@ -162,10 +162,6 @@ int command_init(void){
 		command_add("beardcolor","- Change the beard color of your target",80,command_beardcolor) ||
 		command_add("bestz","- Ask map for a good Z coord for your x,y coords.",0,command_bestz) ||
 		command_add("bind","- Sets your targets bind spot to their current location",200,command_bind) ||
-/*#ifdef BOTS
-		command_add("bot","- Type \"#bot help\" to the see the list of available commands for bots.", 0, command_bot) ||
-#endif*/
-		
 		command_add("camerashake", "Shakes the camera on everyone's screen globally.", 80, command_camerashake) ||
 		command_add("cast",nullptr,0,command_castspell) ||
 		command_add("castspell","[spellid] - Cast a spell",50,command_castspell) ||
@@ -1317,12 +1313,6 @@ void command_zone(Client *c, const Seperator *sep){
 			return;
 		}
 	}
-
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	if(zoneid != c->GetZoneID())
-		Bot::ProcessClientZoneChange(c);
-#endif
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
@@ -2582,10 +2572,6 @@ void command_level(Client *c, const Seperator *sep){
 	}
 	else if (c->Admin() < 100) {
 		c->SetLevel(level, true);
-#ifdef BOTS
-		if(RuleB(Bots, BotLevelsWithOwner))
-			Bot::LevelBotWithClient(c, level, true);
-#endif
 	}
 	else if (!c->GetTarget()) {
 		c->Message(0, "Error: #Level: No target");
@@ -2598,10 +2584,6 @@ void command_level(Client *c, const Seperator *sep){
 			c->GetTarget()->SetLevel(level, true);
 			if(c->GetTarget()->IsClient()) {
 				c->GetTarget()->CastToClient()->SendLevelAppearance();
-#ifdef BOTS
-				if(RuleB(Bots, BotLevelsWithOwner))
-					Bot::LevelBotWithClient(c->GetTarget()->CastToClient(), level, true);
-#endif
 			}
 		}
 	}
@@ -10859,13 +10841,6 @@ void command_showspellslist(Client *c, const Seperator *sep){
 
 	return;
 }
-
-/*#ifdef BOTS
-// Function delegate to support the command interface for Bots with the client.
-void command_bot(Client *c, const Seperator *sep){
-	Bot::ProcessBotCommands(c, sep);
-}
-#endif*/
 
 void command_raidloot(Client *c, const Seperator *sep){
 	if(!sep->arg[1][0]) {
