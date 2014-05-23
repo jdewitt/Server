@@ -206,13 +206,13 @@ RULE_CATEGORY( Map )
 //enable these to help prevent mob hopping when they are pathing
 RULE_BOOL ( Map, FixPathingZWhenLoading, true )		//increases zone boot times a bit to reduce hopping.
 RULE_BOOL ( Map, FixPathingZAtWaypoints, false )	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
-RULE_BOOL ( Map, FixPathingZWhenMoving, false )		//very CPU intensive, but helps hopping with widely spaced waypoints.
+RULE_BOOL ( Map, FixPathingZWhenMoving, true )		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL ( Map, FixPathingZOnSendTo, false )		//try to repair Z coords in the SendTo routine as well.
 RULE_REAL ( Map, FixPathingZMaxDeltaMoving, 20 )	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
 RULE_REAL ( Map, FixPathingZMaxDeltaWaypoint, 20 )	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL ( Map, FixPathingZMaxDeltaSendTo, 20 )	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
 RULE_REAL ( Map, FixPathingZMaxDeltaLoading, 45 )	//while loading each waypoint: max change in Z to allow the BestZ code to apply.
-RULE_BOOL ( Map, UseClosestZ, false)			// Move mobs to the nearest Z above or below, rather than just the nearest below.
+RULE_BOOL ( Map, UseClosestZ, true)			// Move mobs to the nearest Z above or below, rather than just the nearest below.
 							// Only set UseClosestZ true if all your .map files generated from EQGs were created
 							// with azone2.
 							//
