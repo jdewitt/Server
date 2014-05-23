@@ -205,9 +205,6 @@ MARK_AS_ADVANCED(EQEMU_STREAM_SEND_RATE EQEMU_STREAM_DECAY_RATE EQEMU_STREAM_RET
 #NPC Types Cache Behavior
 OPTION(EQEMU_DEPOP_INVALIDATES_CACHE "#repop invalidates the npc_types cache (will cause a larger database hit on #repop but is more convienent)." ON)
 
-#Bots are a compile time option so on/off
-OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
-
 #Disable entire _mlog system (excludes trade/command logs)
 OPTION(EQEMU_DISABLE_LOGSYS "Disable Logging INI System" ON)
 
@@ -221,10 +218,6 @@ ENDIF(EQEMU_COMMANDS_LOGGING)
 IF(EQEMU_DISABLE_LOGSYS)
 	ADD_DEFINITIONS(-DDISABLE_LOGSYS)
 ENDIF(EQEMU_DISABLE_LOGSYS)
-
-IF(EQEMU_ENABLE_BOTS)
-	ADD_DEFINITIONS(-DBOTS)
-ENDIF(EQEMU_ENABLE_BOTS)
 
 #What to build
 OPTION(EQEMU_BUILD_SERVER "Build the game server." ON)
