@@ -24,8 +24,6 @@
 #include "EQCrypto.h"
 #include "../common/sha1.h"
 
-#include "ClientManager.h"
-
 extern EQCrypto eq_crypto;
 extern ErrorLog *server_log;
 extern LoginServer server;
@@ -259,12 +257,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 #endif
 
 	bool result;
+	in_addr in;
+	in.s_addr = connection->GetRemoteIP();
+
 	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
 
-		in_addr in;
-		in.s_addr = connection->GetRemoteIP();
 
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
@@ -279,6 +278,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 			/*eventually add a unix time stamp calculator from last id in log that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
 			server.db->UpdateLSAccountInfo(NULL, e_user, e_hash, "PC_generated@server.com", string(inet_ntoa(in)));
+
+			result = false;
 		}
 		result = false;
 	}
@@ -286,14 +287,23 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	{
 		if(d_pass_hash.compare(e_hash) == 0)
 		{
-			result = true;
+			if (server.db->GetStatusWorldAccountTable(e_user))
+			{
+				result = true;
+			}
+			else
+			{
+				if (server.options.IsLoginFailsOn())
+				{
+					server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Unauthorized client login attempt.");
+				}
+				result = false;
+			}
 		}
 		else
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				in_addr in;
-				in.s_addr = connection->GetRemoteIP();
 				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "PC bad password");
 			}
 			result = false;
@@ -303,12 +313,15 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	if(result)
 	{
 		server.CM->RemoveExistingClient(d_account_id);
-		in_addr in;
-		in.s_addr = connection->GetRemoteIP();
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
 		account_name = e_user;
+
+		if (server.options.IsIDnormalsOn())
+		{
+			server.db->UpdateLSWorldAccountInfo(d_account_id, e_user, e_hash, d_account_id);
+		}
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
@@ -361,10 +374,6 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		connection->QueuePacket(outapp);
 		delete outapp;
-		if (server.options.IsIDnormalsOn())
-		{
-			server.db->UpdateLSWorldAccountInfo(d_account_id, e_user, e_hash, d_account_id);
-		}
 	}
 	else
 	{
@@ -432,14 +441,13 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
 
 	bool result;
+	in_addr in;
+	in.s_addr = connection->GetRemoteIP();
 
 	if(server.db->GetLoginDataFromAccountName(lcs->username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
-
-		in_addr in;
-		in.s_addr = connection->GetRemoteIP();
-
+		
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
 			server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Account not exist, Mac");
@@ -454,6 +462,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 			to limit account creations per time specified by an interval set in the ini.*/
 			server.db->UpdateLSAccountInfo(NULL, lcs->username, lcs->password, "MAC_generated@server.com", string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
+
 			return;
 		}
 		result = false;
@@ -470,8 +479,6 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				in_addr in;
-				in.s_addr = connection->GetRemoteIP();
 				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Mac bad password");
 			}
 			server_log->Log(log_client_error, "%s", sha1hash);
@@ -482,8 +489,6 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	if(result)
 	{
 		server.CM->RemoveExistingClient(d_account_id);
-		in_addr in;
-		in.s_addr = connection->GetRemoteIP();
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
@@ -503,7 +508,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		FatalError("Shit didn't happen");
+		FatalError("Game over, Insert coin to try again.");
 	}
 }
 
