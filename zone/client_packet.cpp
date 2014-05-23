@@ -66,7 +66,6 @@
 #include "guild_mgr.h"
 #include "pathing.h"
 #include "watermap.h"
-#include "merc.h"
 #include "../common/ZoneNumbers.h"
 #include "QuestParserCollection.h"
 
@@ -381,13 +380,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
 	ConnectedOpcodes[OP_ItemPreview] = &Client::Handle_OP_ItemPreview;
-	ConnectedOpcodes[OP_MercenaryDataRequest] = &Client::Handle_OP_MercenaryDataRequest;
-	ConnectedOpcodes[OP_MercenaryHire] = &Client::Handle_OP_MercenaryHire;
-	ConnectedOpcodes[OP_MercenaryCommand] = &Client::Handle_OP_MercenaryCommand;
-	ConnectedOpcodes[OP_MercenaryDataUpdateRequest] = &Client::Handle_OP_MercenaryDataUpdateRequest;
-	ConnectedOpcodes[OP_MercenarySuspendRequest] = &Client::Handle_OP_MercenarySuspendRequest;
-	ConnectedOpcodes[OP_MercenaryDismiss] = &Client::Handle_OP_MercenaryDismiss;
-	//ConnectedOpcodes[OP_MercenaryTimerRequest] = &Client::Handle_OP_MercenaryTimerRequest;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -791,7 +783,6 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 		}
 		SendLFGuildStatus();
 		SendGuildMOTD();
-		SpawnMercOnZone();
 
 		conn_state = ClientReadyReceived;
 		CompleteConnect();
@@ -880,8 +871,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
-
-	SpawnMercOnZone();
 
 	return;
 }
@@ -6630,7 +6619,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	if(Invitee) {
 		if(Invitee->IsClient()) {
 			if((!Invitee->IsGrouped() && !Invitee->IsRaidGrouped()) ||
-				(Invitee->GetGroup() && Invitee->CastToClient()->GetMerc() && Invitee->GetGroup()->GroupCount() == 2))
+				(Invitee->GetGroup() &&  Invitee->GetGroup()->GroupCount() == 2))
 			{
 				if(app->GetOpcode() == OP_GroupInvite2)
 				{
@@ -6731,10 +6720,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 		//inviter has a raid don't do group stuff instead do raid stuff!
 		if(raid){
-			// Suspend the merc while in a raid (maybe a rule could be added for this)
-			if (GetMerc())
-				GetMerc()->Suspend();
-
 			uint32 groupToUse = 0xFFFFFFFF;
 			for(int x = 0; x < MAX_RAID_MEMBERS; x++){
 				if(raid->members[x].member){ //this assumes the inviter is in the zone
@@ -6851,14 +6836,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		if(inviter->CastToClient()->GetClientVersion() >= EQClientSoD)
 			database.RefreshGroupFromDB(inviter->CastToClient());
 
-		// Add the merc back into the new group
-		if (GetMerc()) {
-			if (Merc::AddMercToGroup(GetMerc(), group)) {
-				database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
-				database.RefreshGroupFromDB(this);
-			}
-		}
-
 		//send updates to clients out of zone...
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
 		ServerGroupJoin_Struct* gj = (ServerGroupJoin_Struct*)pack->pBuffer;
@@ -6962,8 +6939,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 #endif
 	if((group->IsLeader(this) && (GetTarget() == 0 || GetTarget() == this)) || (group->GroupCount()<3)) {
 		group->DisbandGroup();
-		if(GetMerc() != nullptr)
-			GetMerc()->Suspend();
 	} else {
 		Mob* memberToDisband = nullptr;
 		memberToDisband = GetTarget();
@@ -6979,10 +6954,9 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 					{
 						group->DelMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
-						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
-						if(memberClient && memberMerc && group)
+						if(memberClient &&  group)
 						{
-							if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
+							if(!memberClient->IsGrouped()) {
 								Group *g = new Group(memberClient);
 
 								entity_list.AddGroup(g);
@@ -6991,53 +6965,29 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 									safe_delete(g);
 									return;
 								}
-								if(Merc::AddMercToGroup(memberMerc, g)) {
-									database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
-									g->SaveGroupLeaderAA();
-									database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
-									database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
-									database.RefreshGroupFromDB(memberClient);
-								}
 							}
 						}
-					}
-					else if(memberToDisband->IsMerc()) {
-						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
 				else {
 					// ...but other members can only remove themselves
 					group->DelMember(this,false);
 
-					if(!IsGrouped() && GetMerc() != nullptr) {
-						if(!IsGrouped()) {
-							Group *g = new Group(this);
+					
+					if(!IsGrouped()) {
+						Group *g = new Group(this);
 
-							if(!g) {
-								delete g;
-								g = nullptr;
-								return;
-							}
+						if(!g) {
+							delete g;
+							g = nullptr;
+							return;
+						}
 
-							entity_list.AddGroup(g);
+						entity_list.AddGroup(g);
 
-							if(g->GetID() == 0) {
-								safe_delete(g);
-								return;
-							}
-
-							if(Merc::AddMercToGroup(GetMerc(), g)) {
-								database.SetGroupLeaderName(g->GetID(), this->GetName());
-								g->SaveGroupLeaderAA();
-								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
-								database.SetGroupID(GetMerc()->GetName(), g->GetID(), this->CharacterID(), true);
-								database.RefreshGroupFromDB(this);
-							}
-							else
-							{
-								if(GetMerc())
-								GetMerc()->Depop();
-							}
+						if(g->GetID() == 0) {
+							safe_delete(g);
+							return;
 						}
 					}
 				}
@@ -13965,369 +13915,6 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 	} else
 		return;
 }
-
-void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
-{
-	// The payload is 4 bytes. The EntityID of the Mercenary Liason which are of class 71.
-	if(app->size != sizeof(MercenaryMerchantShopRequest_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryDataRequest expected 4 got %i", app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	MercenaryMerchantShopRequest_Struct* mmsr = (MercenaryMerchantShopRequest_Struct*) app->pBuffer;
-	uint32 merchant_id = mmsr->MercMerchantID;
-	uint32 altCurrentType = 19;
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Data Request for Merchant ID (%i)", merchant_id);
-
-	//client is requesting data about currently owned mercenary
-	if(merchant_id == 0) {
-
-		//send info about your current merc(s)
-	}
-
-	if(!RuleB(Mercs, AllowMercs)) {
-		return;
-	}
-
-	NPC* tar = entity_list.GetNPCByID(merchant_id);
-
-	if(tar) {
-		int mercTypeCount = 0;
-		int mercCount = 0;
-
-		if(DistNoRoot(*tar) > USE_NPC_RANGE2)
-			return;
-
-		if(tar->GetClass() != MERCERNARY_MASTER) {
-			return;
-		}
-
-		mercTypeCount = tar->GetNumMercTypes(GetClientVersion());
-		mercCount = tar->GetNumMercs(GetClientVersion());
-
-		if(mercCount > MAX_MERC)
-		return;
-
-		std::list<MercType> mercTypeList = tar->GetMercTypesList(GetClientVersion());
-		std::list<MercData> mercDataList = tar->GetMercsList(GetClientVersion());
-
-		int i = 0;
-		int StanceCount = 0;
-
-		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr)
-		{
-			std::list<MercStanceInfo>::iterator siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
-			for(siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin(); siter != zone->merc_stance_list[mercListItr->MercTemplateID].end(); ++siter)
-			{
-				StanceCount++;
-			}
-		}
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
-		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
-
-		mml->MercTypeCount = mercTypeCount;
-		if(mercTypeCount > 0)
-		{
-			for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); ++mercTypeListItr) {
-			mml->MercGrades[i] = mercTypeListItr->Type;	// DBStringID for Type
-			i++;
-			}
-		}
-		mml->MercCount = mercCount;
-
-		if(mercCount > 0)
-		{
-			i = 0;
-			for(std::list<MercData>::iterator mercListIter = mercDataList.begin(); mercListIter != mercDataList.end(); ++mercListIter)
-			{
-				mml->Mercs[i].MercID = mercListIter->MercTemplateID;
-				mml->Mercs[i].MercType = mercListIter->MercType;
-				mml->Mercs[i].MercSubType = mercListIter->MercSubType;
-				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListIter->MercTemplateID, GetLevel(), 0): 0;
-				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListIter->MercTemplateID, GetLevel(), 0): 0;
-				mml->Mercs[i].Status = 0;
-				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListIter->MercTemplateID, GetLevel(), altCurrentType): 0;
-				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListIter->MercTemplateID, GetLevel(), altCurrentType): 0;
-				mml->Mercs[i].AltCurrencyType = altCurrentType;
-				mml->Mercs[i].MercUnk01 = 0;
-				mml->Mercs[i].TimeLeft = -1;
-				mml->Mercs[i].MerchantSlot = i + 1;
-				mml->Mercs[i].MercUnk02 = 1;
-				int mercStanceCount = 0;
-				std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
-				for(iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin(); iter != zone->merc_stance_list[mercListIter->MercTemplateID].end(); ++iter)
-				{
-				mercStanceCount++;
-				}
-				mml->Mercs[i].StanceCount = mercStanceCount;
-				mml->Mercs[i].MercUnk03 = 519044964;
-				mml->Mercs[i].MercUnk04 = 1;
-				//mml->Mercs[i].MercName;
-				int stanceindex = 0;
-				if(mercStanceCount > 0)
-				{
-					std::list<MercStanceInfo>::iterator iter2 = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
-					while(iter2 != zone->merc_stance_list[mercListIter->MercTemplateID].end())
-					{
-						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
-						mml->Mercs[i].Stances[stanceindex].Stance = (iter2->StanceID);
-						stanceindex++;
-						++iter2;
-					}
-				}
-				i++;
-			}
-		}
-		FastQueuePacket(&outapp);
-	}
-}
-
-void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
-{
-	// The payload is 16 bytes. First four bytes are the Merc ID (Template ID)
-	if(app->size != sizeof(MercenaryMerchantRequest_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryHire expected %i got %i", sizeof(MercenaryMerchantRequest_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	MercenaryMerchantRequest_Struct* mmrq = (MercenaryMerchantRequest_Struct*) app->pBuffer;
-	uint32 merc_template_id = mmrq->MercID;
-	uint32 merchant_id = mmrq->MercMerchantID;
-	uint32 merc_unk1 = mmrq->MercUnk01;
-	uint32 merc_unk2 = mmrq->MercUnk02;
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
-
-	//HirePending = true;
-	SetHoTT(0);
-	SendTargetCommand(0);
-
-	if(!RuleB(Mercs, AllowMercs))
-		return;
-
-	MercTemplate* merc_template = zone->GetMercTemplate(merc_template_id);
-
-	if(merc_template) {
-
-		Mob* merchant = entity_list.GetNPCByID(merchant_id);
-		if(!CheckCanHireMerc(merchant, merc_template_id)) {
-			return;
-		}
-
-		if(RuleB(Mercs, ChargeMercPurchaseCost)) {
-			uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; // Cost is in gold
-			TakeMoneyFromPP(cost, true);
-		}
-
-		// Set time remaining to max on Hire
-		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
-
-		// Get merc, assign it to client & spawn
-		Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
-
-		if(merc) {
-			SpawnMerc(merc, true);
-			merc->Save();
-
-			// 0 is approved hire request
-			SendMercMerchantResponsePacket(0);
-		}
-		else {
-			//merc failed to spawn
-			SendMercMerchantResponsePacket(3);
-		}
-	}
-	else {
-		//merc doesn't exist in db
-		SendMercMerchantResponsePacket(2);
-	}
-}
-
-void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(SuspendMercenary_Struct))
-	{
-		Message(13, "Size mismatch in OP_MercenarySuspendRequest expected %i got %i", sizeof(SuspendMercenary_Struct), app->size);
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenarySuspendRequest expected %i got %i", sizeof(SuspendMercenary_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	SuspendMercenary_Struct* sm = (SuspendMercenary_Struct*) app->pBuffer;
-	uint32 merc_suspend = sm->SuspendMerc;	// Seen 30 for suspending or unsuspending
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
-
-	if(!RuleB(Mercs, AllowMercs))
-		return;
-
-	// Check if the merc is suspended and if so, unsuspend, otherwise suspend it
-	SuspendMercCommand();
-}
-
-void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(MercenaryCommand_Struct))
-	{
-		Message(13, "Size mismatch in OP_MercenaryCommand expected %i got %i", sizeof(MercenaryCommand_Struct), app->size);
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryCommand expected %i got %i", sizeof(MercenaryCommand_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	MercenaryCommand_Struct* mc = (MercenaryCommand_Struct*) app->pBuffer;
-	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
-	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
-
-	if(!RuleB(Mercs, AllowMercs))
-		return;
-
-	// Handle the Command here...
-	// Will need a list of what every type of command is supposed to do
-	// Unsure if there is a server response to this packet
-	if(option >= 0)
-	{
-		Merc* merc = GetMerc();
-		GetMercInfo().State = option;
-
-		if(merc) {
-			uint8 numStances = 0;
-
-			//get number of available stances for the current merc
-			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercTemplateID()];
-			std::list<MercStanceInfo>::iterator iter = mercStanceList.begin();
-			while(iter != mercStanceList.end()) {
-				numStances++;
-				++iter;
-			}
-
-			MercTemplate* mercTemplate = zone->GetMercTemplate(GetMerc()->GetMercTemplateID());
-			if(mercTemplate) {
-
-				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
-				if(option >= 0 && option < numStances) {
-					merc->SetStance(mercTemplate->Stances[option]);
-					GetMercInfo().Stance = mercTemplate->Stances[option];
-
-					if(MERC_DEBUG > 0)
-						Message(7, "Mercenary Debug: Set Stance: %u", merc->GetStance());
-				}
-			}
-		}
-	}
-}
-
-void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app)
-{
-	// The payload is 0 bytes.
-	if(app->size != 0)
-	{
-		Message(13, "Size mismatch in OP_MercenaryDataUpdateRequest expected 0 got %i", app->size);
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryDataUpdateRequest expected 0 got %i", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Data Update Request Received.");
-
-	if(GetMercID())
-	{
-		SendMercPersonalInfo();
-	}
-}
-
-void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
-{
-	// The payload is 0 or 1 bytes.
-	if(app->size > 1)
-	{
-		Message(13, "Size mismatch in OP_MercenaryDismiss expected 0 got %i", app->size);
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryDismiss expected 0 got %i", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	uint8 Command = 0;
-	if(app->size > 0)
-	{
-		char *InBuffer = (char *)app->pBuffer;
-		Command = VARSTRUCT_DECODE_TYPE(uint8, InBuffer);
-	}
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Dismiss Request ( %i ) Received.", Command);
-
-	// Handle the dismiss here...
-	if(GetMercID()) {
-		Merc* merc = GetMerc();
-
-		if(merc) {
-			if(CheckCanDismissMerc()) {
-				merc->Dismiss();
-			}
-		}
-	}
-
-	//SendMercMerchantResponsePacket(10);
-}
-
-/*void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
-{
-	// The payload is 0 bytes.
-	if(app->size > 1)
-	{
-		Message(13, "Size mismatch in OP_MercenaryTimerRequest expected 0 got %i", app->size);
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_MercenaryTimerRequest expected 0 got %i", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	if(MERC_DEBUG > 0)
-		Message(7, "Mercenary Debug: Timer Request received.");
-
-	if(!RuleB(Mercs, AllowMercs)) {
-		return;
-	}
-
-	// To Do: Load Mercenary Timer Data to properly populate this reply packet
-	// All hard set values for now
-	uint32 entityID = 0;
-	uint32 mercState = 5;
-	uint32 suspendedTime = 0;
-	if(GetMercID()) {
-		Merc* merc = GetMerc();
-
-		if(merc) {
-			entityID = merc->GetID();
-
-			if(GetMercInfo().IsSuspended) {
-				mercState = 1;
-				suspendedTime = GetMercInfo().SuspendedTime;
-			}
-		}
-	}
-
-	if(entityID > 0) {
-		SendMercTimerPacket(entityID, mercState, suspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-	}
-}*/
 
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {
 	// Does not exist in Ti, UF or RoF clients

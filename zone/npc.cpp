@@ -233,12 +233,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	HasAISpell = false;
 	HasAISpellEffects = false;
 
-	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
-	{
-		LoadMercTypes();
-		LoadMercs();
-	}
-
 	SpellFocusDMG = 0;
 	SpellFocusHeal = 0;
 
