@@ -61,6 +61,120 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
+bool DatabaseMySQL::GetStatusWorldAccountTable(std::string &name)
+{
+	if (!db)
+	{
+		return false;
+	}
+
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	stringstream query(stringstream::in | stringstream::out);
+	unsigned int status;
+	query << "SELECT status FROM " << server.options.GetWorldAccountTable() << " WHERE name = '" << name << "' ";
+
+	if (mysql_query(db, query.str().c_str()) != 0)
+	{
+		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		return false;
+	}
+
+	res = mysql_use_result(db);
+
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			status = atoi(row[0]);
+			if (status >= 80)
+			{
+				mysql_free_result(res);
+				return true;
+			}
+			else
+			{
+				mysql_free_result(res);
+				return false;
+			}
+		}
+	}
+}
+
+bool DatabaseMySQL::GetLSWorldAccountTable(std::string &name)
+{
+	if (!db)
+	{
+		return false;
+	}
+
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	stringstream query(stringstream::in | stringstream::out);
+	query << "SELECT name FROM " << server.options.GetWorldAccountTable() << " WHERE name = '" << name << "'";
+
+	if (mysql_query(db, query.str().c_str()) != 0)
+	{
+		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		return false;
+	}
+
+	res = mysql_use_result(db);
+
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			name = row[0];
+			mysql_free_result(res);
+			return true;
+		}
+	}
+
+	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
+	return false;
+}
+
+void DatabaseMySQL::GetLoginIDFromAccountName(std::string name, unsigned int &id)
+{
+	if (!db)
+	{
+		return;
+	}
+
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	stringstream query(stringstream::in | stringstream::out);
+	query << "SELECT id FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << name << "' ";
+
+	if (mysql_query(db, query.str().c_str()) != 0)
+	{
+		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+		return;
+	}
+
+	res = mysql_use_result(db);
+
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			id = atoi(row[0]);
+			mysql_free_result(res);
+			stringstream query(stringstream::in | stringstream::out);
+			query << "INSERT INTO " << server.options.GetWorldAccountTable() << " SET id = " << id << ", name = '" << name << "', lsaccount_id = '" << id << "' ";
+
+			if (mysql_query(db, query.str().c_str()) != 0)
+			{
+				server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
+			}
+		}
+	}
+
+	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
+	return;
+}
+
 bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
 {
 	if(!db)
@@ -233,7 +347,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
 		query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
 		query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
-		query << "', LastIPAddress = '0.0.0.0', LastLoginDate = now()";
+		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
 
 		if (mysql_query(db, query.str().c_str()) != 0)
 		{
@@ -242,14 +356,14 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 	}
 }
 
-void DatabaseMySQL::UpdateLSWorldAccountInfo(unsigned int id, string name, string password, unsigned int lsaccount_id)
+void DatabaseMySQL::UpdateLSWorldAccountInfo(unsigned int id, std::string name, string password, unsigned int lsaccount_id)
 {
 	if (!db)
 	{
 		return;
 	}
 	stringstream query(stringstream::in | stringstream::out);
-	if (server.db->GetLSWorldAccountTable(id, name, password) == true)
+	if (server.db->GetLSWorldAccountTable(name))
 	{
 		server_log->Log(log_database, "User exists, not overwriting. %s", query.str().c_str());
 	}
