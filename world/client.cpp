@@ -26,6 +26,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "SoFCharCreateData.h"
+#include "console.h"
 
 #include <iostream>
 #include <iomanip>
@@ -817,6 +818,13 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if(!pZoning) {
 		database.SetGroupID(char_name, 0, charid);
 		database.SetLoginFlags(charid, false, false, 1);
+		clog(WORLD__CLIENT_ERR, GetCharName());
+
+		if (RuleB(World, AnnounceJoinQuits) == true) //this is having an issue, its not taking a true false swap, only takes default.
+		{
+			zoneserver_list.SendEmoteMessage(0, 0, 0, 15, "%s is logging on!", GetCharName());
+			clog(WORLD__CLIENT_ERR, "Character is logging on: %s", GetCharName());
+		}
 	}
 	else{
 		uint32 groupid=database.GetGroupID(char_name);

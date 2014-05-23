@@ -29,6 +29,10 @@
 #include <string>
 #include <sstream>
 
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
+#include <cstdio>
+
 TimeoutManager timeout_manager;
 LoginServer server;
 ErrorLog *server_log;
@@ -58,6 +62,22 @@ int main()
 	//Create our subsystem and parse the ini file.
 	server.config = new Config();
 	server_log->Log(log_debug, "Config System Init.");
+
+	std::string configFile = "login.ini"; 
+	ifstream f(configFile.c_str());
+	if (f.good())
+	{
+	}
+	else
+	{
+		f.close();
+		server_log->Log(log_debug, "login.ini errors. Incomplete or missing.");
+		#ifdef WIN32 //Almost never ran in a terminal on linux, so no need to hold window open to see error.
+		server_log->Log(log_debug, "Press any key to close");
+		std::getchar();
+		#endif
+	}
+
 	server.config->Parse("login.ini");
 
 	//Parse auto account creation option.

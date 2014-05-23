@@ -70,6 +70,7 @@ void command_setstat(Client *c, const Seperator *sep);
 void command_incstat(Client *c, const Seperator *sep);
 void command_help(Client *c, const Seperator *sep);
 void command_version(Client *c, const Seperator *sep);
+void command_dbversion(Client *c, const Seperator *sep);
 void command_setfaction(Client *c, const Seperator *sep);
 void command_serversidename(Client *c, const Seperator *sep);
 void command_testspawnkill(Client *c, const Seperator *sep);
