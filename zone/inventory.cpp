@@ -571,7 +571,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		inst->SetInstNoDrop(true);
 
 	// check to see if item is usable in requested slot
-	if(enforceusable && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
+	if(to_slot != SLOT_POWER_SOURCE && enforceusable && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
 		uint32 slottest = (to_slot == 9999) ? 22 : to_slot;
 
 		if(!(slots & ((uint32)1 << slottest))) {
@@ -583,14 +583,43 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		}
 	}
 
-	// put item into inventory
+	//We use Power Source to know when we're coming from a quest method.
+	if(to_slot == SLOT_POWER_SOURCE)
+	{
+		bool stacking = TryStacking(inst);
+		//If we were able to stack, there is no need to continue on as we're set.
+		if(stacking)
+		{
+			safe_delete(inst);
+			return true;
+		}
+		else
+		{
+			bool bag = false;
+			bool cursor = true;
+			if(inst->IsType(ItemClassContainer))
+			{
+				bag = true;
+				cursor = false;
+			}
+			to_slot = m_inv.FindFreeSlot(bag, cursor, item->Size);
+
+			//make sure we are not completely full...
+			if(to_slot == SLOT_CURSOR || to_slot == SLOT_INVALID) {
+				if(m_inv.GetItem(SLOT_CURSOR) != nullptr || to_slot == SLOT_INVALID) {
+					Message(13,"You have no more room. The item falls to the ground.");
+					DropInst(inst);
+				}
+			}
+		}
+	}
+
 	if(to_slot == SLOT_CURSOR) {
 		PushItemOnCursor(*inst);
-		SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+		SendItemPacket(to_slot, inst, ItemPacketSummonItem);
 	}
-	else {
+	else
 		PutItemInInventory(to_slot, *inst, true);
-	}
 
 	safe_delete(inst);
 

@@ -5931,16 +5931,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		}
 	}
 
-	/*if(freeslotid == SLOT_INVALID)
-	{
-		Message(13,"You have no more room. The item falls to the ground.");
-		DropInst(inst);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-		safe_delete(inst);
-		return;
-	}*/
-
 	std::string packet;
 	if (!stacked && inst) {
 		PutItemInInventory(freeslotid, *inst);

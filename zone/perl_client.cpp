@@ -3056,7 +3056,7 @@ XS(XS_Client_SummonItem)
 		uint32		aug3 = 0;
 		uint32		aug4 = 0;
 		uint32		aug5 = 0;
-		uint16		slot_id = 30;
+		uint16		slot_id = 9999;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
