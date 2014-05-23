@@ -53,11 +53,31 @@ public:
 	virtual bool IsConnected() { return (db != nullptr); }
 
 	/**
+	* Retrieves the id from the account name provided
+	* Needed for normalization and status check.
+	*/
+	virtual void GetLoginIDFromAccountName(std::string name, unsigned int &id);
+
+	/**
 	* Retrieves the login data (password hash and account id) from the account name provided
 	* Needed for client login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
 	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id);
+
+	/**
+	* Retrieves account status to check for GM ability to use UF+ clients
+	* Needed for normalization and status check.
+	* Returns true if the record was found, false otherwise.
+	*/
+	virtual bool GetStatusWorldAccountTable(std::string &name);
+
+	/**
+	* Retrieves account name to check for initial entry
+	* Needed for normalization and status check.
+	* Returns true if the record was found, false otherwise.
+	*/
+	virtual bool GetLSWorldAccountTable(std::string &name);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.
