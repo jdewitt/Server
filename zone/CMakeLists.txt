@@ -67,7 +67,6 @@ SET(zone_sources
 	inventory.cpp
 	loottables.cpp
 	map.cpp
-	merc.cpp
 	mob.cpp
 	MobAI.cpp
 	mod_functions.cpp
@@ -168,7 +167,6 @@ SET(zone_headers
 	masterentity.h
 	maxskill.h
 	message.h
-	merc.h
 	mob.h
 	net.h
 	npc.h

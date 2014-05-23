@@ -114,18 +114,6 @@ Mob *Entity::CastToMob()
 	return static_cast<Mob *>(this);
 }
 
-Merc *Entity::CastToMerc()
-{
-#ifdef _EQDEBUG
-	if (!IsMerc()) {
-		std::cout << "CastToMerc error" << std::endl;
-		DebugBreak();
-		return 0;
-	}
-#endif
-	return static_cast<Merc *>(this);
-}
-
 
 Trap *Entity::CastToTrap()
 {
@@ -222,18 +210,6 @@ const Mob *Entity::CastToMob() const
 	}
 #endif
 	return static_cast<const Mob *>(this);
-}
-
-const Merc *Entity::CastToMerc() const
-{
-#ifdef _EQDEBUG
-	if (!IsMerc()) {
-		std::cout << "CastToMerc error" << std::endl;
-		DebugBreak();
-		return 0;
-	}
-#endif
-	return static_cast<const Merc *>(this);
 }
 
 const Trap *Entity::CastToTrap() const
@@ -503,8 +479,6 @@ void EntityList::MobProcess()
 			++it; // we don't erase here because the destructor will
 			if (mob->IsNPC()) {
 				entity_list.RemoveNPC(mob->CastToNPC()->GetID());
-			} else if (mob->IsMerc()) {
-				entity_list.RemoveMerc(mob->CastToMerc()->GetID());
 #ifdef BOTS
 			} else if (mob->IsBot()) {
 				entity_list.RemoveBot(mob->CastToBot()->GetID());
@@ -647,36 +621,6 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
-}
-
-void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
-{
-	if (merc) {
-		merc->SetID(GetFreeID());
-
-		if (SendSpawnPacket) {
-			if (dontqueue) {
-				// Send immediately
-				EQApplicationPacket *outapp = new EQApplicationPacket();
-				merc->CreateSpawnPacket(outapp);
-				outapp->priority = 6;
-				QueueClients(merc, outapp, true);
-				safe_delete(outapp);
-			} else {
-				// Queue the packet
-				NewSpawn_Struct *ns = new NewSpawn_Struct;
-				memset(ns, 0, sizeof(NewSpawn_Struct));
-				merc->FillSpawnStruct(ns, merc);
-				AddToSpawnQueue(merc->GetID(), &ns);
-				safe_delete(ns);
-			}
-
-			//parse->EventMERC(EVENT_SPAWN, merc, nullptr, "", 0);
-		}
-
-		merc_list.insert(std::pair<uint16, Merc *>(merc->GetID(), merc));
-		mob_list.insert(std::pair<uint16, Mob *>(merc->GetID(), merc));
-	}
 }
 
 void EntityList::AddObject(Object *obj, bool SendSpawnPacket)
@@ -937,11 +881,6 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket* app, Client *client)
 Entity *EntityList::GetEntityMob(uint16 id)
 {
 	return mob_list.count(id) ? mob_list.at(id) : nullptr;
-}
-
-Entity *EntityList::GetEntityMerc(uint16 id)
-{
-	return merc_list.count(id) ? merc_list.at(id) : nullptr;
 }
 
 Entity *EntityList::GetEntityMob(const char *name)

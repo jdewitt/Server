@@ -224,16 +224,6 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 
 		if(newmember->IsClient())
 			CharacterID = newmember->CastToClient()->CharacterID();
-		if(newmember->IsMerc())
-		{
-			Client* owner = newmember->CastToMerc()->GetMercOwner();
-			if(owner)
-			{
-				CharacterID = owner->CastToClient()->CharacterID();
-				NewMemberName = newmember->GetName();
-				ismerc = true;
-			}
-		}
 	}
 
 	uint32 i = 0;
@@ -319,14 +309,6 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 			NotifyPuller(newmember->CastToClient(), 1);
 		}
 
-		if(newmember->IsMerc())
-		{
-			Client* owner = newmember->CastToMerc()->GetMercOwner();
-			if(owner)
-			{
-				database.SetGroupID(newmember->GetName(), GetID(), owner->CharacterID(), true);
-			}
-		}
 #ifdef BOTS
 		for (i = 0;i < MAX_GROUP_MEMBERS; i++) {
 			if (members[i] != nullptr && members[i]->IsBot()) {
