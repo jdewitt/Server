@@ -47,6 +47,12 @@ int main()
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
+#ifdef WIN32 //Starts window minimized on Windows.
+	HWND handleWindow;
+	AllocConsole();
+	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
+	ShowWindow(handleWindow, 2);
+#endif
 
 	//Create our error log, is of format login_<number>.log
 	time_t current_time = time(nullptr);
