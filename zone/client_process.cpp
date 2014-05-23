@@ -176,11 +176,6 @@ bool Client::Process() {
 
 		if(linkdead_timer.Check()){
 			Save();
-			if (GetMerc())
-			{
-				GetMerc()->Save();
-				GetMerc()->Depop();
-			}
 			LeaveGroup();
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
@@ -193,11 +188,6 @@ bool Client::Process() {
 		if (camp_timer.Check()) {
 			LeaveGroup();
 			Save();
-			if (GetMerc())
-			{
-				GetMerc()->Save();
-				GetMerc()->Depop();
-			}
 			instalog = true;
 		}
 
@@ -228,18 +218,6 @@ bool Client::Process() {
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 //				SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
 			}
-		}
-
-		if(GetMerc())
-		{
-				UpdateMercTimer();
-		}
-
-		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
-		{
-			if(p_timers.Expired(&database, pTimerMercSuspend, false)) {
-					CheckMercSuspendTimer();
-				}
 		}
 
 		if(IsAIControlled())
@@ -676,14 +654,8 @@ bool Client::Process() {
 		OnDisconnect(true);
 		std::cout << "Client linkdead: " << name << std::endl;
 
-		if (GetGM()) {
-			if (GetMerc())
-			{
-				GetMerc()->Save();
-				GetMerc()->Depop();
-			}
+		if (GetGM()) 
 			return false;
-		}
 		else if(!linkdead_timer.Enabled()){
 			linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
@@ -718,10 +690,6 @@ bool Client::Process() {
 		//ResetTrade();
 		if (client_state != CLIENT_KICKED) {
 			Save();
-		}
-		if (GetMerc())
-		{
-			GetMerc()->Depop();
 		}
 
 		client_state = CLIENT_LINKDEAD;

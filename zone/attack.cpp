@@ -1513,10 +1513,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	SetHorseId(0);
 	dead = true;
 
-	if(GetMerc()) {
-		GetMerc()->Suspend();
-	}
-
 	if (killerMob != nullptr)
 	{
 		if (killerMob->IsNPC()) {
@@ -2554,17 +2550,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	}
 #endif //BOTS
 
-
-	// if other is a merc, add the merc client to the hate list
-	if(other->IsMerc()) {
-		if(other->CastToMerc()->GetMercOwner() && other->CastToMerc()->GetMercOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToMerc()->GetMercOwner()->CastToClient());
-		}
-		else {
-			if(!hate_list.IsOnHateList(other->CastToMerc()->GetMercOwner()))
-				hate_list.Add(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
-		}
-	} //MERC
 
 	// then add pet owner if there's one
 	if (owner) { // Other is a pet, add him and it

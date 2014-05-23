@@ -41,7 +41,6 @@ class Client;
 #include "errno.h"
 #include "mob.h"
 #include "npc.h"
-#include "merc.h"
 #include "zone.h"
 #include "AA.h"
 #include "questmgr.h"
@@ -166,9 +165,6 @@ typedef enum
 	RaidMarkTarget3 = 22,
 	MyPet = 23,
 	MyPetTarget = 24,
-	MyMercenary = 25,
-	MyMercenaryTarget = 26
-
 } XTargetType;
 
 struct XTarget_Struct
@@ -1124,35 +1120,6 @@ public:
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
-	void InitializeMercInfo();
-	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);
-	bool CheckCanRetainMerc(uint32 upkeep);
-	bool CheckCanUnsuspendMerc();
-	bool CheckCanDismissMerc();
-	inline uint32 GetMercID()	const { return mercid; }
-	inline uint8 GetMercSlot()	const { return mercSlot; }
-	void SetMercID( uint32 newmercid) { mercid = newmercid; }
-	void SetMercSlot( uint8 newmercslot) { mercSlot = newmercslot; }
-	Merc* GetMerc();
-	MercInfo& GetMercInfo(uint8 slot) { return m_mercinfo[slot]; }
-	MercInfo& GetMercInfo() { return m_mercinfo[mercSlot]; }
-	uint8 GetNumMercs();
-	void SetMerc(Merc* newmerc);
-	void SendMercMerchantResponsePacket(int32 response_type);
-	//void SendMercenaryUnknownPacket(uint8 type);
-	void SendMercenaryUnsuspendPacket(uint8 type);
-	void SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspended_time, int32 update_interval = 900000, int32 unk01 = 180000);
-	void SendMercSuspendResponsePacket(uint32 suspended_time);
-	void SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02);
-	void SendMercPersonalInfo();
-	void SendClearMercInfo();
-	void SuspendMercCommand();
-	void SpawnMercOnZone();
-	void SpawnMerc(Merc* merc, bool setMaxStats);
-	void UpdateMercTimer();
-	void UpdateMercLevel();
-	void CheckMercSuspendTimer();
-	Timer* GetMercTimer() { return &merc_timer; };
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
@@ -1341,8 +1308,6 @@ private:
 	uint16				CustomerID;
 	uint32				account_creation;
 	uint8				firstlogon;
-	uint32				mercid; // current merc
-	uint8				mercSlot; // selected merc slot
 	bool	Trader;
 	bool	Buyer;
 	std::string	BuyerWelcomeMessage;
@@ -1358,7 +1323,6 @@ private:
 	Object*						m_tradeskill_object;
 	PetInfo						m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo						m_suspendedminion; // pet data for our suspended minion.
-	MercInfo					m_mercinfo[MAXMERCS]; // current mercenary
 	InspectMessage_Struct		m_inspect_message;
 
 	void NPCSpawn(const Seperator* sep);
@@ -1416,7 +1380,6 @@ private:
 	Timer	qglobal_purge_timer;
 	Timer	TrackingTimer;
 	Timer	RespawnFromHoverTimer;
-	Timer	merc_timer;
 
 	float	proximity_x;
 	float	proximity_y;
