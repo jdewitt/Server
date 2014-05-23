@@ -55,7 +55,7 @@
 #include "worldserver.h"
 #include "masterentity.h"
 #include "map.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "../common/features.h"
 #include "pathing.h"
 #include "client_logs.h"
@@ -7973,27 +7973,26 @@ void command_pf(Client *c, const Seperator *sep){
 
 void command_bestz(Client *c, const Seperator *sep){
 	if (zone->zonemap == nullptr) {
-		c->Message(0,"Maps deactivated in this zone.");
-		return;
-	}
+		c->Message(0,"Map not loaded for this zone");
+	} else {
+		Map::Vertex me;
+		me.x = c->GetX();
+		me.y = c->GetY();
+		me.z = c->GetZ() + (c->GetSize() == 0.0 ? 6 : c->GetSize()) * HEAD_POSITION;
+		Map::Vertex hit;
+		Map::Vertex bme(me);
+		bme.z -= 500;
 
-	Map::Vertex me;
-	me.x = c->GetX();
-	me.y = c->GetY();
-	me.z = c->GetZ() + (c->GetSize()==0.0?6:c->GetSize()) * HEAD_POSITION;
-	Map::Vertex hit;
-	Map::Vertex bme(me);
-	bme.z -= 500;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
 
-	float best_z = zone->zonemap->FindBestZ(me, &hit);
-
-	if (best_z != -999999)
-	{
-		c->Message(0,"Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
-	}
-	else
-	{
-		c->Message(0,"Found no Z.");
+		if (best_z != -999999)
+		{
+			c->Message(0, "Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
+		}
+		else
+		{
+			c->Message(0, "Found no Z.");
+		}
 	}
 
 	if(zone->watermap == nullptr) {
@@ -8004,14 +8003,14 @@ void command_bestz(Client *c, const Seperator *sep){
 
 		if(c->GetTarget()) {
 			z=c->GetTarget()->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 
 		}
 		else {
 			z=c->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetX(), c->GetY(),z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetX(), c->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetX(), c->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetX(), c->GetY(), z));
 
