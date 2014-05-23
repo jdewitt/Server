@@ -257,20 +257,6 @@ const Beacon* Entity::CastToBeacon() const
 	return static_cast<const Beacon *>(this);
 }
 
-#ifdef BOTS
-Bot *Entity::CastToBot()
-{
-#ifdef _EQDEBUG
-	if (!IsBot()) {
-		std::cout << "CastToBot error" << std::endl;
-		DebugBreak();
-		return 0;
-	}
-#endif
-	return static_cast<Bot *>(this);
-}
-#endif
-
 EntityList::EntityList()
 {
 	// set up ids between 1 and 1500
@@ -479,10 +465,6 @@ void EntityList::MobProcess()
 			++it; // we don't erase here because the destructor will
 			if (mob->IsNPC()) {
 				entity_list.RemoveNPC(mob->CastToNPC()->GetID());
-#ifdef BOTS
-			} else if (mob->IsBot()) {
-				entity_list.RemoveBot(mob->CastToBot()->GetID());
-#endif
 			} else {
 #ifdef _WINDOWS
 				struct in_addr in;
@@ -2327,13 +2309,6 @@ void EntityList::RemoveEntity(uint16 id)
 		return;
 	else if (entity_list.RemoveMerc(id))
 		return;
-
-#ifdef BOTS
-	// This block of code is necessary to clean up bot objects
-	else if (entity_list.RemoveBot(id))
-		return;
-#endif //BOTS
-
 	else
 		entity_list.RemoveObject(id);
 }
