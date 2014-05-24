@@ -1723,20 +1723,6 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 {
 	Mob::FillSpawnStruct(ns, ForWho);
 
-	//Basic settings to make sure swarm pets work properly.
-	if  (GetSwarmOwner()) {
-		Client *c = entity_list.GetClientByID(GetSwarmOwner());
-			if(c) {
-				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
-				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
-				if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
-					ns->spawn.IsMercenary = 1;
-			}
-			//NPC cast swarm pets should still be targetable with F8.
-			else
-				ns->spawn.IsMercenary = 0;
-	}
-	
 	//Not recommended if using above (However, this will work better on older clients).
 	if (RuleB(Pets, UnTargetableSwarmPet)) {
 		if(GetOwnerID() || GetSwarmOwner()) {

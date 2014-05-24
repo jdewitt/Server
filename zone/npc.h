@@ -353,7 +353,6 @@ public:
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 	void RemoveSpellFromNPCList(int16 spell_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
-	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
 	NPC_Emote_Struct* GetNPCEmote(uint16 emoteid, uint8 event_);
 	void DoNPCEmote(uint8 event_, uint16 emoteid);
