@@ -113,76 +113,6 @@ struct TraderCharges_Struct {
 	int32 Charges[80];
 };
 
-const int MaxMercStanceID = 9;
-
-struct MercStanceInfo {
-	uint8	ProficiencyID;
-	uint8	ClassID;
-	uint32	StanceID;
-	uint8	IsDefault;
-};
-
-struct MercTemplate {
-	uint32	MercTemplateID;
-	uint32	MercType;				// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-	uint32	MercSubType;			// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
-	uint16	RaceID;
-	uint8	ClassID;
-	uint32	MercNPCID;
-	uint8	ProficiencyID;
-	uint8	TierID;
-	uint8	CostFormula;			// To determine cost to client
-	uint32	ClientVersion;				// Only send valid mercs per expansion
-	uint8	MercNameType;			// Determines if merc gets random name or default text
-	char	MercNamePrefix[25];
-	char	MercNameSuffix[25];
-	uint32	Stances[MaxMercStanceID];
-};
-
-struct MercInfo {
-	uint32	mercid;
-	uint8	slot;
-	char	merc_name[64];
-	uint32	MercTemplateID;
-	const	MercTemplate* myTemplate;
-	uint32	SuspendedTime;
-	bool	IsSuspended;
-	uint32	MercTimerRemaining;
-	uint8	Gender;
-	int32	State;
-	uint32	Stance;
-	int32	hp;
-	int32	mana;
-	int32	endurance;
-	uint8	face;
-	uint8	luclinHairStyle;
-	uint8	luclinHairColor;
-	uint8	luclinEyeColor;
-	uint8	luclinEyeColor2;
-	uint8	luclinBeardColor;
-	uint8	luclinBeard;
-	uint32	drakkinHeritage;
-	uint32	drakkinTattoo;
-	uint32	drakkinDetails;
-};
-
-struct MercSpellEntry {
-	uint8	proficiencyid;
-	uint16	spellid;		// <= 0 = no spell
-	uint32	type;			// 0 = never, must be one (and only one) of the defined values
-	int16	stance;			// 0 = all, + = only this stance, - = all except this stance
-	uint8	minlevel;
-	uint8	maxlevel;
-	int16	slot;
-	uint16	proc_chance;
-	uint32	time_cancast;	// when we can cast this spell next
-};
-
-struct ClientMercEntry {
-	uint32 id;
-	uint32 npcid;
-};
-
 class ItemInst;
 struct FactionMods;
 struct FactionValue;
@@ -366,20 +296,6 @@ public:
 	uint32	GetMaxNPCSpellsEffectsID();
 	DBnpcspells_Struct* GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct* GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
-
-	/*
-	* Mercs
-	*/
-	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
-	void	LoadMercEquipment(Merc *merc);
-	void	SaveMercBuffs(Merc *merc);
-	void	LoadMercBuffs(Merc *merc);
-	bool	LoadMercInfo(Client *c);
-	bool	LoadCurrentMerc(Client *c);
-	bool	SaveMerc(Merc *merc);
-	bool	DeleteMerc(uint32 merc_id);
-	//void	LoadMercTypesForMercMerchant(NPC *merchant);
-	//void	LoadMercsForMercMerchant(NPC *merchant);
 
 	/*
 	* Petitions

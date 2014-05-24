@@ -282,13 +282,6 @@
 	void Handle_OP_XTargetRequest(const EQApplicationPacket *app);
 	void Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app);
 	void Handle_OP_ItemPreview(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryHire(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryCommand(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app);
-	void Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryDismiss(const EQApplicationPacket *app);
-	void Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);

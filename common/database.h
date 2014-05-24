@@ -46,7 +46,6 @@ class NPC;
 class SpawnGroupList;
 class Petition;
 class Client;
-class Merc;
 struct Combine_Struct;
 //struct Faction;
 //struct FactionMods;

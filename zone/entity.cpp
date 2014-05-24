@@ -1981,11 +1981,6 @@ void EntityList::RemoveAllNPCs()
 	npc_limit_list.clear();
 }
 
-void EntityList::RemoveAllMercs()
-{
-	merc_list.clear();
-}
-
 void EntityList::RemoveAllGroups()
 {
 	while (group_list.size())
@@ -2112,16 +2107,6 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id))
 			npc_limit_list.erase(delete_id);
-		return true;
-	}
-	return false;
-}
-
-bool EntityList::RemoveMerc(uint16 delete_id)
-{
-	auto it = merc_list.find(delete_id);
-	if (it != merc_list.end()) {
-		merc_list.erase(it); // Already Deleted
 		return true;
 	}
 	return false;
@@ -2306,8 +2291,6 @@ void EntityList::RemoveEntity(uint16 id)
 	else if (entity_list.RemoveGroup(id))
 		return;
 	else if (entity_list.RemoveTrap(id))
-		return;
-	else if (entity_list.RemoveMerc(id))
 		return;
 	else
 		entity_list.RemoveObject(id);
