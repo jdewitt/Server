@@ -64,7 +64,7 @@ public:
 	* Needed for status check.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetStatusLSAccountTable(std::string &name, std::string &client_status);
+	virtual bool GetStatusLSAccountTable(std::string &name, unsigned int &client_unlock);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.
@@ -87,7 +87,7 @@ public:
 	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string created_by, std::string LastIPAddress);
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress);
 
 	/**
 	* Updates the ip address of the world with account id = id
