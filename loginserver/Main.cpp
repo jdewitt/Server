@@ -47,7 +47,7 @@ int main()
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
-#ifdef WIN32 //Starts window minimized on Windows.
+#ifdef _WINDOWS //Starts window minimized on Windows.
 	HWND handleWindow;
 	AllocConsole();
 	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
@@ -90,12 +90,6 @@ int main()
 	if (server.config->GetVariable("options", "auto_account_create").compare("TRUE") == 0)
 	{
 		server.options.AutoCreate(true);
-	}
-
-	//Parse login ID to account ID normalization option.
-	if (server.config->GetVariable("options", "ID_normalization").compare("TRUE") == 0)
-	{
-		server.options.IDnormals(true);
 	}
 
 	//Parse failed access log option.
@@ -166,13 +160,6 @@ int main()
 	if (ln.size() > 0)
 	{
 		server.options.AccountAccessLogTable(ln);
-	}
-
-	//Parse world account table option.
-	ln = server.config->GetVariable("schema", "world_account_table");
-	if (ln.size() > 0)
-	{
-		server.options.WorldAccountTable(ln);
 	}
 
 	//Parse world account table option.

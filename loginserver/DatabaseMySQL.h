@@ -51,13 +51,7 @@ public:
 	* @return Returns true if the database successfully connected.
 	*/
 	virtual bool IsConnected() { return (db != nullptr); }
-
-	/**
-	* Retrieves the id from the account name provided
-	* Needed for normalization and status check.
-	*/
-	virtual void GetLoginIDFromAccountName(std::string name, unsigned int &id);
-
+	
 	/**
 	* Retrieves the login data (password hash and account id) from the account name provided
 	* Needed for client login procedure.
@@ -67,17 +61,10 @@ public:
 
 	/**
 	* Retrieves account status to check for GM ability to use UF+ clients
-	* Needed for normalization and status check.
+	* Needed for status check.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetStatusWorldAccountTable(std::string &name);
-
-	/**
-	* Retrieves account name to check for initial entry
-	* Needed for normalization and status check.
-	* Returns true if the record was found, false otherwise.
-	*/
-	virtual bool GetLSWorldAccountTable(std::string &name);
+	virtual bool GetStatusLSAccountTable(std::string &name, std::string &client_status);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.
@@ -93,11 +80,6 @@ public:
 	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address);
 
 	/**
-	* Updates or creates the login server world account with info
-	*/
-	virtual void UpdateLSWorldAccountInfo(unsigned int id, std::string name, std::string password, unsigned int lsaccount_id);
-
-	/**
 	* Updates or creates the access log
 	*/
 	virtual void UpdateAccessLog(unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason);
@@ -105,7 +87,7 @@ public:
 	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string LastIPAddress);
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string created_by, std::string LastIPAddress);
 
 	/**
 	* Updates the ip address of the world with account id = id

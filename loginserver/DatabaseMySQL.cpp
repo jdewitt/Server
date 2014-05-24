@@ -61,7 +61,7 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
-bool DatabaseMySQL::GetStatusWorldAccountTable(std::string &name)
+bool DatabaseMySQL::GetStatusLSAccountTable(std::string &name, std::string &client_unlock)
 {
 	if (!db)
 	{
@@ -71,8 +71,7 @@ bool DatabaseMySQL::GetStatusWorldAccountTable(std::string &name)
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	stringstream query(stringstream::in | stringstream::out);
-	unsigned int status;
-	query << "SELECT status FROM " << server.options.GetWorldAccountTable() << " WHERE name = '" << name << "' ";
+	query << "SELECT client_unlock FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << name << "' ";
 
 	if (mysql_query(db, query.str().c_str()) != 0)
 	{
@@ -86,8 +85,8 @@ bool DatabaseMySQL::GetStatusWorldAccountTable(std::string &name)
 	{
 		while ((row = mysql_fetch_row(res)) != nullptr)
 		{
-			status = atoi(row[0]);
-			if (status >= 80)
+			client_unlock = row[0];
+			if (client_unlock == "true")
 			{
 				mysql_free_result(res);
 				return true;
@@ -99,80 +98,6 @@ bool DatabaseMySQL::GetStatusWorldAccountTable(std::string &name)
 			}
 		}
 	}
-}
-
-bool DatabaseMySQL::GetLSWorldAccountTable(std::string &name)
-{
-	if (!db)
-	{
-		return false;
-	}
-
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	stringstream query(stringstream::in | stringstream::out);
-	query << "SELECT name FROM " << server.options.GetWorldAccountTable() << " WHERE name = '" << name << "'";
-
-	if (mysql_query(db, query.str().c_str()) != 0)
-	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-		return false;
-	}
-
-	res = mysql_use_result(db);
-
-	if (res)
-	{
-		while ((row = mysql_fetch_row(res)) != nullptr)
-		{
-			name = row[0];
-			mysql_free_result(res);
-			return true;
-		}
-	}
-
-	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
-	return false;
-}
-
-void DatabaseMySQL::GetLoginIDFromAccountName(std::string name, unsigned int &id)
-{
-	if (!db)
-	{
-		return;
-	}
-
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	stringstream query(stringstream::in | stringstream::out);
-	query << "SELECT id FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << name << "' ";
-
-	if (mysql_query(db, query.str().c_str()) != 0)
-	{
-		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-		return;
-	}
-
-	res = mysql_use_result(db);
-
-	if (res)
-	{
-		while ((row = mysql_fetch_row(res)) != nullptr)
-		{
-			id = atoi(row[0]);
-			mysql_free_result(res);
-			stringstream query(stringstream::in | stringstream::out);
-			query << "INSERT INTO " << server.options.GetWorldAccountTable() << " SET id = " << id << ", name = '" << name << "', lsaccount_id = '" << id << "' ";
-
-			if (mysql_query(db, query.str().c_str()) != 0)
-			{
-				server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-			}
-		}
-	}
-
-	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
-	return;
 }
 
 bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
@@ -322,18 +247,18 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 	}
 }
 
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email, string LastIPAddress)
+void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string created_by, std::string LastIPAddress)
 {
 	if (!db)
 	{
 		return;
 	}
-	if (email == "PC_generated@server.com")
+	if (created_by == "PC")
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
 		query << id << ", AccountName = '" << name << "', AccountPassword = '";
-		query << password << "', AccountCreateDate = now(), AccountEmail = '" << email;
+		query << password << "', AccountCreateDate = now(), created_by = '" << created_by;
 		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
 
 		if (mysql_query(db, query.str().c_str()) != 0)
@@ -341,36 +266,13 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
 		}
 	}
-	else
+	if (created_by == "MAC")
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
 		query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
-		query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
+		query << password << "'), AccountCreateDate = now(), created_by = '" << created_by;
 		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
-
-		if (mysql_query(db, query.str().c_str()) != 0)
-		{
-			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-		}
-	}
-}
-
-void DatabaseMySQL::UpdateLSWorldAccountInfo(unsigned int id, std::string name, string password, unsigned int lsaccount_id)
-{
-	if (!db)
-	{
-		return;
-	}
-	stringstream query(stringstream::in | stringstream::out);
-	if (server.db->GetLSWorldAccountTable(name))
-	{
-		server_log->Log(log_database, "User exists, not overwriting. %s", query.str().c_str());
-	}
-	else
-	{
-		query << "INSERT INTO " << server.options.GetWorldAccountTable() << " SET id = ";
-		query << id << ", name = '" << name << "', password = md5('" << password << "'), lsaccount_id = '" << lsaccount_id << "' ";
 
 		if (mysql_query(db, query.str().c_str()) != 0)
 		{
