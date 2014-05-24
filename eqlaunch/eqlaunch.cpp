@@ -37,6 +37,12 @@ void CatchSignal(int sig_num);
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
 	set_exception_handler();
+#ifdef WIN32 //Starts window minimized on Windows.
+	HWND handleWindow;
+	AllocConsole();
+	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
+	ShowWindow(handleWindow, 2);
+#endif
 
 	std::string launcher_name;
 	if(argc == 2) {

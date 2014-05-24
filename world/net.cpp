@@ -113,6 +113,12 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
+#ifdef WIN32 //Starts window minimized on Windows.
+	HWND handleWindow;
+	AllocConsole();
+	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
+	ShowWindow(handleWindow, 2);
+#endif
 
 	// Load server configuration
 	_log(WORLD__INIT, "Loading server configuration..");

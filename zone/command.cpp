@@ -180,6 +180,7 @@ int command_init(void){
 		command_add("date","[yyyy] [mm] [dd] [HH] [MM] - Set EQ time",90,command_date) ||
 		command_add("dbspawn",nullptr,0,command_npctypespawn) ||
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
+		command_add("dbversion","- Display current database version.",0,command_dbversion) ||
 		command_add("delacct","[accountname] - Delete an account",150,command_delacct) ||
 		command_add("deletegraveyard","[zone name] - Deletes the graveyard for the specified zone.", 200, command_deletegraveyard) ||
 		command_add("delpetition","[petition number] - Delete a petition",20,command_delpetition) ||
@@ -682,6 +683,12 @@ void command_logcommand(Client *c, const char *message){
 }
 
 // commands go below here
+
+void command_dbversion(Client *c, const Seperator* sep){
+	//I gave up on this, pulling the realtime from the eqtime table.
+	//Then displaying on client the human readable time plus the time since this update.
+	c->Message(0, "Unimplemented, see comments in command.cpp");
+}
  
 void command_setstat(Client* c, const Seperator* sep){
 	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
