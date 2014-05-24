@@ -61,7 +61,7 @@ DatabaseMySQL::~DatabaseMySQL()
 	}
 }
 
-bool DatabaseMySQL::GetStatusLSAccountTable(std::string &name, std::string &client_unlock)
+bool DatabaseMySQL::GetStatusLSAccountTable(std::string &name, unsigned int &client_unlock)
 {
 	if (!db)
 	{
@@ -85,8 +85,8 @@ bool DatabaseMySQL::GetStatusLSAccountTable(std::string &name, std::string &clie
 	{
 		while ((row = mysql_fetch_row(res)) != nullptr)
 		{
-			client_unlock = row[0];
-			if (client_unlock == "true")
+			client_unlock = atoi(row[0]);
+			if (client_unlock == 1)
 			{
 				mysql_free_result(res);
 				return true;
@@ -247,13 +247,13 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 	}
 }
 
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, std::string created_by, std::string LastIPAddress)
+void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress)
 {
 	if (!db)
 	{
 		return;
 	}
-	if (created_by == "PC")
+	if (created_by == 1)
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
@@ -266,7 +266,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
 		}
 	}
-	if (created_by == "MAC")
+	if (created_by == 2)
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
