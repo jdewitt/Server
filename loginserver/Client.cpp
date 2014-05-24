@@ -277,7 +277,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 			}
 			/*eventually add a unix time stamp calculator from last id in log that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, e_user, e_hash, "PC_generated@server.com", string(inet_ntoa(in)));
+			server.db->UpdateLSAccountInfo(NULL, e_user, e_hash, "", "PC", string(inet_ntoa(in)));
 
 			result = false;
 		}
@@ -287,7 +287,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	{
 		if(d_pass_hash.compare(e_hash) == 0)
 		{
-			if (server.db->GetStatusWorldAccountTable(e_user))
+			std::string unlock = "true";
+			if (server.db->GetStatusLSAccountTable(e_user, unlock))
 			{
 				result = true;
 			}
@@ -317,11 +318,6 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		GenerateKey();
 		account_id = d_account_id;
 		account_name = e_user;
-
-		if (server.options.IsIDnormalsOn())
-		{
-			server.db->UpdateLSWorldAccountInfo(d_account_id, e_user, e_hash, d_account_id);
-		}
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
@@ -460,7 +456,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 			}
 			/*eventually add a unix time stamp calculator from last id that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, lcs->username, lcs->password, "MAC_generated@server.com", string(inet_ntoa(in)));
+			server.db->UpdateLSAccountInfo(NULL, lcs->username, lcs->password, "", "MAC", string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -501,10 +497,10 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		s_id->unknown = 4;
 		connection->QueuePacket(outapp);
 		delete outapp;
-		if (server.options.IsIDnormalsOn())
-		{
-			server.db->UpdateLSWorldAccountInfo(account_id, lcs->username, lcs->password, account_id);
-		}
+		//if (server.options.IsIDnormalsOn())
+		//{
+		//	server.db->UpdateLSWorldAccountInfo(account_id, lcs->username, lcs->password, account_id);
+		//}
 	}
 	else
 	{

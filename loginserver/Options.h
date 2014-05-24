@@ -30,7 +30,6 @@ public:
 	*/
 	Options() :
 		auto_account_create(false),
-		ID_normalization(false),
 		Login_Fails(false),
 		allow_unregistered(true),
 		trace(false),
@@ -51,22 +50,12 @@ public:
 	inline bool IsCreateOn() const { return auto_account_create; }
 
 	/**
-	* Sets login ID to account ID normalization.
-	*/
-	inline void IDnormals(bool b) { ID_normalization = b; }
-
-	/**
-	* Returns the value of ID_normalization.
-	*/
-	inline bool IsIDnormalsOn() const { return ID_normalization; }
-
-	/**
 	* Sets logging of failed logins.
 	*/
 	inline void LoginFails(bool b) { Login_Fails = b; }
 
 	/**
-	* Returns the value of ID_normalization.
+	* Logs failed logins and reason.
 	*/
 	inline bool IsLoginFailsOn() const { return Login_Fails; }
 
@@ -158,18 +147,13 @@ public:
 	/**
 	* Sets world account table.
 	*/
-	inline void WorldAccountTable(std::string t) { world_account_table = t; }
+	//inline void WorldAccountTable(std::string t) { world_account_table = t; }
 
 	/**
 	* Return the value of local_network.
 	*/
 	inline std::string GetAccountTable() const { return account_table; }
-
-	/**
-	* Return the value of local_network.
-	*/
-	inline std::string GetWorldAccountTable() const { return world_account_table; }
-
+	
 	/**
 	* Sets world account table.
 	*/
@@ -212,7 +196,6 @@ public:
 
 private:
 	bool auto_account_create;
-	bool ID_normalization;
 	bool Login_Fails;
 	bool allow_unregistered;
 	bool trace;

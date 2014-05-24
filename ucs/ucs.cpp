@@ -69,7 +69,7 @@ std::string GetMailPrefix() {
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
 	set_exception_handler();
-#ifdef WIN32 //Starts window minimized on Windows.
+#ifdef _WINDOWS //Starts window minimized on Windows.
 	HWND handleWindow;
 	AllocConsole();
 	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
