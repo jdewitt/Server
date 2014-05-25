@@ -726,7 +726,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("LoginUnknown2", static_cast<int>(OP_LoginUnknown2)),
 			luabind::value("ItemViewUnknown", static_cast<int>(OP_ItemViewUnknown)),
 			luabind::value("GetGuildMOTDReply", static_cast<int>(OP_GetGuildMOTDReply)),
-			luabind::value("SetGuildRank", static_cast<int>(OP_SetGuildRank)),
 			luabind::value("SpawnPositionUpdate", static_cast<int>(OP_SpawnPositionUpdate)),
 			luabind::value("ManaUpdate", static_cast<int>(OP_ManaUpdate)),
 			luabind::value("EnduranceUpdate", static_cast<int>(OP_EnduranceUpdate)),
