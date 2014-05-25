@@ -540,13 +540,6 @@ public:
 	void	SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
 	uint32	GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void	AddPVPPoints(uint32 Points);
-	uint32	GetRadiantCrystals() { return m_pp.currentRadCrystals; }
-	void	SetRadiantCrystals(uint32 Crystals) { m_pp.currentRadCrystals = Crystals; }
-	uint32	GetEbonCrystals() { return m_pp.currentEbonCrystals; }
-	void	SetEbonCrystals(uint32 Crystals) { m_pp.currentEbonCrystals = Crystals; }
-	void	AddCrystals(uint32 Radiant, uint32 Ebon);
-	void	SendCrystalCounts();
-
 	void	AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	void	SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void	AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);

@@ -214,10 +214,7 @@ public:
 	void KeyRingAdd(uint32 item);
 	bool KeyRingCheck(uint32 item);
 	void AddPVPPoints(uint32 points);
-	void AddCrystals(uint32 radiant, uint32 ebon);
 	uint32 GetPVPPoints();
-	uint32 GetRadiantCrystals();
-	uint32 GetEbonCrystals();
 	void QuestReadBook(const char *text, int type);
 	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();

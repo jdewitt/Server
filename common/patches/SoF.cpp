@@ -660,10 +660,6 @@ ENCODE(OP_PlayerProfile) {
 //	OUT(unknown17892[4580]);
 	OUT(expAA);
 //	OUT(unknown19516[40]);
-	OUT(currentRadCrystals);
-	OUT(careerRadCrystals);
-	OUT(currentEbonCrystals);
-	OUT(careerEbonCrystals);
 	OUT(groupAutoconsent);
 	OUT(raidAutoconsent);
 	OUT(guildAutoconsent);

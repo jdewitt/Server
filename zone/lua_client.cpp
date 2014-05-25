@@ -932,24 +932,9 @@ void Lua_Client::AddPVPPoints(uint32 points) {
 	self->AddPVPPoints(points);
 }
 
-void Lua_Client::AddCrystals(uint32 radiant, uint32 ebon) {
-	Lua_Safe_Call_Void();
-	self->AddCrystals(radiant, ebon);
-}
-
 uint32 Lua_Client::GetPVPPoints() {
 	Lua_Safe_Call_Int();
 	return self->GetPVPPoints();
-}
-
-uint32 Lua_Client::GetRadiantCrystals() {
-	Lua_Safe_Call_Int();
-	return self->GetRadiantCrystals();
-}
-
-uint32 Lua_Client::GetEbonCrystals() {
-	Lua_Safe_Call_Int();
-	return self->GetEbonCrystals();
 }
 
 void Lua_Client::QuestReadBook(const char *text, int type) {
@@ -1450,10 +1435,7 @@ luabind::scope lua_register_client() {
 		.def("KeyRingAdd", (void(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
 		.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
 		.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
-		.def("AddCrystals", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::AddCrystals)
 		.def("GetPVPPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetPVPPoints)
-		.def("GetRadiantCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetRadiantCrystals)
-		.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
 		.def("QuestReadBook", (void(Lua_Client::*)(const char *,int))&Lua_Client::QuestReadBook)
 		.def("UpdateGroupAAs", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateGroupAAs)
 		.def("GetGroupPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints)

@@ -356,10 +356,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT(entityid);
 	OUT(leadAAActive);
 	OUT(expAA);
-	OUT(currentRadCrystals);
-	OUT(careerRadCrystals);
-	OUT(currentEbonCrystals);
-	OUT(careerEbonCrystals);
 	OUT(groupAutoconsent);
 	OUT(raidAutoconsent);
 	OUT(guildAutoconsent);
