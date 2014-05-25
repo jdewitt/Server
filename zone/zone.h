@@ -193,7 +193,6 @@ public:
 	std::map<uint32,std::list<LDoNTrapTemplate*> > ldon_trap_entry_list;
 	std::map<uint32, ZoneEXPModInfo> level_exp_mod;
 	std::list<InternalVeteranReward> VeteranRewards;
-	std::list<AltCurrencyDefinition_Struct> AlternateCurrencies;
 	char *adv_data;
 	bool did_adventure_actions;
 
@@ -201,7 +200,6 @@ public:
 	void	DoAdventureAssassinationCountIncrease();
 	void	DoAdventureActions();
 	void	LoadVeteranRewards();
-	void	LoadAlternateCurrencies();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);
 

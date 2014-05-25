@@ -953,8 +953,8 @@ XS(XS_EQW_SendMessage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendMessage(msgtype, msg);
 	}
@@ -979,8 +979,8 @@ XS(XS_EQW_WorldShutDown)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->WorldShutDown(time, interval);
 	}

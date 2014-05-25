@@ -773,9 +773,6 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 		case BERSERKERGM:
 			strcpy(ns->spawn.lastName, "GM Berserker");
 			break;
-		case MERCERNARY_MASTER:
-			strcpy(ns->spawn.lastName, "Mercenary Recruiter");
-			break;
 		default:
 			break;
 		}
@@ -850,9 +847,6 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	case BERSERKERGM:
 		strcpy(ns2->spawn.lastName, "GM Berserker");
 		break;
-	case MERCERNARY_MASTER:
-		strcpy(ns->spawn.lastName, "Mercenary Recruiter");
-		break;
 	default:
 		strcpy(ns2->spawn.lastName, ns->spawn.lastName);
 		break;
@@ -891,8 +885,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
-		
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;

@@ -5530,31 +5530,6 @@ XS(XS_Client_SignalClient)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_AddAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddAlternateCurrencyValue)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
-	{
-		Client *		THIS;
-		uint32		currency_id = (uint32)SvUV(ST(1));
-		int32		amount = (int32)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->AddAlternateCurrencyValue(currency_id, amount);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendWebLink)
 {
@@ -6178,7 +6153,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetCustomItemData"), XS_Client_GetCustomItemData, file, "$$$");
 		newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
 		newXSproto(strcpy(buf, "SignalClient"), XS_Client_SignalClient, file, "$");
-		newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 		newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 		newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
         newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");

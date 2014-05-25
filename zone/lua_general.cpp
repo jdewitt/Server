@@ -1448,8 +1448,7 @@ luabind::scope lua_register_client_version() {
 			luabind::value("Titanium", static_cast<int>(EQClientTitanium)),
 			luabind::value("SoF", static_cast<int>(EQClientSoF)),
 			luabind::value("SoD", static_cast<int>(EQClientSoD)),
-			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot)),
-			luabind::value("RoF", static_cast<int>(EQClientRoF))
+			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot))
 		];
 }
 

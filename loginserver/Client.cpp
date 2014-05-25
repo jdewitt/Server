@@ -267,13 +267,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
-			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Account not exist, PC");
+			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account not exist, PC");
 		}
 		if (server.options.IsCreateOn() && server.options.IsLoginFailsOn())
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Account created, PC");
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account created, PC");
 			}
 			/*eventually add a unix time stamp calculator from last id in log that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
@@ -296,7 +296,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 			{
 				if (server.options.IsLoginFailsOn())
 				{
-					server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "Unauthorized client login attempt.");
+					server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Unauthorized client login attempt.");
 				}
 				result = false;
 			}
@@ -305,7 +305,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(NULL), "PC bad password");
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "PC bad password");
 			}
 			result = false;
 		}
@@ -446,13 +446,13 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
-			server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Account not exist, Mac");
+			server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
 		}
 		if (server.options.IsCreateOn())
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Account created, Mac");
+				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
 			}
 			/*eventually add a unix time stamp calculator from last id that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
@@ -475,7 +475,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(NULL), "Mac bad password");
+				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
 			}
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;

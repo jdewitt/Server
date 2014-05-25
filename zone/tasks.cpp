@@ -1133,11 +1133,6 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
 
-	if (c->GetClientVersion() >= EQClientRoF)
-	{
-		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
-		return;
-	}
 	// Titanium OpCode: 0x5e7c
 	_log(TASKS__UPDATE, "TaskSelector for %i Tasks", TaskCount);
 	char *Ptr;
@@ -2664,12 +2659,6 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
-	if (c->GetClientVersion() >= EQClientRoF)
-	{
-		SendTaskActivityNew(c, TaskID, ActivityID, ClientTaskIndex, Optional, TaskComplete);
-		return;
-	}
-
 	char *Ptr;
 
 	TaskActivityHeader_Struct* tah;
@@ -2938,12 +2927,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
 						break;
 					}
-					case EQClientRoF:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
 					default:
 					{
 						// All clients after Titanium
@@ -2969,12 +2952,6 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 						case EQClientTitanium:
 						{
 							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						case EQClientRoF:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
 									0x12, ItemID, Item->Name ,0x12);
 							break;
 						}

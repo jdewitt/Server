@@ -50,7 +50,7 @@ int main()
 #ifdef _WINDOWS //Starts window minimized on Windows.
 	HWND handleWindow;
 	AllocConsole();
-	handleWindow = FindWindowA("ConsoleWindowClass", NULL);
+	handleWindow = FindWindowA("ConsoleWindowClass", nullptr);
 	ShowWindow(handleWindow, 2);
 #endif
 

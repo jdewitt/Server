@@ -244,16 +244,16 @@ timeval sleep_time;
 
 					//newstr
 					stream_itr=Streams.find(temp);
-					EQStream *curstream = NULL;
+					EQStream *curstream = nullptr;
 					if(stream_itr != Streams.end())
 					curstream = stream_itr->second;
 					//oldstr
 					oldstream_itr=OldStreams.find(temp);
-					EQOldStream *oldcurstream = NULL;
+					EQOldStream *oldcurstream = nullptr;
 					if(oldstream_itr != OldStreams.end())
 					oldcurstream = oldstream_itr->second;
 
-					if(curstream != NULL)
+					if(curstream != nullptr)
 					{
 						//dont bother processing incoming packets for closed connections
 						if(curstream->CheckClosed())
@@ -269,7 +269,7 @@ timeval sleep_time;
 							curstream->ReleaseFromUse();
 						}
 					}
-					else if(oldcurstream != NULL)
+					else if(oldcurstream != nullptr)
 					{
 						if(oldcurstream->CheckClosed())
 							oldcurstream = nullptr;

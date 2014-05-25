@@ -1065,7 +1065,6 @@ ENCODE(OP_ZoneSpawns) {
 			Bitfields->anon = emu->anon;
 			Bitfields->showhelm = emu->showhelm;
 			Bitfields->targetable = 1;
-			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
 			Bitfields->statue = 0;
 			Bitfields->trader = 0;
 			Bitfields->buyer = 0;
@@ -1264,7 +1263,6 @@ ENCODE(OP_ZoneSpawns) {
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary); //IsMercenary
 			Buffer += 24; // Unknown;
 
 			dest->FastQueuePacket(&outapp, ack_req);
@@ -2428,18 +2426,6 @@ ENCODE(OP_GroupUpdate)
 	dest->FastQueuePacket(&outapp);
 }
 
-ENCODE(OP_AltCurrencySell)
-{
-    ENCODE_LENGTH_EXACT(AltCurrencySellItem_Struct);
-	SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
-
-    OUT(merchant_entity_id);
-    eq->slot_id = TitaniumToSoDSlot(emu->slot_id);
-    OUT(charges);
-    OUT(cost);
-    FINISH_ENCODE();
-}
-
 ENCODE(OP_WearChange)
 {
 	ENCODE_LENGTH_EXACT(WearChange_Struct);
@@ -3393,26 +3379,6 @@ DECODE(OP_Bug)
     strn0cpy(emu->system_info, eq->system_info, sizeof(emu->system_info));
 
 	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_AltCurrencySellSelection)
-{
-    DECODE_LENGTH_EXACT(structs::AltCurrencySelectItem_Struct);
-	SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
-    IN(merchant_entity_id);
-    emu->slot_id = SoDToTitaniumSlot(eq->slot_id);
-    FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_AltCurrencySell)
-{
-    DECODE_LENGTH_EXACT(structs::AltCurrencySellItem_Struct);
-	SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
-    IN(merchant_entity_id);
-    emu->slot_id = SoDToTitaniumSlot(eq->slot_id);
-    IN(charges);
-    IN(cost);
-    FINISH_DIRECT_DECODE();
 }
 
 

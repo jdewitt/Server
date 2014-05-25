@@ -115,42 +115,6 @@ void Client::SendGuildChannel()
 	}
 }
 
-void Client::SendGuildRanks()
-{
-	if(GetClientVersion() < EQClientRoF)
-		return;
-
-	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
-	int ranks = 8 + 1; // Static number of RoF+ ranks as of May 2014
-	int j = 1;
-	int i = 1;
-	if(IsInAGuild())
-	{
-		while(j < ranks)
-		{
-			while(i < permissions)
-			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateRanks_Struct));
-				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*) outapp->pBuffer;
-				//guuacs->Unknown0008 = this->GuildID();
-				strncpy(guuacs->Unknown0012, this->GetCleanName(), 64);
-				guuacs->Action = 5;
-				guuacs->RankID = j;
-				guuacs->GuildID = this->GuildID();
-				guuacs->PermissionID = i;
-				guuacs->PermissionVal = 1;
-				guuacs->Unknown0089[0] = 0x2c;
-				guuacs->Unknown0089[1] = 0x01;
-				guuacs->Unknown0089[2] = 0x00;
-				FastQueuePacket(&outapp);
-				i++;
-			}
-			j++;
-			i = 1;
-		}
-	}
-}
-
 void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
@@ -259,8 +223,6 @@ void Client::RefreshGuildInfo()
 	guildrank = GUILD_RANK_NONE;
 	guild_id = GUILD_NONE;
 
-	bool WasBanker = GuildBanker;
-
 	CharGuildInfo info;
 	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
 		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
@@ -269,31 +231,6 @@ void Client::RefreshGuildInfo()
 
 	guildrank = info.rank;
 	guild_id = info.guild_id;
-	GuildBanker = info.banker || guild_mgr.IsGuildLeader(GuildID(), CharacterID());
-
-	if(((int)zone->GetZoneID() == RuleI(World, GuildBankZoneID)))
-	{
-		if(WasBanker != GuildBanker)
-		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
-
-			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
-
-			gsrs->Rank = guildrank;
-			strn0cpy(gsrs->MemberName, GetName(), sizeof(gsrs->MemberName));
-			gsrs->Banker = GuildBanker;
-
-			FastQueuePacket(&outapp);
-		}
-
-		if((guild_id != OldGuildID) && GuildBanks)
-		{
-			ClearGuildBank();
-
-			if(guild_id != GUILD_NONE)
-				GuildBanks->SendGuildBank(this);
-		}
-	}
 
 	SendGuildSpawnAppearance();
 }
