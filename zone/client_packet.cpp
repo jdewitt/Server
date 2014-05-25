@@ -656,12 +656,6 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 		FastQueuePacket(&outapp);
 
-		if(GetClientVersion() >= EQClientRoF)
-		{
-			outapp = new EQApplicationPacket(OP_ClientReady, 0);
-			FastQueuePacket(&outapp);
-		}
-
 		// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
 		outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
 		QueuePacket(outapp);
@@ -4641,7 +4635,6 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 			}
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			SendGuildRanks();
 
 		}
 	}
@@ -8117,11 +8110,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 	uint32 max_items = 80;
 
-	/*
-	if (GetClientVersion() >= EQClientRoF)
-		max_items = 200;
-	*/
-
 	//Show Items
 	if(app->size==sizeof(Trader_ShowItems_Struct))
 	{
@@ -8213,15 +8201,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 			this->Trader_StartTrader();
 
-			if (GetClientVersion() >= EQClientRoF)
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderStatus_Struct));
-				TraderStatus_Struct* tss = (TraderStatus_Struct*)outapp->pBuffer;
-				tss->Code = BazaarTrader_StartTraderMode2;
-				QueuePacket(outapp);
-				_pkt(TRADING__PACKETS, outapp);
-				safe_delete(outapp);
-			}
 		}
 		else if (app->size==sizeof(TraderStatus_Struct))
 		{
@@ -8452,7 +8431,6 @@ void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
 	if(IsInAGuild())
 	{
-		SendGuildRanks();
 		SendGuildMembers();
 	}
 	return;
@@ -9592,13 +9570,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	if(eqs->ClientVersion() > EQClientMac)
 		LoadClientTaskState();
 
-	if (GetClientVersion() >= EQClientRoF)
-	{
-		outapp = new EQApplicationPacket(OP_ReqNewZone, 0);
-		Handle_Connect_OP_ReqNewZone(outapp);
-		safe_delete(outapp);
-	}
-
 	if(ClientVersionBit & BIT_UnderfootAndLater)
 	{
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
@@ -9957,7 +9928,6 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
-		SendGuildRanks();
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
@@ -12886,7 +12856,6 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			SendGuildRanks();
 		}
 	}
 }

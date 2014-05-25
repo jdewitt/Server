@@ -305,7 +305,7 @@ int16 Database::CheckStatus(uint32 account_id)
 			int16 status = atoi(row[0]);
 
 			int32 suspendeduntil = 0;
-			// MariaDB initalizes with NULL if unix_timestamp() is out of range
+			// MariaDB initalizes with nullptr if unix_timestamp() is out of range
 			if (row[1] != NULL) {
 				suspendeduntil = atoi(row[1]);
 			}

@@ -17,12 +17,12 @@
 namespace Evolution {
 
 static const char *name = "Evolution";
-static OpcodeManager *opcodes = NULL;
+static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
-	if(opcodes == NULL) {
+	if(opcodes == nullptr) {
 		std::string opfile = "patch_";
 		opfile += name;
 		opfile += ".conf";
@@ -61,7 +61,7 @@ void Reload() {
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
 
-	if(opcodes != NULL) {
+	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		std::string opfile = "patch_";
 		opfile += name;

@@ -3304,26 +3304,6 @@ struct GuildUpdateURLAndChannel_Struct
 /*4176*/
 };
 
-//Case 5 in Rain of Fear and higher clients for guild permissions.
-//RankID is the internal guild rank. There are 8 in Rain of Fear as opposed to the 3 in Titanium.
-//PermissionID is the type of permission. There are 32 total, with some unused. Live May 2014 sends and uses 26 of them. Varies through client version.
-//Permission value is a char that is either 0 or 1. Enabled for that rank/disabled for that rank.
-//The client sends this struct on changing a guild rank. The server sends each rank in 32 or less packets upon zonein if you are in a guild.
-struct GuildUpdateRanks_Struct
-{
-/*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel, 5 = RoF Ranks
-/*0004*/	uint32	Unknown0004; //Seen 00 00 00 00
-/*0008*/	uint32	Unknown0008; //Seen 96 29 00 00
-/*0008*/	char	Unknown0012[64]; //Seen "CharacterName"
-/*0076*/	uint32	GuildID; //Guild ID of "CharacterName"
-/*0080*/	uint32	RankID;
-/*0084*/	uint32	PermissionID;
-/*0088*/	char	PermissionVal;
-/*0089*/	char	Unknown0089[3]; //Seen 2c 01 00 ?
-/*0092*/
-};
-
-
 struct GuildStatus_Struct
 {
 /*000*/	char	Name[64];
@@ -4879,53 +4859,6 @@ struct LFGuild_GuildToggle_Struct
 /*548*/ uint32	TimePosted;
 /*552*/ char	Name[64];
 /*616*/
-};
-
-struct MaxCharacters_Struct
-{
-/*000*/ uint32 max_chars;	// Seen 4 on Silver Account (4 characters max)
-/*004*/ uint32 unknown004;	// Seen 0
-/*008*/ uint32 unknown008;	// Seen 0
-};
-
-struct Membership_Struct
-{
-/*000*/ uint32 membership;	// Seen 2 on Gold Account
-/*004*/ uint32 races;	// Seen ff ff 01 00
-/*008*/ uint32 classes;	// Seen ff ff 01 01
-/*012*/ uint32 entrysize; // Seen 15 00 00 00
-/*016*/ int32 entries[21]; //Varies. Seen ff ff ff ff, and 01 00 00 00
-/*104*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
-/*108*/ // char exit_url[0];	// URL that will open when EQ is exited
-};
-
-struct Membership_Entry_Struct
-{
-/*000*/ uint32 purchase_id;		// Seen 1, then increments 90287 to 90300
-/*004*/ uint32 bitwise_entry;	// Seen 16 to 65536 - Skips 4096
-/*008*/
-};
-
-struct Membership_Setting_Struct
-{
-/*000*/ uint32 setting_index;	// 0, 1, or 2
-/*004*/ uint32 setting_id;		// 0 to 21
-/*008*/ int32 setting_value;	// All can be 0, 1, or -1
-/*012*/
-};
-
-struct Membership_Details_Struct
-{
-/*0000*/ uint32 membership_setting_count;	// Seen 66
-/*0016*/ Membership_Setting_Struct settings[66];
-/*0012*/ uint32 race_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_races[15];
-/*0012*/ uint32 class_entry_count;	// Seen 15
-/*1044*/ Membership_Entry_Struct membership_classes[15];
-/*1044*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
-/*1048*/ //char exit_url[42];		// Upgrade to Silver or Gold Membership URL
-/*1048*/ uint32 exit_url_length2;	// Length of the exit_url2 string (0 for none)
-/*0000*/ //char exit_url2[49];		// Upgrade to Gold Membership URL
 };
 
 struct ItemPreview_Struct

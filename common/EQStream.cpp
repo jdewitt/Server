@@ -1922,7 +1922,7 @@ void EQOldStream::CheckBufferedPackets()
 /************************************************************************/
 /************ Make an EQ packet and put it to the send queue ************/
 /* 
-	APP->size == 0 && app->pBuffer == NULL if no data.
+	APP->size == 0 && app->pBuffer == nullptr if no data.
 
 	Agz: set ack_req = false if you dont want this packet to require an ack
 	response from the client, this menas this packet may get lost and not
@@ -1962,9 +1962,9 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 	}
 
 	// Agz:Moved this to after finish check
-	if(app == NULL)
+	if(app == nullptr)
 	{
-		//cout << "EQPacketManager::MakeEQPacket app == NULL" << endl;
+		//cout << "EQPacketManager::MakeEQPacket app == nullptr" << endl;
 		return;
 	}
 	bool bFragment= false; //This is set later on if fragseq should be increased at the end.
@@ -2205,7 +2205,7 @@ void EQOldStream::CheckTimers(void)
 	/************ Should a pure ack be sent? ************/
 	if (no_ack_sent_timer->Check() || keep_alive_timer->Check())
 	{
-		EQProtocolPacket app(0xFFFF, NULL, 0);
+		EQProtocolPacket app(0xFFFF, nullptr, 0);
 		MakeEQPacket(&app);
 	}
 	MOutboundQueue.unlock();

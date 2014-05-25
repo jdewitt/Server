@@ -6085,11 +6085,7 @@ void command_itemsearch(Client *c, const Seperator *sep){
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
 			if (item)
-				if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
+				if (c->GetClientVersion() >= EQClientSoF)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
 				}
@@ -6121,11 +6117,7 @@ void command_itemsearch(Client *c, const Seperator *sep){
 			strupr(sName);
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
-				if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
+				if (c->GetClientVersion() >= EQClientSoF)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
 				}

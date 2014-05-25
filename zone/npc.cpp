@@ -495,11 +495,7 @@ void NPC::QueryLoot(Client* to) {
 	for(; cur != end; ++cur) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item)
-			if (to->GetClientVersion() >= EQClientRoF)
-			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
-			else if (to->GetClientVersion() >= EQClientSoF)
+			if (to->GetClientVersion() >= EQClientSoF)
 			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}

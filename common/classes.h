@@ -64,7 +64,6 @@
 #define GUILD_TRIBUTE_MASTER	64	//not sure
 #define NORRATHS_KEEPERS_MERCHANT 67
 #define DARK_REIGN_MERCHANT 68
-#define FELLOWSHIP_MASTER 69
 
 const char* GetEQClassName(uint8 class_, uint8 level = 0);
 uint32 GetArrayEQClass(uint8 eqclass);
