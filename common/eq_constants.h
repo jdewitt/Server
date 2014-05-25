@@ -80,7 +80,7 @@ enum ItemUseTypes : uint8
 /*----*/	ItemTypeSmallThrowing,
 /*----*/	ItemTypeSpell,			// spells and tomes
 /*5514*/	ItemTypePotion,
-/*----*/	ItemTypeUnknown3,
+/*----*/	ItemTypeFletchedArrows,
 /*0406*/	ItemTypeWindInstrument,
 /*0407*/	ItemTypeStringedInstrument,
 /*0408*/	ItemTypeBrassInstrument,
