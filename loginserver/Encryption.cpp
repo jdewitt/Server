@@ -32,21 +32,21 @@ bool Encryption::LoadCrypto(std::string name)
 	else
 	{
 		encrypt_func = (DLLFUNC_Encrypt)GetSym("Encrypt");
-		if(encrypt_func == NULL)
+		if(encrypt_func == nullptr)
 		{
 			server_log->Log(log_error, "Failed to attach Encrypt.");
 			Unload();
 			return false;
 		}
 		decrypt_func = (DLLFUNC_DecryptUsernamePassword)GetSym("DecryptUsernamePassword");
-		if(decrypt_func == NULL)
+		if(decrypt_func == nullptr)
 		{
 			server_log->Log(log_error, "Failed to attach DecryptUsernamePassword.");
 			Unload();
 			return false;
 		}
 		delete_func = (DLLFUNC_HeapDelete)GetSym("_HeapDeleteCharBuffer");
-		if(delete_func == NULL)
+		if(delete_func == nullptr)
 		{
 			server_log->Log(log_error, "Failed to attach _HeapDeleteCharBuffer.");
 			Unload();
@@ -62,7 +62,7 @@ char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned
 	{
 		return decrypt_func(encrypted_buffer, buffer_size, mode);
 	}
-	return NULL;
+	return nullptr;
 }
 
 char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned int &out_size)
@@ -71,7 +71,7 @@ char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned
 	{
 		return encrypt_func(buffer, buffer_size, out_size);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void Encryption::DeleteHeap(char *buffer)
@@ -97,7 +97,7 @@ bool Encryption::Load(const char *name)
 	h_dll = LoadLibrary(name);
 #endif
 
-	if(h_dll == NULL)
+	if(h_dll == nullptr)
 	{
 		return false;
 	}
@@ -114,7 +114,7 @@ void Encryption::Unload()
 	if(h_dll)
 	{
 		FreeLibrary(h_dll);
-		h_dll = NULL;
+		h_dll = nullptr;
 	}
 }
 
@@ -123,7 +123,7 @@ bool Encryption::GetSym(const char *name, void **sym)
 	if(Loaded())
 	{
 		*sym = GetProcAddress(h_dll, name);
-		return(*sym != NULL);
+		return(*sym != nullptr);
 	}
 	else
 	{
@@ -139,7 +139,7 @@ void *Encryption::GetSym(const char *name)
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 

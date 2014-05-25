@@ -121,7 +121,6 @@ enum ItemUseTypes : uint8
 /*----*/	ItemTypeRecipe,
 /*----*/	ItemTypeAdvancedRecipe,
 /*----*/	ItemTypeJournal,		// only one(1) database entry
-/*----*/	ItemTypeAltCurrency,	// alt-currency (as opposed to coinage)
 /*5881*/	ItemTypePerfectedAugmentationDistiller,
 /*----*/	_ItemTypeCount
 

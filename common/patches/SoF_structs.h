@@ -4023,35 +4023,6 @@ struct ExpeditionJoinPrompt_Struct
 /*068*/ char expedition_name[64];
 };
 
-struct AltCurrencySelectItem_Struct {
-    uint32 merchant_entity_id;
-    uint32 slot_id;
-    uint32 unknown008;
-    uint32 unknown012;
-    uint32 unknown016;
-    uint32 unknown020;
-    uint32 unknown024;
-    uint32 unknown028;
-    uint32 unknown032;
-    uint32 unknown036;
-    uint32 unknown040;
-    uint32 unknown044;
-    uint32 unknown048;
-    uint32 unknown052;
-    uint32 unknown056;
-    uint32 unknown060;
-    uint32 unknown064;
-    uint32 unknown068;
-    uint32 unknown072;
-    uint32 unknown076;
-};
-
-struct AltCurrencySellItem_Struct {
-/*000*/ uint32 merchant_entity_id;
-/*004*/ uint32 slot_id;
-/*006*/ uint32 charges;
-/*010*/ uint32 cost;
-};
 
 
 	};	//end namespace structs

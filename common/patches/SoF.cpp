@@ -1957,18 +1957,6 @@ ENCODE(OP_OnLevelMessage)
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_AltCurrencySell)
-{
-    ENCODE_LENGTH_EXACT(AltCurrencySellItem_Struct);
-	SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
-
-    OUT(merchant_entity_id);
-    eq->slot_id = TitaniumToSoFSlot(emu->slot_id);
-    OUT(charges);
-    OUT(cost);
-    FINISH_ENCODE();
-}
-
 ENCODE(OP_WearChange)
 {
 	ENCODE_LENGTH_EXACT(WearChange_Struct);
@@ -2832,27 +2820,6 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	*length = ss.tellp();
 	return item_serial;
 }
-
-DECODE(OP_AltCurrencySellSelection)
-{
-    DECODE_LENGTH_EXACT(structs::AltCurrencySelectItem_Struct);
-	SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
-    IN(merchant_entity_id);
-    emu->slot_id = SoFToTitaniumSlot(eq->slot_id);
-    FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_AltCurrencySell)
-{
-    DECODE_LENGTH_EXACT(structs::AltCurrencySellItem_Struct);
-	SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
-    IN(merchant_entity_id);
-    emu->slot_id = SoFToTitaniumSlot(eq->slot_id);
-    IN(charges);
-    IN(cost);
-    FINISH_DIRECT_DECODE();
-}
-
 
 } //end namespace SoF
 

@@ -446,14 +446,14 @@ Mob *HateList::GetRandom()
 {
 	int count = list.size();
 	if(count == 0) //If we don't have any entries it'll crash getting a random 0, -1 position.
-		return NULL;
+		return nullptr;
 
 	if(count == 1) //No need to do all that extra work if we only have one hate entry
 	{
 		if(*list.begin()) // Just in case tHateEntry is invalidated somehow...
 			return (*list.begin())->ent;
 
-		return NULL;
+		return nullptr;
 	}
 
 	auto iterator = list.begin();

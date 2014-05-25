@@ -64,26 +64,6 @@
 #define GUILD_TRIBUTE_MASTER	64	//not sure
 #define NORRATHS_KEEPERS_MERCHANT 67
 #define DARK_REIGN_MERCHANT 68
-#define FELLOWSHIP_MASTER 69
-#define ALT_CURRENCY_MERCHANT 70
-#define MERCERNARY_MASTER 71
-#define warrior_1 1
-#define monk_1 64
-#define paladin_1 4
-#define shadow_1 16
-#define bard_1 128
-#define cleric_1 2
-#define necromancer_1 1024
-#define ranger_1 8
-#define druid_1 32
-#define mage_1 4096
-#define wizard_1 2048
-#define enchanter_1 8192
-#define rogue_1 256
-#define shaman_1 512
-#define beastlord_1 16384
-#define berserker_1 32768
-#define call_1 65536
 
 const char* GetEQClassName(uint8 class_, uint8 level = 0);
 uint32 GetArrayEQClass(uint8 eqclass);

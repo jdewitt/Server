@@ -385,12 +385,6 @@ public:
 	void QGlobalPurge();
 
 	/*
-	* Alternate Currency
-	*/
-	void LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency);
-	void UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value);
-
-	/*
 	* Misc stuff.
 	* PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD
 	* REALLY HAS NO BETTER SECTION

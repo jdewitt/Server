@@ -1041,7 +1041,6 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.size,"
 			"npc_types.loottable_id,"
 			"npc_types.merchant_id,"
-			"npc_types.alt_currency_id,"
 			"npc_types.adventure_template_id,"
 			"npc_types.trap_template,"
 			"npc_types.attack_speed,"
@@ -1140,7 +1139,6 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->size = atof(row[r++]);
 				tmpNPCType->loottable_id = atoi(row[r++]);
 				tmpNPCType->merchanttype = atoi(row[r++]);
-				tmpNPCType->alt_currency_type = atoi(row[r++]);
 				tmpNPCType->adventure_template = atoi(row[r++]);
 				tmpNPCType->trap_template = atoi(row[r++]);
 				tmpNPCType->attack_speed = atof(row[r++]);
@@ -1856,35 +1854,6 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
 	if (!RunQuery(query, MakeAnyLenString(&query, "replace into doors (id, doorid,zone,version,name,pos_x,pos_y,pos_z,heading,opentype,guild,lockpick,keyitem,door_param,invert_state,incline,size) values('%i','%i','%s','%i', '%s','%f','%f','%f','%f','%i','%i','%i', '%i','%i','%i','%i','%i')", ddoordbid ,ddoorid ,zone->GetShortName(), zone->GetInstanceVersion(), ddoor_name, dxpos, dypos, dzpos, dheading, dopentype, dguildid, dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize), errbuf))	{
 		std::cerr << "Error in InsertDoor" << query << "' " << errbuf << std::endl;
 	}
-	safe_delete_array(query);
-}
-
-void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT currency_id, amount FROM character_alt_currency where char_id='%u'", char_id), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)))
-		{
-			currency[atoi(row[0])] = atoi(row[1]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-	}
-}
-
-void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	database.RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO character_alt_currency (char_id, currency_id, amount)"
-		" VALUES('%u', '%u', '%u')", char_id, currency_id, value),
-		errbuf);
 	safe_delete_array(query);
 }
 

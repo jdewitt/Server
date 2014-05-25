@@ -2662,11 +2662,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 
 	if(initiator)
 	{
-		if (initiator->GetClientVersion() >= EQClientRoF)
-		{
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);
-		}
-		else if (initiator->GetClientVersion() >= EQClientSoF)
+		if (initiator->GetClientVersion() >= EQClientSoF)
 		{
 			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
 		}

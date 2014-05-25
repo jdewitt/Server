@@ -6085,11 +6085,7 @@ void command_itemsearch(Client *c, const Seperator *sep){
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
 			if (item)
-				if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
+				if (c->GetClientVersion() >= EQClientSoF)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
 				}
@@ -6121,11 +6117,7 @@ void command_itemsearch(Client *c, const Seperator *sep){
 			strupr(sName);
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
-				if (c->GetClientVersion() >= EQClientRoF)
-				{
-					c->Message(0, "  %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
-				}
-				else if (c->GetClientVersion() >= EQClientSoF)
+				if (c->GetClientVersion() >= EQClientSoF)
 				{
 					c->Message(0, "  %i: %c%06X00000000000000000000000000000000000000000000%s%c",(int) item->ID,0x12, item->ID, item->Name, 0x12);
 				}
@@ -6537,7 +6529,6 @@ void command_npcedit(Client *c, const Seperator *sep){
 		c->Message(0, "#npcedit Manaregen - Sets an NPC's mana regen rate per tick");
 		c->Message(0, "#npcedit Loottable - Sets the loottable ID for an NPC ");
 		c->Message(0, "#npcedit Merchantid - Sets the merchant ID for an NPC");
-		c->Message(0, "#npcedit alt_currency_id - Sets the Alternate Currency ID for an alterative currency Merchant");
 		c->Message(0, "#npcedit npc_spells_effects_id - Sets the NPC Spell Effects ID");
 		c->Message(0, "#npcedit adventure_template_id - Sets the NPC's Adventure Template ID");
 		c->Message(0, "#npcedit trap_template - Sets the NPC's Trap Template ID");
@@ -6713,15 +6704,6 @@ void command_npcedit(Client *c, const Seperator *sep){
 		char *query = 0;
 		c->Message(15,"NPCID %u is now merchant_id %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set merchant_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "alt_currency_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set alt_currency_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
