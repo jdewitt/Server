@@ -105,8 +105,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
 	ConnectingOpcodes[OP_ApproveZone] = &Client::Handle_Connect_OP_ApproveZone;
 	ConnectingOpcodes[OP_TGB] = &Client::Handle_Connect_OP_TGB;
-	ConnectingOpcodes[OP_SendTributes] = &Client::Handle_Connect_OP_SendTributes;
-	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
@@ -294,14 +292,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Split] = &Client::Handle_OP_Split;
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
-	ConnectedOpcodes[OP_OpenTributeMaster] = &Client::Handle_OP_OpenTributeMaster;
-	ConnectedOpcodes[OP_OpenGuildTributeMaster] = &Client::Handle_OP_OpenGuildTributeMaster;
-	ConnectedOpcodes[OP_TributeItem] = &Client::Handle_OP_TributeItem;
-	ConnectedOpcodes[OP_TributeMoney] = &Client::Handle_OP_TributeMoney;
-	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_TributeUpdate] = &Client::Handle_OP_TributeUpdate;
-	ConnectedOpcodes[OP_TributeToggle] = &Client::Handle_OP_TributeToggle;
-	ConnectedOpcodes[OP_TributeNPC] = &Client::Handle_OP_TributeNPC;
 	ConnectedOpcodes[OP_ConfirmDelete] = &Client::Handle_OP_ConfirmDelete;
 	ConnectedOpcodes[OP_CrashDump] = &Client::Handle_OP_CrashDump;
 	ConnectedOpcodes[OP_ControlBoat] = &Client::Handle_OP_ControlBoat;
@@ -579,18 +569,6 @@ void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 {
 	SendAAList();
-	return;
-}
-
-void Client::Handle_Connect_OP_SendTributes(const EQApplicationPacket *app)
-{
-	SendTributes();
-	return;
-}
-
-void Client::Handle_Connect_OP_SendGuildTributes(const EQApplicationPacket *app)
-{
-	SendGuildTributes();
 	return;
 }
 
@@ -2264,8 +2242,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	uint32 merchantid = 0;
 
 	Mob* tmp = entity_list.GetMob(eid->entity_id);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
 		return;
 
 	//you have to be somewhat close to them to be properly using them
@@ -2359,8 +2336,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 */
 	uint32 merchantid = 0;
 	Mob* tmp = entity_list.GetMob(aps->npcid);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
 		return;
 
 	//you have to be somewhat close to them to be properly using them
@@ -8570,167 +8546,6 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_OpenTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenTributeMaster. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		//Opens the tribute master window
-		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
-		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
-		if(tribmast && tribmast->IsNPC() && tribmast->GetClass()==TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
-			st->response = 1;
-			QueuePacket(app);
-			tribute_master_id = st->tribute_master_id;
-			DoTributeUpdate();
-		} else {
-			st->response=0;
-			QueuePacket(app);
-		}
-	}
-	return;
-}
-
-void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_OpenGuildTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		//Opens the guild tribute master window
-		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
-		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
-		if(tribmast && tribmast->IsNPC() && tribmast->GetClass()==GUILD_TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
-			st->response = 1;
-			QueuePacket(app);
-			tribute_master_id = st->tribute_master_id;
-			DoTributeUpdate();
-		} else {
-			st->response=0;
-			QueuePacket(app);
-		}
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeItem of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//player donates an item...
-	if(app->size != sizeof(TributeItem_Struct))
-		printf("Error in OP_TributeItem. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		TributeItem_Struct* t = (TributeItem_Struct*)app->pBuffer;
-
-		tribute_master_id = t->tribute_master_id;
-		//make sure they are dealing with a valid tribute master
-		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
-		if(!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
-			return;
-		if(DistNoRoot(*tribmast) > USE_NPC_RANGE2)
-			return;
-
-		t->tribute_points = TributeItem(t->slot, t->quantity);
-
-		_log(TRIBUTE__OUT, "Sending tribute item reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
-
-		QueuePacket(app);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeMoney of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//player donates money
-	if(app->size != sizeof(TributeMoney_Struct))
-		printf("Error in OP_TributeMoney. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		TributeMoney_Struct* t = (TributeMoney_Struct*)app->pBuffer;
-
-		tribute_master_id = t->tribute_master_id;
-		//make sure they are dealing with a valid tribute master
-		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
-		if(!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
-			return;
-		if(DistNoRoot(*tribmast) > USE_NPC_RANGE2)
-			return;
-
-		t->tribute_points = TributeMoney(t->platinum);
-
-		_log(TRIBUTE__OUT, "Sending tribute money reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
-
-		QueuePacket(app);
-	}
-	return;
-}
-
-void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_SelectTribute of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//we should enforce being near a real tribute master to change this
-	//but im not sure how I wanna do that right now.
-	if(app->size != sizeof(SelectTributeReq_Struct))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_SelectTribute packet");
-	else {
-		SelectTributeReq_Struct *t = (SelectTributeReq_Struct *) app->pBuffer;
-		SendTributeDetails(t->client_id, t->tribute_id);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeUpdate of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//sent when the client changes their tribute settings...
-	if(app->size != sizeof(TributeInfo_Struct))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_TributeUpdate packet");
-	else {
-		TributeInfo_Struct *t = (TributeInfo_Struct *) app->pBuffer;
-		ChangeTributeSettings(t);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeToggle of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(uint32))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_TributeToggle packet");
-	else {
-		uint32 *val = (uint32 *) app->pBuffer;
-		ToggleTribute(*val? true : false);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeNPC of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	return;
-}
-
 void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 {
 }
@@ -9509,19 +9324,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	//safe_delete(outapp);
 
 	////////////////////////////////////////////////////////////
-	// Tribute Packets
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		DoTributeUpdate();
-		if(m_pp.tribute_active) {
-			//restart the tribute timer where we left off
-			tribute_timer.Start(m_pp.tribute_time_remaining);
-		}
-	}
-
-	////////////////////////////////////////////////////////////
 	// Character Inventory Packet
-	//this is not quite where live sends inventory, they do it after tribute
 	if (loaditems) {//dont load if a length error occurs
 		if(eqs->ClientVersion() == EQClientMac)
 			BulkSendItems();
@@ -11495,8 +11298,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	Adventure_Sell_Struct *ams_in = (Adventure_Sell_Struct*)app->pBuffer;
 
 	Mob* vendor = entity_list.GetMob(ams_in->npcid);
-	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != ADVENTUREMERCHANT) &&
-		(vendor->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (vendor->GetClass() != DARK_REIGN_MERCHANT)))
+	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != ADVENTUREMERCHANT)))
 	{
 		Message(13, "Vendor was not found.");
 		return;

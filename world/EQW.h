@@ -68,7 +68,6 @@ public:
 	bool	SetGuild(uint32 charid, uint32 guild_id, uint8 rank);
 	bool	SetGuildRank(uint32 charid, uint8 rank);
 	bool	SetBankerFlag(uint32 charid, bool is_banker);
-	bool	SetTributeFlag(uint32 charid, bool enabled);
 	bool	SetPublicNote(uint32 charid, const char *note);
 
 	//bugs

@@ -2998,29 +2998,6 @@ void command_peekinv(Client *c, const Seperator *sep){
 		}
 	}
 
-	if (bAll || (strcasecmp(sep->arg[1], "trib")==0)) {
-		// Active tribute effect items
-		bFound = true;
-		for (int16 i=TRIBUTE_SLOT_START; i<(TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); i++) {
-			const ItemInst* inst = client->GetInv().GetItem(i);
-			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-			c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
-		}
-	}
-
 	if (bAll || (strcasecmp(sep->arg[1], "bank")==0)) {
 		// Bank and shared bank items
 		bFound = true;

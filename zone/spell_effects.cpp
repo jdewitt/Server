@@ -5116,43 +5116,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 			}
 		}
 
-		//Tribute Focus
-		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
-		{
-			TempItem = nullptr;
-			ItemInst* ins = GetInv().GetItem(x);
-			if (!ins)
-				continue;
-			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
-				if(rand_effectiveness) {
-					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
-					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					} else if (focus_max < 0 && focus_max < focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-				}
-				else {
-					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
-					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-					else if (Total < 0 && Total < realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-				}
-			}
-		}
-
 		if(UsedItem && rand_effectiveness && focus_max_real != 0)
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 

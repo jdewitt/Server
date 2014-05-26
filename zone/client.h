@@ -719,16 +719,6 @@ public:
 	bool BindWound(Mob* bindmob, bool start, bool fail = false);
 	void SetTradeskillObject(Object* object) { m_tradeskill_object = object; }
 	Object* GetTradeskillObject() { return m_tradeskill_object; }
-	void	SendTributes();
-	void	SendGuildTributes();
-	void	DoTributeUpdate();
-	void	SendTributeDetails(uint32 client_id, uint32 tribute_id);
-	int32	TributeItem(uint32 slot, uint32 quantity);
-	int32	TributeMoney(uint32 platinum);
-	void	AddTributePoints(int32 ammount);
-	void	ChangeTributeSettings(TributeInfo_Struct *t);
-	void	SendTributeTimer();
-	void	ToggleTribute(bool enabled);
 	void	SendPathPacket(std::vector<FindPerson_Point> &path);
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
