@@ -475,15 +475,6 @@ bool BaseGuildManager::SetAltFlag(uint32 charid, bool is_alt)
 	return(true);
 }
 
-bool BaseGuildManager::SetTributeFlag(uint32 charid, bool enabled) {
-	if(!DBSetTributeFlag(charid, enabled))
-		return(false);
-
-	SendCharRefresh(GUILD_NONE, 0, charid);
-
-	return(true);
-}
-
 bool BaseGuildManager::SetPublicNote(uint32 charid, const char *note) {
 	if(!DBSetPublicNote(charid, note))
 		return(false);
@@ -882,13 +873,6 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
 	mysql_free_result(result);
 
 	return IsAlt;
-}
-
-bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
-	char *query = 0;
-	return(_RunQuery(query, MakeAnyLenString(&query,
-		"UPDATE guild_members SET tribute_enable=%d WHERE char_id=%d",
-		enabled?1:0, charid), "setting a guild member's tribute flag"));
 }
 
 bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {

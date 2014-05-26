@@ -105,8 +105,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
 	ConnectingOpcodes[OP_ApproveZone] = &Client::Handle_Connect_OP_ApproveZone;
 	ConnectingOpcodes[OP_TGB] = &Client::Handle_Connect_OP_TGB;
-	ConnectingOpcodes[OP_SendTributes] = &Client::Handle_Connect_OP_SendTributes;
-	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
@@ -294,14 +292,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Split] = &Client::Handle_OP_Split;
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
-	ConnectedOpcodes[OP_OpenTributeMaster] = &Client::Handle_OP_OpenTributeMaster;
-	ConnectedOpcodes[OP_OpenGuildTributeMaster] = &Client::Handle_OP_OpenGuildTributeMaster;
-	ConnectedOpcodes[OP_TributeItem] = &Client::Handle_OP_TributeItem;
-	ConnectedOpcodes[OP_TributeMoney] = &Client::Handle_OP_TributeMoney;
-	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_TributeUpdate] = &Client::Handle_OP_TributeUpdate;
-	ConnectedOpcodes[OP_TributeToggle] = &Client::Handle_OP_TributeToggle;
-	ConnectedOpcodes[OP_TributeNPC] = &Client::Handle_OP_TributeNPC;
 	ConnectedOpcodes[OP_ConfirmDelete] = &Client::Handle_OP_ConfirmDelete;
 	ConnectedOpcodes[OP_CrashDump] = &Client::Handle_OP_CrashDump;
 	ConnectedOpcodes[OP_ControlBoat] = &Client::Handle_OP_ControlBoat;
@@ -369,12 +359,9 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_CorpseDrop] = &Client::Handle_OP_CorpseDrop;
 	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
 	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
-	//ConnectedOpcodes[OP_CrystalReclaim] = &Client::Handle_OP_CrystalReclaim;
-	//ConnectedOpcodes[OP_CrystalCreate] = &Client::Handle_OP_CrystalCreate;
 	ConnectedOpcodes[OP_LFGuild] = &Client::Handle_OP_LFGuild;
 	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
-	ConnectedOpcodes[OP_ItemPreview] = &Client::Handle_OP_ItemPreview;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -582,18 +569,6 @@ void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 {
 	SendAAList();
-	return;
-}
-
-void Client::Handle_Connect_OP_SendTributes(const EQApplicationPacket *app)
-{
-	SendTributes();
-	return;
-}
-
-void Client::Handle_Connect_OP_SendGuildTributes(const EQApplicationPacket *app)
-{
-	SendGuildTributes();
 	return;
 }
 
@@ -2267,8 +2242,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	uint32 merchantid = 0;
 
 	Mob* tmp = entity_list.GetMob(eid->entity_id);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
 		return;
 
 	//you have to be somewhat close to them to be properly using them
@@ -2362,8 +2336,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 */
 	uint32 merchantid = 0;
 	Mob* tmp = entity_list.GetMob(aps->npcid);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
 		return;
 
 	//you have to be somewhat close to them to be properly using them
@@ -2460,22 +2433,6 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 			return;
 		}
 	}
-	else if(aps->Type == NorrathsKeepersMerchant)
-	{
-		if(GetRadiantCrystals() < item->LDoNPrice)
-		{
-			Message(13, "You need at least %u Radiant Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else if(aps->Type == DarkReignMerchant)
-	{
-		if(GetEbonCrystals() < item->LDoNPrice)
-		{
-			Message(13, "You need at least %u Ebon Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
 	else
 	{
 		Message(13, "Unknown Adventure Merchant type.");
@@ -2500,16 +2457,6 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	{
 		SetPVPPoints(GetPVPPoints() - (int32)item->LDoNPrice);
 		SendPVPStats();
-	}
-	else if(aps->Type == NorrathsKeepersMerchant)
-	{
-		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
-	}
-	else if(aps->Type == DarkReignMerchant)
-	{
-		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	int16 charges = 1;
 	if(item->MaxCharges != 0)
@@ -8599,167 +8546,6 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_OpenTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenTributeMaster. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		//Opens the tribute master window
-		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
-		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
-		if(tribmast && tribmast->IsNPC() && tribmast->GetClass()==TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
-			st->response = 1;
-			QueuePacket(app);
-			tribute_master_id = st->tribute_master_id;
-			DoTributeUpdate();
-		} else {
-			st->response=0;
-			QueuePacket(app);
-		}
-	}
-	return;
-}
-
-void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_OpenGuildTributeMaster of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		//Opens the guild tribute master window
-		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
-		Mob* tribmast = entity_list.GetMob(st->tribute_master_id);
-		if(tribmast && tribmast->IsNPC() && tribmast->GetClass()==GUILD_TRIBUTE_MASTER
-			&& DistNoRoot(*tribmast) <= USE_NPC_RANGE2) {
-			st->response = 1;
-			QueuePacket(app);
-			tribute_master_id = st->tribute_master_id;
-			DoTributeUpdate();
-		} else {
-			st->response=0;
-			QueuePacket(app);
-		}
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeItem of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//player donates an item...
-	if(app->size != sizeof(TributeItem_Struct))
-		printf("Error in OP_TributeItem. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		TributeItem_Struct* t = (TributeItem_Struct*)app->pBuffer;
-
-		tribute_master_id = t->tribute_master_id;
-		//make sure they are dealing with a valid tribute master
-		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
-		if(!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
-			return;
-		if(DistNoRoot(*tribmast) > USE_NPC_RANGE2)
-			return;
-
-		t->tribute_points = TributeItem(t->slot, t->quantity);
-
-		_log(TRIBUTE__OUT, "Sending tribute item reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
-
-		QueuePacket(app);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeMoney of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//player donates money
-	if(app->size != sizeof(TributeMoney_Struct))
-		printf("Error in OP_TributeMoney. Expected size of: %zu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
-	else {
-		TributeMoney_Struct* t = (TributeMoney_Struct*)app->pBuffer;
-
-		tribute_master_id = t->tribute_master_id;
-		//make sure they are dealing with a valid tribute master
-		Mob* tribmast = entity_list.GetMob(t->tribute_master_id);
-		if(!tribmast || !tribmast->IsNPC() || tribmast->GetClass() != TRIBUTE_MASTER)
-			return;
-		if(DistNoRoot(*tribmast) > USE_NPC_RANGE2)
-			return;
-
-		t->tribute_points = TributeMoney(t->platinum);
-
-		_log(TRIBUTE__OUT, "Sending tribute money reply with %d points", t->tribute_points);
-		_pkt(TRIBUTE__OUT, app);
-
-		QueuePacket(app);
-	}
-	return;
-}
-
-void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_SelectTribute of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//we should enforce being near a real tribute master to change this
-	//but im not sure how I wanna do that right now.
-	if(app->size != sizeof(SelectTributeReq_Struct))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_SelectTribute packet");
-	else {
-		SelectTributeReq_Struct *t = (SelectTributeReq_Struct *) app->pBuffer;
-		SendTributeDetails(t->client_id, t->tribute_id);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeUpdate of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	//sent when the client changes their tribute settings...
-	if(app->size != sizeof(TributeInfo_Struct))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_TributeUpdate packet");
-	else {
-		TributeInfo_Struct *t = (TributeInfo_Struct *) app->pBuffer;
-		ChangeTributeSettings(t);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeToggle of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	if(app->size != sizeof(uint32))
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_TributeToggle packet");
-	else {
-		uint32 *val = (uint32 *) app->pBuffer;
-		ToggleTribute(*val? true : false);
-	}
-	return;
-}
-
-void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
-{
-	_log(TRIBUTE__IN, "Received OP_TributeNPC of length %d", app->size);
-	_pkt(TRIBUTE__IN, app);
-
-	return;
-}
-
 void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 {
 }
@@ -9538,19 +9324,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	//safe_delete(outapp);
 
 	////////////////////////////////////////////////////////////
-	// Tribute Packets
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		DoTributeUpdate();
-		if(m_pp.tribute_active) {
-			//restart the tribute timer where we left off
-			tribute_timer.Start(m_pp.tribute_time_remaining);
-		}
-	}
-
-	////////////////////////////////////////////////////////////
 	// Character Inventory Packet
-	//this is not quite where live sends inventory, they do it after tribute
 	if (loaditems) {//dont load if a length error occurs
 		if(eqs->ClientVersion() == EQClientMac)
 			BulkSendItems();
@@ -11524,8 +11298,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	Adventure_Sell_Struct *ams_in = (Adventure_Sell_Struct*)app->pBuffer;
 
 	Mob* vendor = entity_list.GetMob(ams_in->npcid);
-	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != ADVENTUREMERCHANT) &&
-		(vendor->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (vendor->GetClass() != DARK_REIGN_MERCHANT)))
+	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != ADVENTUREMERCHANT)))
 	{
 		Message(13, "Vendor was not found.");
 		return;
@@ -11625,17 +11398,6 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 			UpdateLDoNPoints(price, 6);
 			break;
 		}
-		case NORRATHS_KEEPERS_MERCHANT:
-		{
-			SetRadiantCrystals(GetRadiantCrystals() + price);
-			break;
-		}
-		case DARK_REIGN_MERCHANT:
-		{
-			SetEbonCrystals(GetEbonCrystals() + price);
-			break;
-		}
-
 		default:
 			break;
 	}
@@ -12863,49 +12625,6 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	}
 }
 
-/*void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app) {
-	uint32 ebon = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
-	uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
-	if((ebon + radiant) > 0) {
-		AddCrystals(radiant, ebon);
-	}
-}
-
-void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
-	VERIFY_PACKET_LENGTH(OP_CrystalCreate, app, CrystalReclaim_Struct);
-	CrystalReclaim_Struct *cr = (CrystalReclaim_Struct*)app->pBuffer;
-
-	if(cr->type == 5) {
-		if(cr->amount > GetEbonCrystals()) {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals());
-			m_pp.currentEbonCrystals = 0;
-			m_pp.careerEbonCrystals = 0;
-			Save();
-			SendCrystalCounts();
-		} else {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount);
-			m_pp.currentEbonCrystals -= cr->amount;
-			m_pp.careerEbonCrystals -= cr->amount;
-			Save();
-			SendCrystalCounts();
-		}
-	} else if(cr->type == 4) {
-		if(cr->amount > GetRadiantCrystals()) {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals());
-			m_pp.currentRadCrystals = 0;
-			m_pp.careerRadCrystals = 0;
-			Save();
-			SendCrystalCounts();
-		} else {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount);
-			m_pp.currentRadCrystals -= cr->amount;
-			m_pp.careerRadCrystals -= cr->amount;
-			Save();
-			SendCrystalCounts();
-		}
-	}
-}*/
-
 void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 {
 	if(app->size < 4)
@@ -13283,183 +13002,6 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 	}
 
 	XTargetAutoAddHaters = app->ReadUInt8(0);
-}
-
-void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
-{
-	VERIFY_PACKET_LENGTH(OP_ItemPreview, app, ItemPreview_Struct);
-	ItemPreview_Struct *ips = (ItemPreview_Struct *)app->pBuffer;
-
-	const Item_Struct* item = database.GetItem(ips->itemid);
-
-	if (item) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPreview, strlen(item->Name) + strlen(item->Lore) + strlen(item->IDFile) + 898);
-
-		int spacer;
-		for (spacer = 0; spacer < 16; spacer++) {
-			outapp->WriteUInt8(48);
-		}
-		outapp->WriteUInt16(256);
-		for (spacer = 0; spacer < 7; spacer++) {
-			outapp->WriteUInt8(0);
-		}
-		for (spacer = 0; spacer < 7; spacer++) {
-			outapp->WriteUInt8(255);
-		}
-		outapp->WriteUInt32(0);
-		outapp->WriteUInt32(1);
-		outapp->WriteUInt32(0);
-		outapp->WriteUInt8(237); // Seems to be some kind of counter? increases by 1 for each preview that you do.
-		outapp->WriteUInt16(2041); //F907
-		for (spacer = 0; spacer < 36; spacer++) {
-			outapp->WriteUInt8(0);
-		}
-		for (spacer = 0; spacer < 4; spacer++) {
-			outapp->WriteUInt8(255);
-		}
-		for (spacer = 0; spacer < 9; spacer++) {
-			outapp->WriteUInt8(0);
-		}
-		for (spacer = 0; spacer < 5; spacer++) {
-			outapp->WriteUInt8(255);
-		}
-		for (spacer = 0; spacer < 5; spacer++) {
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteString(item->Name);
-		outapp->WriteString(item->Lore);
-		outapp->WriteUInt8(0);
-		outapp->WriteUInt32(ips->itemid);
-		outapp->WriteUInt32(item->Weight);
-		outapp->WriteUInt8(item->NoRent);
-		outapp->WriteUInt8(item->NoDrop);
-		outapp->WriteUInt8(item->Attuneable);
-		outapp->WriteUInt8(item->Size);
-		outapp->WriteUInt32(item->Slots);
-		outapp->WriteUInt32(item->Price);
-		outapp->WriteUInt32(item->Icon);
-		outapp->WriteUInt8(0); //Unknown?
-		outapp->WriteUInt8(0); //Placeable flag?
-		outapp->WriteUInt32(item->BenefitFlag);
-		outapp->WriteUInt8(item->Tradeskills);
-		outapp->WriteUInt8(item->CR);
-		outapp->WriteUInt8(item->DR);
-		outapp->WriteUInt8(item->PR);
-		outapp->WriteUInt8(item->MR);
-		outapp->WriteUInt8(item->FR);
-		outapp->WriteUInt8(item->AStr);
-		outapp->WriteUInt8(item->ASta);
-		outapp->WriteUInt8(item->AAgi);
-		outapp->WriteUInt8(item->ADex);
-		outapp->WriteUInt8(item->ACha);
-		outapp->WriteUInt8(item->AInt);
-		outapp->WriteUInt8(item->AWis);
-		outapp->WriteSInt32(item->HP);
-		outapp->WriteSInt32(item->Mana);
-		outapp->WriteSInt32(item->Endur);
-		outapp->WriteSInt32(item->AC);
-		outapp->WriteUInt32(item->Regen);
-		outapp->WriteUInt32(item->ManaRegen);
-		outapp->WriteSInt32(item->EnduranceRegen);
-		outapp->WriteUInt32(item->Classes);
-		outapp->WriteUInt32(item->Races);
-		outapp->WriteUInt32(item->Deity);
-		outapp->WriteUInt32(item->SkillModValue);
-		outapp->WriteUInt32(0); //SkillModValue
-		outapp->WriteUInt32(item->SkillModType);
-		outapp->WriteUInt32(0); //SkillModExtra
-		outapp->WriteUInt32(item->BaneDmgRace);
-		outapp->WriteUInt32(item->BaneDmgBody);
-		outapp->WriteUInt32(item->BaneDmgRaceAmt);
-		outapp->WriteUInt32(item->BaneDmgAmt);
-		outapp->WriteUInt8(item->Magic);
-		outapp->WriteUInt32(item->CastTime_);
-		outapp->WriteUInt32(item->ReqLevel);
-		outapp->WriteUInt32(item->RecLevel);
-		outapp->WriteUInt32(item->RecSkill);
-		outapp->WriteUInt32(item->BardType);
-		outapp->WriteUInt32(item->BardValue);
-		outapp->WriteUInt8(item->Light);
-		outapp->WriteUInt8(item->Delay);
-		outapp->WriteUInt8(item->ElemDmgType);
-		outapp->WriteUInt8(item->ElemDmgAmt);
-		outapp->WriteUInt8(item->Range);
-		outapp->WriteUInt32(item->Damage);
-		outapp->WriteUInt32(item->Color);
-		outapp->WriteUInt32(0);	// Prestige
-		outapp->WriteUInt8(item->ItemType);
-		outapp->WriteUInt32(item->Material);
-		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt32(item->EliteMaterial);
-		outapp->WriteUInt32(0);	// unknown
-		outapp->WriteUInt32(0);	// unknown
-		outapp->WriteUInt32(0); //This is unknown057 from lucy
-		for (spacer = 0; spacer < 77; spacer++) { //More Item stats, but some seem to be off based on packet check
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
-		outapp->WriteUInt32(0); //Unknown
-		for (spacer = 0; spacer < 5; spacer++) { //Augment stuff
-			outapp->WriteUInt32(item->AugSlotType[spacer]);
-			outapp->WriteUInt8(item->AugSlotVisible[spacer]);
-			outapp->WriteUInt8(item->AugSlotUnk2[spacer]);
-		}
-		outapp->WriteUInt32(0); //New RoF 6th Aug Slot
-		outapp->WriteUInt8(1); //^
-		outapp->WriteUInt8(0); //^^
-		outapp->WriteUInt32(item->LDoNSold);
-		outapp->WriteUInt32(item->LDoNTheme);
-		outapp->WriteUInt32(item->LDoNPrice);
-		outapp->WriteUInt32(item->LDoNSellBackRate);
-		for (spacer = 0; spacer < 11; spacer++) { //unknowns
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
-		outapp->WriteUInt16(0); //Unknown
-		outapp->WriteUInt32(item->Favor); // Tribute
-		for (spacer = 0; spacer < 17; spacer++) { //unknowns
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt32(item->GuildFavor); // Tribute
-		outapp->WriteUInt32(0); //Unknown
-		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
-		for (spacer = 0; spacer < 11; spacer++) { //unknowns
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt8(1);
-		for (spacer = 0; spacer < 25; spacer++) { //unknowns
-			outapp->WriteUInt8(0);
-		}
-		for (spacer = 0; spacer < 304; spacer++) { //Cast stuff and whole bunch of unknowns
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt8(142); // Always seen not in the item structure though 8E
-		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt32(1); // Always seen as 1
-		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt32(0xCDCCCC3D); // Unknown
-		outapp->WriteUInt32(0);
-		outapp->WriteUInt16(8256); //0x4020/8256
-		outapp->WriteUInt16(0);
-		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
-		outapp->WriteUInt16(0);
-		outapp->WriteUInt32(0xFFFFFFFF); //Unknown but always seen as FF FF FF FF
-		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt16(0); //unknown
-		outapp->WriteUInt32(32831); //0x3F80
-		for (spacer = 0; spacer < 24; spacer++) { //whole bunch of unknowns always 0's
-			outapp->WriteUInt8(0);
-		}
-		outapp->WriteUInt8(1);
-		for (spacer = 0; spacer < 6; spacer++) { //whole bunch of unknowns always 0's
-			outapp->WriteUInt8(0);
-		}
-
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	} else
-		return;
 }
 
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {

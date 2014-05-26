@@ -271,12 +271,9 @@
 	void Handle_OP_CorpseDrop(const EQApplicationPacket *app);
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
-	void Handle_OP_CrystalReclaim(const EQApplicationPacket *app);
-	void Handle_OP_CrystalCreate(const EQApplicationPacket *app);
 	void Handle_OP_LFGuild(const EQApplicationPacket *app);
 	void Handle_OP_XTargetRequest(const EQApplicationPacket *app);
 	void Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app);
-	void Handle_OP_ItemPreview(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);

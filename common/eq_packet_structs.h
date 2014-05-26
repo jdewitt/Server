@@ -4543,14 +4543,6 @@ struct GMSearchCorpse_Struct
 /*128*/	uint32 Unknown128;
 };
 
-struct CrystalCountUpdate_Struct
-{
-/*000*/	uint32	CurrentRadiantCrystals;
-/*004*/	uint32	CurrentEbonCrystals;
-/*008*/	uint32	CareerRadiantCrystals;
-/*012*/	uint32	CareerEbonCrystals;
-};
-
 struct BeggingResponse_Struct
 {
 /*00*/	uint32	Unknown00;
@@ -4802,11 +4794,6 @@ struct Untargetable_Struct {
 /*008*/
 };
 
-struct CrystalReclaim_Struct {
-/**/ uint32 type;
-/**/ uint32 amount;
-};
-
 struct LFGuild_SearchPlayer_Struct
 {
 /*00*/	uint32	Command;
@@ -4860,17 +4847,6 @@ struct LFGuild_GuildToggle_Struct
 /*552*/ char	Name[64];
 /*616*/
 };
-
-struct ItemPreview_Struct
-{
-/*000*/	uint32	itemid;
-/*004*/	uint32	unknown004[3];
-/*016*/	uint32	slot;
-/*020*/	uint32	unknown020;
-/*024*/	uint16	slot2;
-/*026*/	uint8	unknown026[54];
-};
-
 
 struct ServerLootItem_Struct {
 	uint32	item_id;

@@ -379,7 +379,6 @@ int command_init(void){
 		command_add("setallskill",nullptr,0,command_setskillall) ||
 		command_add("setallskills",nullptr,0,command_setskillall) ||
 		command_add("setanim","[animnum] - Set target's appearance to animnum",200,command_setanim) ||
-		//command_add("setcrystals","[value] - Set your or your player target's available radiant or ebon crystals",100,command_setcrystals) ||
 		command_add("setexp",nullptr,0,command_setxp) ||
 		command_add("setskill","[skillnum] [value] - Set your target's skill skillnum to value",50,command_setskill) ||
 		command_add("setskillall","[value] - Set all of your target's skills to value",50,command_setskillall) ||
@@ -2995,29 +2994,6 @@ void command_peekinv(Client *c, const Seperator *sep){
 						}
 					}
 				}
-			}
-		}
-	}
-
-	if (bAll || (strcasecmp(sep->arg[1], "trib")==0)) {
-		// Active tribute effect items
-		bFound = true;
-		for (int16 i=TRIBUTE_SLOT_START; i<(TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); i++) {
-			const ItemInst* inst = client->GetInv().GetItem(i);
-			item = (inst) ? inst->GetItem() : nullptr;
-			if (c->GetClientVersion() >= EQClientSoF)
-			{
-				c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
-			}
-			else
-			{
-			c->Message((item==0), "TributeSlot: %i, Item: %i (%c%06X000000000000000000000000000000000000000%s%c), Charges: %i", i,
-				((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
-				((item==0)?"null":item->Name), 0x12,
-				((item==0)?0:inst->GetCharges()));
 			}
 		}
 	}
@@ -6180,34 +6156,6 @@ void command_setaapts(Client *c, const Seperator *sep){
 		t->SendAATable();
 	}
 }
-
-/*void command_setcrystals(Client *c, const Seperator *sep){
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(0, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 100000)
-		c->Message(0, "You must have a number greater than 0 for crystals and no more than 100000.");
-	else if(!strcasecmp(sep->arg[1], "radiant"))
-	{
-		t->SetRadiantCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->Save();
-	}
-	else if(!strcasecmp(sep->arg[1], "ebon"))
-	{
-		t->SetEbonCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->Save();
-	}
-	else
-	{
-		c->Message(0, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	}
-}*/
 
 void command_stun(Client *c, const Seperator *sep){
 	Mob *t=c->CastToMob();

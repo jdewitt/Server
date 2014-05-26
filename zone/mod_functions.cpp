@@ -94,9 +94,6 @@ float Client::mod_tradeskill_chance(float chance, DBTradeskillRecipe_Struct *spe
 //Chance to skillup rolled against a random 0-99 where higher is better.
 float Client::mod_tradeskill_skillup(float chance_stage2) { return(chance_stage2); }
 
-//Tribute value override
-int32 Client::mod_tribute_item_value(int32 pts, const ItemInst* item) { return(pts); }
-
 //Death reporting
 void Client::mod_client_death_npc(Mob* killerMob) { return; }
 void Client::mod_client_death_duel(Mob* killerMob) { return; }

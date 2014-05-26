@@ -4397,31 +4397,6 @@ XS(XS_Client_AddPVPPoints)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_AddCrystals);
-XS(XS_Client_AddCrystals)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, RadiantCount, EbonCount)");
-	{
-		Client *	THIS;
-		uint32		Radiant = (uint32)SvUV(ST(1));
-		uint32		Ebon = (uint32)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->AddCrystals(Radiant, Ebon);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVPPoints)
 {
@@ -4443,58 +4418,6 @@ XS(XS_Client_GetPVPPoints)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPVPPoints();
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetRadiantCrystals); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRadiantCrystals)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetRadiantCrystals();
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetEbonCrystals); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEbonCrystals)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetEbonCrystals();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -6110,10 +6033,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "KeyRingAdd"), XS_Client_KeyRingAdd, file, "$$");
 		newXSproto(strcpy(buf, "KeyRingCheck"), XS_Client_KeyRingCheck, file, "$$");
 		newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
-		newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 		newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
-		newXSproto(strcpy(buf, "GetRadiantCrystals"), XS_Client_GetRadiantCrystals, file, "$");
-		newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
 		newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
 		newXSproto(strcpy(buf, "UpdateGroupAAs"), XS_Client_UpdateGroupAAs, file, "$$$");
 		newXSproto(strcpy(buf, "GetGroupPoints"), XS_Client_GetGroupPoints, file, "$");

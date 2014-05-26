@@ -740,34 +740,6 @@ XS(XS_EQW_SetBankerFlag)
 	XSRETURN(1);
 }
 
-XS(XS_EQW_SetTributeFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EQW_SetTributeFlag)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EQW::SetTributeFlag(THIS, charid, enabled)");
-	{
-		EQW *		THIS;
-		bool		RETVAL;
-		uint32		charid = (uint32)SvUV(ST(1));
-		bool		enabled = (bool)SvTRUE(ST(2));
-
-		if (sv_derived_from(ST(0), "EQW")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(EQW *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->SetTributeFlag(charid, enabled);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
 XS(XS_EQW_SetPublicNote); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EQW_SetPublicNote)
 {
@@ -1029,7 +1001,6 @@ XS(boot_EQW)
 		newXSproto(strcpy(buf, "SetGuild"), XS_EQW_SetGuild, file, "$$$$");
 		newXSproto(strcpy(buf, "SetGuildRank"), XS_EQW_SetGuildRank, file, "$$$");
 		newXSproto(strcpy(buf, "SetBankerFlag"), XS_EQW_SetBankerFlag, file, "$$$");
-		newXSproto(strcpy(buf, "SetTributeFlag"), XS_EQW_SetTributeFlag, file, "$$$");
 		newXSproto(strcpy(buf, "SetPublicNote"), XS_EQW_SetPublicNote, file, "$$$");
 		newXSproto(strcpy(buf, "CountBugs"), XS_EQW_CountBugs, file, "$");
 		newXSproto(strcpy(buf, "ListBugs"), XS_EQW_ListBugs, file, "$$");

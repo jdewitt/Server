@@ -158,13 +158,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 	}
 
-	//tribute items
-	for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
-		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
-		if(inst == 0)
-			continue;
-		AddItemBonuses(inst, newbon, false, true);
-	}
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();

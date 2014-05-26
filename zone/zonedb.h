@@ -326,11 +326,6 @@ public:
 	bool    DisableRecipe(uint32 recipe_id);
 
 	/*
-	* Tribute
-	*/
-	bool	LoadTributes();
-
-	/*
 	* Doors
 	*/
 	bool	DoorIsOpen(uint8 door_id,const char* zone_name);

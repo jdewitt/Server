@@ -2782,7 +2782,7 @@ struct TaskDescription_Struct {
 /*035*/	uint32	unknown35;
 /*039*/	uint16	unknown39;
 /*041*/	char	reward_link[1];	//variable length, 0 terminated
-/*042*/	uint32	unknown43;  //maybe crystal count?
+/*042*/	uint32	unknown43;  //maybe f count?
 };
 
 struct TaskMemberList_Struct {
