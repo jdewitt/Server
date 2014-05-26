@@ -375,10 +375,6 @@ bool EQW::SetBankerFlag(uint32 charid, bool is_banker) {
 	return(guild_mgr.SetBankerFlag(charid, is_banker));
 }
 
-bool EQW::SetTributeFlag(uint32 charid, bool enabled) {
-	return(guild_mgr.SetTributeFlag(charid, enabled));
-}
-
 bool EQW::SetPublicNote(uint32 charid, const char *note) {
 	return(guild_mgr.SetPublicNote(charid, note));
 }

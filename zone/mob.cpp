@@ -719,9 +719,6 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 	if(strlen(ns->spawn.lastName) == 0) {
 		switch(ns->spawn.class_)
 		{
-		case TRIBUTE_MASTER:
-			strcpy(ns->spawn.lastName, "Tribute Master");
-			break;
 		case ADVENTURERECRUITER:
 			strcpy(ns->spawn.lastName, "Adventure Recruiter");
 			break;
@@ -732,46 +729,43 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 			strcpy(ns->spawn.lastName,"Adventure Merchant");
 			break;
 		case WARRIORGM:
-			strcpy(ns->spawn.lastName, "GM Warrior");
+			strcpy(ns->spawn.lastName, "Warrior Guildmaster");
 			break;
 		case PALADINGM:
-			strcpy(ns->spawn.lastName, "GM Paladin");
+			strcpy(ns->spawn.lastName, "Paladin Guildmaster");
 			break;
 		case RANGERGM:
-			strcpy(ns->spawn.lastName, "GM Ranger");
+			strcpy(ns->spawn.lastName, "Ranger Guildmaster");
 			break;
 		case SHADOWKNIGHTGM:
-			strcpy(ns->spawn.lastName, "GM Shadowknight");
+			strcpy(ns->spawn.lastName, "Shadowknight Guildmaster");
 			break;
 		case DRUIDGM:
-			strcpy(ns->spawn.lastName, "GM Druid");
+			strcpy(ns->spawn.lastName, "Druid Guildmaster");
 			break;
 		case BARDGM:
-			strcpy(ns->spawn.lastName, "GM Bard");
+			strcpy(ns->spawn.lastName, "Bard Guildmaster");
 			break;
 		case ROGUEGM:
-			strcpy(ns->spawn.lastName, "GM Rogue");
+			strcpy(ns->spawn.lastName, "Rogue Guildmaster");
 			break;
 		case SHAMANGM:
-			strcpy(ns->spawn.lastName, "GM Shaman");
+			strcpy(ns->spawn.lastName, "Shaman Guildmaster");
 			break;
 		case NECROMANCERGM:
-			strcpy(ns->spawn.lastName, "GM Necromancer");
+			strcpy(ns->spawn.lastName, "Necromancer Guildmaster");
 			break;
 		case WIZARDGM:
-			strcpy(ns->spawn.lastName, "GM Wizard");
+			strcpy(ns->spawn.lastName, "Wizard Guildmaster");
 			break;
 		case MAGICIANGM:
-			strcpy(ns->spawn.lastName, "GM Magician");
+			strcpy(ns->spawn.lastName, "Magician Guildmaster");
 			break;
 		case ENCHANTERGM:
-			strcpy(ns->spawn.lastName, "GM Enchanter");
+			strcpy(ns->spawn.lastName, "Enchanter Guildmaster");
 			break;
 		case BEASTLORDGM:
-			strcpy(ns->spawn.lastName, "GM Beastlord");
-			break;
-		case BERSERKERGM:
-			strcpy(ns->spawn.lastName, "GM Berserker");
+			strcpy(ns->spawn.lastName, "Beastlord Guildmaster");
 			break;
 		default:
 			break;
@@ -793,9 +787,6 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	strcpy(ns2->spawn.name, ns->spawn.name);
 	switch(ns->spawn.class_)
 	{
-	case TRIBUTE_MASTER:
-		strcpy(ns2->spawn.lastName, "Tribute Master");
-		break;
 	case ADVENTURERECRUITER:
 		strcpy(ns2->spawn.lastName, "Adventure Recruiter");
 		break;
@@ -806,46 +797,43 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 		strcpy(ns->spawn.lastName,"Adventure Merchant");
 		break;
 	case WARRIORGM:
-		strcpy(ns2->spawn.lastName, "GM Warrior");
+		strcpy(ns2->spawn.lastName, "Warrior Guildmaster");
 		break;
 	case PALADINGM:
-		strcpy(ns2->spawn.lastName, "GM Paladin");
+		strcpy(ns2->spawn.lastName, "Paladin Guildmaster");
 		break;
 	case RANGERGM:
-		strcpy(ns2->spawn.lastName, "GM Ranger");
+		strcpy(ns2->spawn.lastName, "Ranger Guildmaster");
 		break;
 	case SHADOWKNIGHTGM:
-		strcpy(ns2->spawn.lastName, "GM Shadowknight");
+		strcpy(ns2->spawn.lastName, "Shadowknight Guildmaster");
 		break;
 	case DRUIDGM:
-		strcpy(ns2->spawn.lastName, "GM Druid");
+		strcpy(ns2->spawn.lastName, "Druid Guildmaster");
 		break;
 	case BARDGM:
-		strcpy(ns2->spawn.lastName, "GM Bard");
+		strcpy(ns2->spawn.lastName, "Bard Guildmaster");
 		break;
 	case ROGUEGM:
-		strcpy(ns2->spawn.lastName, "GM Rogue");
+		strcpy(ns2->spawn.lastName, "Rogue Guildmaster");
 		break;
 	case SHAMANGM:
-		strcpy(ns2->spawn.lastName, "GM Shaman");
+		strcpy(ns2->spawn.lastName, "Shaman Guildmaster");
 		break;
 	case NECROMANCERGM:
-		strcpy(ns2->spawn.lastName, "GM Necromancer");
+		strcpy(ns2->spawn.lastName, "Necromancer Guildmaster");
 		break;
 	case WIZARDGM:
-		strcpy(ns2->spawn.lastName, "GM Wizard");
+		strcpy(ns2->spawn.lastName, "Wizard Guildmaster");
 		break;
 	case MAGICIANGM:
-		strcpy(ns2->spawn.lastName, "GM Magician");
+		strcpy(ns2->spawn.lastName, "Magician Guildmaster");
 		break;
 	case ENCHANTERGM:
-		strcpy(ns2->spawn.lastName, "GM Enchanter");
+		strcpy(ns2->spawn.lastName, "Enchanter Guildmaster");
 		break;
 	case BEASTLORDGM:
-		strcpy(ns2->spawn.lastName, "GM Beastlord");
-		break;
-	case BERSERKERGM:
-		strcpy(ns2->spawn.lastName, "GM Berserker");
+		strcpy(ns2->spawn.lastName, "Beastlord Guildmaster");
 		break;
 	default:
 		strcpy(ns2->spawn.lastName, ns->spawn.lastName);

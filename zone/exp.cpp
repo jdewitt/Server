@@ -432,7 +432,6 @@ void Client::SetLevel(uint8 set_level, bool command)
 		SetHP(CalcMaxHP()); // Why not, lets give them a free heal
 	}
 
-		DoTributeUpdate();
 	SendHPUpdate();
 	SetMana(CalcMaxMana());
 	UpdateWho();

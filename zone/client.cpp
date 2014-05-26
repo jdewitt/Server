@@ -4447,21 +4447,6 @@ void Client::SendPVPStats()
 	safe_delete(outapp);
 }
 
-void Client::SendCrystalCounts()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CrystalCountUpdate, sizeof(CrystalCountUpdate_Struct));
-	CrystalCountUpdate_Struct *ccus = (CrystalCountUpdate_Struct *)outapp->pBuffer;
-
-	ccus->CurrentRadiantCrystals = GetRadiantCrystals();
-	ccus->CurrentEbonCrystals = GetEbonCrystals();
-	ccus->CareerRadiantCrystals = m_pp.careerRadCrystals;
-	ccus->CareerEbonCrystals = m_pp.careerEbonCrystals;
-
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void Client::SendDisciplineTimers()
 {
 
@@ -5739,18 +5724,6 @@ void Client::AddPVPPoints(uint32 Points)
 	Save();
 
 	SendPVPStats();
-}
-
-void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
-{
-	m_pp.currentRadCrystals += Radiant;
-	m_pp.careerRadCrystals += Radiant;
-	m_pp.currentEbonCrystals += Ebon;
-	m_pp.careerEbonCrystals += Ebon;
-
-	Save();
-
-	SendCrystalCounts();
 }
 
 // Processes a client request to inspect a SoF client's equipment.

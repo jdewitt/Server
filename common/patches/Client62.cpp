@@ -339,14 +339,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT(ldon_points_ruj);
 	OUT(ldon_points_tak);
 	OUT(ldon_points_available);
-	OUT(tribute_time_remaining);
-	OUT(career_tribute_points);
-	OUT(tribute_points);
-	OUT(tribute_active);
-	for(r = 0; r < structs::MAX_PLAYER_TRIBUTES; r++) {
-		OUT(tributes[r].tribute);
-		OUT(tributes[r].tier);
-	}
 	OUT(group_leadership_exp);
 	OUT(raid_leadership_exp);
 	OUT(group_leadership_points);
@@ -356,10 +348,6 @@ ENCODE(OP_PlayerProfile) {
 	OUT(entityid);
 	OUT(leadAAActive);
 	OUT(expAA);
-	OUT(currentRadCrystals);
-	OUT(careerRadCrystals);
-	OUT(currentEbonCrystals);
-	OUT(careerEbonCrystals);
 	OUT(groupAutoconsent);
 	OUT(raidAutoconsent);
 	OUT(guildAutoconsent);

@@ -600,10 +600,6 @@ bool Client::Process() {
 			BuffProcess();
 			DoStaminaUpdate();
 
-			if(tribute_timer.Check()) {
-				ToggleTribute(true);	//re-activate the tribute.
-			}
-
 			if (fishing_timer.Check()) {
 				GoFish();
 			}

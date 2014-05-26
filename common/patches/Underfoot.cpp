@@ -657,16 +657,8 @@ ENCODE(OP_PlayerProfile) {
 	OUT(ldon_points_tak);
 	OUT(ldon_points_available);
 //	OUT(unknown14420[132]);
-	OUT(tribute_time_remaining);
-	OUT(career_tribute_points);
 //	OUT(unknown7208);
-	OUT(tribute_points);
 //	OUT(unknown7216);
-	OUT(tribute_active);
-	for(r = 0; r < structs::MAX_PLAYER_TRIBUTES; r++) {
-		OUT(tributes[r].tribute);
-		OUT(tributes[r].tier);
-	}
 //	OUT(unknown14616[8]);
 	OUT(group_leadership_exp);
 //	OUT(unknown14628);
@@ -686,10 +678,6 @@ ENCODE(OP_PlayerProfile) {
 //	OUT(unknown17892[4580]);
 	OUT(expAA);
 //	OUT(unknown19516[40]);
-	OUT(currentRadCrystals);
-	OUT(careerRadCrystals);
-	OUT(currentEbonCrystals);
-	OUT(careerEbonCrystals);
 	OUT(groupAutoconsent);
 	OUT(raidAutoconsent);
 	OUT(guildAutoconsent);

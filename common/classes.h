@@ -60,10 +60,6 @@
 #define ADVENTUREMERCHANT 61
 #define LDON_TREASURE 62 //objects you can use /open on first seen in LDONs
 #define CORPSE_CLASS 62	//only seen on Danvi's Corpse in Akheva so far..
-#define TRIBUTE_MASTER	63
-#define GUILD_TRIBUTE_MASTER	64	//not sure
-#define NORRATHS_KEEPERS_MERCHANT 67
-#define DARK_REIGN_MERCHANT 68
 
 const char* GetEQClassName(uint8 class_, uint8 level = 0);
 uint32 GetArrayEQClass(uint8 eqclass);

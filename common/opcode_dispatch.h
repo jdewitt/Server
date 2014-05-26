@@ -261,14 +261,6 @@ INr(OP_TGB);		//4 bytes, value is 0, 1, or 2
 IN(OP_Split, Split_Struct);
 INz(OP_SenseTraps);		//?
 INz(OP_DisarmTraps);	//?
-IN(OP_OpenTributeMaster, StartTribute_Struct);
-IN(OP_OpenGuildTributeMaster, StartTribute_Struct);
-IN(OP_TributeItem, TributeItem_Struct);
-IN(OP_TributeMoney, TributeMoney_Struct);
-IN(OP_SelectTribute, SelectTributeReq_Struct);
-IN(OP_TributeUpdate, TributeInfo_Struct);
-IN(OP_TributeToggle, uint32);	//value is 0 or 1
-IN(OP_TributeNPC, uint32);		//contains tribute master entity ID
 INr(OP_CrashDump);
 INr(OP_ControlBoat);
 INr(OP_DumpName);

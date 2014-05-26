@@ -250,8 +250,6 @@ int main(int argc, char** argv) {
 	title_manager.LoadTitles();
 	_log(ZONE__INIT, "Loading AA effects");
 	database.LoadAAEffects();
-	_log(ZONE__INIT, "Loading tributes");
-	database.LoadTributes();
 	_log(ZONE__INIT, "Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 	_log(ZONE__INIT, "Loading commands");

@@ -57,7 +57,6 @@ public:
 	bool	GetAltFlag(uint32 CharID);
 	bool	SetAltFlag(uint32 charid, bool is_alt);
 	bool	GetBankerFlag(uint32 CharID);
-	bool	SetTributeFlag(uint32 charid, bool enabled);
 	bool	SetPublicNote(uint32 charid, const char *note);
 
 	//queries
@@ -107,7 +106,6 @@ protected:
 	bool	DBSetGuildRank(uint32 charid, uint8 rank);
 	bool	DBSetBankerFlag(uint32 charid, bool is_banker);
 	bool	DBSetAltFlag(uint32 charid, bool is_alt);
-	bool	DBSetTributeFlag(uint32 charid, bool enabled);
 	bool	DBSetPublicNote(uint32 charid, const char *note);
 	bool	_RunQuery(char *&query, int len, const char *errmsg);
 //	void	DBSetPublicNote(uint32 guild_id,char* charname, char* note);
