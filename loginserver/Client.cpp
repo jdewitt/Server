@@ -425,7 +425,6 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 
 	status = cs_logged_in;
 
-	string e_user;
 	string e_hash;
 	char *e_buffer = nullptr;
 	unsigned int d_account_id = 0;
@@ -436,27 +435,28 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	eq_crypto.DoEQDecrypt((unsigned char*)data, eqlogin, 40);
 	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
 
+	string e_user = lcs->username; //e_user should be d_user as we're decrypted, but this variable name is required later on.
 	bool result;
 	in_addr in;
 	in.s_addr = connection->GetRemoteIP();
 
-	if(server.db->GetLoginDataFromAccountName(lcs->username, d_pass_hash, d_account_id) == false)
+	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
 		
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
-			server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
+			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
 		}
 		if (server.options.IsCreateOn())
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
 			}
 			/*eventually add a unix time stamp calculator from last id that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, lcs->username, lcs->password, "", 2, string(inet_ntoa(in)));
+			server.db->UpdateLSAccountInfo(NULL, e_user, lcs->password, "", 2, string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -475,7 +475,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, lcs->username, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
+				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
 			}
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
