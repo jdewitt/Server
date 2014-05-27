@@ -4182,55 +4182,6 @@ struct VeteranReward
 /*012*/	VeteranRewardItem items[8];
 };
 
-struct ExpeditionEntryHeader_Struct
-{
-/*000*/ uint32 unknown000;
-/*000*/ uint32 number_of_entries;
-};
-
-struct ExpeditionJoinPrompt_Struct
-{
-/*000*/ uint32 clientid;
-/*004*/ uint32 unknown004;
-/*008*/ char player_name[64];
-/*072*/ char expedition_name[64];
-};
-
-struct ExpeditionExpireWarning
-{
-/*000*/ uint32 clientid;
-/*004*/ uint32 unknown004;
-/*008*/ uint32 minutes_remaining;
-};
-
-struct ExpeditionInfo_Struct
-{
-/*000*/ uint32 clientid;
-/*004*/ uint32 unknown004;
-/*008*/ uint32 unknown008;
-/*012*/ uint32 max_players;
-/*016*/ char expedition_name[128];
-/*142*/ char leader_name[64];
-};
-
-struct ExpeditionCompassEntry_Struct
-{
-/*000*/ float unknown000; //seen *((uint32*)) = 1584791871
-/*004*/ uint32 enabled; //guess
-/*008*/ uint32 unknown008; //seen 1019
-/*012*/ float y;
-/*016*/ float x;
-/*020*/ float z;
-};
-
-struct ExpeditionCompass_Struct
-{
-/*000*/ uint32 clientid;
-/*004*/ uint32 count;
-/*008*/ ExpeditionCompassEntry_Struct entries[0];
-};
-
-
 	};	//end namespace structs
 };	//end namespace Underfoot
 
