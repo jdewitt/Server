@@ -8089,7 +8089,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 		outapp = new EQApplicationPacket(OP_ControlBoat,0);
 	else
 	{
-		outapp = new EQApplicationPacket(OP_ControlBoat,sizeof(ControlBoat_Struct));
+		outapp = new EQApplicationPacket(OP_ControlBoat,sizeof(OldControlBoat_Struct));
 		OldControlBoat_Struct* cbs2 = (OldControlBoat_Struct*)outapp->pBuffer;
 		cbs2->boatId = boatid;
 		cbs2->TakeControl = TakeControl;
