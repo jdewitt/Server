@@ -211,8 +211,8 @@ EQApplicationPacket* ServerManager::CreateOldServerListPacket(Client* c)
 			memcpy(data_ptr, (*iter)->GetRemoteIP().c_str(), (*iter)->GetRemoteIP().size());
 			data_ptr += ((*iter)->GetRemoteIP().size() + 1);
 		}
-
-		ServerListServerFlags_Struct* slsf = (ServerListServerFlags_Struct*)&data_ptr;
+		
+		ServerListServerFlags_Struct* slsf = (ServerListServerFlags_Struct*)data_ptr;
 		slsf->greenname = 0;
 		switch((*iter)->GetServerListID())
 		{
@@ -236,7 +236,7 @@ EQApplicationPacket* ServerManager::CreateOldServerListPacket(Client* c)
 		data_ptr += sizeof(ServerListServerFlags_Struct);
 		++iter;
 	}
-	ServerListEndFlags_Struct* slef = (ServerListEndFlags_Struct*)&data_ptr;
+	ServerListEndFlags_Struct* slef = (ServerListEndFlags_Struct*)data_ptr;
 	return outapp;
 }
 

@@ -229,8 +229,6 @@ public:
 	void AddLevelBasedExp(int exp_pct);
 	void AddLevelBasedExp(int exp_pct, int max_level);
 	void IncrementAA(int aa);
-	void MarkSingleCompassLoc(float in_x, float in_y, float in_z);
-	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, int count);
 	int GetNextAvailableSpellBookSlot();
 	int GetNextAvailableSpellBookSlot(int start);
 	int FindSpellBookSlotBySpellID(int spell_id);
