@@ -916,7 +916,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 			{
-				if(GetClientVersion() == EQClientMac && GetBoatNPCID() == 0)
+				if(GetBoatNPCID() == 0)
 				{
 					Message(13, "Large warp detected.");
 					char hString[250];
@@ -8024,12 +8024,41 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(ControlBoat_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_ControlBoat, size=%i, expected %i", app->size, sizeof(ControlBoat_Struct));
-		return;
+	if(GetClientVersion() > EQClientMac)
+	{
+		if (app->size != sizeof(ControlBoat_Struct)) {
+			LogFile->write(EQEMuLog::Error, "Wrong size: OP_ControlBoat, size=%i, expected %i", app->size, sizeof(ControlBoat_Struct));
+			return;
+		}
 	}
-	ControlBoat_Struct* cbs = (ControlBoat_Struct*)app->pBuffer;
-	Mob* boat = entity_list.GetMob(cbs->boatId);
+	else
+	{
+		if (app->size != sizeof(OldControlBoat_Struct)) {
+			LogFile->write(EQEMuLog::Error, "Wrong size: OP_ControlBoat, size=%i, expected %i", app->size, sizeof(OldControlBoat_Struct));
+			return;
+		}
+	}
+
+	bool TakeControl = false;
+	Mob* boat = 0;
+	int unknown5 = 0;
+	int16 boatid = 0;
+	if(GetClientVersion() > EQClientMac)
+	{
+		ControlBoat_Struct* cbs = (ControlBoat_Struct*)app->pBuffer;
+		boat = entity_list.GetMob(cbs->boatId);
+		TakeControl = cbs->TakeControl;
+		boatid = cbs->boatId;
+	}
+	else
+	{
+		OldControlBoat_Struct* cbs = (OldControlBoat_Struct*)app->pBuffer;
+		boat = entity_list.GetMob(cbs->boatId);
+		TakeControl = cbs->TakeControl;
+		unknown5 = cbs->unknown5;
+		boatid = cbs->boatId;
+	}
+			
 	if (boat == 0)
 		return;	// do nothing if the boat isn't valid
 
@@ -8042,7 +8071,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (cbs->TakeControl) {
+	if (TakeControl) {
 		// this uses the boat's target to indicate who has control of it. It has to check hate to make sure the boat isn't actually attacking anyone.
 		if ((boat->GetTarget() == 0) || (boat->GetTarget() == this && boat->GetHateAmount(this) == 0)) {
 			boat->SetTarget(this);
@@ -8054,8 +8083,19 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 	}
 	else
 		boat->SetTarget(0);
+	
+	EQApplicationPacket* outapp;
+	if(GetClientVersion() > EQClientMac)
+		outapp = new EQApplicationPacket(OP_ControlBoat,0);
+	else
+	{
+		outapp = new EQApplicationPacket(OP_ControlBoat,sizeof(OldControlBoat_Struct));
+		OldControlBoat_Struct* cbs2 = (OldControlBoat_Struct*)outapp->pBuffer;
+		cbs2->boatId = boatid;
+		cbs2->TakeControl = TakeControl;
+		cbs2->unknown5 = unknown5;
+	}
 
-	EQApplicationPacket* outapp=new EQApplicationPacket(OP_ControlBoat,0);
 	FastQueuePacket(&outapp);
 	safe_delete(outapp);
 	// have the boat signal itself, so quests can be triggered by boat use
