@@ -170,7 +170,7 @@ RULE_INT ( Zone, MQWarpExemptStatus, -1 ) // Required status level to exempt the
 RULE_INT ( Zone, MQZoneExemptStatus, -1 ) // Required status level to exempt the MQZoneDetector. Set to -1 to disable this feature.
 RULE_INT ( Zone, MQGateExemptStatus, -1 ) // Required status level to exempt the MQGateDetector. Set to -1 to disable this feature.
 RULE_INT ( Zone, MQGhostExemptStatus, -1 ) // Required status level to exempt the MGhostDetector. Set to -1 to disable this feature.
-RULE_BOOL ( Zone, EnableMQWarpDetector, true ) // Enable the MQWarp Detector. Set to False to disable this feature.
+RULE_BOOL ( Zone, EnableMQWarpDetector, false ) // Enable the MQWarp Detector. Set to False to disable this feature.
 RULE_BOOL ( Zone, EnableMQZoneDetector, true ) // Enable the MQZone Detector. Set to False to disable this feature.
 RULE_BOOL ( Zone, EnableMQGateDetector, true ) // Enable the MQGate Detector. Set to False to disable this feature.
 RULE_BOOL ( Zone, EnableMQGhostDetector, true ) // Enable the MQGhost Detector. Set to False to disable this feature.
