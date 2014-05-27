@@ -137,13 +137,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	ZoneLoaded = true;
 
 	worldserver.SetZone(iZoneID, iInstanceID);
-	if(iInstanceID != 0)
-	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureZoneData, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = iInstanceID;
-		worldserver.SendPacket(pack);
-		delete pack;
-	}
 
 	LogFile->write(EQEMuLog::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
 	LogFile->write(EQEMuLog::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
@@ -647,17 +640,6 @@ void Zone::Shutdown(bool quite)
 		zone->npctable.erase(itr);
 	}
 
-	zone->adventure_entry_list_flavor.clear();
-
-	std::map<uint32,LDoNTrapTemplate*>::iterator itr4;
-	while(zone->ldon_trap_list.size())
-	{
-		itr4 = zone->ldon_trap_list.begin();
-		delete itr4->second;
-		zone->ldon_trap_list.erase(itr4);
-	}
-	zone->ldon_trap_entry_list.clear();
-
 	LogFile->write(EQEMuLog::Status, "Zone Shutdown: %s (%i)", zone->GetShortName(), zone->GetZoneID());
 	petition_list.ClearPetitions();
 	zone->GotCurTime(false);
@@ -793,10 +775,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	{
 		Instance_Timer = nullptr;
 	}
-	adv_data = nullptr;
 	map_name = nullptr;
 	Instance_Warning_timer = nullptr;
-	did_adventure_actions = false;
 	database.QGlobalPurge();
 
 	if(zoneid == RuleI(World, GuildBankZoneID))
@@ -827,7 +807,6 @@ Zone::~Zone() {
 	safe_delete(Instance_Shutdown_Timer);
 	safe_delete(Instance_Warning_timer);
 	safe_delete(qGlobals);
-	safe_delete_array(adv_data);
 	safe_delete_array(map_name);
 
 	if(aas != nullptr) {
@@ -886,9 +865,6 @@ bool Zone::Init(bool iStaticZone) {
 		return false;
 	}
 
-	LogFile->write(EQEMuLog::Status, "Loading adventure flavor text...");
-	LoadAdventureFlavor();
-
 	LogFile->write(EQEMuLog::Status, "Loading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
@@ -911,8 +887,6 @@ bool Zone::Init(bool iStaticZone) {
 		database.DeleteBuyLines(0);
 	}
 
-	zone->LoadLDoNTraps();
-	zone->LoadLDoNTrapEntries();
 	zone->LoadVeteranRewards();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
@@ -1142,10 +1116,6 @@ bool Zone::Process() {
 				iterator.RemoveCurrent();
 			}
 		}
-		if(adv_data && !did_adventure_actions)
-		{
-			DoAdventureActions();
-		}
 	}
 	if(initgrids_timer.Check()) {
 		//delayed grid loading stuff.
@@ -1177,33 +1147,6 @@ bool Zone::Process() {
 				entity_list.GateAllClients();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
-			}
-
-			if(adv_data == nullptr)
-			{
-				if(Instance_Warning_timer == nullptr)
-				{
-					uint32 rem_time = Instance_Timer->GetRemainingTime();
-					if(rem_time < 60000 && rem_time > 55000)
-					{
-						entity_list.ExpeditionWarning(1);
-						Instance_Warning_timer = new Timer(10000);
-					}
-					else if(rem_time < 300000 && rem_time > 295000)
-					{
-						entity_list.ExpeditionWarning(5);
-						Instance_Warning_timer = new Timer(10000);
-					}
-					else if(rem_time < 900000 && rem_time > 895000)
-					{
-						entity_list.ExpeditionWarning(15);
-						Instance_Warning_timer = new Timer(10000);
-					}
-				}
-				else if(Instance_Warning_timer->Check())
-				{
-					safe_delete(Instance_Warning_timer);
-				}
 			}
 		}
 		else if(Instance_Shutdown_Timer != nullptr)
@@ -1944,90 +1887,6 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 	}
 }
 
-void Zone::LoadLDoNTraps()
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, type, spell_id, "
-		"skill, locked FROM ldon_trap_templates"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint8 x = 0;
-			LDoNTrapTemplate *lt = new LDoNTrapTemplate;
-			lt->id = atoi(row[x++]);
-			lt->type = (LDoNChestTypes)atoi(row[x++]);
-			lt->spell_id = atoi(row[x++]);
-			lt->skill = atoi(row[x++]);
-			lt->locked = atoi(row[x++]);
-			ldon_trap_list[lt->id] = lt;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
-	}
-}
-
-void Zone::LoadLDoNTrapEntries()
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, trap_id FROM ldon_trap_entries"),errbuf,&result)) {
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			uint32 trap_id = atoi(row[1]);
-
-			LDoNTrapTemplate *tt = nullptr;
-			std::map<uint32,LDoNTrapTemplate*>::iterator it;
-			it = ldon_trap_list.find(trap_id);
-			if(it == ldon_trap_list.end())
-			{
-				continue;
-			}
-			else
-			{
-				tt = ldon_trap_list[trap_id];
-			}
-
-			std::list<LDoNTrapTemplate*> temp;
-			std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator iter;
-
-			iter = ldon_trap_entry_list.find(id);
-			if(iter == ldon_trap_entry_list.end())
-			{
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-			else
-			{
-				temp = ldon_trap_entry_list[id];
-				temp.push_back(tt);
-				ldon_trap_entry_list[id] = temp;
-			}
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
-	}
-}
-
 void Zone::LoadVeteranRewards()
 {
 	VeteranRewards.clear();
@@ -2111,89 +1970,6 @@ void Zone::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 z
 	{
 		qGlobals->RemoveGlobal(name, npcID, charID, zoneID);
 	}
-}
-
-void Zone::LoadAdventureFlavor()
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, text FROM adventure_template_entry_flavor"), errbuf, &result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 id = atoi(row[0]);
-			std::string in_str = row[1];
-			adventure_entry_list_flavor[id] = in_str;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
-	}
-}
-
-void Zone::DoAdventureCountIncrease()
-{
-	ServerZoneAdventureDataReply_Struct *sr = (ServerZoneAdventureDataReply_Struct*)adv_data;
-	if(sr->count < sr->total)
-	{
-		sr->count++;
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureCountUpdate, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = instanceid;
-		worldserver.SendPacket(pack);
-		delete pack;
-	}
-}
-
-void Zone::DoAdventureAssassinationCountIncrease()
-{
-	ServerZoneAdventureDataReply_Struct *sr = (ServerZoneAdventureDataReply_Struct*)adv_data;
-	if(sr->assa_count < RuleI(Adventure, NumberKillsForBossSpawn))
-	{
-		sr->assa_count++;
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureAssaCountUpdate, sizeof(uint16));
-		*((uint16*)pack->pBuffer) = instanceid;
-		worldserver.SendPacket(pack);
-		delete pack;
-	}
-}
-
-void Zone::DoAdventureActions()
-{
-	ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)adv_data;
-	if(ds->type == Adventure_Collect)
-	{
-		int count = (ds->total - ds->count) * 25 / 10;
-		entity_list.AddLootToNPCS(ds->data_id, count);
-		did_adventure_actions = true;
-	}
-	else if(ds->type == Adventure_Assassinate)
-	{
-		if(ds->assa_count >= RuleI(Adventure, NumberKillsForBossSpawn))
-		{
-			const NPCType* tmp = database.GetNPCType(ds->data_id);
-			if(tmp)
-			{
-				NPC* npc = new NPC(tmp, 0, ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h, FlyMode3);
-				npc->AddLootTable();
-				entity_list.AddNPC(npc);
-				npc->Shout("Rarrrgh!");
-				did_adventure_actions = true;
-			}
-		}
-	}
-	else
-	{
-		did_adventure_actions = true;
-	}
-
 }
 
 void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)

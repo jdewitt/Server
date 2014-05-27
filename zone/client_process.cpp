@@ -80,54 +80,6 @@ bool Client::Process() {
 			SendAllPackets();
 		}
 
-		if(adventure_request_timer)
-		{
-			if(adventure_request_timer->Check())
-			{
-				safe_delete(adventure_request_timer);
-			}
-		}
-
-		if(adventure_create_timer)
-		{
-			if(adventure_create_timer->Check())
-			{
-				safe_delete(adventure_create_timer);
-			}
-		}
-
-		if(adventure_leave_timer)
-		{
-			if(adventure_leave_timer->Check())
-			{
-				safe_delete(adventure_leave_timer);
-			}
-		}
-
-		if(adventure_door_timer)
-		{
-			if(adventure_door_timer->Check())
-			{
-				safe_delete(adventure_door_timer);
-			}
-		}
-
-		if(adventure_stats_timer)
-		{
-			if(adventure_stats_timer->Check())
-			{
-				safe_delete(adventure_stats_timer);
-			}
-		}
-
-		if(adventure_leaderboard_timer)
-		{
-			if(adventure_leaderboard_timer->Check())
-			{
-				safe_delete(adventure_leaderboard_timer);
-			}
-		}
-
 		if(dead)
 		{
 			SetHP(-100);

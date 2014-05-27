@@ -56,7 +56,6 @@ struct NPCType
 	uint32	npc_spells_effects_id;
 	int32	npc_faction_id;
 	uint32	merchanttype;
-	uint32	adventure_template;
 	uint32	trap_template;
 	uint8	light;		//not loaded from DB
 	uint16	AC;
@@ -235,7 +234,6 @@ struct Door {
 	float	dest_y;
 	float	dest_z;
 	float	dest_heading;
-	uint8	is_ldon_door;
 	uint32	client_version_mask;
 };
 

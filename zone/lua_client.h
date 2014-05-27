@@ -52,7 +52,6 @@ public:
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
 	const char *GetLastName();
-	int GetLDoNPointsTheme(int theme);
 	int GetBaseSTR();
 	int GetBaseSTA();
 	int GetBaseCHA();
@@ -64,7 +63,6 @@ public:
 	uint32 GetEXP();
 	uint32 GetAAExp();
 	uint32 GetTotalSecondsPlayed();
-	void UpdateLDoNPoints(int points, uint32 theme);
 	void SetDeity(int v);
 	void AddEXP(uint32 add_exp);
 	void AddEXP(uint32 add_exp, int conlevel);

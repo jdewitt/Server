@@ -2040,25 +2040,6 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 	if (!IsEngaged())
 		zone->AddAggroMob();
 
-	if(GetClass() == LDON_TREASURE)
-	{
-		if(IsLDoNLocked() && GetLDoNLockedSkill() != LDoNTypeMechanical)
-		{
-			damage = -5;
-		}
-		else
-		{
-			if(IsLDoNTrapped())
-			{
-				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				SpellFinished(GetLDoNTrapSpellID(), other, 10, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
-				SetLDoNTrapSpellID(0);
-				SetLDoNTrapped(false);
-				SetLDoNTrapDetected(false);
-			}
-		}
-	}
-
 	//do a majority of the work...
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
 
@@ -2141,8 +2122,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	}
 
 	if (killerMob) {
-		if(GetClass() != LDON_TREASURE)
-			hate_list.Add(killerMob, damage);
+		hate_list.Add(killerMob, damage);
 	}
 
 	safe_delete(app);
@@ -2170,7 +2150,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
-	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 	if (give_exp_client && !IsCorpse() && MerchantType == 0)
 	{
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
@@ -2181,11 +2160,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 		if(kr)
 		{
-			if(!IsLdonTreasure) {
-				kr->SplitExp((finalxp), this);
-				if(killerMob && (kr->IsRaidMember(killerMob->GetName()) || kr->IsRaidMember(killerMob->GetUltimateOwner()->GetName())))
-					killerMob->TrySpellOnKill(killed_level,spell);
-			}
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 				if (kr->members[i].member != nullptr) { // If Group Member is Client
@@ -2222,11 +2196,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
-			if(!IsLdonTreasure) {
-				kg->SplitExp((finalxp), this);
-				if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
-					killerMob->TrySpellOnKill(killed_level,spell);
-			}
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -2265,19 +2234,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else
 		{
-			if(!IsLdonTreasure) {
-				int conlevel = give_exp->GetLevelCon(GetLevel());
-				if (conlevel != CON_GREEN)
-				{
-					if(GetOwner() && GetOwner()->IsClient()){
-					}
-					else {
-						give_exp_client->AddEXP((finalxp), conlevel); // Pyro: Comment this if NPC death crashes zone
-						if(killerMob && (killerMob->GetID() == give_exp_client->GetID() || killerMob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
-							killerMob->TrySpellOnKill(killed_level,spell);
-					}
-				}
-			}
 			 /* Send the EVENT_KILLED_MERIT event */
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 
@@ -2307,7 +2263,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp_client)
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
+	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
 	{
@@ -2382,26 +2338,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 							break;
 						}
 					}
-				}
-			}
-		}
-
-		if(zone && zone->adv_data)
-		{
-			ServerZoneAdventureDataReply_Struct *sr = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(sr->type == Adventure_Kill)
-			{
-				zone->DoAdventureCountIncrease();
-			}
-			else if(sr->type == Adventure_Assassinate)
-			{
-				if(sr->data_id == GetNPCTypeID())
-				{
-					zone->DoAdventureCountIncrease();
-				}
-				else
-				{
-					zone->DoAdventureAssassinationCountIncrease();
 				}
 			}
 		}

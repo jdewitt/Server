@@ -127,14 +127,8 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_TargetCommand] = &Client::Handle_OP_TargetCommand;
 	ConnectedOpcodes[OP_Shielding] = &Client::Handle_OP_Shielding;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
-	ConnectedOpcodes[OP_AdventureInfoRequest] = &Client::Handle_OP_AdventureInfoRequest;
-	ConnectedOpcodes[OP_AdventureRequest] = &Client::Handle_OP_AdventureRequest;
-	ConnectedOpcodes[OP_LDoNButton] = &Client::Handle_OP_LDoNButton;
-	ConnectedOpcodes[OP_LeaveAdventure] = &Client::Handle_OP_LeaveAdventure;
 	ConnectedOpcodes[OP_Consume] = &Client::Handle_OP_Consume;
 	ConnectedOpcodes[OP_ItemVerifyRequest] = &Client::Handle_OP_ItemVerifyRequest;
-	ConnectedOpcodes[OP_AdventureMerchantRequest] = &Client::Handle_OP_AdventureMerchantRequest;
-	ConnectedOpcodes[OP_AdventureMerchantPurchase] = &Client::Handle_OP_AdventureMerchantPurchase;
 	ConnectedOpcodes[OP_ConsiderCorpse] = &Client::Handle_OP_ConsiderCorpse;
 	ConnectedOpcodes[OP_Consider] = &Client::Handle_OP_Consider;
 	ConnectedOpcodes[OP_Begging] = &Client::Handle_OP_Begging;
@@ -160,11 +154,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_DeleteCharge] = &Client::Handle_OP_DeleteCharge;
 	ConnectedOpcodes[OP_Camp] = &Client::Handle_OP_Camp;
 	ConnectedOpcodes[OP_Logout] = &Client::Handle_OP_Logout;
-	ConnectedOpcodes[OP_LDoNOpen] = &Client::Handle_OP_LDoNOpen;
-	ConnectedOpcodes[OP_LDoNSenseTraps] = &Client::Handle_OP_LDoNSenseTraps;
-	ConnectedOpcodes[OP_LDoNDisarmTraps] = &Client::Handle_OP_LDoNDisarmTraps;
-	ConnectedOpcodes[OP_LDoNInspect] = &Client::Handle_OP_LDoNInspect;
-	ConnectedOpcodes[OP_LDoNPickLock] = &Client::Handle_OP_LDoNPickLock;
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_Sneak] = &Client::Handle_OP_Sneak;
 	ConnectedOpcodes[OP_Hide] = &Client::Handle_OP_Hide;
@@ -336,9 +325,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_RespawnWindow] = &Client::Handle_OP_RespawnWindow;
-	ConnectedOpcodes[OP_AdventureMerchantSell] = &Client::Handle_OP_AdventureMerchantSell;
-	ConnectedOpcodes[OP_AdventureStatsRequest] = &Client::Handle_OP_AdventureStatsRequest;
-	ConnectedOpcodes[OP_AdventureLeaderboardRequest] = &Client::Handle_OP_AdventureLeaderboardRequest;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
@@ -1716,198 +1702,6 @@ void Client::Handle_OP_Jump(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(EntityId_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "Handle_OP_AdventureInfoRequest had a packet that was too small.");
-		return;
-	}
-	EntityId_Struct* ent = (EntityId_Struct*)app->pBuffer;
-	Mob * m = entity_list.GetMob(ent->entity_id);
-	if(m && m->IsNPC())
-	{
-		std::map<uint32, std::string>::iterator it;
-		it = zone->adventure_entry_list_flavor.find(m->CastToNPC()->GetAdventureTemplate());
-		if(it != zone->adventure_entry_list_flavor.end())
-		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureInfo, (it->second.size() + 2));
-			strn0cpy((char*)outapp->pBuffer, it->second.c_str(), it->second.size());
-			FastQueuePacket(&outapp);
-		}
-		else
-		{
-			if(m->CastToNPC()->GetAdventureTemplate() != 0)
-			{
-				std::string text = "Choose your difficulty and preferred adventure type.";
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureInfo, (text.size() + 2));
-				strn0cpy((char*)outapp->pBuffer, text.c_str(), text.size());
-				FastQueuePacket(&outapp);
-			}
-		}
-	}
-}
-
-void Client::Handle_OP_AdventureRequest(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(AdventureRequest_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "Handle_OP_AdventureRequest had a packet that was too small.");
-		return;
-	}
-
-	if(IsOnAdventure())
-	{
-		return;
-	}
-
-	if(!p_timers.Expired(&database, pTimerStartAdventureTimer, false))
-	{
-		return;
-	}
-
-	if(GetPendingAdventureRequest())
-	{
-		return;
-	}
-
-	AdventureRequest_Struct* ars = (AdventureRequest_Struct*)app->pBuffer;
-	uint8 group_members = 0;
-	Raid *r = nullptr;
-	Group *g = nullptr;
-
-	if(IsRaidGrouped())
-	{
-		r = GetRaid();
-		group_members = r->RaidCount();
-	}
-	else if(IsGrouped())
-	{
-		g = GetGroup();
-		group_members = g->GroupCount();
-	}
-	else
-	{
-		return;
-	}
-
-	if(group_members < RuleI(Adventure, MinNumberForGroup) || group_members > RuleI(Adventure, MaxNumberForGroup))
-	{
-		return;
-	}
-
-	Mob* m = entity_list.GetMob(ars->entity_id);
-	uint32 template_id = 0;
-	if(m && m->IsNPC())
-	{
-		template_id = m->CastToNPC()->GetAdventureTemplate();
-	}
-	else
-	{
-		return;
-	}
-
-	ServerPacket *packet = new ServerPacket(ServerOP_AdventureRequest, sizeof(ServerAdventureRequest_Struct) + (64 * group_members));
-	ServerAdventureRequest_Struct *sar = (ServerAdventureRequest_Struct*)packet->pBuffer;
-	sar->member_count = group_members;
-	sar->risk = ars->risk;
-	sar->type = ars->type;
-	sar->template_id = template_id;
-	strcpy(sar->leader, GetName());
-
-	if(IsRaidGrouped())
-	{
-		int i = 0;
-		for(int x = 0; x < 72; ++x)
-		{
-			if(i == group_members)
-			{
-				break;
-			}
-
-			const char *c_name = nullptr;
-			c_name = r->GetClientNameByIndex(x);
-			if(c_name)
-			{
-				memcpy((packet->pBuffer + sizeof(ServerAdventureRequest_Struct) + (64 * i)), c_name, strlen(c_name));
-				++i;
-			}
-		}
-	}
-	else
-	{
-		int i = 0;
-		for(int x = 0; x < 6; ++x)
-		{
-			if(i == group_members)
-			{
-				break;
-			}
-
-			const char *c_name = nullptr;
-			c_name = g->GetClientNameByIndex(x);
-			if(c_name)
-			{
-				memcpy((packet->pBuffer + sizeof(ServerAdventureRequest_Struct) + (64 * i)), c_name, strlen(c_name));
-				++i;
-			}
-		}
-	}
-
-	packet->Deflate();
-	worldserver.SendPacket(packet);
-	delete packet;
-	p_timers.Start(pTimerStartAdventureTimer, 5);
-}
-
-void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(bool))
-	{
-		return;
-	}
-
-	if(GetPendingAdventureCreate())
-	{
-		return;
-	}
-
-	if(IsOnAdventure())
-	{
-		return;
-	}
-
-	bool* p = (bool*)app->pBuffer;
-	if(*p == true)
-	{
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestCreate, sizeof(ServerAdventureRequestCreate_Struct) + (64 * adv_requested_member_count));
-		ServerAdventureRequestCreate_Struct *sac = (ServerAdventureRequestCreate_Struct*)pack->pBuffer;
-		strcpy(sac->leader, GetName());
-		sac->id = adv_requested_id;
-		sac->theme = adv_requested_theme;
-		sac->member_count = adv_requested_member_count;
-		memcpy((pack->pBuffer + sizeof(ServerAdventureRequestCreate_Struct)), adv_requested_data, (64 * adv_requested_member_count));
-		pack->Deflate();
-		worldserver.SendPacket(pack);
-		delete pack;
-		PendingAdventureCreate();
-		ClearPendingAdventureData();
-	}
-	else
-	{
-		ClearPendingAdventureData();
-	}
-}
-
-void Client::Handle_OP_LeaveAdventure(const EQApplicationPacket *app)
-{
-	if(!IsOnAdventure())
-	{
-		return;
-	}
-	LeaveAdventure();
-}
-
 void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consume_Struct))
@@ -2228,248 +2022,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(AdventureMerchant_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "OP size error: OP_AdventureMerchantRequest expected:%i got:%i", sizeof(AdventureMerchant_Struct), app->size);
-		return;
-	}
-	std::stringstream ss(std::stringstream::in | std::stringstream::out);
-
-	uint8 count = 0;
-	AdventureMerchant_Struct* eid = (AdventureMerchant_Struct*)app->pBuffer;
-	uint32 merchantid = 0;
-
-	Mob* tmp = entity_list.GetMob(eid->entity_id);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
-		return;
-
-	//you have to be somewhat close to them to be properly using them
-	if(DistNoRoot(*tmp) > USE_NPC_RANGE2)
-		return;
-
-	merchantid=tmp->CastToNPC()->MerchantType;
-	tmp->CastToNPC()->FaceTarget(this->CastToMob());
-
-	const Item_Struct *item = 0;
-	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
-	std::list<MerchantList>::const_iterator itr;
-	for(itr = merlist.begin();itr != merlist.end() && count<255;++itr){
-		const MerchantList &ml = *itr;
-		if(GetLevel() < ml.level_required) {
-			continue;
-		}
-
-		int32 fac = tmp->GetPrimaryFaction();
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-			continue;
-		}
-
-		item = database.GetItem(ml.item);
-		if(item)
-		{
-			uint32 theme;
-			if(item->LDoNTheme > 16)
-			{
-				theme = 0;
-			}
-			else if(item->LDoNTheme & 16)
-			{
-				theme = 5;
-			}
-			else if(item->LDoNTheme & 8)
-			{
-				theme = 4;
-			}
-			else if(item->LDoNTheme & 4)
-			{
-				theme = 3;
-			}
-			else if(item->LDoNTheme & 2)
-			{
-				theme = 2;
-			}
-			else if(item->LDoNTheme & 1)
-			{
-				theme = 1;
-			}
-			else
-			{
-				theme = 0;
-			}
-			ss << "^" << item->Name << "|";
-			ss << item->ID << "|";
-			ss << item->LDoNPrice << "|";
-			ss << theme << "|";
-			ss << "0|";
-			ss << "1|";
-			ss << item->Races << "|";
-			ss << item->Classes;
-			count++;
-		}
-	}
-	//Count
-	//^Item Name,Item ID,Cost in Points,Theme (0=none),0,1,races bit map,classes bitmap
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureMerchantResponse,ss.str().size()+2);
-	outapp->pBuffer[0] = count;
-	strn0cpy((char*)&outapp->pBuffer[1],ss.str().c_str(),ss.str().size());
-	FastQueuePacket(&outapp);
-}
-
-void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(Adventure_Purchase_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "OP size error: OP_AdventureMerchantPurchase expected:%i got:%i", sizeof(Adventure_Purchase_Struct), app->size);
-		return;
-	}
-
-	Adventure_Purchase_Struct* aps = (Adventure_Purchase_Struct*)app->pBuffer;
-/*
-	Get item apc->itemid (can check NPC if thats necessary), ldon point theme check only if theme is not 0 (I am not sure what 1-5 are though for themes)
-	if(ldon_points_available >= item ldonpointcost)
-	{
-	give item (67 00 00 00 for the packettype using opcode 0x02c5)
-	ldon_points_available -= ldonpointcost;
-	}
-*/
-	uint32 merchantid = 0;
-	Mob* tmp = entity_list.GetMob(aps->npcid);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&	(tmp->GetClass() != DISCORD_MERCHANT)))
-		return;
-
-	//you have to be somewhat close to them to be properly using them
-	if(DistNoRoot(*tmp) > USE_NPC_RANGE2)
-		return;
-
-	merchantid = tmp->CastToNPC()->MerchantType;
-
-	const Item_Struct* item = nullptr;
-	bool found = false;
-	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
-	std::list<MerchantList>::const_iterator itr;
-
-	for(itr = merlist.begin();itr != merlist.end();++itr){
-		MerchantList ml = *itr;
-		if(GetLevel() < ml.level_required) {
-			continue;
-		}
-
-		int32 fac = tmp->GetPrimaryFaction();
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-			continue;
-		}
-
-		item = database.GetItem(ml.item);
-		if(!item)
-			continue;
-		if(item->ID == aps->itemid) { //This check to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
-			found = true;
-			break;
-		}
-	}
-	if (!item || !found) {
-		Message(13, "Error: The item you purchased does not exist!");
-		return;
-	}
-
-	if(aps->Type == LDoNMerchant)
-	{
-		if(m_pp.ldon_points_available < int32(item->LDoNPrice)) {
-			Message(13, "You cannot afford that item.");
-			return;
-		}
-
-		if(item->LDoNTheme <= 16)
-		{
-			if(item->LDoNTheme & 16)
-			{
-				if(m_pp.ldon_points_tak < int32(item->LDoNPrice))
-				{
-					Message(13, "You need at least %u points in tak to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if(item->LDoNTheme & 8)
-			{
-				if(m_pp.ldon_points_ruj < int32(item->LDoNPrice))
-				{
-					Message(13, "You need at least %u points in ruj to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if(item->LDoNTheme & 4)
-			{
-				if(m_pp.ldon_points_mmc < int32(item->LDoNPrice))
-				{
-					Message(13, "You need at least %u points in mmc to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if(item->LDoNTheme & 2)
-			{
-				if(m_pp.ldon_points_mir < int32(item->LDoNPrice))
-				{
-					Message(13, "You need at least %u points in mir to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if(item->LDoNTheme & 1)
-			{
-				if(m_pp.ldon_points_guk < int32(item->LDoNPrice))
-				{
-					Message(13, "You need at least %u points in guk to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-		}
-	}
-	else if(aps->Type == DiscordMerchant)
-	{
-		if(GetPVPPoints() < item->LDoNPrice)
-		{
-			Message(13, "You need at least %u PVP points to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else
-	{
-		Message(13, "Unknown Adventure Merchant type.");
-		return;
-	}
-
-
-	if(CheckLoreConflict(item))
-	{
-		Message(15,"You can only have one of a lore item.");
-		return;
-	}
-
-	if(aps->Type == LDoNMerchant)
-	{
-		int32 requiredpts = (int32)item->LDoNPrice*-1;
-
-		if(!UpdateLDoNPoints(requiredpts, 6))
-			return;
-	}
-	else if(aps->Type == DiscordMerchant)
-	{
-		SetPVPPoints(GetPVPPoints() - (int32)item->LDoNPrice);
-		SendPVPStats();
-	}
-	int16 charges = 1;
-	if(item->MaxCharges != 0)
-		charges = item->MaxCharges;
-
-	ItemInst *inst = database.CreateItem(item, charges);
-	if(!AutoPutLootInInventory(*inst, true, true))
-	{
-		PutLootInInventory(SLOT_CURSOR, *inst);
-	}
-	Save(1);
-}
-
 void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct))
@@ -2542,12 +2094,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob == 0)
 		return;
 
-	if(tmob->GetClass() == LDON_TREASURE)
-	{
-		Message(15, "%s", tmob->GetCleanName());
-		return;
-	}
-
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Consider, sizeof(Consider_Struct));
 	Consider_Struct* con = (Consider_Struct*)outapp->pBuffer;
 	con->playerid = GetID();
@@ -2609,9 +2155,6 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	}
 
 	if(!HasSkill(SkillBegging) || !GetTarget())
-		return;
-
-	if(GetTarget()->GetClass() == LDON_TREASURE)
 		return;
 
 	p_timers.Start(pTimerBeggingPickPocket, 8);
@@ -3869,77 +3412,6 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 		Corpse::SendLootReqErrorPacket(this);
 	}
 	return;
-}
-
-void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
-{
-	Mob * target = GetTarget();
-	if(target && target->IsNPC())
-		HandleLDoNOpen(target->CastToNPC());
-}
-
-void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
-{
-	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillSenseTraps))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			HandleLDoNSenseTraps(target->CastToNPC(), GetSkill(SkillSenseTraps), LDoNTypeMechanical);
-		}
-		else
-			Message(13, "You do not have the sense traps skill.");
-	}
-}
-
-void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
-{
-	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillDisarmTraps))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			HandleLDoNDisarm(target->CastToNPC(), GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
-		}
-		else
-			Message(13, "You do not have the disarm trap skill.");
-	}
-}
-
-void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
-{
-	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillPickLock))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			HandleLDoNPickLock(target->CastToNPC(), GetSkill(SkillPickLock), LDoNTypeMechanical);
-		}
-		else
-			Message(13, "You do not have the pick locks skill.");
-	}
-}
-
-void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
-{
-	Mob * target = GetTarget();
-	if(target && target->GetClass() == LDON_TREASURE)
-		Message(15, "%s", target->GetCleanName());
 }
 
 void Client::Handle_OP_Dye(const EQApplicationPacket *app)
@@ -8999,36 +8471,10 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	}
 	*/
 
-	//validate adventure points, this cap is arbitrary at 2,000,000,000
 	if(eqs->ClientVersion() > EQClientMac)
 	{
-		if(m_pp.ldon_points_guk < 0)
-			m_pp.ldon_points_guk = 0;
-		if(m_pp.ldon_points_guk > 0x77359400)
-			m_pp.ldon_points_guk = 0x77359400;
-		if(m_pp.ldon_points_mir < 0)
-			m_pp.ldon_points_mir = 0;
-		if(m_pp.ldon_points_mir > 0x77359400)
-			m_pp.ldon_points_mir = 0x77359400;
-		if(m_pp.ldon_points_mmc < 0)
-			m_pp.ldon_points_mmc = 0;
-		if(m_pp.ldon_points_mmc > 0x77359400)
-			m_pp.ldon_points_mmc = 0x77359400;
-		if(m_pp.ldon_points_ruj < 0)
-			m_pp.ldon_points_ruj = 0;
-		if(m_pp.ldon_points_ruj > 0x77359400)
-			m_pp.ldon_points_ruj = 0x77359400;
-		if(m_pp.ldon_points_tak < 0)
-			m_pp.ldon_points_tak = 0;
-		if(m_pp.ldon_points_tak > 0x77359400)
-			m_pp.ldon_points_tak = 0x77359400;
-		if(m_pp.ldon_points_available < 0)
-			m_pp.ldon_points_available = 0;
-		if(m_pp.ldon_points_available > 0x77359400)
-			m_pp.ldon_points_available = 0x77359400;
-
-	if(GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming,100);
+		if(GetSkill(SkillSwimming) < 100)
+			SetSkill(SkillSwimming,100);
 	}
 
 	//pull AAs from the PP
@@ -9707,23 +9153,6 @@ void Client::CompleteConnect()
 	{
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
-	}
-
-	if(GetClientVersion() > EQClientMac)
-	{
-		/** Request adventure info **/
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
-		strcpy((char*)pack->pBuffer, GetName());
-		worldserver.SendPacket(pack);
-		delete pack;
-
-		if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
-		{
-			EQApplicationPacket *outapp = MakeBuffsPacket(false);
-			CastToClient()->FastQueuePacket(&outapp);
-		}
-
-		entity_list.RefreshClientXTargets(this);
 	}
 }
 
@@ -11283,180 +10712,6 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
-}
-
-void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(Adventure_Sell_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch on OP_AdventureMerchantSell: got %u expected %u",
-			app->size, sizeof(Adventure_Sell_Struct));
-		DumpPacket(app);
-		return;
-	}
-
-	Adventure_Sell_Struct *ams_in = (Adventure_Sell_Struct*)app->pBuffer;
-
-	Mob* vendor = entity_list.GetMob(ams_in->npcid);
-	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != ADVENTUREMERCHANT)))
-	{
-		Message(13, "Vendor was not found.");
-		return;
-	}
-
-	if(DistNoRoot(*vendor) > USE_NPC_RANGE2)
-	{
-		Message(13, "Vendor is out of range.");
-		return;
-	}
-
-	uint32 itemid = GetItemIDAt(ams_in->slot);
-
-	if(itemid == 0)
-	{
-		Message(13, "Found no item at that slot.");
-		return;
-	}
-
-	const Item_Struct* item = database.GetItem(itemid);
-	ItemInst* inst = GetInv().GetItem(ams_in->slot);
-	if(!item || !inst){
-		Message(13, "You seemed to have misplaced that item...");
-		return;
-	}
-
-	// Note that Lucy has ldonsold values of 4 and 5 for items sold by Norrath's Keepers and Dark Reign, whereas 13th Floor
-	// has ldonsold = 0 for these items, so some manual editing of the items DB will be required to support sell back of the
-	// items.
-	//
-	// The Merchant seems to have some other way of knowing whether he will accept the item, other than the ldonsold field,
-	// e.g. if you summon items 76036 and 76053 (good and evil versions of Spell: Ward Of Vengeance), if you are interacting
-	// with a Norrath's Keeper merchant and click on 76036 in your inventory, he says he will give you radiant crystals for
-	// it, but he will refuse for item 76053.
-	//
-	// Similarly, just giving a cloth cap an ldonsold value of 4 will not make the Merchant buy it.
-	//
-	// Note that the the Client will not allow you to sell anything back to a Discord merchant, so there is no need to handle
-	// that case here.
-	if(item->LDoNSold == 0)
-	{
-		Message(13, "The merchant does not want that item.");
-		return;
-	}
-
-	if(item->LDoNPrice == 0)
-	{
-		Message(13, "The merchant does not want that item.");
-		return;
-	}
-
-	int32 price = item->LDoNPrice * 70 / 100;
-
-	if(price == 0)
-	{
-		Message(13, "The merchant does not want that item.");
-		return;
-	}
-
-	if (RuleB(EventLog, RecordSellToMerchant))
-		LogMerchant(this, vendor, ams_in->charges, price, item, false);
-
-	if(!inst->IsStackable())
-	{
-		DeleteItemInInventory(ams_in->slot, 0, false);
-	}
-	else
-	{
-		if(inst->GetCharges() < ams_in->charges)
-		{
-			ams_in->charges = inst->GetCharges();
-		}
-
-		if(ams_in->charges == 0)
-		{
-			Message(13, "Charge mismatch error.");
-			return;
-		}
-
-		DeleteItemInInventory(ams_in->slot, ams_in->charges, false);
-		price *= ams_in->charges;
-	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureMerchantSell, sizeof(Adventure_Sell_Struct));
-	Adventure_Sell_Struct *ams = (Adventure_Sell_Struct*)outapp->pBuffer;
-	ams->slot = ams_in->slot;
-	ams->unknown000 = 1;
-	ams->npcid = ams->npcid;
-	ams->charges = ams_in->charges;
-	ams->sell_price = price;
-	FastQueuePacket(&outapp);
-
-	switch(vendor->GetClass())
-	{
-		case ADVENTUREMERCHANT:
-		{
-			UpdateLDoNPoints(price, 6);
-			break;
-		}
-		default:
-			break;
-	}
-
-	Save(1);
-}
-
-void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
-{
-	if(adventure_stats_timer)
-	{
-		return;
-	}
-
-	adventure_stats_timer = new Timer(8000);
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureStatsReply, sizeof(AdventureStats_Struct));
-	AdventureStats_Struct *as = (AdventureStats_Struct*)outapp->pBuffer;
-
-	if(database.GetAdventureStats(CharacterID(), as->success.guk, as->success.mir, as->success.mmc, as->success.ruj,
-		as->success.tak, as->failure.guk, as->failure.mir, as->failure.mmc, as->failure.ruj, as->failure.tak))
-	{
-		as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
-		as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
-		m_pp.ldon_wins_guk = as->success.guk;
-		m_pp.ldon_wins_mir = as->success.mir;
-		m_pp.ldon_wins_mmc = as->success.mmc;
-		m_pp.ldon_wins_ruj = as->success.ruj;
-		m_pp.ldon_wins_tak = as->success.tak;
-		m_pp.ldon_losses_guk = as->failure.guk;
-		m_pp.ldon_losses_mir = as->failure.mir;
-		m_pp.ldon_losses_mmc = as->failure.mmc;
-		m_pp.ldon_losses_ruj = as->failure.ruj;
-		m_pp.ldon_losses_tak = as->failure.tak;
-	}
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(AdventureLeaderboardRequest_Struct))
-	{
-		return;
-	}
-
-	if(adventure_leaderboard_timer)
-	{
-		return;
-	}
-
-	adventure_leaderboard_timer = new Timer(4000);
-	ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeaderboard, sizeof(ServerLeaderboardRequest_Struct));
-	ServerLeaderboardRequest_Struct *lr = (ServerLeaderboardRequest_Struct*)pack->pBuffer;
-	strcpy(lr->player, GetName());
-
-	AdventureLeaderboardRequest_Struct *lrs = (AdventureLeaderboardRequest_Struct*)app->pBuffer;
-	lr->type = 1 + (lrs->theme * 2) + lrs->type;
-	worldserver.SendPacket(pack);
-	delete pack;
 }
 
 void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)

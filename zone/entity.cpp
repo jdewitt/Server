@@ -4097,8 +4097,7 @@ uint32 EntityList::CheckNPCsClose(Mob *center)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		NPC *cur = it->second;
-		if (!cur || cur == center || cur->IsPet() || cur->GetClass() == LDON_TREASURE ||
-				cur->GetBodyType() == BT_NoTarget || cur->GetBodyType() == BT_Special) {
+		if (!cur || cur == center || cur->IsPet() || cur->GetBodyType() == BT_NoTarget || cur->GetBodyType() == BT_Special) {
 			++it;
 			continue;
 		}
@@ -4108,8 +4107,6 @@ uint32 EntityList::CheckNPCsClose(Mob *center)
 		float zDiff = cur->GetZ() - center->GetZ();
 		float dist = ((xDiff * xDiff) + (yDiff * yDiff) + (zDiff * zDiff));
 
-		if (dist <= RuleR(Adventure, DistanceForRescueAccept))
-			count++;
 		++it;
 	}
 	return count;
@@ -4376,7 +4373,6 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (!it->second->IsPet()
-				&& it->second->GetClass() != LDON_TREASURE
 				&& it->second->GetBodyType() != BT_NoTarget
 				&& it->second->GetBodyType() != BT_NoTarget2
 				&& it->second->GetBodyType() != BT_Special)
@@ -4397,7 +4393,6 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (!it->second->IsPet()
-				&& it->second->GetClass() != LDON_TREASURE
 				&& it->second->GetBodyType() != BT_NoTarget
 				&& it->second->GetBodyType() != BT_NoTarget2
 				&& it->second->GetBodyType() != BT_Special)
@@ -4462,20 +4457,6 @@ NPC *EntityList::GetClosestBanker(Mob *sender, uint32 &distance)
 		++it;
 	}
 	return nc;
-}
-
-void EntityList::ExpeditionWarning(uint32 minutes_left)
-{
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_DzExpeditionEndsWarning, sizeof(ExpeditionExpireWarning));
-	ExpeditionExpireWarning *ew = (ExpeditionExpireWarning*)outapp->pBuffer;
-	ew->minutes_remaining = minutes_left;
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		it->second->Message_StringID(15, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
-		it->second->QueuePacket(outapp);
-		++it;
-	}
 }
 
 Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)

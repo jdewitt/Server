@@ -270,8 +270,6 @@ public:
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
-	void	ExpeditionWarning(uint32 minutes_left);
-
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
