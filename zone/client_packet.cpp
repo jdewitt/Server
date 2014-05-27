@@ -304,9 +304,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
-	ConnectedOpcodes[OP_AcceptNewTask] = &Client::Handle_OP_AcceptNewTask;
-	ConnectedOpcodes[OP_CancelTask] = &Client::Handle_OP_CancelTask;
-	ConnectedOpcodes[OP_TaskHistoryRequest] = &Client::Handle_OP_TaskHistoryRequest;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_Bandolier] = &Client::Handle_OP_Bandolier;
@@ -1223,8 +1220,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(proximity_timer.Check()) {
 		entity_list.ProcessMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
-			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 		proximity_x = ppu->x_pos;
 		proximity_y = ppu->y_pos;
 		proximity_z = ppu->z_pos;
@@ -8295,8 +8290,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	m_pp.zone_id = zone->GetZoneID();
 	m_pp.zoneInstance = zone->GetInstanceID();
 
-	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
-
 	max_AAXP = RuleI(AA, ExpPerPoint);
 
 	if(!RuleB(Character, MaintainIntoxicationAcrossZones))
@@ -8788,19 +8781,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	}
 
 
-	////////////////////////////////////////////////////////////
-	// Task Packets
-	if(eqs->ClientVersion() > EQClientMac)
-		LoadClientTaskState();
-
-	if(ClientVersionBit & BIT_UnderfootAndLater)
-	{
-		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
-		outapp->WriteUInt32(GetMaxXTargets());
-		outapp->WriteUInt32(0);
-		FastQueuePacket(&outapp);
-	}
-
 	//////////////////////////////////////
 	// Weather Packet
 	// This shouldent be moved, this seems to be what the client
@@ -9072,14 +9052,6 @@ void Client::CompleteConnect()
 
 	if(GetGroup())
 		database.RefreshGroupFromDB(this);
-
-	if(GetClientVersion() > EQClientMac)
-	{
-		if(RuleB(TaskSystem, EnableTaskSystem))
-			TaskPeriodic_Timer.Start();
-		else
-			TaskPeriodic_Timer.Disable();
-	}
 
 	conn_state = ClientConnectFinished;
 
@@ -10026,48 +9998,6 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	}
 	PendingSacrifice = false;
 	SacrificeCaster.clear();
-}
-
-void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(AcceptNewTask_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AcceptNewTask expected %i got %i",
-					sizeof(AcceptNewTask_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
-
-	if(ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->AcceptNewTask(this, ant->task_id, ant->task_master_id);
-}
-
-void Client::Handle_OP_CancelTask(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(CancelTask_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_CancelTask expected %i got %i",
-					sizeof(CancelTask_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
-
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->CancelTask(this, cts->SequenceNumber);
-}
-
-void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(TaskHistoryRequest_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_TaskHistoryRequest expected %i got %i",
-					sizeof(TaskHistoryRequest_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	TaskHistoryRequest_Struct *ths = (TaskHistoryRequest_Struct*)app->pBuffer;
-
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->SendTaskHistory(this, ths->TaskIndex);
 }
 
 void Client::Handle_OP_Bandolier(const EQApplicationPacket *app) {

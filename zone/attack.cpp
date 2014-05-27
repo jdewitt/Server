@@ -2167,8 +2167,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 					mod_npc_killed_merit(kr->members[i].member);
 
-					if(RuleB(TaskSystem, EnableTaskSystem))
-						kr->members[i].member->UpdateTasksOnKill(GetNPCTypeID());
 					PlayerCount++;
 				}
 			}
@@ -2205,9 +2203,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 					mod_npc_killed_merit(c);
 
-					if(RuleB(TaskSystem, EnableTaskSystem))
-						c->UpdateTasksOnKill(GetNPCTypeID());
-
 					PlayerCount++;
 				}
 			}
@@ -2238,9 +2233,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 
 			mod_npc_killed_merit(give_exp_client);
-
-			if(RuleB(TaskSystem, EnableTaskSystem))
-				give_exp_client->UpdateTasksOnKill(GetNPCTypeID());
 
 			// QueryServ Logging - Solo
 			if(RuleB(QueryServ, PlayerLogNPCKills)){

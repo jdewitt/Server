@@ -119,17 +119,6 @@ void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 	lua_setfield(L, -2, "other");
 }
 
-void handle_npc_task_accepted(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
-	Lua_Client l_client(reinterpret_cast<Client*>(init));
-	luabind::object l_client_o = luabind::object(L, l_client);
-	l_client_o.push(L);
-	lua_setfield(L, -2, "other");
-
-	lua_pushinteger(L, std::stoi(data));
-	lua_setfield(L, -2, "task_id");
-}
-
 void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
@@ -355,12 +344,6 @@ void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std
 	lua_setfield(L, -2, "spell");
 }
 
-void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-							 std::vector<void*> *extra_pointers) {
-	lua_pushinteger(L, std::stoi(data));
-	lua_setfield(L, -2, "task_id");
-}
-
 void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
@@ -394,29 +377,6 @@ void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std
 	luabind::object l_corpse_o = luabind::object(L, l_corpse);
 	l_corpse_o.push(L);
 	lua_setfield(L, -2, "corpse");
-}
-
-void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-									   std::vector<void*> *extra_pointers) {
-	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_setfield(L, -2, "task_id");
-
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_setfield(L, -2, "activity_id");
-}
-
-void handle_player_task_update(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								 std::vector<void*> *extra_pointers) {
-	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_setfield(L, -2, "count");
-
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_setfield(L, -2, "activity_id");
-
-	lua_pushinteger(L, std::stoi(sep.arg[2]));
-	lua_setfield(L, -2, "task_id");
 }
 
 void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

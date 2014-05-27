@@ -20,8 +20,6 @@ void handle_npc_single_client(QuestInterface *parse, lua_State* L, NPC* npc, Mob
 						  std::vector<void*> *extra_pointers);
 void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers);
-void handle_npc_task_accepted(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers);
 void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers);
 void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -64,8 +62,6 @@ void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, 
 		std::vector<void*> *extra_pointers);
 void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
 void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
@@ -73,10 +69,6 @@ void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client,
 void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
-void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers);
-void handle_player_task_update(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);

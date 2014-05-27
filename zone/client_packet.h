@@ -217,9 +217,6 @@
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
 	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
-	void Handle_OP_AcceptNewTask(const EQApplicationPacket *app);
-	void Handle_OP_CancelTask(const EQApplicationPacket *app);
-	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_Bandolier(const EQApplicationPacket *app);

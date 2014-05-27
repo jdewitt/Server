@@ -420,15 +420,6 @@ RULE_INT ( Aggro, MaxStunProcAggro, 400 ) // Set to -1 for no limit. Maxmimum am
 RULE_INT ( Aggro, IntAggroThreshold, 75 ) // Int <= this will aggro regardless of level difference.
 RULE_CATEGORY_END()
 
-RULE_CATEGORY ( TaskSystem)
-RULE_BOOL ( TaskSystem, EnableTaskSystem, false) // Globally enable or disable the Task system
-RULE_INT ( TaskSystem, PeriodicCheckTimer, 5) // Seconds between checks for failed tasks. Also used by the 'Touch' activity
-RULE_BOOL ( TaskSystem, RecordCompletedTasks, true)
-RULE_BOOL ( TaskSystem, RecordCompletedOptionalActivities, false)
-RULE_BOOL ( TaskSystem, KeepOneRecordPerCompletedTask, true)
-RULE_BOOL ( TaskSystem, EnableTaskProximity, true)
-RULE_CATEGORY_END()
-
 RULE_CATEGORY ( Chat )
 RULE_BOOL ( Chat, ServerWideOOC, true)
 RULE_BOOL ( Chat, ServerWideAuction, true)

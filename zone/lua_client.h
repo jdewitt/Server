@@ -62,7 +62,6 @@ public:
 	int GetWeight();
 	uint32 GetEXP();
 	uint32 GetAAExp();
-	uint32 GetTotalSecondsPlayed();
 	void SetDeity(int v);
 	void AddEXP(uint32 add_exp);
 	void AddEXP(uint32 add_exp, int conlevel);
@@ -230,12 +229,6 @@ public:
 	int GetNextAvailableSpellBookSlot();
 	int GetNextAvailableSpellBookSlot(int start);
 	int FindSpellBookSlotBySpellID(int spell_id);
-	void UpdateTaskActivity(int task, int activity, int count);
-	void AssignTask(int task, int npc_id);
-	void FailTask(int task);
-	bool IsTaskCompleted(int task);
-	bool IsTaskActive(int task);
-	bool IsTaskActivityActive(int task, int activity);
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);

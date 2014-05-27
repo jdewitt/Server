@@ -359,8 +359,6 @@ void Client::GoFish()
 			{
 				PushItemOnCursor(*inst);
 				SendItemPacket(SLOT_CURSOR,inst,ItemPacketSummonItem);
-				if(RuleB(TaskSystem, EnableTaskSystem))
-					UpdateTasksForItem(ActivityFish, food_id);
 
 				safe_delete(inst);
 				inst = m_inv.GetItem(SLOT_CURSOR);
@@ -473,8 +471,6 @@ void Client::ForageItem(bool guarantee) {
 			else {
 				PushItemOnCursor(*inst);
 				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
-				if(RuleB(TaskSystem, EnableTaskSystem))
-					UpdateTasksForItem(ActivityForage, foragedfood);
 
 				safe_delete(inst);
 				inst = m_inv.GetItem(SLOT_CURSOR);

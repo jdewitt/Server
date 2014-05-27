@@ -293,7 +293,6 @@ OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);
 OUTv(OP_ItemLinkResponse, ItemPacket_Struct);
 OUTv(OP_ZoneSpawns, Spawn_Struct);
-OUTv(OP_CompletedTasks, TaskHistory_Struct);
 OUTv(OP_CharInventory, ItemPacket_Struct);
 OUTv(OP_CustomTitles, Titles_Struct);
 OUTv(OP_SpawnDoor, Door_Struct);

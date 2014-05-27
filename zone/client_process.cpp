@@ -123,9 +123,6 @@ bool Client::Process() {
 			CalcItemScale();
 		}
 
-		if(TaskPeriodic_Timer.Check() && taskstate)
-			taskstate->TaskPeriodicChecks(this);
-
 		if(linkdead_timer.Check()){
 			Save();
 			LeaveGroup();
