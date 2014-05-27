@@ -4828,55 +4828,6 @@ XS(XS_Client_GetAALevel)
 	XSRETURN(1);
 }
 
-XS(XS_Client_MarkCompassLoc);
-XS(XS_Client_MarkCompassLoc)
-{
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, x, y, z)");
-	{
-		Client *	THIS;
-		float		x = SvNV(ST(1));
-		float		y = SvNV(ST(2));
-		float		z = SvNV(ST(3));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->MarkSingleCompassLoc(x,y,z);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_ClearCompassMark);
-XS(XS_Client_ClearCompassMark)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)");
-	{
-		Client *	THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->MarkSingleCompassLoc(0,0,0,0);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_GetFreeSpellBookSlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFreeSpellBookSlot)
 {
@@ -5796,32 +5747,6 @@ XS(XS_Client_PlayMP3)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_ExpeditionMessage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ExpeditionMessage)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, ExpdID, Message)");
-	{
-		Client *		THIS;
-		int ExpdID =	(int)SvUV(ST(1));
-		const char *	Message = (const char *)SvPV_nolen(ST(2));
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
-		THIS->ExpeditionSay(Message, ExpdID);
-	}
-	XSRETURN_EMPTY;
-}
-
 //Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
 
 XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
@@ -6049,8 +5974,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$");
 		newXSproto(strcpy(buf, "IncrementAA"), XS_Client_IncrementAA, file, "$$");
 		newXSproto(strcpy(buf, "GetAALevel"), XS_Client_GetAALevel, file, "$$");
-		newXSproto(strcpy(buf, "MarkCompassLoc"), XS_Client_MarkCompassLoc, file, "$$$$");
-		newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 		newXSproto(strcpy(buf, "GetFreeSpellBookSlot"), XS_Client_GetFreeSpellBookSlot, file, "$;$");
 		newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UpdateTaskActivity"), XS_Client_UpdateTaskActivity, file, "$$$$");
@@ -6086,7 +6009,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
-		newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		XSRETURN_YES;
 }

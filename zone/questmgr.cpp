@@ -2559,7 +2559,6 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 		if (removed_all) {
 			initiator->Message(MT_Say, "Removed all players from instance.");
 		} else {
-			// once the expedition system is in, this message it not relevant
 			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
 		}
 	}
