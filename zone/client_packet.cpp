@@ -8780,6 +8780,21 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}
 	}
 
+	///////////////////////////////////////
+
+	if (ClientVersionBit & BIT_UnderfootAndLater)
+
+	 {
+
+		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
+
+		outapp->WriteUInt32(GetMaxXTargets());
+
+		outapp->WriteUInt32(0);
+
+		FastQueuePacket(&outapp);
+
+	}
 
 	//////////////////////////////////////
 	// Weather Packet
