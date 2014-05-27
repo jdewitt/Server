@@ -83,7 +83,6 @@
 #include "LauncherList.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "AdventureManager.h"
 #include "ucs.h"
 #include "queryserv.h"
 
@@ -98,7 +97,6 @@ EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
-AdventureManager adventure_manager;
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
@@ -340,20 +338,6 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Deleted %i stale player backups from database", database.DeleteStalePlayerBackups());
 	}
 
-	_log(WORLD__INIT, "Loading adventures...");
-	if(!adventure_manager.LoadAdventureTemplates())
-	{
-		_log(WORLD__INIT_ERR, "Unable to load adventure templates.");
-	}
-
-	if(!adventure_manager.LoadAdventureEntries())
-	{
-		_log(WORLD__INIT_ERR, "Unable to load adventure templates.");
-	}
-
-	adventure_manager.Load();
-	adventure_manager.LoadLeaderboardInfo();
-
 	_log(WORLD__INIT, "Purging expired instances");
 	database.PurgeExpiredInstances();
 	Timer PurgeInstanceTimer(450000);
@@ -476,8 +460,6 @@ int main(int argc, char** argv) {
 		QSLink.Process();
 
 		LFPGroupList.Process();
-
-		adventure_manager.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();

@@ -536,7 +536,6 @@ public:
 
 	inline uint32	GetEXP()		const { return m_pp.exp; }
 
-	bool	UpdateLDoNPoints(int32 points, uint32 theme);
 	void	SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
 	uint32	GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void	AddPVPPoints(uint32 Points);
@@ -969,32 +968,6 @@ public:
 	inline const EQClientVersion GetClientVersion() const { return ClientVersion; }
 	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
 
-	/** Adventure Stuff **/
-	void SendAdventureError(const char *error);
-	void SendAdventureDetails();
-	void SendAdventureCount(uint32 count, uint32 total);
-	void NewAdventure(int id, int theme, const char *text, int member_count, const char *members);
-	bool IsOnAdventure();
-	void LeaveAdventure();
-	void AdventureFinish(bool win, int theme, int points);
-	void SetAdventureData(char *data) { adv_data = data; }
-	void ClearAdventureData() { safe_delete(adv_data); }
-	bool HasAdventureData() { return adv_data != nullptr; }
-	void ClearCurrentAdventure();
-	void PendingAdventureRequest() { adventure_request_timer = new Timer(8000); }
-	bool GetPendingAdventureRequest() const { return (adventure_request_timer != nullptr); }
-	void ClearPendingAdventureRequest() { safe_delete(adventure_request_timer); }
-	void PendingAdventureCreate() { adventure_create_timer = new Timer(8000); }
-	bool GetPendingAdventureCreate() const { return (adventure_create_timer != nullptr); }
-	void ClearPendingAdventureCreate() { safe_delete(adventure_create_timer); }
-	void PendingAdventureLeave() { adventure_leave_timer = new Timer(8000); }
-	bool GetPendingAdventureLeave() const { return (adventure_leave_timer != nullptr); }
-	void ClearPendingAdventureLeave() { safe_delete(adventure_leave_timer); }
-	void PendingAdventureDoorClick() { adventure_door_timer = new Timer(8000); }
-	bool GetPendingAdventureDoorClick() const { return (adventure_door_timer != nullptr); }
-	void ClearPendingAdventureDoorClick() { safe_delete(adventure_door_timer); }
-	void ClearPendingAdventureData();
-
 	int GetAggroCount();
 	void IncrementAggroCount();
 	void DecrementAggroCount();
@@ -1002,21 +975,7 @@ public:
 	void SendDisciplineTimers();
 	void SendRespawnBinds();
 
-	uint32 GetLDoNWins() { return (m_pp.ldon_wins_guk + m_pp.ldon_wins_mir + m_pp.ldon_wins_mmc + m_pp.ldon_wins_ruj + m_pp.ldon_wins_tak); }
-	uint32 GetLDoNLosses() { return (m_pp.ldon_losses_guk + m_pp.ldon_losses_mir + m_pp.ldon_losses_mmc + m_pp.ldon_losses_ruj + m_pp.ldon_losses_tak); }
-	uint32 GetLDoNWinsTheme(uint32 t);
-	uint32 GetLDoNLossesTheme(uint32 t);
-	uint32 GetLDoNPointsTheme(uint32 t);
-	void UpdateLDoNWins(uint32 t, int32 n);
-	void UpdateLDoNLosses(uint32 t, int32 n);
-	void CheckLDoNHail(Mob *target);
 	void CheckEmoteHail(Mob *target, const char* message);
-
-	void HandleLDoNOpen(NPC *target);
-	void HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type);
-	void HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type);
-	void HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type);
-	int	LDoNChest_SkillCheck(NPC *target, int skill);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y);
@@ -1166,19 +1125,6 @@ protected:
 	float aa_los_me_heading;
 	bool los_status_facing;
 	QGlobalCache *qGlobals;
-
-	/** Adventure Variables **/
-	Timer *adventure_request_timer;
-	Timer *adventure_create_timer;
-	Timer *adventure_leave_timer;
-	Timer *adventure_door_timer;
-	Timer *adventure_stats_timer;
-	Timer *adventure_leaderboard_timer;
-	int adv_requested_theme;
-	int adv_requested_id;
-	char *adv_requested_data;
-	int adv_requested_member_count;
-	char *adv_data;
 
 private:
 	eqFilterMode ClientFilters[_FilterCount];

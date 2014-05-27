@@ -241,10 +241,6 @@ const char* GetEQClassName(uint8 class_, uint8 level) {
 			return "Berserker Guildmaster";
 		case MERCHANT:
 			return "Merchant";
-		case ADVENTURERECRUITER:
-			return "Adventure Recruiter";
-		case ADVENTUREMERCHANT:
-			return "Adventure Merchant";
 		case CORPSE_CLASS:
 			return "Corpse Class";
 		default:

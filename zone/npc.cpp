@@ -201,7 +201,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	MerchantType = d->merchanttype;
 	merchant_open = GetClass() == MERCHANT;
-	adventure_template_id = d->adventure_template;
 	org_x = x;
 	org_y = y;
 	org_z = z;
@@ -269,76 +268,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
 	}
 
-	if(d->trap_template > 0)
-	{
-		std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator trap_ent_iter;
-		std::list<LDoNTrapTemplate*> trap_list;
-
-		trap_ent_iter = zone->ldon_trap_entry_list.find(d->trap_template);
-		if(trap_ent_iter != zone->ldon_trap_entry_list.end())
-		{
-			trap_list = trap_ent_iter->second;
-			if(trap_list.size() > 0)
-			{
-				std::list<LDoNTrapTemplate*>::iterator trap_list_iter = trap_list.begin();
-				std::advance(trap_list_iter, MakeRandomInt(0, trap_list.size() - 1));
-				LDoNTrapTemplate* tt = (*trap_list_iter);
-				if(tt)
-				{
-					if((uint8)tt->spell_id > 0)
-					{
-						ldon_trapped = true;
-						ldon_spell_id = tt->spell_id;
-					}
-					else
-					{
-						ldon_trapped = false;
-						ldon_spell_id = 0;
-					}
-
-					ldon_trap_type = (uint8)tt->type;
-					if(tt->locked > 0)
-					{
-						ldon_locked = true;
-						ldon_locked_skill = tt->skill;
-					}
-					else
-					{
-						ldon_locked = false;
-						ldon_locked_skill = 0;
-					}
-					ldon_trap_detected = 0;
-				}
-			}
-			else
-			{
-				ldon_trapped = false;
-				ldon_trap_type = 0;
-				ldon_spell_id = 0;
-				ldon_locked = false;
-				ldon_locked_skill = 0;
-				ldon_trap_detected = 0;
-			}
-		}
-		else
-		{
-			ldon_trapped = false;
-			ldon_trap_type = 0;
-			ldon_spell_id = 0;
-			ldon_locked = false;
-			ldon_locked_skill = 0;
-			ldon_trap_detected = 0;
-		}
-	}
-	else
-	{
-		ldon_trapped = false;
-		ldon_trap_type = 0;
-		ldon_spell_id = 0;
-		ldon_locked = false;
-		ldon_locked_skill = 0;
-		ldon_trap_detected = 0;
-	}
 	reface_timer = new Timer(15000);
 	reface_timer->Disable();
 	qGlobals = nullptr;
@@ -611,30 +540,6 @@ bool NPC::Process()
 
 		if(GetMana() < GetMaxMana()) {
 			SetMana(GetMana()+mana_regen+bonus);
-		}
-
-
-		if(zone->adv_data && !p_depop)
-		{
-			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
-			{
-				Mob *o = GetOwner();
-				if(o && o->IsClient())
-				{
-					float x_diff = ds->dest_x - GetX();
-					float y_diff = ds->dest_y - GetY();
-					float z_diff = ds->dest_z - GetZ();
-					float dist = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
-					if(dist < RuleR(Adventure, DistanceForRescueComplete))
-					{
-						zone->DoAdventureCountIncrease();
-						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
-							" this wretched place. I'll find my way from here.");
-						Depop();
-					}
-				}
-			}
 		}
 	}
 

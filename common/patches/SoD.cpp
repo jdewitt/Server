@@ -1777,18 +1777,6 @@ ENCODE(OP_LootItem) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_TributeItem) {
-	ENCODE_LENGTH_EXACT(TributeItem_Struct);
-	SETUP_DIRECT_ENCODE(TributeItem_Struct, structs::TributeItem_Struct);
-
-	eq->slot = TitaniumToSoDSlot(emu->slot);
-	OUT(quantity);
-	OUT(tribute_master_id);
-	OUT(tribute_points);
-
-	FINISH_ENCODE();
-}
-
 ENCODE(OP_Projectile) {
 	// This Opcode is not named very well. It is used for the animation of arrows leaving the player's bow
 	// and flying to the target.
@@ -1881,19 +1869,6 @@ ENCODE(OP_ZonePlayerToBind)
 
 	memcpy((*p)->pBuffer, ss.str().c_str(), ss.str().size());
 	dest->FastQueuePacket(&(*p));
-}
-
-ENCODE(OP_AdventureMerchantSell) {
-	ENCODE_LENGTH_EXACT(Adventure_Sell_Struct);
-	SETUP_DIRECT_ENCODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
-
-	eq->unknown000 = 1;
-	OUT(npcid);
-	eq->slot = TitaniumToSoDSlot(emu->slot);
-	OUT(charges);
-	OUT(sell_price);
-
-	FINISH_ENCODE();
 }
 
 ENCODE(OP_RaidUpdate)
@@ -2332,19 +2307,6 @@ DECODE(OP_RaidInvite) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_AdventureMerchantSell) {
-	DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);
-	SETUP_DIRECT_DECODE(Adventure_Sell_Struct, structs::Adventure_Sell_Struct);
-
-	IN(npcid);
-	emu->slot = SoDToTitaniumSlot(eq->slot);
-	IN(charges);
-	IN(sell_price);
-
-	FINISH_DIRECT_DECODE();
-}
-
-
 DECODE(OP_ApplyPoison) {
 	DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 	SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
@@ -2676,18 +2638,6 @@ DECODE(OP_LootItem) {
 	IN(looter);
 	emu->slot_id = eq->slot_id - 1;
 	IN(auto_loot);
-
-	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_TributeItem) {
-	DECODE_LENGTH_EXACT(structs::TributeItem_Struct);
-	SETUP_DIRECT_DECODE(TributeItem_Struct, structs::TributeItem_Struct);
-
-	emu->slot = SoDToTitaniumSlot(eq->slot);
-	IN(quantity);
-	IN(tribute_master_id);
-	IN(tribute_points);
 
 	FINISH_DIRECT_DECODE();
 }

@@ -130,11 +130,6 @@ const char *Lua_Client::GetLastName() {
 	return self->GetLastName();
 }
 
-int Lua_Client::GetLDoNPointsTheme(int theme) {
-	Lua_Safe_Call_Int();
-	return self->GetLDoNPointsTheme(theme);
-}
-
 int Lua_Client::GetBaseSTR() {
 	Lua_Safe_Call_Int();
 	return self->GetBaseSTR();
@@ -188,11 +183,6 @@ uint32 Lua_Client::GetAAExp() {
 uint32 Lua_Client::GetTotalSecondsPlayed() {
 	Lua_Safe_Call_Int();
 	return self->GetTotalSecondsPlayed();
-}
-
-void Lua_Client::UpdateLDoNPoints(int points, uint32 theme) {
-	Lua_Safe_Call_Void();
-	self->UpdateLDoNPoints(points, theme);
 }
 
 void Lua_Client::SetDeity(int v) {
@@ -872,26 +862,6 @@ int Lua_Client::GetModCharacterFactionLevel(int faction) {
 	return self->GetModCharacterFactionLevel(faction);
 }
 
-int Lua_Client::GetLDoNWins() {
-	Lua_Safe_Call_Int();
-	return self->GetLDoNWins();
-}
-
-int Lua_Client::GetLDoNLosses() {
-	Lua_Safe_Call_Int();
-	return self->GetLDoNLosses();
-}
-
-int Lua_Client::GetLDoNWinsTheme(int theme) {
-	Lua_Safe_Call_Int();
-	return self->GetLDoNWinsTheme(theme);
-}
-
-int Lua_Client::GetLDoNLossesTheme(int theme) {
-	Lua_Safe_Call_Int();
-	return self->GetLDoNLossesTheme(theme);
-}
-
 int Lua_Client::GetStartZone() {
 	Lua_Safe_Call_Int();
 	return self->GetStartZone();
@@ -1265,7 +1235,6 @@ luabind::scope lua_register_client() {
 		.def("GetBaseFace", (int(Lua_Client::*)(void))&Lua_Client::GetBaseFace)
 		.def("GetLanguageSkill", (int(Lua_Client::*)(int))&Lua_Client::GetLanguageSkill)
 		.def("GetLastName", (const char *(Lua_Client::*)(void))&Lua_Client::GetLastName)
-		.def("GetLDoNPointsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNPointsTheme)
 		.def("GetBaseSTR", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTR)
 		.def("GetBaseSTA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTA)
 		.def("GetBaseCHA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseCHA)
@@ -1277,7 +1246,6 @@ luabind::scope lua_register_client() {
 		.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
-		.def("UpdateLDoNPoints", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateLDoNPoints)
 		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
 		.def("AddEXP", (void(Lua_Client::*)(uint32))&Lua_Client::AddEXP)
 		.def("AddEXP", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddEXP)
@@ -1413,10 +1381,6 @@ luabind::scope lua_register_client() {
 		.def("AddAAPoints", (void(Lua_Client::*)(int))&Lua_Client::AddAAPoints)
 		.def("RefundAA", (void(Lua_Client::*)(void))&Lua_Client::RefundAA)
 		.def("GetModCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetModCharacterFactionLevel)
-		.def("GetLDoNWins", (int(Lua_Client::*)(void))&Lua_Client::GetLDoNWins)
-		.def("GetLDoNLosses", (int(Lua_Client::*)(void))&Lua_Client::GetLDoNLosses)
-		.def("GetLDoNWinsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNWinsTheme)
-		.def("GetLDoNLossesTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNLossesTheme)
 		.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)
 		.def("SetStartZone", (void(Lua_Client::*)(int))&Lua_Client::SetStartZone)
 		.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)

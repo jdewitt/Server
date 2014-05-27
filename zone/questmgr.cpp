@@ -1577,24 +1577,6 @@ void QuestManager::resume() {
 	owner->CastToNPC()->ResumeWandering();
 }
 
-void QuestManager::addldonpoints(int32 points, uint32 theme) {
-	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNPoints(points, theme);
-}
-
-void QuestManager::addldonwin(int32 wins, uint32 theme) {
-	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNWins(theme, wins);
-}
-
-void QuestManager::addldonloss(int32 losses, uint32 theme) {
-	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNLosses(theme, losses);
-}
-
 void QuestManager::setnexthpevent(int at) {
 	QuestManagerCurrentQuestVars();
 	if (owner)

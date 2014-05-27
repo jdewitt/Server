@@ -40,15 +40,6 @@ void load_opcode_names()
 	opcode_map[0x01e9]="LiveOP_AAAction";
 	opcode_map[0x00bb]="LiveOP_BoardBoat";
 	opcode_map[0x00bc]="LiveOP_LeaveBoat";
-	opcode_map[0x02b8]="LiveOP_AdventureInfoRequest";
-	opcode_map[0x02b9]="LiveOP_AdventureInfo";
-	opcode_map[0x02a6]="LiveOP_AdventureRequest";
-	opcode_map[0x02a8]="LiveOP_AdventureDetails";
-	opcode_map[0x02a9]="LiveOP_LDoNButton";
-	opcode_map[0x02ba]="LiveOP_AdventureData";
-	opcode_map[0x02c9]="LiveOP_AdventureFinish";
-	opcode_map[0x02c6]="LiveOP_LeaveAdventure";
-	opcode_map[0x02ce]="LiveOP_AdventureUpdate";
 	opcode_map[0x002b]="LiveOP_SendExpZonein";
 	opcode_map[0x01e4]="LiveOP_ZoneInSendName";
 	opcode_map[0x01bf]="LiveOP_GuildLeader";
@@ -86,10 +77,6 @@ void load_opcode_names()
 	opcode_map[0x0f6d]="LiveOP_ShopEndConfirm";
 	opcode_map[0x00f7]="LiveOP_ShopRequest";
 	opcode_map[0x006c]="LiveOP_ShopEnd";
-	opcode_map[0x02d1]="LiveOP_AdventureMerchantRequest";
-	opcode_map[0x02d2]="LiveOP_AdventureMerchantResponse";
-	opcode_map[0x02d3]="LiveOP_AdventureMerchantPurchase";
-	opcode_map[0x02e3]="LiveOP_AdventurePointsUpdate";
 	opcode_map[0x0270]="LiveOP_LFGCommand";
 	opcode_map[0x01d0]="LiveOP_LFGAppearance";
 	opcode_map[0x01b5]="LiveOP_MoneyUpdate";

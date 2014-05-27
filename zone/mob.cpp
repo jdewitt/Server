@@ -719,14 +719,8 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 	if(strlen(ns->spawn.lastName) == 0) {
 		switch(ns->spawn.class_)
 		{
-		case ADVENTURERECRUITER:
-			strcpy(ns->spawn.lastName, "Adventure Recruiter");
-			break;
 		case BANKER:
 			strcpy(ns->spawn.lastName, "Banker");
-			break;
-		case ADVENTUREMERCHANT:
-			strcpy(ns->spawn.lastName,"Adventure Merchant");
 			break;
 		case WARRIORGM:
 			strcpy(ns->spawn.lastName, "Warrior Guildmaster");
@@ -787,14 +781,8 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	strcpy(ns2->spawn.name, ns->spawn.name);
 	switch(ns->spawn.class_)
 	{
-	case ADVENTURERECRUITER:
-		strcpy(ns2->spawn.lastName, "Adventure Recruiter");
-		break;
 	case BANKER:
 		strcpy(ns2->spawn.lastName, "Banker");
-		break;
-	case ADVENTUREMERCHANT:
-		strcpy(ns->spawn.lastName,"Adventure Merchant");
 		break;
 	case WARRIORGM:
 		strcpy(ns2->spawn.lastName, "Warrior Guildmaster");
@@ -3681,12 +3669,6 @@ uint32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 		stat = uint32(item->FactionAmt4);
 	if (id == "augtype")
 		stat = uint32(item->AugType);
-	if (id == "ldontheme")
-		stat = uint32(item->LDoNTheme);
-	if (id == "ldonprice")
-		stat = uint32(item->LDoNPrice);
-	if (id == "ldonsold")
-		stat = uint32(item->LDoNSold);
 	if (id == "banedmgraceamt")
 		stat = uint32(item->BaneDmgRaceAmt);
 	if (id == "augrestrict")
@@ -3771,8 +3753,6 @@ uint32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 		stat = uint32(item->HealAmt);
 	if (id == "spelldmg")
 		stat = uint32(item->SpellDmg);
-	if (id == "ldonsellbackrate")
-		stat = uint32(item->LDoNSellBackRate);
 	if (id == "scriptfileid")
 		stat = uint32(item->ScriptFileID);
 	if (id == "expendablearrow")

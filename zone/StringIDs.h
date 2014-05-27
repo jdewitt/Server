@@ -95,7 +95,6 @@
 #define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
-#define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
 #define TRADESKILL_NOCOMBINE		334		//You cannot combine these items in this container type!
 #define TRADESKILL_FAILED			336		//You lacked the skills to fashion the items together.
 #define TRADESKILL_TRIVIAL			338		//You can no longer advance your skill from making this item.
@@ -110,7 +109,6 @@
 #define MEND_SUCCESS				350		//You mend your wounds and heal some damage.
 #define MEND_WORSEN					351		//You have worsened your wounds!
 #define MEND_FAIL					352		//You have failed to mend your wounds.
-#define LDON_SENSE_TRAP2			367		//You have not detected any traps.
 #define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item. You already have one.
 #define PICK_LORE					379		//You cannot pick up a lore item you already possess.
 #define CONSENT_DENIED				390		//You do not have consent to summon that corpse.
@@ -241,7 +239,6 @@
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
-#define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
 #define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
 #define CORPSEDRAG_ALREADY			4062	//You are already dragging %1.
@@ -254,7 +251,6 @@
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
-#define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
@@ -273,22 +269,7 @@
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
-#define LDON_DONT_KNOW_TRAPPED		7552	//You do not know if this object is trapped.
-#define LDON_HAVE_DISARMED			7553	//You have disarmed %1!
-#define LDON_ACCIDENT_SETOFF		7554	//You accidentally set off the trap!
-#define LDON_HAVE_NOT_DISARMED		7555	//You have not disarmed %1.
-#define LDON_ACCIDENT_SETOFF2		7556	//You accidentally set off the trap!
-#define LDON_CERTAIN_TRAP			7557	//You are certain that %1 is trapped.
-#define LDON_CERTAIN_NOT_TRAP		7558	//You are certain that %1 is not trapped.
-#define LDON_CANT_DETERMINE_TRAP	7559	//You are unable to determine if %1 is trapped.
-#define LDON_PICKLOCK_SUCCESS		7560	//You have successfully picked %1!
-#define LDON_PICKLOCK_FAILURE		7561	//You have failed to pick %1.
-#define LDON_STILL_LOCKED			7562	//You cannot open %1, it is locked.
-#define LDON_BASH_CHEST				7563	//%1 try to %2 %3, but do no damage.
 #define DOORS_NO_PICK				7564	//You must have a lock pick in your inventory to do this.
-#define LDON_NO_LOCKPICK			7564	//You must have a lock pick in your inventory to do this.
-#define LDON_WAS_NOT_LOCKED			7565	//%1 was not locked.
-#define LDON_WAS_NOT_TRAPPED		7566	//%1 was not trapped
 #define GAIN_GROUP_LEADERSHIP_POINT	8585	//
 #define GAIN_RAID_LEADERSHIP_POINT	8589	//
 #define MAX_GROUP_LEADERSHIP_POINTS	8584	//
@@ -346,7 +327,6 @@
 #define SENSE_ANIMAL				12472	//You sense an animal in this direction.
 #define SENSE_SUMMONED				12473	//You sense a summoned being in this direction.
 #define SENSE_NOTHING				12474	//You don't sense anything.
-#define LDON_SENSE_TRAP3			12476	//You don't sense any traps.
 #define INTERRUPT_SPELL_OTHER		12478	//%1's casting is interrupted!
 #define YOU_HIT_NONMELEE			12481	//You were hit by non-melee for %1 damage.
 #define TRACK_LOST_TARGET			12681	//You have lost your tracking target.

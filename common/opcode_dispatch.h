@@ -97,13 +97,7 @@ IN(OP_TargetMouse, ClientTarget_Struct);
 IN(OP_TargetCommand, ClientTarget_Struct);
 IN(OP_Shielding, Shielding_Struct);
 INr(OP_Jump);	//?
-INr(OP_AdventureInfoRequest);
-INr(OP_AdventureRequest);
-IN(OP_LDoNButton, bool);	//not sure on length
-INr(OP_LeaveAdventure);
 IN(OP_Consume, Consume_Struct);
-IN(OP_AdventureMerchantRequest, AdventureMerchant_Struct);
-IN(OP_AdventureMerchantPurchase, Adventure_Purchase_Struct);
 IN(OP_ConsiderCorpse, Consider_Struct);
 IN(OP_Consider, Consider_Struct);
 INr(OP_Begging);	//?
@@ -292,10 +286,6 @@ OUTz(OP_FinishWindow);
 OUTz(OP_FinishWindow2);
 //OUTz(OP_TradeSkillCombine);
 
-//OUTv(OP_AdventureDetails, strlen(AF.text)+1);
-//OUTv(OP_AdventureInfo, strlen(buffer1)+1);
-//OUTv(OP_AdventureInfo, strlen(p)+1);
-//OUTv(OP_AdventureMerchantResponse, strlen(msg)+2);
 OUTv(OP_ItemPacket, ItemPacket_Struct);
 OUTv(OP_BuffFadeMsg, BuffFadeMsg_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
@@ -318,9 +308,6 @@ OUTv(OP_SendTitleList, TitleList_Struct);
 OUT(OP_SendMaxCharacters, MaxCharacters_Struct);
 OUT(OP_AAExpUpdate, AAExpUpdate_Struct);
 OUT(OP_Action, Action_Struct);
-OUT(OP_AdventureData, AdventureRequestResponse_Struct);
-OUT(OP_AdventureFinish, AdventureFinish_Struct);
-OUT(OP_AdventurePointsUpdate, AdventurePoints_Update_Struct);
 OUT(OP_Animation, Animation_Struct);
 OUT(OP_AnnoyingZoneUnknown, AnnoyingZoneUnknown_Struct);
 OUT(OP_BankerChange, BankerChange_Struct);

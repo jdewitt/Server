@@ -33,7 +33,6 @@
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "AdventureManager.h"
 #include "ucs.h"
 #include "queryserv.h"
 
@@ -43,7 +42,6 @@ extern ZSList zoneserver_list;
 extern ConsoleList console_list;
 extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
-extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
 void CatchSignal(int sig_num);
@@ -1188,68 +1186,6 @@ bool ZoneServer::Process() {
 				}
 
 				zoneserver_list.SendPacket(pack);
-				break;
-			}
-
-			case ServerOP_AdventureRequest:
-			{
-				adventure_manager.CalculateAdventureRequestReply((const char*)pack->pBuffer);
-				break;
-			}
-
-			case ServerOP_AdventureRequestCreate:
-			{
-				adventure_manager.TryAdventureCreate((const char*)pack->pBuffer);
-				break;
-			}
-
-			case ServerOP_AdventureDataRequest:
-			{
-				AdventureFinishEvent fe;
-				while(adventure_manager.PopFinishedEvent((const char*)pack->pBuffer, fe))
-				{
-					adventure_manager.SendAdventureFinish(fe);
-				}
-				adventure_manager.GetAdventureData((const char*)pack->pBuffer);
-				break;
-			}
-
-			case ServerOP_AdventureClickDoor:
-			{
-				ServerPlayerClickedAdventureDoor_Struct *pcad = (ServerPlayerClickedAdventureDoor_Struct*)pack->pBuffer;
-				adventure_manager.PlayerClickedDoor(pcad->player, pcad->zone_id, pcad->id);
-				break;
-			}
-
-			case ServerOP_AdventureLeave:
-			{
-				adventure_manager.LeaveAdventure((const char*)pack->pBuffer);
-				break;
-			}
-
-			case ServerOP_AdventureCountUpdate:
-			{
-				ServerAdventureCount_Struct *sc = (ServerAdventureCount_Struct*)pack->pBuffer;
-				adventure_manager.IncrementCount(sc->instance_id);
-				break;
-			}
-
-			case ServerOP_AdventureAssaCountUpdate:
-			{
-				adventure_manager.IncrementAssassinationCount(*((uint16*)pack->pBuffer));
-				break;
-			}
-
-			case ServerOP_AdventureZoneData:
-			{
-				adventure_manager.GetZoneData(*((uint16*)pack->pBuffer));
-				break;
-			}
-
-			case ServerOP_AdventureLeaderboard:
-			{
-				ServerLeaderboardRequest_Struct *lr = (ServerLeaderboardRequest_Struct*)pack->pBuffer;
-				adventure_manager.DoLeaderboardRequest(lr->player, lr->type);
 				break;
 			}
 
