@@ -146,9 +146,7 @@ Client::Client(EQStreamInterface* ieqs)
 #ifdef REVERSE_AGGRO
 	scanarea_timer(AIClientScanarea_delay),
 #endif
-	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
-	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
 	charm_update_timer(6000),
 	rest_timer(1),
 	charm_class_attacks_timer(3000),
@@ -238,10 +236,6 @@ Client::Client(EQStreamInterface* ieqs)
 	UpdateWindowTitle();
 	horseId = 0;
 	tgb = false;
-	tribute_master_id = 0xFFFFFFFF;
-	tribute_timer.Disable();
-	taskstate = nullptr;
-	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
 	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
@@ -376,7 +370,6 @@ Client::~Client() {
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown
 
-	safe_delete(taskstate);
 	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);
@@ -421,9 +414,9 @@ void Client::ReportConnectingState() {
 		LogFile->write(EQEMuLog::Debug, "Client sent initial zone packet, but we never got their player info from the database.");
 		break;
 	case PlayerProfileLoaded:	//our DB work is done, sending it
-		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
+		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, spawns, time and weather, but never finished.");
 		break;
-	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
+	case ZoneInfoSent:		//includes PP, spawns, time and weather
 		LogFile->write(EQEMuLog::Debug, "We successfully sent player info and spawns, waiting for client to request new zone.");
 		break;
 	case NewZoneRequested:	//received and sent new zone request
@@ -520,8 +513,6 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
-	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
-	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
 	m_pp.lastlogin = time(nullptr);
@@ -543,19 +534,11 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) {
-		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
-	} else {
-		m_pp.tribute_time_remaining = 0xFFFFFFFF;
-		m_pp.tribute_active = 0;
-	}
-
 	p_timers.Store(&database);
 
 //	printf("Dumping inventory on save:\n");
 //	m_inv.dumpEntireInventory();
 
-	SaveTaskState();
 	if (iCommitNow <= 1) {
 		char* query = 0;
 		uint32_breakdown workpt;
@@ -1010,12 +993,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if(DistNoRootNoZ(*GetTarget()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
-
-					if(RuleB(TaskSystem, EnableTaskSystem)) {
-						if(UpdateTasksOnSpeakWith(tar->GetNPCTypeID())) {
-							tar->DoQuestPause(this);
-						}
-					}
 				}
 			}
 			else {

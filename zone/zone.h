@@ -30,7 +30,6 @@
 //#include "mob.h"
 #include "zonedump.h"
 #include "spawn2.h"
-#include "tasks.h"
 #include "pathing.h"
 #include "QGlobals.h"
 #include <unordered_map>

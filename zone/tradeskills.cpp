@@ -1081,8 +1081,6 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			{
 				entity_list.MessageGroup(this,true,MT_Skills,"%s has successfully fashioned %s!",GetName(),item->Name);
 			}
-			if(RuleB(TaskSystem, EnableTaskSystem))
-				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
 			++itr;
 		}
 		return(true);

@@ -1412,12 +1412,6 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-		case ServerOP_ReloadTasks: {
-			if(RuleB(Tasks,EnableTaskSystem)) {
-				HandleReloadTasks(pack);
-			}
-			break;
-		}
 		case ServerOP_LFGMatches: {
 			HandleLFGMatches(pack);
 			break;
@@ -1794,69 +1788,6 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	safe_delete(pack);
 	return ret;
 }
-
-void WorldServer::SendReloadTasks(int Command, int TaskID) {
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadTasks, sizeof(ReloadTasks_Struct));
-	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
-
-	rts->Command = Command;
-	rts->Parameter = TaskID;
-
-	SendPacket(pack);
-}
-
-void WorldServer::HandleReloadTasks(ServerPacket *pack)
-{
-	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
-
-	_log(TASKS__GLOBALLOAD, "Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
-
-	switch(rts->Command) {
-		case RELOADTASKS:
-			entity_list.SaveAllClientsTaskState();
-
-			if(rts->Parameter == 0) {
-				_log(TASKS__GLOBALLOAD, "Reload ALL tasks");
-				safe_delete(taskmanager);
-				taskmanager = new TaskManager;
-				taskmanager->LoadTasks();
-				if(zone)
-					taskmanager->LoadProximities(zone->GetZoneID());
-				entity_list.ReloadAllClientsTaskState();
-			}
-			else {
-				_log(TASKS__GLOBALLOAD, "Reload only task %i", rts->Parameter);
-				taskmanager->LoadTasks(rts->Parameter);
-				entity_list.ReloadAllClientsTaskState(rts->Parameter);
-			}
-
-			break;
-
-		case RELOADTASKPROXIMITIES:
-			if(zone) {
-				_log(TASKS__GLOBALLOAD, "Reload task proximities");
-				taskmanager->LoadProximities(zone->GetZoneID());
-			}
-			break;
-
-		case RELOADTASKGOALLISTS:
-			_log(TASKS__GLOBALLOAD, "Reload task goal lists");
-			taskmanager->ReloadGoalLists();
-			break;
-
-		case RELOADTASKSETS:
-			_log(TASKS__GLOBALLOAD, "Reload task sets");
-			taskmanager->LoadTaskSets();
-			break;
-
-		default:
-			_log(TASKS__GLOBALLOAD, "Unhandled ServerOP_ReloadTasks command %i", rts->Command);
-
-	}
-
-
-}
-
 
 uint32 WorldServer::NextGroupID() {
 	//this system wastes a lot of potential group IDs (~5%), but

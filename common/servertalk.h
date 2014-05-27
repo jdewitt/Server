@@ -77,7 +77,6 @@
 #define ServerOP_GroupJoin			0x003e //for joining ooz folks
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
-#define ServerOP_ReloadTasks		0x0060
 #define ServerOP_DepopAllPlayersCorpses	0x0061
 #define ServerOP_ReloadTitles		0x0062
 #define ServerOP_QGlobalUpdate		0x0063
@@ -787,11 +786,6 @@ struct ServerOP_Consent_Struct {
 	uint32 zone_id;
 	uint16 instance_id;
 	uint32 message_string_id;
-};
-
-struct ReloadTasks_Struct {
-	uint32 Command;
-	uint32 Parameter;
 };
 
 struct ServerDepopAllPlayersCorpses_Struct

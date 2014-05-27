@@ -3338,43 +3338,6 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 	}
 }
 
-void EntityList::SaveAllClientsTaskState()
-{
-	if (!taskmanager)
-		return;
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *client = it->second;
-		if (client->IsTaskStateLoaded())
-			client->SaveTaskState();
-
-		++it;
-	}
-}
-
-void EntityList::ReloadAllClientsTaskState(int TaskID)
-{
-	if (!taskmanager)
-		return;
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *client = it->second;
-		if (client->IsTaskStateLoaded()) {
-			// If we have been passed a TaskID, only reload the client state if they have
-			// that Task active.
-			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
-				_log(TASKS__CLIENTLOAD, "Reloading Task State For Client %s", client->GetName());
-				client->RemoveClientTaskState();
-				client->LoadClientTaskState();
-				taskmanager->SendActiveTasksToClient(client);
-			}
-		}
-		++it;
-	}
-}
-
 bool EntityList::IsMobInZone(Mob *who)
 {
 	//We don't use mob_list.find(who) because this code needs to be able to handle dangling pointers for the quest code.

@@ -65,7 +65,6 @@
 
 // these should be in the headers...
 extern WorldServer worldserver;
-extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
 #include "QuestParserCollection.h"
@@ -411,7 +410,6 @@ int command_init(void){
 		command_add("suspend","[name][days] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("synctod","- Send a time of day update to every client in zone",90,command_synctod) ||
 		
-		command_add("task","(subcommand) - Task system commands", 150, command_task) ||
 		command_add("tattoo","- Change the tattoo of your target (Drakkin Only)",80,command_tattoo) ||
 		command_add("tempname","[newname] - Temporarily renames your target. Leave name blank to restore the original name.",100,command_tempname) ||
 		command_add("testspawn","[memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct",200,command_testspawn) ||
@@ -8438,89 +8436,6 @@ void command_rules(Client *c, const Seperator *sep){
 	} else {
 		c->Message(15, "Invalid action specified. use '#rules help' for help");
 	}
-}
-
-void command_task(Client *c, const Seperator *sep){
-	//super-command for managing tasks
-	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(0, "Syntax: #task [subcommand].");
-		c->Message(0, "-- Task System Commands --");
-		c->Message(0, "...show - List active tasks for a client");
-		c->Message(0, "...update <TaskID> <ActivityID> [Count]");
-		c->Message(0, "...reloadall - Reload all Task information from the database");
-		c->Message(0, "...reload task <TaskID> - Reload Task and Activity informnation for a single task");
-		c->Message(0, "...reload lists - Reload goal/reward list information");
-		c->Message(0, "...reload prox - Reload proximity information");
-		c->Message(0, "...reload sets - Reload task set information");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "show")) {
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-			c->GetTarget()->CastToClient()->ShowClientTasks();
-		else
-			c->ShowClientTasks();
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "update")) {
-		if(sep->argnum>=3) {
-			int TaskID = atoi(sep->arg[2]);
-			int ActivityID = atoi(sep->arg[3]);
-			int Count=1;
-
-			if(sep->argnum>=4) {
-				Count = atoi(sep->arg[4]);
-				if(Count <= 0)
-					Count = 1;
-			}
-			c->Message(15, "Updating Task %i, Activity %i, Count %i", TaskID, ActivityID, Count);
-			c->UpdateTaskActivity(TaskID, ActivityID, Count);
-		}
-		return;
-	}
-	if(!strcasecmp(sep->arg[1], "reloadall")) {
-		c->Message(15, "Sending reloadtasks to world");
-		worldserver.SendReloadTasks(RELOADTASKS);
-		c->Message(15, "Back again");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "reload")) {
-		if(sep->arg[2][0] != '\0') {
-			if(!strcasecmp(sep->arg[2], "lists")) {
-				c->Message(15, "Sending reload lists to world");
-				worldserver.SendReloadTasks(RELOADTASKGOALLISTS);
-				c->Message(15, "Back again");
-				return;
-			}
-			if(!strcasecmp(sep->arg[2], "prox")) {
-				c->Message(15, "Sending reload proximities to world");
-				worldserver.SendReloadTasks(RELOADTASKPROXIMITIES);
-				c->Message(15, "Back again");
-				return;
-			}
-			if(!strcasecmp(sep->arg[2], "sets")) {
-				c->Message(15, "Sending reload task sets to world");
-				worldserver.SendReloadTasks(RELOADTASKSETS);
-				c->Message(15, "Back again");
-				return;
-			}
-			if(!strcasecmp(sep->arg[2], "task") && (sep->arg[3][0] != '\0')) {
-				int TaskID = atoi(sep->arg[3]);
-				if((TaskID > 0) && (TaskID < MAXTASKS)) {
-					c->Message(15, "Sending reload task %i to world");
-					worldserver.SendReloadTasks(RELOADTASKS, TaskID);
-					c->Message(15, "Back again");
-					return;
-				}
-			}
-		}
-
-	}
-	c->Message(0, "Unable to interpret command. Type #task help");
-
 }
 
 void command_reloadtitles(Client *c, const Seperator *sep){

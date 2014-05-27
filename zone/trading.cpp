@@ -621,14 +621,6 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			}
 		}
 
-		if(RuleB(TaskSystem, EnableTaskSystem)) {
-			int Cash = trade->cp + (trade->sp * 10) + (trade->gp * 100) + (trade->pp * 1000);
-			if(UpdateTasksOnDeliver(items, Cash, tradingWith->GetNPCTypeID())) {
-				if(!tradingWith->IsMoving())
-					tradingWith->FaceTarget(this);
-			}
-		}
-
 		char temp1[100] = { 0 };
 		char temp2[100] = { 0 };
 		snprintf(temp1, 100, "copper.%d", tradingWith->GetNPCTypeID());

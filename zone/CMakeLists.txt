@@ -100,7 +100,6 @@ SET(zone_sources
 	special_attacks.cpp
 	spell_effects.cpp
 	spells.cpp
-	tasks.cpp
 	titles.cpp
 	tradeskills.cpp
 	trading.cpp
@@ -187,7 +186,6 @@ SET(zone_headers
 	spawn2.h
 	spawngroup.h
 	StringIDs.h
-	tasks.h
 	titles.h
 	trap.h
 	water_map.h

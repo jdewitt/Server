@@ -1245,7 +1245,6 @@ bool ZoneServer::Process() {
 			case ServerOP_DepopPlayerCorpse:
 			case ServerOP_ReloadTitles:
 			case ServerOP_SpawnStatusChange:
-			case ServerOP_ReloadTasks:
 			case ServerOP_ReloadWorld:
 			case ServerOP_UpdateSpawn:
 			{
