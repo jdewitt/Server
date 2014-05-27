@@ -181,24 +181,13 @@ public:
 	void LoadLevelEXPMods();
 
 	void SetInstanceTimer(uint32 new_duration);
-	void LoadLDoNTraps();
-	void LoadLDoNTrapEntries();
-	void LoadAdventureFlavor();
 
 	std::map<uint32,NPCType *> npctable;
 	std::map<uint32,std::list<MerchantList> > merchanttable;
 	std::map<uint32,std::list<TempMerchantList> > tmpmerchanttable;
-	std::map<uint32,std::string> adventure_entry_list_flavor;
-	std::map<uint32,LDoNTrapTemplate*> ldon_trap_list;
-	std::map<uint32,std::list<LDoNTrapTemplate*> > ldon_trap_entry_list;
 	std::map<uint32, ZoneEXPModInfo> level_exp_mod;
 	std::list<InternalVeteranReward> VeteranRewards;
-	char *adv_data;
-	bool did_adventure_actions;
 
-	void	DoAdventureCountIncrease();
-	void	DoAdventureAssassinationCountIncrease();
-	void	DoAdventureActions();
 	void	LoadVeteranRewards();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);

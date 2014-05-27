@@ -65,32 +65,7 @@ struct DuelResponse_Struct
 	uint32 entity_id;
 	uint32 unknown;
 };
-/*
-	Cofruben:
-	Adventure stuff,not a net one,just one for our use
-*/
-static const uint32 ADVENTURE_COLLECT		= 0;
-static const uint32 ADVENTURE_MASSKILL		= 1;
-static const uint32 ADVENTURE_NAMED			= 2;
-static const uint32 ADVENTURE_RESCUE		= 3;
 
-struct AdventureInfo {
-	uint32 QuestID;
-	uint32 NPCID;
-	bool in_use;
-	uint32 status;
-	bool ShowCompass;
-	uint32 Objetive;// can be item to collect,mobs to kill,boss to kill and someone to rescue.
-	uint32 ObjetiveValue;// number of items,or number of needed mob kills.
-	char text[512];
-	uint8 type;
-	uint32 minutes;
-	uint32 points;
-	float x;
-	float y;
-	uint32 zoneid;
-	uint32 zonedungeonid;
-};
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -1812,74 +1787,6 @@ struct Merchant_DelItem_Struct{
 /*004*/	uint32	playerid;		// Player's entity id
 /*008*/	uint32	itemslot;
 };
-struct Adventure_Purchase_Struct {
-/*000*/	uint32	some_flag;	//set to 1 generally...
-/*004*/	uint32	npcid;
-/*008*/	uint32	itemid;
-/*012*/	uint32	variable;
-};
-
-struct Adventure_Sell_Struct {
-/*000*/	uint32	unknown000;	//0x01 - Stack Size/Charges?
-/*004*/	uint32	npcid;
-/*008*/	uint32	slot;
-/*012*/	uint32	charges;
-/*016*/	uint32	sell_price;
-};
-
-struct AdventurePoints_Update_Struct {
-/*000*/	uint32				ldon_available_points;		// Total available points
-/*004*/ uint8				unkown_apu004[20];
-/*024*/	uint32				ldon_guk_points;		// Earned Deepest Guk points
-/*028*/	uint32				ldon_mirugal_points;		// Earned Mirugal' Mebagerie points
-/*032*/	uint32				ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
-/*036*/	uint32				ldon_rujarkian_points;		// Earned Rujarkian Hills points
-/*040*/	uint32				ldon_takish_points;		// Earned Takish points
-/*044*/	uint8				unknown_apu042[216];
-};
-
-
-struct AdventureFinish_Struct{
-	uint32 win_lose;//Cofruben: 00 is a lose,01 is win.
-	uint32 points;
-};
-//OP_AdventureRequest
-struct AdventureRequest_Struct{
-	uint32 risk;//1 normal,2 hard.
-	uint32 entity_id;
-};
-struct AdventureRequestResponse_Struct{
-	uint32 unknown000;
-	char text[2048];
-	uint32 timetoenter;
-	uint32 timeleft;
-	uint32 risk;
-	float x;
-	float y;
-	float z;
-	uint32 showcompass;
-	uint32 unknown2080;
-};
-
-//this is mostly right but something is off that causes the client to crash sometimes
-//I don't really care enough about the feature to work on it anymore though.
-struct AdventureLeaderboardEntry_Struct
-{
-/*004*/ char name[64];
-/*008*/ uint32 success;
-/*012*/ uint32 failure;
-/*016*/
-};
-
-struct AdventureLeaderboard_Struct
-{
-/*000*/ uint32 unknown000;
-/*004*/ uint32 unknown004;
-/*008*/ uint32 success;
-/*012*/ uint32 failure;
-/*016*/ uint32 our_rank;
-/*020*/
-};
 
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
@@ -3539,11 +3446,6 @@ struct Arrow_Struct {
 //made a bunch of trivial structs for stuff for opcode finder to use
 struct Consent_Struct {
 	char name[1];	//always at least a null - was 1
-};
-
-struct AdventureMerchant_Struct {
-	uint32	unknown_flag;		//seems to be 1
-	uint32	entity_id;
 };
 
 struct Save_Struct {

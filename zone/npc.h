@@ -283,18 +283,6 @@ public:
 	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
 	void				AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
 
-	//mercenary stuff
-	void	LoadMercTypes();
-	void	LoadMercs();
-	std::list<MercType> GetMercTypesList() {return mercTypeList; };
-	std::list<MercType> GetMercTypesList( uint32 expansion );
-	std::list<MercData> GetMercsList() {return mercDataList; };
-	std::list<MercData> GetMercsList( uint32 expansion );
-	int		GetNumMercTypes() { return static_cast<int>(mercTypeList.size()); };
-	int		GetNumMercTypes( uint32 expansion );
-	int		GetNumMercs() { return static_cast<int>(mercDataList.size()); };
-	int		GetNumMercs( uint32 expansion );
-
 	inline bool WillAggroNPCs() const { return(npc_aggro); }
 
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
@@ -318,24 +306,6 @@ public:
 	void	ModifyNPCStat(const char *identifier, const char *newValue);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
-	bool IsLDoNTrapped() const { return (ldon_trapped); }
-	void SetLDoNTrapped(bool n) { ldon_trapped = n; }
-
-	uint8 GetLDoNTrapType() const { return (ldon_trap_type); }
-	void SetLDoNTrapType(uint8 n) { ldon_trap_type = n; }
-
-	uint16 GetLDoNTrapSpellID() const { return (ldon_spell_id); }
-	void SetLDoNTrapSpellID(uint16 n) { ldon_spell_id = n; }
-
-	bool IsLDoNLocked() const { return (ldon_locked); }
-	void SetLDoNLocked(bool n) { ldon_locked = n; }
-
-	uint16 GetLDoNLockedSkill() const { return (ldon_locked_skill); }
-	void SetLDoNLockedSkill(uint16 n) { ldon_locked_skill = n; }
-
-	bool IsLDoNTrapDetected() const { return (ldon_trap_detected); }
-	void SetLDoNTrapDetected(bool n) { ldon_trap_detected = n; }
-
 	const bool GetCombatEvent() const { return combat_event; }
 	void SetCombatEvent(bool b) { combat_event = b; }
 
@@ -348,7 +318,6 @@ public:
 
 	void NPCSlotTexture(uint8 slot, uint16 texture);	// Sets new material values for slots
 
-	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 	void RemoveSpellFromNPCList(int16 spell_id);
@@ -459,18 +428,7 @@ protected:
 	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
 	AA_SwarmPetInfo *swarmInfoPtr;
 
-	bool ldon_trapped;
-	uint8 ldon_trap_type;
-	uint16 ldon_spell_id;
-	bool ldon_locked;
-	uint16 ldon_locked_skill;
-	bool ldon_trap_detected;
 	QGlobalCache *qGlobals;
-	uint32 adventure_template_id;
-
-	//mercenary stuff
-	std::list<MercType> mercTypeList;
-	std::list<MercData> mercDataList;
 
 private:
 	uint32	loottable_id;

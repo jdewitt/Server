@@ -1216,18 +1216,6 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 			}
 		}
 
-		if(zone->adv_data)
-		{
-			ServerZoneAdventureDataReply_Struct *ad = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ad->type == Adventure_Collect && !IsPlayerCorpse())
-			{
-				if(ad->data_id == inst->GetItem()->ID)
-				{
-					zone->DoAdventureCountIncrease();
-				}
-			}
-		}
-
 		// first add it to the looter - this will do the bag contents too
 		if(lootitem->auto_loot)
 		{

@@ -188,7 +188,6 @@ int command_init(void){
 		command_add("depopzone","- Depop the zone",100,command_depopzone) ||
 		command_add("details","- Change the details of your target (Drakkin Only)",80,command_details) ||
 		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
-		command_add("disarmtrap", "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 0, command_disarmtrap) ||
 		command_add("distance","- Reports the distance between you and your target.", 80, command_distance) ||
 		command_add("d1","[type] [spell] [damage] - Send an OP_Action packet with the specified values",200,command_d1) ||
 		command_add("doanim","[animnum] [type] - Send an EmoteAnim for you or your target",50,command_doanim) ||
@@ -327,7 +326,6 @@ int command_init(void){
 		command_add("petitioninfo","[petition number] - Get info about a petition",20,command_petitioninfo) ||
 		command_add("peqzone","[zonename] - Go to specified zone, if you have > 75% health",0,command_peqzone) ||
 		command_add("pf","- ",0,command_pf) ||
-		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", 0, command_picklock) ||
 #ifdef EQPROFILE
 		command_add("profiledump","- Dump profiling info to logs",250,command_profiledump) ||
 		command_add("profilereset","- Reset profiling info",250,command_profilereset) ||
@@ -367,7 +365,6 @@ int command_init(void){
 		command_add("search",nullptr,10,command_itemsearch) ||
 		command_add("sendop","[opcode] - LE's Private test command, leave it alone",200,command_sendop) ||
 		command_add("sendzonespawns","- Refresh spawn list for all clients in zone",150,command_sendzonespawns) ||
-		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", 0, command_sensetrap) ||
 		command_add("serverinfo","- Get OS info about server host",200,command_serverinfo) ||
 		command_add("serverrules","- Read this server's rules",0,command_serverrules) ||
 		command_add("serversidename","- Prints target's server side name",0,command_serversidename) ||
@@ -375,7 +372,6 @@ int command_init(void){
 		command_add("setaapoints",nullptr,0,command_setaapts) ||
 		command_add("setaapts","[value] - Set your or your player target's available AA points",100,command_setaapts) ||
 		command_add("setaaxp","[value] - Set your or your player target's AA experience",100,command_setaaxp) ||
-		//command_add("setadventurepoints","- Set your or your player target's available adventure points",150,command_set_adventure_points) ||
 		command_add("setallskill",nullptr,0,command_setskillall) ||
 		command_add("setallskills",nullptr,0,command_setskillall) ||
 		command_add("setanim","[animnum] - Set target's appearance to animnum",200,command_setanim) ||
@@ -746,38 +742,6 @@ void command_optest(Client *c, const Seperator *sep){
 	{
 		switch(atoi(sep->arg[1]))
 		{
-			case 1:
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureFinish, sizeof(AdventureFinish_Struct));
-				AdventureFinish_Struct *af = (AdventureFinish_Struct*)outapp->pBuffer;
-				af->win_lose = 1;
-				af->points = 125;
-				c->FastQueuePacket(&outapp);
-				break;
-			}
-			case 2:
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
-				AdventureRequestResponse_Struct *arr = (AdventureRequestResponse_Struct*)outapp->pBuffer;
-				if(sep->IsHexNumber(2))
-					arr->unknown000 = hextoi(sep->arg[2]);
-				else
-					arr->unknown000 = 0xBFC40100;
-				arr->risk = 1;
-				arr->showcompass = 1;
-				strcpy(arr->text, "This is some text for an adventure packet!\0");
-				arr->timeleft = 60*60;
-				//arr->timetoenter = 30*60;
-				if(sep->IsHexNumber(3))
-					arr->unknown2080=hextoi(sep->arg[3]);
-				else
-					arr->unknown2080=0x0A;
-				arr->x = c->GetY();
-				arr->y = c->GetX();
-				arr->z = c->GetZ();
-				c->FastQueuePacket(&outapp);
-				break;
-			}
 			case 3:
 			{
 				c->SendMarqueeMessage(15, 250, 0, 500, 5000, "Some msg");
@@ -6378,28 +6342,6 @@ void command_checklos(Client *c, const Seperator *sep){
 	}
 }
 
-/*void command_set_adventure_points(Client *c, const Seperator *sep){
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(!sep->arg[1][0])
-	{
-		c->Message(0, "Usage: #setadventurepoints [points] [theme]");
-		return;
-	}
-
-	if(!sep->IsNumber(1) || !sep->IsNumber(2))
-	{
-		c->Message(0, "Usage: #setadventurepoints [points] [theme]");
-		return;
-	}
-
-	c->Message(0, "Updating adventure points for %s", t->GetName());
-	t->UpdateLDoNPoints(atoi(sep->arg[1]), atoi(sep->arg[2]));
-}*/
-
 void command_npcsay(Client *c, const Seperator *sep){
 	if(c->GetTarget() && c->GetTarget()->IsNPC() && sep->arg[1][0])
 	{
@@ -6478,7 +6420,6 @@ void command_npcedit(Client *c, const Seperator *sep){
 		c->Message(0, "#npcedit Loottable - Sets the loottable ID for an NPC ");
 		c->Message(0, "#npcedit Merchantid - Sets the merchant ID for an NPC");
 		c->Message(0, "#npcedit npc_spells_effects_id - Sets the NPC Spell Effects ID");
-		c->Message(0, "#npcedit adventure_template_id - Sets the NPC's Adventure Template ID");
 		c->Message(0, "#npcedit trap_template - Sets the NPC's Trap Template ID");
 		c->Message(0, "#npcedit special_abilities - Sets the NPC's Special Abilities");
 		c->Message(0, "#npcedit Spell - Sets the npc spells list ID for an NPC");
@@ -6661,15 +6602,6 @@ void command_npcedit(Client *c, const Seperator *sep){
 		char *query = 0;
 		c->Message(15,"NPCID %u now has field 'npc_spells_effects_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_spells_effects_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-	else if ( strcasecmp( sep->arg[1], "adventure_template_id" ) == 0 )
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'adventure_template_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set adventure_template_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -11121,79 +11053,6 @@ void command_camerashake(Client *c, const Seperator *sep){
 		}
 	}
 	return;
-}
-
-void command_disarmtrap(Client *c, const Seperator *sep){
-	Mob *target = c->GetTarget();
-
-	if(!target)
-	{
-		c->Message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->IsNPC())
-	{
-		if(c->HasSkill(SkillDisarmTraps))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
-		}
-		else
-			c->Message(13, "You do not have the disarm trap skill.");
-	}
-}
-
-void command_sensetrap(Client *c, const Seperator *sep){
-	Mob * target = c->GetTarget();
-	if(!target)
-	{
-		c->Message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->IsNPC())
-	{
-		if(c->HasSkill(SkillSenseTraps))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(SkillSenseTraps), LDoNTypeMechanical);
-		}
-		else
-			c->Message(13, "You do not have the sense traps skill.");
-	}
-}
-
-void command_picklock(Client *c, const Seperator *sep){
-	Mob * target = c->GetTarget();
-	if(!target)
-	{
-		c->Message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->IsNPC())
-	{
-		if(c->HasSkill(SkillPickLock))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->Message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(SkillPickLock), LDoNTypeMechanical);
-		}
-		else
-			c->Message(13, "You do not have the pick locks skill.");
-	}
 }
 
 void command_qtest(Client *c, const Seperator *sep){

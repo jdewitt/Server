@@ -70,7 +70,6 @@ Doors::Doors(const Door* door)
 	dest_z = door->dest_z;
 	dest_heading = door->dest_heading;
 
-	is_ldon_door = door->is_ldon_door;
 	client_version_mask = door->client_version_mask;
 }
 
@@ -108,7 +107,6 @@ Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, u
 	dest_z = 0;
 	dest_heading = 0;
 
-	is_ldon_door = 0;
 	client_version_mask = 4294967295u;
 }
 
@@ -152,44 +150,6 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	//used_pawn: Locked doors! Rogue friendly too =)
 	//TODO: add check for other lockpick items
 	//////////////////////////////////////////////////////////////////
-
-	//TODO: ADVENTURE DOOR
-	if(IsLDoNDoor())
-	{
-		if(sender)
-		{
-			if(RuleI(Adventure, ItemIDToEnablePorts) != 0)
-			{
-				if(!sender->KeyRingCheck(RuleI(Adventure, ItemIDToEnablePorts)))
-				{
-					if(sender->GetInv().HasItem(RuleI(Adventure, ItemIDToEnablePorts)) == SLOT_INVALID)
-					{
-						sender->Message_StringID(13, DUNGEON_SEALED);
-						safe_delete(outapp);
-						return;
-					}
-					else
-					{
-						sender->KeyRingAdd(RuleI(Adventure, ItemIDToEnablePorts));
-					}
-				}
-			}
-
-			if(!sender->GetPendingAdventureDoorClick())
-			{
-				sender->PendingAdventureDoorClick();
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureClickDoor, sizeof(ServerPlayerClickedAdventureDoor_Struct));
-				ServerPlayerClickedAdventureDoor_Struct *ads = (ServerPlayerClickedAdventureDoor_Struct*)pack->pBuffer;
-				strcpy(ads->player, sender->GetName());
-				ads->zone_id = zone->GetZoneID();
-				ads->id = GetDoorDBID();
-				worldserver.SendPacket(pack);
-				safe_delete(pack);
-				safe_delete(outapp);
-			}
-			return;
-		}
-	}
 
 	uint32 keyneeded = GetKeyItem();
 	uint8 keepoffkeyring = GetNoKeyring();
@@ -673,7 +633,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 //	Door tmpDoor;
 	MakeAnyLenString(&query, "SELECT id,doorid,zone,name,pos_x,pos_y,pos_z,heading,"
 		"opentype,guild,lockpick,keyitem,nokeyring,triggerdoor,triggertype,dest_zone,dest_instance,dest_x,"
-		"dest_y,dest_z,dest_heading,door_param,invert_state,incline,size,is_ldon_door,client_version_mask "
+		"dest_y,dest_z,dest_heading,door_param,invert_state,incline,size,client_version_mask "
 		"FROM doors WHERE zone='%s' AND (version=%u OR version=-1) ORDER BY doorid asc", zone_name, version);
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
@@ -709,8 +669,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 			into[r].invert_state=atoi(row[22]);
 			into[r].incline=atoi(row[23]);
 			into[r].size=atoi(row[24]);
-			into[r].is_ldon_door=atoi(row[25]);
-			into[r].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
+			into[r].client_version_mask = (uint32)strtoul(row[25], nullptr, 10);
 		}
 		mysql_free_result(result);
 	}

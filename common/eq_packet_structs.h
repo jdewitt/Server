@@ -93,32 +93,6 @@ struct DuelResponse_Struct
 	uint32 unknown;
 };
 
-//adventure stuff
-enum AdventureObjective
-{
-	Adventure_Random = 0,
-	Adventure_Assassinate = 1,
-	Adventure_Kill = 2,
-	Adventure_Collect = 3,
-	Adventure_Rescue = 4
-};
-
-typedef enum
-{
-	LDoNTypeMechanical = 1,
-	LDoNTypeMagical = 2,
-	LDoNTypeCursed = 3,
-} LDoNChestTypes;
-
-struct LDoNTrapTemplate
-{
-	uint32 id;
-	LDoNChestTypes type;
-	uint32 spell_id;
-	uint16 skill;
-	uint8 locked;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -1957,123 +1931,10 @@ struct Merchant_DelItem_Struct{
 /*008*/	uint32	itemslot;
 /*012*/	uint32	type;
 };
-struct Adventure_Purchase_Struct {
-/*000*/	uint32	Type;	// 1 = LDoN, 2 = Discord, 4 = Norrath's Keepers, 5 = Dark Reign
-/*000*/	uint32	npcid;
-/*004*/	uint32	itemid;
-/*008*/	uint32	variable;
-};
-
-struct Adventure_Sell_Struct {
-/*000*/	uint32	unknown000;	//0x01
-/*004*/	uint32	npcid;
-/*008*/	uint32	slot;
-/*012*/	uint32	charges;
-/*016*/	uint32	sell_price;
-};
-
-
-struct AdventurePoints_Update_Struct {
-/*000*/	uint32	ldon_available_points;		// Total available points
-/*004*/	uint8	unknown004[36];
-/*040*/	uint8	unknown040[16];
-/*056*/	uint32	ldon_guk_points;		// Earned Deepest Guk points
-/*060*/	uint8	unknown060[16];
-/*076*/	uint32	ldon_mirugal_points;		// Earned Mirugal' Menagerie points
-/*080*/	uint8	unknown080[16];
-/*096*/	uint32	ldon_mistmoore_points;		// Earned Mismoore Catacombs Points
-/*100*/	uint8	unknown100[16];
-/*116*/	uint32	ldon_rujarkian_points;		// Earned Rujarkian Hills points
-/*120*/	uint8	unknown120[16];
-/*136*/	uint32	ldon_takish_points;		// Earned Takish points
-/*140*/
-};
-
-struct AdventureFinish_Struct{
-/*000*/ uint32 win_lose;//Cofruben: 00 is a lose,01 is win.
-/*004*/ uint32 points;
-/*008*/
-};
 
 struct Weblink_Struct{
 /*000*/ char weblink[1];
 /*004*/
-};
-
-//OP_AdventureRequest
-struct AdventureRequest_Struct{
-/*000*/	uint32 risk;//1 normal,2 hard.
-/*004*/	uint32 entity_id;
-/*008*/	uint32 type;
-/*012*/
-};
-struct AdventureRequestResponse_Struct{
-/*0000*/ uint32 unknown000;
-/*0004*/ char text[2048];
-/*2052*/ uint32 timetoenter;
-/*2056*/ uint32 timeleft;
-/*2060*/ uint32 risk;
-/*2064*/ float x;
-/*2068*/ float y;
-/*2072*/ float z;
-/*2076*/ uint32 showcompass;
-/*2080*/ uint32 unknown2080;
-/*2084*/
-};
-
-struct AdventureCountUpdate_Struct
-{
-/*000*/ uint32 current;
-/*004*/	uint32 total;
-/*008*/
-};
-
-struct AdventureStatsColumn_Struct
-{
-/*000*/ uint32 total;
-/*004*/	uint32 guk;
-/*008*/	uint32 mir;
-/*012*/	uint32 mmc;
-/*016*/	uint32 ruj;
-/*020*/	uint32 tak;
-/*024*/
-};
-
-struct AdventureStats_Struct
-{
-/*000*/ AdventureStatsColumn_Struct success;
-/*024*/ AdventureStatsColumn_Struct failure;
-/*048*/	AdventureStatsColumn_Struct rank;
-/*072*/	AdventureStatsColumn_Struct rank2;
-/*096*/
-};
-
-//this is mostly right but something is off that causes the client to crash sometimes
-//I don't really care enough about the feature to work on it anymore though.
-struct AdventureLeaderboardEntry_Struct
-{
-/*000*/ char name[64];
-/*064*/ uint32 success;
-/*068*/ uint32 failure;
-/*072*/
-};
-
-struct AdventureLeaderboardRequest_Struct
-{
-/*000*/ uint32 type;
-/*004*/ uint32 theme;
-/*008*/ uint32 risk;
-/*012*/
-};
-
-struct AdventureLeaderboard_Struct
-{
-/*000*/ uint32 unknown000;
-/*004*/ uint32 unknown004;
-/*008*/ uint32 success;
-/*012*/ uint32 failure;
-/*016*/ uint32 our_rank;
-/*020*/	AdventureLeaderboardEntry_Struct entries[100];
 };
 
 /*struct Item_Shop_Struct {
@@ -4151,11 +4012,6 @@ struct Consent_Struct {
 
 enum { LDoNMerchant = 1, DiscordMerchant = 2, NorrathsKeepersMerchant = 4, DarkReignMerchant = 5 };
 
-struct AdventureMerchant_Struct {
-	uint32	Type;	// 1 = LDoN, 2 = Discord, 4 = Norrath's Keepers, 5 = Dark Reign
-	uint32	entity_id;
-};
-
 struct Save_Struct {
 	uint8	unknown00[192];
 };
@@ -4697,11 +4553,6 @@ struct BuffIcon_Struct
 	uint32 entity_id;
 	uint16 count;
 	BuffIconEntry_Struct entries[0];
-};
-
-struct ExpeditionExpireWarning
-{
-/*008*/ uint32 minutes_remaining;
 };
 
 struct CorpseDrag_Struct

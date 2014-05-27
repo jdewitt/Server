@@ -249,7 +249,6 @@ void command_ipban(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
 void command_revoke(Client *c, const Seperator *sep);
 void command_checklos(Client *c, const Seperator *sep);
-void command_set_adventure_points(Client *c, const Seperator *sep);
 void command_npcsay(Client *c, const Seperator *sep);
 void command_npcshout(Client *c, const Seperator *sep);
 void command_npcemote(Client *c, const Seperator *sep);

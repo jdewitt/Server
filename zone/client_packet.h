@@ -28,14 +28,8 @@
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_Shielding(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
-	void Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureRequest(const EQApplicationPacket *app);
-	void Handle_OP_LDoNButton(const EQApplicationPacket *app);
-	void Handle_OP_LeaveAdventure(const EQApplicationPacket *app);
 	void Handle_OP_Consume(const EQApplicationPacket *app);
 	void Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app);
 	void Handle_OP_ConsiderCorpse(const EQApplicationPacket *app);
 	void Handle_OP_Consider(const EQApplicationPacket *app);
 	void Handle_OP_Begging(const EQApplicationPacket *app);
@@ -62,11 +56,6 @@
 	void Handle_OP_Camp(const EQApplicationPacket *app);
 	void Handle_OP_Logout(const EQApplicationPacket *app);
 	void Handle_OP_SenseHeading(const EQApplicationPacket *app);
-	void Handle_OP_LDoNOpen(const EQApplicationPacket *app);
-	void Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app);
-	void Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app);
-	void Handle_OP_LDoNInspect(const EQApplicationPacket *app);
-	void Handle_OP_LDoNPickLock(const EQApplicationPacket *app);
 	void Handle_OP_FeignDeath(const EQApplicationPacket *app);
 	void Handle_OP_Sneak(const EQApplicationPacket *app);
 	void Handle_OP_Hide(const EQApplicationPacket *app);
@@ -248,9 +237,6 @@
 	void Handle_OP_AugmentInfo(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app);
-	void Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app);
 	void Handle_OP_RespawnWindow(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);

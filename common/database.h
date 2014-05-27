@@ -171,13 +171,6 @@ public:
 	bool GlobalInstance(uint16 instance_id);
 
 	/*
-	* Adventure related.
-	*/
-	void UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win);
-	bool GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w, uint32 &tak_w,
-		uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l);
-
-	/*
 	* Account Related
 	*/
 	uint32	GetMiniLoginAccount(char* ip);

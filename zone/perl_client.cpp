@@ -584,33 +584,6 @@ XS(XS_Client_GetLastName)
 	XSRETURN(1);
 }
 
-XS(XS_Client_GetLDoNPointsTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNPointsTheme)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, theme)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-		int32 theme_out = (int32)SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetLDoNPointsTheme(theme_out);
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_GetBaseSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTR)
 {
@@ -893,34 +866,6 @@ XS(XS_Client_GetTotalSecondsPlayed)
 
 		RETVAL = THIS->GetTotalSecondsPlayed();
 		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_UpdateLDoNPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateLDoNPoints)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, points, theme)");
-	{
-		Client *		THIS;
-		bool		RETVAL;
-		int32		points = (int32)SvIV(ST(1));
-		uint32		theme = (uint32)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->UpdateLDoNPoints(points, theme);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
 }
@@ -4093,112 +4038,6 @@ XS(XS_Client_GetModCharacterFactionLevel)
 	XSRETURN(1);
 }
 
-XS(XS_Client_GetLDoNWins); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNWins)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetLDoNWins();
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetLDoNLosses); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNLosses)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetLDoNLosses();
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetLDoNWinsTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNWinsTheme)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, theme)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-		int32 theme_out = (int32)SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetLDoNWinsTheme(theme_out);
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetLDoNLossesTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNLossesTheme)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, theme)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-		int32 theme_out = (int32)SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetLDoNLossesTheme(theme_out);
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_GetItemAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemAt)
 {
@@ -5822,7 +5661,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetBaseFace"), XS_Client_GetBaseFace, file, "$");
 		newXSproto(strcpy(buf, "GetLanguageSkill"), XS_Client_GetLanguageSkill, file, "$$");
 		newXSproto(strcpy(buf, "GetLastName"), XS_Client_GetLastName, file, "$");
-		newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
 		newXSproto(strcpy(buf, "GetBaseSTR"), XS_Client_GetBaseSTR, file, "$");
 		newXSproto(strcpy(buf, "GetBaseSTA"), XS_Client_GetBaseSTA, file, "$");
 		newXSproto(strcpy(buf, "GetBaseCHA"), XS_Client_GetBaseCHA, file, "$");
@@ -5834,7 +5672,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 		newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
 		newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
-		newXSproto(strcpy(buf, "UpdateLDoNPoints"), XS_Client_UpdateLDoNPoints, file, "$$$");
 		newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 		newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
 		newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
@@ -5947,10 +5784,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "AddAAPoints"), XS_Client_AddAAPoints, file, "$$");
 		newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 		newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
-		newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
-		newXSproto(strcpy(buf, "GetLDoNLosses"), XS_Client_GetLDoNLosses, file, "$");
-		newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
-		newXSproto(strcpy(buf, "GetLDoNLossesTheme"), XS_Client_GetLDoNLossesTheme, file, "$$");
 		newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 		newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
 		newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
