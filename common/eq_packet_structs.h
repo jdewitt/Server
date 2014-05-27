@@ -4011,6 +4011,14 @@ struct ControlBoat_Struct {
 /*007*/							// no idea what these last three bytes represent
 };
 
+struct OldControlBoat_Struct
+{
+	/*000*/	uint16	boatId;			// entitylist id of the boat
+	/*002*/	bool	TakeControl;	// 01 if taking control, 00 if releasing it
+	/*003*/ uint8   unknown5;	// no idea what these last byte represent
+	/*004*/							
+};
+
 struct AugmentInfo_Struct
 {
 /*000*/ uint32	itemid;		// id of the solvent needed

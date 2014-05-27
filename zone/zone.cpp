@@ -1211,7 +1211,7 @@ void Zone::ChangeWeather()
 	{
 		if(rainchance > 0 || snowchance > 0)
 		{
-			uint8 intensity = MakeRandomInt(1, 10);
+			uint8 intensity = MakeRandomInt(1, 3);
 			if((rainchance > snowchance) || (rainchance == snowchance))
 			{
 				//It's gunna rain!
