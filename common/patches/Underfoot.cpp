@@ -1875,40 +1875,6 @@ ENCODE(OP_RaidJoin)
 	delete[] __emu_buffer;
 }
 
-ENCODE(OP_VetRewardsAvaliable)
-{
-	EQApplicationPacket *inapp = *p;
-	unsigned char * __emu_buffer = inapp->pBuffer;
-
-	uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-	*p = nullptr;
-
-	EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
-	uchar *old_data = __emu_buffer;
-	uchar *data = outapp_create->pBuffer;
-	for(unsigned int i = 0; i < count; ++i)
-	{
-		structs::VeteranReward *vr = (structs::VeteranReward*)data;
-		InternalVeteranReward *ivr = (InternalVeteranReward*)old_data;
-
-		vr->claim_count = ivr->claim_count;
-		vr->claim_id = ivr->claim_id;
-		vr->number_available = ivr->number_available;
-		for(int x = 0; x < 8; ++x)
-		{
-			vr->items[x].item_id = ivr->items[x].item_id;
-			strcpy(vr->items[x].item_name, ivr->items[x].item_name);
-			vr->items[x].charges = ivr->items[x].charges;
-		}
-
-		old_data += sizeof(InternalVeteranReward);
-		data += sizeof(structs::VeteranReward);
-	}
-
-	dest->FastQueuePacket(&outapp_create);
-	delete inapp;
-}
-
 ENCODE(OP_WhoAllResponse)
 {
 	EQApplicationPacket *in = *p;

@@ -185,9 +185,7 @@ public:
 	std::map<uint32,std::list<MerchantList> > merchanttable;
 	std::map<uint32,std::list<TempMerchantList> > tmpmerchanttable;
 	std::map<uint32, ZoneEXPModInfo> level_exp_mod;
-	std::list<InternalVeteranReward> VeteranRewards;
 
-	void	LoadVeteranRewards();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);
 

@@ -884,34 +884,6 @@ ENCODE(OP_Illusion) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_VetRewardsAvaliable)
-{
-	EQApplicationPacket *inapp = *p;
-	unsigned char * __emu_buffer = inapp->pBuffer;
-
-	uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-	*p = nullptr;
-
-	EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
-	uchar *old_data = __emu_buffer;
-	uchar *data = outapp_create->pBuffer;
-	for(uint32 i = 0; i < count; ++i)
-	{
-		structs::VeteranReward *vr = (structs::VeteranReward*)data;
-		InternalVeteranReward *ivr = (InternalVeteranReward*)old_data;
-
-		vr->claim_id = ivr->claim_id;
-		vr->item.item_id = ivr->items[0].item_id;
-		strcpy(vr->item.item_name, ivr->items[0].item_name);
-
-		old_data += sizeof(InternalVeteranReward);
-		data += sizeof(structs::VeteranReward);
-	}
-
-	dest->FastQueuePacket(&outapp_create);
-	delete inapp;
-}
-
 ENCODE(OP_InspectAnswer) {
 	ENCODE_LENGTH_EXACT(InspectResponse_Struct);
 	SETUP_DIRECT_ENCODE(InspectResponse_Struct, structs::InspectResponse_Struct);
