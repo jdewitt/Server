@@ -502,46 +502,6 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" character_tasks");
-#endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
-	if(query)
-	{
-		safe_delete_array(query);
-		query = nullptr;
-	}
-
-#if DEBUG >= 5
-	printf(" character_activities");
-#endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_activities WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
-	if(query)
-	{
-		safe_delete_array(query);
-		query = nullptr;
-	}
-
-#if DEBUG >= 5
-	printf(" character_enabledtasks");
-#endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_enabledtasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
-	if(query)
-	{
-		safe_delete_array(query);
-		query = nullptr;
-	}
-
-#if DEBUG >= 5
-	printf(" completed_tasks");
-#endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from completed_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
-	if(query)
-	{
-		safe_delete_array(query);
-		query = nullptr;
-	}
-
-#if DEBUG >= 5
 	printf(" friends");
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from friends WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);

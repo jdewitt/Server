@@ -59,11 +59,6 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_level_up",
 	"event_killed_merit",
 	"event_cast_on",
-	"event_task_accepted",
-	"event_task_stage_complete",
-	"event_task_update",
-	"event_task_complete",
-	"event_task_fail",
 	"event_aggro_say",
 	"event_player_pickup",
 	"event_popup_response",
@@ -148,7 +143,6 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_SLAY] = handle_npc_single_mob;
 	NPCArgumentDispatch[EVENT_ENTER] = handle_npc_single_client;
 	NPCArgumentDispatch[EVENT_EXIT] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_TASK_ACCEPTED] = handle_npc_task_accepted;
 	NPCArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_npc_popup;
 	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
 	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
@@ -178,14 +172,10 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP] = handle_player_pick_up;
 	PlayerArgumentDispatch[EVENT_CAST] = handle_player_cast;
 	PlayerArgumentDispatch[EVENT_CAST_BEGIN] = handle_player_cast;
-	PlayerArgumentDispatch[EVENT_TASK_FAIL] = handle_player_task_fail;
 	PlayerArgumentDispatch[EVENT_ZONE] = handle_player_zone;
 	PlayerArgumentDispatch[EVENT_DUEL_WIN] = handle_player_duel_win;
 	PlayerArgumentDispatch[EVENT_DUEL_LOSE] = handle_player_duel_loss;
 	PlayerArgumentDispatch[EVENT_LOOT] = handle_player_loot;
-	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
-	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_update;
-	PlayerArgumentDispatch[EVENT_TASK_UPDATE] = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_COMMAND] = handle_player_command;
 	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS] = handle_player_combine;
 	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE] = handle_player_combine;

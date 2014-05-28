@@ -52,7 +52,6 @@
 #include "ZoneConfig.h"
 #include "titles.h"
 #include "guild_mgr.h"
-#include "tasks.h"
 
 #include "QuestParserCollection.h"
 #include "embparser.h"
@@ -98,7 +97,6 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
-TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
 const SPDat_Spell_Struct* spells;
@@ -274,12 +272,6 @@ int main(int argc, char** argv) {
 				_log(ZONE__INIT, "Loaded default rule set 'default'", tmp);
 			}
 		}
-	}
-
-	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		_log(ZONE__INIT, "Loading Tasks");
-		taskmanager = new TaskManager;
-		taskmanager->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -515,7 +507,6 @@ int main(int argc, char** argv) {
 	worldserver.Disconnect();
 	dbasync->CommitWrites();
 	dbasync->StopThread();
-	safe_delete(taskmanager);
 	command_deinit();
 	safe_delete(parse);
 	CheckEQEMuErrorAndPause();

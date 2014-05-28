@@ -180,11 +180,6 @@ uint32 Lua_Client::GetAAExp() {
 	return self->GetAAXP();
 }
 
-uint32 Lua_Client::GetTotalSecondsPlayed() {
-	Lua_Safe_Call_Int();
-	return self->GetTotalSecondsPlayed();
-}
-
 void Lua_Client::SetDeity(int v) {
 	Lua_Safe_Call_Void();
 	self->SetDeity(v);
@@ -992,36 +987,6 @@ int Lua_Client::FindSpellBookSlotBySpellID(int spell_id) {
 	return self->FindSpellBookSlotBySpellID(spell_id);
 }
 
-void Lua_Client::UpdateTaskActivity(int task, int activity, int count) {
-	Lua_Safe_Call_Void();
-	self->UpdateTaskActivity(task, activity, count);
-}
-
-void Lua_Client::AssignTask(int task, int npc_id) {
-	Lua_Safe_Call_Void();
-	self->AssignTask(task, npc_id);
-}
-
-void Lua_Client::FailTask(int task) {
-	Lua_Safe_Call_Void();
-	self->FailTask(task);
-}
-
-bool Lua_Client::IsTaskCompleted(int task) {
-	Lua_Safe_Call_Bool();
-	return self->IsTaskCompleted(task) != 0;
-}
-
-bool Lua_Client::IsTaskActive(int task) {
-	Lua_Safe_Call_Bool();
-	return self->IsTaskActive(task);
-}
-
-bool Lua_Client::IsTaskActivityActive(int task, int activity) {
-	Lua_Safe_Call_Bool();
-	return self->IsTaskActivityActive(task, activity);
-}
-
 int Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
@@ -1245,7 +1210,6 @@ luabind::scope lua_register_client() {
 		.def("GetWeight", (int(Lua_Client::*)(void))&Lua_Client::GetWeight)
 		.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
-		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
 		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
 		.def("AddEXP", (void(Lua_Client::*)(uint32))&Lua_Client::AddEXP)
 		.def("AddEXP", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddEXP)
@@ -1407,12 +1371,6 @@ luabind::scope lua_register_client() {
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)
-		.def("UpdateTaskActivity", (void(Lua_Client::*)(int,int,int))&Lua_Client::UpdateTaskActivity)
-		.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
-		.def("FailTask", (void(Lua_Client::*)(int))&Lua_Client::FailTask)
-		.def("IsTaskCompleted", (bool(Lua_Client::*)(int))&Lua_Client::IsTaskCompleted)
-		.def("IsTaskActive", (bool(Lua_Client::*)(int))&Lua_Client::IsTaskActive)
-		.def("IsTaskActivityActive", (bool(Lua_Client::*)(int,int))&Lua_Client::IsTaskActivityActive)
 		.def("GetCorpseCount", (int(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
 		.def("GetCorpseID", (int(Lua_Client::*)(int))&Lua_Client::GetCorpseID)
 		.def("GetCorpseItemAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetCorpseItemAt)

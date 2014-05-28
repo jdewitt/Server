@@ -705,10 +705,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	tradevar = 0;
 	lootvar = 0;
 
-	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		taskmanager->LoadProximities(zoneid);
-	}
-
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));
@@ -887,7 +883,6 @@ bool Zone::Init(bool iStaticZone) {
 		database.DeleteBuyLines(0);
 	}
 
-	zone->LoadVeteranRewards();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//Load AA information
@@ -968,7 +963,6 @@ void Zone::ReloadStaticData() {
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	entity_list.RespawnAllDoors();
 
-	zone->LoadVeteranRewards();
 	NPCEmoteList.Clear();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
@@ -1884,61 +1878,6 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 	if(Instance_Timer)
 	{
 		Instance_Timer->Start(new_duration * 1000);
-	}
-}
-
-void Zone::LoadVeteranRewards()
-{
-	VeteranRewards.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	InternalVeteranReward current_reward;
-	uint8 idx = 0;
-
-	current_reward.claim_id = 0;
-
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT claim_id, name, item_id, charges FROM"
-		" veteran_reward_templates WHERE reward_slot < 8 and claim_id > 0 ORDER by claim_id, reward_slot"),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			uint32 claim = atoi(row[0]);
-			if(claim != current_reward.claim_id)
-			{
-				if(current_reward.claim_id != 0)
-				{
-					current_reward.claim_count = idx;
-					current_reward.number_available = 1;
-					VeteranRewards.push_back(current_reward);
-				}
-				idx = 0;
-				memset(&current_reward, 0, sizeof(InternalVeteranReward));
-				current_reward.claim_id = claim;
-			}
-
-			strcpy(current_reward.items[idx].item_name, row[1]);
-			current_reward.items[idx].item_id = atoi(row[2]);
-			current_reward.items[idx].charges = atoi(row[3]);
-			idx++;
-		}
-
-		if(current_reward.claim_id != 0)
-		{
-			current_reward.claim_count = idx;
-			current_reward.number_available = 1;
-			VeteranRewards.push_back(current_reward);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query, errbuf);
-		safe_delete_array(query);
 	}
 }
 

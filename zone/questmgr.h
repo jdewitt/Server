@@ -19,7 +19,6 @@
 #define __QUEST_MANAGER_H__
 
 #include "../common/timer.h"
-#include "tasks.h"
 
 #include <string>
 #include <list>
@@ -170,30 +169,6 @@ public:
 	void playerfeature(char *feature, int setting);
 	void npcfeature(char *feature, int setting);
 	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
-	void taskselector(int taskcount, int *tasks);
-	void tasksetselector(int tasksettid);
-	void enabletask(int taskcount, int *tasks);
-	void disabletask(int taskcount, int *tasks);
-	bool istaskenabled(int taskid);
-	bool istaskactive(int task);
-	bool istaskactivityactive(int task, int activity);
-	int gettaskactivitydonecount(int task, int activity);
-	void updatetaskactivity(int task, int activity, int count);
-	void resettaskactivity(int task, int activity);
-	void taskexploredarea(int exploreid);
-	void assigntask(int taskid);
-	void failtask(int taskid);
-	int tasktimeleft(int taskid);
-	int istaskcompleted(int taskid);
-	int enabledtaskcount(int taskset);
-	int firsttaskinset(int taskset);
-	int lasttaskinset(int taskset);
-	int nexttaskinset(int taskset, int taskid);
-	int activespeaktask();
-	int activespeakactivity(int taskid);
-	int activetasksinset(int taskset);
-	int completedtasksinset(int taskset);
-	bool istaskappropriate(int task);
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);

@@ -57,11 +57,6 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_LEVEL_UP",
 	"EVENT_KILLED_MERIT",
 	"EVENT_CAST_ON",
-	"EVENT_TASKACCEPTED",
-	"EVENT_TASK_STAGE_COMPLETE",
-	"EVENT_TASK_UPDATE",
-	"EVENT_TASK_COMPLETE",
-	"EVENT_TASK_FAIL",
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
 	"EVENT_POPUPRESPONSE",
@@ -1236,33 +1231,6 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		case EVENT_CAST:
 		case EVENT_CAST_BEGIN: {
 			ExportVar(package_name.c_str(), "spell_id", data);
-			break;
-		}
-
-		case EVENT_TASK_ACCEPTED:{
-			ExportVar(package_name.c_str(), "task_id", data);
-			break;
-		}
-
-		case EVENT_TASK_STAGE_COMPLETE:{
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "task_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "activity_id", sep.arg[1]);
-			break;
-		}
-
-		case EVENT_TASK_FAIL:{
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "task_id", sep.arg[0]);
-			break;
-		}
-
-		case EVENT_TASK_COMPLETE:
-		case EVENT_TASK_UPDATE:{
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "donecount", sep.arg[0]);
-			ExportVar(package_name.c_str(), "activity_id", sep.arg[1]);
-			ExportVar(package_name.c_str(), "task_id", sep.arg[2]);
 			break;
 		}
 

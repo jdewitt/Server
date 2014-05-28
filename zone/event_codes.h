@@ -25,11 +25,6 @@ typedef enum {
 	EVENT_LEVEL_UP,		//pc only
 	EVENT_KILLED_MERIT, //killed by a PC or group, gave experience; will repeat several times for groups
 	EVENT_CAST_ON,		//pc casted a spell on npc
-	EVENT_TASK_ACCEPTED,	//pc accepted a task
-	EVENT_TASK_STAGE_COMPLETE,
-	EVENT_TASK_UPDATE,
-	EVENT_TASK_COMPLETE,
-	EVENT_TASK_FAIL,
 	EVENT_AGGRO_SAY,
 	EVENT_PLAYER_PICKUP,
 	EVENT_POPUP_RESPONSE,

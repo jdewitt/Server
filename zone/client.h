@@ -65,7 +65,6 @@ class Client;
 #define XTARGET_HARDCAP		20
 
 extern Zone* zone;
-extern TaskManager *taskmanager;
 
 class CLIENTPACKET
 {
@@ -186,12 +185,6 @@ struct RespawnOption
 
 
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
-
-struct ClientReward
-{
-	uint32 id;
-	uint32 amount;
-};
 
 class ClientFactory {
 public:
@@ -556,7 +549,6 @@ public:
 	uint32	GetGroupPoints() { return(m_pp.group_leadership_points); }
 	uint32	GetRaidEXP() { return(m_pp.raid_leadership_exp); }
 	uint32	GetGroupEXP() { return(m_pp.group_leadership_exp); }
-	uint32	GetTotalSecondsPlayed() { return(TotalSecondsPlayed); }
 	virtual void SetLevel(uint8 set_level, bool command = false);
 	void	GoToBind(uint8 bindnum = 0);
 	void	GoToSafeCoords(uint16 zone_id, uint16 instance_id);
@@ -888,83 +880,6 @@ public:
 	struct	Translocate_Struct PendingTranslocateData;
 	void	SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
-	// Task System Methods
-	void	LoadClientTaskState();
-	void	RemoveClientTaskState();
-	void	SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, int TaskIncomplete=1);
-	void	SendTaskFailed(int TaskID, int TaskIndex);
-	void	SendTaskComplete(int TaskIndex);
-
-	inline void CancelTask(int TaskIndex) { if(taskstate) taskstate->CancelTask(this, TaskIndex); }
-
-	inline bool SaveTaskState() { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
-
-	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
-
-	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
-
-	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
-
-	inline ActivityState GetTaskActivityState(int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(index, ActivityID) : ActivityHidden); }
-
-	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count) { if(taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count); }
-
-	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
-
-	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
-
-	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }
-
-	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
-
-	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
-
-	inline bool UpdateTasksOnDeliver(uint32 *Items, int Cash, int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
-
-	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
-
-	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
-
-	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
-
-	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
-
-	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
-
-	inline void AssignTask(int TaskID, int NPCID) { if(taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID); }
-
-	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
-
-	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
-
-	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }
-
-	inline int TaskTimeLeft(int TaskID) { return (taskstate ? taskstate->TaskTimeLeft(TaskID) : 0); }
-
-	inline int EnabledTaskCount(int TaskSetID) { return (taskstate ? taskstate->EnabledTaskCount(TaskSetID) : -1); }
-
-	inline int IsTaskCompleted(int TaskID) { return (taskstate ? taskstate->IsTaskCompleted(TaskID) : -1); }
-
-	inline void ShowClientTasks() { if(taskstate) taskstate->ShowClientTasks(this); }
-
-	inline void CancelAllTasks() { if(taskstate) taskstate->CancelAllTasks(this); }
-
-	inline int GetActiveTaskCount() { return (taskstate ? taskstate->GetActiveTaskCount() : 0); }
-
-	inline int GetActiveTaskID(int index) { return (taskstate ? taskstate->GetActiveTaskID(index) : -1); }
-
-	inline int GetTaskStartTime(int index) { return (taskstate ? taskstate->GetTaskStartTime(index) : -1); }
-
-	inline bool IsTaskActivityCompleted(int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(index, ActivityID) : false); }
-
-	inline int GetTaskActivityDoneCount(int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) :0); }
-
-	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
-
-	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
-
-	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
-
 	inline const EQClientVersion GetClientVersion() const { return ClientVersion; }
 	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
 
@@ -1000,8 +915,6 @@ public:
 	char* GetBoatName() { return m_pp.boat; }
 	void SetBoatID(uint32 boatid);
 	void SetBoatName(const char* boatname);
-	void SendRewards();
-	bool TryReward(uint32 claim_id);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 	void GuildBankAck();
@@ -1287,10 +1200,7 @@ private:
 #ifdef REVERSE_AGGRO
 	Timer	scanarea_timer;
 #endif
-	Timer	tribute_timer;
-
 	Timer	proximity_timer;
-	Timer	TaskPeriodic_Timer;
 	Timer	charm_update_timer;
 	Timer	rest_timer;
 	Timer	charm_class_attacks_timer;
@@ -1332,9 +1242,6 @@ private:
 	unsigned int	RestRegenEndurance;
 
 	std::set<uint32> zone_flags;
-
-	ClientTaskState *taskstate;
-	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;

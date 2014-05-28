@@ -1226,9 +1226,6 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		{
 			client->PutLootInInventory(SLOT_CURSOR, *inst, bag_item_data);
 		}
-		// Update any tasks that have an activity to loot this item.
-		if(RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(ActivityLoot, item->ID);
 		// now remove it from the corpse
 		if(item_data)
 			RemoveItem(item_data->lootslot);

@@ -279,7 +279,6 @@ void command_guildcreate(Client *c, const Seperator *sep);
 void command_guildapprove(Client *c, const Seperator *sep);
 void command_guildlist(Client *c, const Seperator *sep);
 void command_rules(Client *c, const Seperator *sep);
-void command_task(Client *c, const Seperator *sep);
 void command_reloadtitles(Client *c, const Seperator *sep);
 void command_altactivate(Client *c, const Seperator *sep);
 void command_refundaa(Client *c, const Seperator *sep);

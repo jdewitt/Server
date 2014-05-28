@@ -146,9 +146,7 @@ Client::Client(EQStreamInterface* ieqs)
 #ifdef REVERSE_AGGRO
 	scanarea_timer(AIClientScanarea_delay),
 #endif
-	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
-	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
 	charm_update_timer(6000),
 	rest_timer(1),
 	charm_class_attacks_timer(3000),
@@ -238,10 +236,6 @@ Client::Client(EQStreamInterface* ieqs)
 	UpdateWindowTitle();
 	horseId = 0;
 	tgb = false;
-	tribute_master_id = 0xFFFFFFFF;
-	tribute_timer.Disable();
-	taskstate = nullptr;
-	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
 	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
@@ -376,7 +370,6 @@ Client::~Client() {
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown
 
-	safe_delete(taskstate);
 	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);
@@ -421,9 +414,9 @@ void Client::ReportConnectingState() {
 		LogFile->write(EQEMuLog::Debug, "Client sent initial zone packet, but we never got their player info from the database.");
 		break;
 	case PlayerProfileLoaded:	//our DB work is done, sending it
-		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
+		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, spawns, time and weather, but never finished.");
 		break;
-	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
+	case ZoneInfoSent:		//includes PP, spawns, time and weather
 		LogFile->write(EQEMuLog::Debug, "We successfully sent player info and spawns, waiting for client to request new zone.");
 		break;
 	case NewZoneRequested:	//received and sent new zone request
@@ -520,8 +513,6 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
-	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
-	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
 	m_pp.lastlogin = time(nullptr);
@@ -543,19 +534,11 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) {
-		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
-	} else {
-		m_pp.tribute_time_remaining = 0xFFFFFFFF;
-		m_pp.tribute_active = 0;
-	}
-
 	p_timers.Store(&database);
 
 //	printf("Dumping inventory on save:\n");
 //	m_inv.dumpEntireInventory();
 
-	SaveTaskState();
 	if (iCommitNow <= 1) {
 		char* query = 0;
 		uint32_breakdown workpt;
@@ -1010,12 +993,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if(DistNoRootNoZ(*GetTarget()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
-
-					if(RuleB(TaskSystem, EnableTaskSystem)) {
-						if(UpdateTasksOnSpeakWith(tar->GetNPCTypeID())) {
-							tar->DoQuestPause(this);
-						}
-					}
 				}
 			}
 			else {
@@ -4898,224 +4875,6 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		break;
 	}
 	return false;
-}
-
-void Client::SendRewards()
-{
-	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT reward_id, amount FROM"
-		" account_rewards WHERE account_id=%i ORDER by reward_id", AccountID()),
-		errbuf,&result))
-	{
-		while((row = mysql_fetch_row(result)))
-		{
-			ClientReward cr;
-			cr.id = atoi(row[0]);
-			cr.amount = atoi(row[1]);
-			rewards.push_back(cr);
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return;
-	}
-
-	if(rewards.size() > 0)
-	{
-		EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
-		uchar *data = vetapp->pBuffer;
-		for(int i = 0; i < rewards.size(); ++i)
-		{
-			InternalVeteranReward *ivr = (InternalVeteranReward*)data;
-			ivr->claim_id = rewards[i].id;
-			ivr->number_available = rewards[i].amount;
-			std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-			while(iter != zone->VeteranRewards.end())
-			{
-				if((*iter).claim_id == rewards[i].id)
-				{
-					break;
-				}
-				++iter;
-			}
-
-			if(iter != zone->VeteranRewards.end())
-			{
-				InternalVeteranReward ivro = (*iter);
-				ivr->claim_count = ivro.claim_count;
-				for(int x = 0; x < ivro.claim_count; ++x)
-				{
-					ivr->items[x].item_id = ivro.items[x].item_id;
-					ivr->items[x].charges = ivro.items[x].charges;
-					strcpy(ivr->items[x].item_name, ivro.items[x].item_name);
-				}
-			}
-
-			data += sizeof(InternalVeteranReward);
-		}
-		FastQueuePacket(&vetapp);
-	}
-}
-
-bool Client::TryReward(uint32 claim_id)
-{
-	//Make sure we have an open spot
-	//Make sure we have it in our acct and count > 0
-	//Make sure the entry was found
-	//If we meet all the criteria:
-	//Decrement our count by 1 if it > 1 delete if it == 1
-	//Create our item in bag if necessary at the free inv slot
-	//save
-	uint32 free_slot = 0xFFFFFFFF;
-
-	for(int i = 22; i < 30; ++i)
-	{
-		ItemInst *item = GetInv().GetItem(i);
-		if(!item)
-		{
-			free_slot = i;
-			break;
-		}
-	}
-
-	if(free_slot == 0xFFFFFFFF)
-	{
-		return false;
-	}
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 amt = 0;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT amount FROM"
-		" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-		errbuf,&result))
-	{
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			amt = atoi(row[0]);
-		}
-		else
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return false;
-		}
-		mysql_free_result(result);
-		safe_delete_array(query);
-	}
-	else
-	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
-		return false;
-	}
-
-	if(amt == 0)
-	{
-		return false;
-	}
-
-	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-	while(iter != zone->VeteranRewards.end())
-	{
-		if((*iter).claim_id == claim_id)
-		{
-			break;
-		}
-		++iter;
-	}
-
-	if(iter == zone->VeteranRewards.end())
-	{
-		return false;
-	}
-
-	if(amt == 1)
-	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"DELETE FROM"
-			" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
-	}
-	else
-	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"UPDATE account_rewards SET amount=(amount-1)"
-			" WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
-		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
-		}
-	}
-
-	InternalVeteranReward ivr = (*iter);
-	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
-	if(claim)
-	{
-		bool lore_conflict = false;
-		if(CheckLoreConflict(claim->GetItem()))
-		{
-			lore_conflict = true;
-		}
-
-		for(int y = 1; y < 8; y++)
-		{
-			if(ivr.items[y].item_id)
-			{
-				if(claim->GetItem()->ItemClass == 1)
-				{
-					ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
-					if(item_temp)
-					{
-						if(CheckLoreConflict(item_temp->GetItem()))
-						{
-							lore_conflict = true;
-							DuplicateLoreMessage(ivr.items[y].item_id);
-						}
-						claim->PutItem(y-1, *item_temp);
-					}
-				}
-			}
-		}
-
-		if(lore_conflict)
-		{
-			safe_delete(claim);
-			return true;
-		}
-		else
-		{
-			PutItemInInventory(free_slot, *claim);
-			SendItemPacket(free_slot, claim, ItemPacketTrade);
-		}
-	}
-
-	Save();
-	return true;
 }
 
 void Client::SuspendMinion()
