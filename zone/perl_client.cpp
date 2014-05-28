@@ -5440,7 +5440,7 @@ XS(XS_Client_QuestReward)
 {
 	dXSARGS;
 	if (items < 1 || items > 9)
-		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, mob, copper, silver, gold, platinum, itemid, exp, factionid, faction)");
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, mob, copper, silver, gold, platinum, itemid, exp, faction)");
 	{
 		Client*		THIS;
 		Mob *		mob = nullptr;
@@ -5450,8 +5450,7 @@ XS(XS_Client_QuestReward)
 		int32		platinum = 0;
 		int32		itemid = 0;
 		int32		exp = 0;
-		int32		factionid = 0;
-		int32		faction = 0;
+		bool		faction = false;
 
 		if (sv_derived_from(ST(0), "THIS")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -5478,10 +5477,9 @@ XS(XS_Client_QuestReward)
 		if (items > 5)	{	platinum = (int32)SvIV(ST(5));	}
 		if (items > 6)	{	itemid = (int32)SvIV(ST(6));	}
 		if (items > 7)	{	exp = (int32)SvIV(ST(7));	}
-		if (items > 8)	{	factionid = (int32)SvIV(ST(8));	}
-		if (items > 9)	{	faction = (int32)SvIV(ST(9));	}
+		if (items > 8)	{	faction = (bool)SvIV(ST(8));	}
 
-		THIS->QuestReward(mob, copper, silver, gold, platinum, itemid, exp, factionid, faction);
+		THIS->QuestReward(mob, copper, silver, gold, platinum, itemid, exp, faction);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5704,7 +5702,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
-		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$$");
+		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 		XSRETURN_YES;
 }
 

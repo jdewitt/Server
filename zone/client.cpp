@@ -6378,7 +6378,7 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 //o--------------------------------------------------------------
 //| Notes: Sets the characters faction standing with the specified NPC.
 //o--------------------------------------------------------------
-void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity)
+void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest)
 {
 	int32 faction_id[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
 	int32 npc_value[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
@@ -6402,6 +6402,15 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 			// Get the characters current value with that faction
 			current_value = GetCharacterFactionLevel(faction_id[i]);
 
+			if(quest)
+			{
+				//The ole switcheroo
+				if(npc_value[i] > 0)
+					npc_value[i] = -abs(npc_value[i]);
+				else if(npc_value[i] < 0)
+					npc_value[i] = abs(npc_value[i]);
+			}
+
 			if(this->itembonuses.HeroicCHA) {
 				int faction_mod = itembonuses.HeroicCHA / 5;
 				// If our result isn't truncated, then just do that
@@ -6415,6 +6424,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 			}
 			//figure out their modifier
 			mod = fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
+
 			if(mod > MAX_FACTION)
 				mod = MAX_FACTION;
 			else if(mod < MIN_FACTION)
@@ -6424,9 +6434,12 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 			if(npc_value[i] != 0) {
 				tmpValue = current_value + mod + npc_value[i];
 
-				// Make sure faction hits don't go to GMs...
-				if (m_pp.gm==1 && (tmpValue < current_value)) {
-					tmpValue = current_value;
+				if(!quest)
+				{
+					// Make sure faction hits don't go to GMs...
+					if (m_pp.gm==1 && (tmpValue < current_value)) {
+						tmpValue = current_value;
+					}
 				}
 
 				// Make sure we dont go over the min/max faction limits
@@ -7041,7 +7054,7 @@ void Client::SetBoatName(const char* boatname)
 	strncpy(m_pp.boat,boatname,16);
 }
 
-void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, uint32 factionid, int32 faction) {
+void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
 	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
@@ -7055,8 +7068,6 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	qr->platinum = platinum;
 	qr->item_id = itemid;
 	qr->exp_reward = exp;
-	qr->faction = factionid;
-	qr->faction_mod = faction;
 
 	if(copper > 0 || silver > 0 || gold > 0 || platinum > 0)
 		AddMoneyToPP(copper, silver, gold, platinum, false);
@@ -7064,11 +7075,19 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	if(itemid > 0)
 		SummonItem(itemid,0,0,0,0,0,0,false,SLOT_POWER_SOURCE);
 
+	if(faction)
+	{
+		if(target->IsNPC())
+		{
+			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
+			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
+			qr->faction = target->CastToNPC()->GetPrimaryFaction();
+			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+		}
+	}
+
 	if(exp > 0)
 		AddEXP(exp);
-
-	if(factionid > 0)
-		SetFactionLevel2(CharacterID(), factionid, GetClass(), GetBaseRace(), GetDeity(), faction, 0);
 
 	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
