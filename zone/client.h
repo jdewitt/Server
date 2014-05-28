@@ -186,12 +186,6 @@ struct RespawnOption
 
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
-struct ClientReward
-{
-	uint32 id;
-	uint32 amount;
-};
-
 class ClientFactory {
 public:
 	Client *MakeClient(EQStream* ieqs);
@@ -921,8 +915,6 @@ public:
 	char* GetBoatName() { return m_pp.boat; }
 	void SetBoatID(uint32 boatid);
 	void SetBoatName(const char* boatname);
-	void SendRewards();
-	bool TryReward(uint32 claim_id);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 	void GuildBankAck();

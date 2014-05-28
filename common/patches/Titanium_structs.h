@@ -2997,18 +2997,6 @@ struct GuildMemberUpdate_Struct {
 /*072*/	uint32	unknown072;
 };
 
-struct VeteranRewardItem
-{
-/*000*/	uint32 item_id;
-/*004*/	char item_name[256];
-};
-
-struct VeteranReward
-{
-/*000*/	uint32 claim_id;
-/*004*/	VeteranRewardItem item;
-};
-
 struct LFGuild_SearchPlayer_Struct
 {
 /*00*/	uint32	Command;

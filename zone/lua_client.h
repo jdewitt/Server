@@ -199,10 +199,6 @@ public:
 	void AddAAPoints(int points);
 	void RefundAA();
 	int GetModCharacterFactionLevel(int faction);
-	int GetLDoNWins();
-	int GetLDoNLosses();
-	int GetLDoNWinsTheme(int theme);
-	int GetLDoNLossesTheme(int theme);
 	int GetStartZone();
 	void SetStartZone(int zone_id);
 	void SetStartZone(int zone_id, float x);

@@ -326,7 +326,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
-	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
 	ConnectedOpcodes[OP_GuildBank] = &Client::Handle_OP_GuildBank;
 	ConnectedOpcodes[OP_GroupRoles] = &Client::Handle_OP_GroupRoles;
@@ -9165,8 +9164,6 @@ void Client::CompleteConnect()
 		}
 	}
 
-	SendRewards();
-
 	CalcItemScale();
 	DoItemEnterZone();
 
@@ -10908,46 +10905,6 @@ void Client::Handle_OP_Report(const EQApplicationPacket *app)
 
 	CanUseReport = false;
 	database.AddReport(reporter, reported, current_string);
-}
-
-void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(VeteranClaimRequest))
-	{
-		LogFile->write(EQEMuLog::Debug, "OP_VetClaimRequest size lower than expected: got %u expected at least %u",
-			app->size, sizeof(VeteranClaimRequest));
-		DumpPacket(app);
-		return;
-	}
-
-	VeteranClaimRequest *vcr = (VeteranClaimRequest*)app->pBuffer;
-
-	if(vcr->claim_id == 0xFFFFFFFF) //request update packet
-	{
-		SendRewards();
-	}
-	else //try to claim something!
-	{
-		if(!TryReward(vcr->claim_id))
-		{
-			Message(13, "Your claim has been rejected.");
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = -1;
-			FastQueuePacket(&vetapp);
-		}
-		else
-		{
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = 0;
-			FastQueuePacket(&vetapp);
-		}
-	}
 }
 
 void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)

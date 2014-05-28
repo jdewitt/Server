@@ -1990,16 +1990,16 @@ struct Illusion_Struct_Old {
 // OP_Sound - Size: 68
 struct QuestReward_Struct
 {
-/*000*/ uint32	from_mob;	// ID of mob awarding the client
-/*004*/ uint32	unknown004;
-/*008*/ uint32	unknown008;
-/*012*/ uint32	unknown012;
-/*016*/ uint32	unknown016;
-/*020*/ uint32	unknown020;
+/*000*/ uint32	mob_id;	// ID of mob awarding the client
+/*004*/ uint32	target_id;
+/*008*/ uint32	exp_reward;
+/*012*/ uint32	faction;
+/*016*/ uint32	faction_mod;
+/*020*/ uint32	copper;		// Gives copper to the client
 /*024*/ uint32	silver;		// Gives silver to the client
 /*028*/ uint32	gold;		// Gives gold to the client
 /*032*/ uint32	platinum;	// Gives platinum to the client
-/*036*/ uint32	unknown036;
+/*036*/ uint32	item_id;
 /*040*/ uint32	unknown040;
 /*044*/ uint32	unknown044;
 /*048*/ uint32	unknown048;
@@ -4109,36 +4109,6 @@ struct DisciplineTimer_Struct
 /*00*/ uint32	TimerID;
 /*04*/ uint32	Duration;
 /*08*/ uint32	Unknown08;
-};
-
-struct InternalVeteranRewardItem
-{
-/*000*/	uint32 item_id;
-/*004*/ uint32 charges;
-/*008*/	char item_name[64];
-};
-
-struct InternalVeteranReward
-{
-/*000*/	uint32 claim_id;
-/*004*/ uint32 number_available;
-/*008*/	uint32 claim_count;
-/*012*/	InternalVeteranRewardItem items[8];
-};
-
-struct VeteranClaimReply
-{
-/*000*/	char name[64];
-/*064*/	uint32 claim_id;
-/*068*/	uint32 reject_field;
-/*072*/	uint32 unknown072;
-};
-
-struct VeteranClaimRequest
-{
-/*000*/	char name_data[64]; //name + other data
-/*064*/	uint32 claim_id;
-/*068*/	uint32 unknown068;
 };
 
 struct GMSearchCorpse_Struct
