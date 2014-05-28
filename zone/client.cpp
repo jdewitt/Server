@@ -1249,7 +1249,7 @@ void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 }
 
 void Client::SendSound(){//Makes a sound. EQMac is 48 bytes.
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, 68);
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
 	unsigned char x[68];
 	memset(x, 0, 68);
 	x[0]=0x22;

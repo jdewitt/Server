@@ -452,7 +452,7 @@ public:
 	inline const uint32 LastChange() const { return pLastChange; }
 
 	//Quest
-	void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
+	void QuestReward(Client *c = nullptr, uint32 copper = 0,uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
 	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
