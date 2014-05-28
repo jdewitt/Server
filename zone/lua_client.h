@@ -261,6 +261,14 @@ public:
 	void SetBoatID(uint32 in_boatid);
 	char* GetBoatName();
 	void SetBoatName(const char* in_boatname);
+	void QuestReward(Lua_Mob target);
+	void QuestReward(Lua_Mob target, uint32 copper);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, uint32 factionid, int32 faction);
 };
 
 #endif

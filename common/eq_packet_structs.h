@@ -1994,7 +1994,7 @@ struct QuestReward_Struct
 /*004*/ uint32	target_id;
 /*008*/ uint32	exp_reward;
 /*012*/ uint32	faction;
-/*016*/ uint32	faction_mod;
+/*016*/ int32	faction_mod;
 /*020*/ uint32	copper;		// Gives copper to the client
 /*024*/ uint32	silver;		// Gives silver to the client
 /*028*/ uint32	gold;		// Gives gold to the client
