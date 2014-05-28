@@ -1590,17 +1590,22 @@ void Lua_Mob::QuestReward(Lua_Client c) {
 	self->QuestReward(c);
 }
 
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver) {
+void Lua_Mob::QuestReward(Lua_Client c, uint32 copper) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(c);
+}
+
+void Lua_Mob::QuestReward(Lua_Client c, uint32 copper, uint32 silver) {
 	Lua_Safe_Call_Void();
 	self->QuestReward(c, silver);
 }
 
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold) {
+void Lua_Mob::QuestReward(Lua_Client c, uint32 copper, uint32 silver, uint32 gold) {
 	Lua_Safe_Call_Void();
 	self->QuestReward(c, silver, gold);
 }
 
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold, uint32 platinum) {
+void Lua_Mob::QuestReward(Lua_Client c, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	Lua_Safe_Call_Void();
 	self->QuestReward(c, silver, gold, platinum);
 }
