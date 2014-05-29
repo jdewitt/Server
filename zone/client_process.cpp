@@ -1594,33 +1594,19 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			if((sk == SkillTinkering && GetRace() != GNOME) || (sk == SkillSafeFall && GetRace() != VAHSHIR))
 				gmtrain->skills[sk] = 0;
 			else if((sk == SkillHide || sk == SkillSneak) && GetRace() == HALFLING)
-				gmtrain->skills[sk] = 50;
+				gmtrain->skills[sk] = 50; //Alkabor sends this as 0, but it doesn't show up for us.
 			else 
 				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
 
-			//The below is being used for troubleshooting. Don't delete!
-
-			/*if(sk == 0 || sk == 1 || sk == 2 || sk == 3 || sk == 15 || sk == 20 || sk == 22 || sk == 28 || sk == 33 || sk == 36) 
-				gmtrain->skills[sk] = 250;
-			else if(sk == 4 || sk == 5 || sk == 7 || sk == 9 || sk == 13 || sk == 14 || sk == 18 || sk == 19 || sk == 24 || sk == 27 || sk == 31 || sk == 40 || sk == 43 || sk == 44 || sk == 45 || sk == 46 || sk ==47 || sk == 50 || sk == 51 || sk == 53 || sk == 59 || sk == 60 || sk == 61 || sk == 63 || sk == 64 || sk == 65 || sk == 66 || sk == 67 || sk == 68 || sk == 69)
-				gmtrain->skills[sk] = 200;
-			else
-				gmtrain->skills[sk] = 0;
-			if(gmtrain->skills[sk] > 0)
-				_log(CLIENT__ERROR, "Skill: %i has value: %i",sk, gmtrain->skills[sk]);*/
-
-
 		}
-		gmtrain->greed = 1.25; //Todo: Dynamically calculate using faction/charisma
+		Mob* trainer = entity_list.GetMob(gmtrain->npcid);
+		gmtrain->greed = CalcPriceMod(trainer,true);
 		gmtrain->unknown208 = 1;
 		for(int l = 0; l < 32; l++) {
 			gmtrain->language[l] = 201;
 		}
 
-		char* packet_dump = "GM_OUT.txt";
-		FileDumpPacketHex(packet_dump, outapp);
 		FastQueuePacket(&outapp);
-
 		// welcome message
 		if (pTrainer && pTrainer->IsNPC())
 		{
@@ -1729,7 +1715,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// languages go here
 		if (gmskill->skill_id > 25)
 		{
-			std::cout << "Wrong Training Skill (languages)" << std::endl;
+			mlog(CLIENT__ERROR, "Wrong Training Skill (languages)");
 			DumpPacket(app);
 			return;
 		}
@@ -1744,7 +1730,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// normal skills go here
 		if (gmskill->skill_id > HIGHEST_SKILL)
 		{
-			std::cout << "Wrong Training Skill (abilities)" << std::endl;
+			mlog(CLIENT__ERROR, "Wrong Training Skill (abilities)" );
 			DumpPacket(app);
 			return;
 		}
@@ -1767,6 +1753,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
 			if (t_level == 0)
 			{
+				mlog(CLIENT__ERROR, "Tried to train a new skill %d, which is not allowed at this level %i.", skill, t_level);
 				return;
 			}
 			SetSkill(skill, t_level);
@@ -1785,6 +1772,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case SkillPottery:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 				break;
@@ -1795,6 +1783,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 			default:
@@ -1802,10 +1791,11 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			int MaxSkillValue = MaxSkill(skill);
-			if (skilllevel >= MaxSkillValue)
+			if (skilllevel > 99 || skilllevel >= MaxSkillValue)
 			{
 				// Don't allow training over max skill level
 				Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+				SetSkill(skill, skilllevel);
 				return;
 			}
 
@@ -1816,6 +1806,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				{
 					// Restrict specialization training to follow the rules
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 			}
