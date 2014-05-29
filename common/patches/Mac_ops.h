@@ -118,5 +118,6 @@ D(OP_Taunt);
 D(OP_CombatAbility);
 E(OP_Projectile);
 E(OP_Charm);
+E(OP_Sound);
 #undef E
 #undef D

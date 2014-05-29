@@ -1174,6 +1174,46 @@ void Lua_Client::SetBoatName(const char* in_boatname)
 	self->SetBoatName(in_boatname);
 }
 
+void Lua_Client::QuestReward(Lua_Mob target) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, faction);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1406,7 +1446,15 @@ luabind::scope lua_register_client() {
 		.def("GetBoatID", (int(Lua_Client::*)(void))&Lua_Client::GetBoatID)
 		.def("SetBoatID", (void(Lua_Client::*)(uint32))&Lua_Client::SetBoatID)
 		.def("GetBoatName", (char *(Lua_Client::*)(void))&Lua_Client::GetBoatName)
-		.def("SetBoatName", (void(Lua_Client::*)(const char *))&Lua_Client::SetBoatName);
+		.def("SetBoatName", (void(Lua_Client::*)(const char *))&Lua_Client::SetBoatName)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32,uint32,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32,uint32,uint32,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32,uint32,uint32,uint32,uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob,uint32,uint32,uint32,uint32,uint32,uint32,bool))&Lua_Client::QuestReward);
 }
 
 luabind::scope lua_register_inventory_where() {

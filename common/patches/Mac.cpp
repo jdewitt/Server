@@ -1841,6 +1841,22 @@ ENCODE(OP_Charm){
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_Sound){
+	ENCODE_LENGTH_EXACT(QuestReward_Struct);
+	SETUP_DIRECT_ENCODE(QuestReward_Struct, structs::QuestReward_Struct);
+	OUT(mob_id);
+	OUT(target_id);
+	OUT(exp_reward);
+	OUT(copper);
+	OUT(silver);
+	OUT(gold);
+	OUT(platinum);
+	OUT(item_id);
+	OUT(faction);
+	OUT(faction_mod);
+	FINISH_ENCODE();
+}
+
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)

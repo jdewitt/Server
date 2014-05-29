@@ -5435,6 +5435,55 @@ XS(XS_Client_SendMarqueeMessage)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_QuestReward)
+{
+	dXSARGS;
+	if (items < 1 || items > 9)
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, mob, copper, silver, gold, platinum, itemid, exp, faction)");
+	{
+		Client*		THIS;
+		Mob *		mob = nullptr;
+		int32		copper = 0;
+		int32		silver = 0;
+		int32		gold = 0;
+		int32		platinum = 0;
+		int32		itemid = 0;
+		int32		exp = 0;
+		bool		faction = false;
+
+		if (sv_derived_from(ST(0), "THIS")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (items > 1)	{
+			if (sv_derived_from(ST(1), "mob")) {
+				IV tmp = SvIV((SV*)SvRV(ST(1)));
+				mob = INT2PTR(Mob *,tmp);
+			}
+			else
+				Perl_croak(aTHX_ "mob is not of type Mob");
+			if(mob == nullptr)
+				Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
+		}
+		if (items > 2)	{	copper = (int32)SvIV(ST(2));	}
+		if (items > 3)	{	silver = (int32)SvIV(ST(3));	}
+		if (items > 4)	{	gold = (int32)SvIV(ST(4));		}
+		if (items > 5)	{	platinum = (int32)SvIV(ST(5));	}
+		if (items > 6)	{	itemid = (int32)SvIV(ST(6));	}
+		if (items > 7)	{	exp = (int32)SvIV(ST(7));	}
+		if (items > 8)	{	faction = (bool)SvIV(ST(8));	}
+
+		THIS->QuestReward(mob, copper, silver, gold, platinum, itemid, exp, faction);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5653,6 +5702,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
+		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 		XSRETURN_YES;
 }
 
