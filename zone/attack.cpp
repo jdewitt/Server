@@ -2194,6 +2194,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
+			kg->SplitExp((finalxp), this);
+			if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
+				killerMob->TrySpellOnKill(killed_level,spell);
+
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
