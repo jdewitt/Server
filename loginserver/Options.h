@@ -37,6 +37,7 @@ public:
 		dump_out_packets(false),
 		encryption_mode(5),
 		local_network("127.0.0.1"),
+		network_ip("127.0.0.1"),
 		reject_duplicate_servers(false) { }
 
 	/**
@@ -124,10 +125,20 @@ public:
 	*/
 	inline void LocalNetwork(std::string n) { local_network = n; }
 
+		/**
+	* Sets local_network.
+	*/
+	inline void NetworkIP(std::string n) { network_ip = n; }
+
 	/**
 	* Return the value of local_network.
 	*/
 	inline std::string GetLocalNetwork() const { return local_network; }
+
+	/**
+	* Return the value of local_network.
+	*/
+	inline std::string GetNetworkIP() const { return network_ip; }
 
 	/**
 	* Sets account table.
@@ -205,6 +216,7 @@ private:
 	bool reject_duplicate_servers;
 	int encryption_mode;
 	std::string local_network;
+	std::string network_ip;
 	std::string access_log_table;
 	std::string account_table;
 	std::string world_account_table;

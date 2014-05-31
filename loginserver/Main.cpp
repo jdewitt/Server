@@ -142,6 +142,13 @@ int main()
 		server.options.LocalNetwork(ln);
 	}
 
+	//Parse local network option.
+	std::string ln = server.config->GetVariable("options", "network_ip");
+	if(ln.size() > 0)
+	{
+		server.options.NetworkIP(ln);
+	}
+
 	//Parse reject duplicate servers option.
 	if(server.config->GetVariable("options", "reject_duplicate_servers").compare("TRUE") == 0)
 	{

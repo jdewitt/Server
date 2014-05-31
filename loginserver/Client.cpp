@@ -302,8 +302,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 		connection->QueuePacket(outapp);
 		delete outapp;
 
-		//Hardcoded for the time being, until it can be loaded from the DB. Change to your IP/DNS!
-		string buf = "192.168.1.135";
+		string buf = server.options.GetNetworkIP();
 		EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_ServerName, buf.length() + 1);
 		strcpy((char*) outapp2->pBuffer, buf.c_str());
 		connection->QueuePacket(outapp2);
