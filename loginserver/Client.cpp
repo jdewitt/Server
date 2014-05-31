@@ -64,6 +64,16 @@ bool Client::Process()
 				Handle_SessionReady((const char*)app->pBuffer, app->Size());
 				break;
 			}
+
+		case OP_SessionLogin:
+			{
+				if(server.options.IsTraceOn())
+				{
+					server_log->Log(log_network, "Session ready received from client.");
+				}
+				Handle_SessionLogin((const char*)app->pBuffer, app->Size());
+				break;
+			}
 		case OP_Login:
 			{
 				if(app->Size() < 20)
@@ -202,6 +212,111 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 		connection->QueuePacket(outapp);
 		delete outapp;
 	}
+}
+
+
+void Client::Handle_SessionLogin(const char* data, unsigned int size)
+{
+
+	if(version != cv_old)
+	{
+		//Not old client, gtfo haxxor!
+		return;
+	}
+	
+	status = cs_logged_in;
+
+	string ourdata = data;
+
+	//Get rid of that 989 studios part of the string, plus remove null term zero.
+	string userpass = ourdata.substr(0, ourdata.find("eqworld-52.989studios.com") - 1);
+
+	string username = userpass.substr(0, userpass.find("/"));
+	string password = userpass.substr(userpass.find("/") + 1);
+
+	server_log->Log(log_network, "Username: %s", username.c_str());
+	server_log->Log(log_network, "Password: %s", password.c_str());
+
+	unsigned int d_account_id = 0;
+	in_addr in;
+	string d_pass_hash;
+	uchar sha1pass[40];
+	char sha1hash[40];
+	in.s_addr = connection->GetRemoteIP();
+	bool result = false;
+	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
+	{
+		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
+		
+		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
+		{
+			server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
+		}
+		if (server.options.IsCreateOn())
+		{
+			if (server.options.IsLoginFailsOn())
+			{
+				server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
+			}
+			/*eventually add a unix time stamp calculator from last id that matches IP
+			to limit account creations per time specified by an interval set in the ini.*/
+			server.db->UpdateLSAccountInfo(NULL, username, password, "", 2, string(inet_ntoa(in)));
+			FatalError("Account did not exist so it was created. Hit connect again to login.");
+
+			return;
+		}
+		result = false;
+	}
+	else
+	{
+		sha1::calc(password.c_str(), password.length(), sha1pass);
+		sha1::toHexString(sha1pass,sha1hash);
+		if(d_pass_hash.compare((char*)sha1hash) == 0)
+		{
+			result = true;
+		}
+		else
+		{
+			if (server.options.IsLoginFailsOn())
+			{
+				server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
+			}
+			server_log->Log(log_client_error, "%s", sha1hash);
+			result = false;
+		}
+	}
+
+	if(result)
+	{
+		server.CM->RemoveExistingClient(d_account_id);
+		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
+		GenerateKey();
+		account_id = d_account_id;
+		account_name = username.c_str();
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(SessionId_Struct));
+		SessionId_Struct* s_id = (SessionId_Struct*)outapp->pBuffer;
+		// this is submitted to world server as "username"
+		sprintf(s_id->session_id, "LS#%i", account_id);
+		strcpy(s_id->unused, "unused");
+		s_id->unknown = 4;
+		connection->QueuePacket(outapp);
+		delete outapp;
+
+		//Hardcoded for the time being, until it can be loaded from the DB. Change to your IP/DNS!
+		string buf = "192.168.1.135";
+		EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_ServerName, buf.length() + 1);
+		strcpy((char*) outapp2->pBuffer, buf.c_str());
+		connection->QueuePacket(outapp2);
+		delete outapp2;
+
+	}
+	else
+	{
+		FatalError("Game over, Insert coin to try again.");
+	}
+
+	return;
+
 }
 
 void Client::Handle_Login(const char* data, unsigned int size)

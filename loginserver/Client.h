@@ -81,6 +81,11 @@ public:
 	*/
 	void Handle_Login(const char* data, unsigned int size);
 
+		/**
+	* Verifies login and send a reply for Mac clients.
+	*/
+	void Handle_SessionLogin(const char* data, unsigned int size);
+
 	/**
 	* Verifies login and sends a reply for older client cryptos.
 	*/
