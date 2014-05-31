@@ -143,10 +143,10 @@ int main()
 	}
 
 	//Parse local network option.
-	std::string ln = server.config->GetVariable("options", "network_ip");
-	if(ln.size() > 0)
+	std::string mip = server.config->GetVariable("options", "network_ip");
+	if(mip.size() > 0)
 	{
-		server.options.NetworkIP(ln);
+		server.options.NetworkIP(mip);
 	}
 
 	//Parse reject duplicate servers option.
