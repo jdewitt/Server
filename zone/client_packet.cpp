@@ -1260,7 +1260,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	// Outgoing client packet
-	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation)
+	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation || (delta_x != 0 || delta_y != 0 || delta_z != 0) && animation == 0)
 	{
 		x_pos			= ppu->x_pos;
 		y_pos			= ppu->y_pos;
