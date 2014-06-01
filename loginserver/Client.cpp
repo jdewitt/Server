@@ -241,7 +241,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	in_addr in;
 	string d_pass_hash;
 	uchar sha1pass[40];
-	char sha1hash[40];
+	char sha1hash[41];
 	in.s_addr = connection->GetRemoteIP();
 	bool result = false;
 	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
@@ -288,7 +288,6 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 
 	if(result)
 	{
-		server.CM->RemoveExistingClient(d_account_id);
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
@@ -304,7 +303,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 
 		string buf = server.options.GetNetworkIP();
 		EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_ServerName, buf.length() + 1);
-		strcpy((char*) outapp2->pBuffer, buf.c_str());
+		strncpy((char*)outapp2->pBuffer, buf.c_str(), buf.length() + 1);
 		connection->QueuePacket(outapp2);
 		delete outapp2;
 
@@ -427,7 +426,6 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	if(result)
 	{
-		server.CM->RemoveExistingClient(d_account_id);
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
@@ -545,7 +543,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	string d_pass_hash;
 	uchar eqlogin[40];
 	uchar sha1pass[40];
-	char sha1hash[40];
+	char sha1hash[41];
 	eq_crypto.DoEQDecrypt((unsigned char*)data, eqlogin, 40);
 	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
 
@@ -598,7 +596,6 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 
 	if(result)
 	{
-		server.CM->RemoveExistingClient(d_account_id);
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
