@@ -3736,6 +3736,9 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_
 }
 
 void Client::SetHoTT(uint32 mobid) {
+	if(GetClientVersion() == EQClientMac)
+		return;
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_TargetHoTT, sizeof(ClientTarget_Struct));
 	ClientTarget_Struct *ct = (ClientTarget_Struct *) outapp->pBuffer;
 	ct->new_target = mobid;
@@ -6034,6 +6037,9 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
 {
+	if(GetClientVersion() == EQClientMac)
+		return;
+
 	if(!XTargettingAvailable())
 		return;
 
