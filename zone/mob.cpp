@@ -2888,9 +2888,11 @@ void Mob::SetTarget(Mob* mob) {
 		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
 	else if (IsClient())
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
+	
 
 	if(IsPet() && GetOwner() && GetOwner()->IsClient())
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
+	return;
 }
 
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)

@@ -1488,37 +1488,52 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				//Targeting something we shouldn't with /target
 				//but the client allows this without MQ so you don't flag it
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-				outapp->pBuffer[0] = 0x2f;
-				outapp->pBuffer[1] = 0x01;
-				outapp->pBuffer[4] = 0x0d;
+
 				if(GetTarget())
 				{
 					SetTarget(nullptr);
 				}
-				QueuePacket(outapp);
-				safe_delete(outapp);
+
+				if(GetClientVersion() > EQClientMac)
+				{
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
+					outapp->pBuffer[0] = 0x2f;
+					outapp->pBuffer[1] = 0x01;
+					outapp->pBuffer[4] = 0x0d;
+
+					QueuePacket(outapp);
+					safe_delete(outapp);
+				}
 				return;
 			}
-
+			
 			QueuePacket(app);
-			EQApplicationPacket hp_app;
 			GetTarget()->IsTargeted(1);
-			GetTarget()->CreateHPPacket(&hp_app);
-			QueuePacket(&hp_app, false);
+			if(GetClientVersion() > EQClientMac)
+			{
+				//Intel mac crashes when we send this.
+				EQApplicationPacket hp_app;
+				GetTarget()->CreateHPPacket(&hp_app);
+				QueuePacket(&hp_app, false);
+			}
+				
 		}
 		else
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-			outapp->pBuffer[0] = 0x2f;
-			outapp->pBuffer[1] = 0x01;
-			outapp->pBuffer[4] = 0x0d;
 			if(GetTarget())
 			{
 				SetTarget(nullptr);
 			}
-			QueuePacket(outapp);
-			safe_delete(outapp);
+			if(GetClientVersion() > EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
+				outapp->pBuffer[0] = 0x2f;
+				outapp->pBuffer[1] = 0x01;
+				outapp->pBuffer[4] = 0x0d;
+
+				QueuePacket(outapp);
+				safe_delete(outapp);
+			}
 		}
 	}
 	else
