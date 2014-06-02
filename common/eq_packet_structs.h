@@ -600,11 +600,11 @@ struct GMTrainEnd_Struct
 
 struct GMSkillChange_Struct {
 /*000*/	uint16		npcid;
-/*002*/ uint8		unknown1[2];	// something like PC_ID, but not really. stays the same thru the session though
-/*002*/ uint16		skillbank;		// 0 if normal skills, 1 if languages
-/*002*/ uint8		unknown2[2];
+/*002*/ uint16		playerid;
+/*004*/ uint16		skillbank;		// 0 if normal skills, 1 if languages
+/*006*/ uint16		unknown2;
 /*008*/ uint16		skill_id;
-/*010*/ uint8		unknown3[2];
+/*010*/ uint16		unknown3;		//probably void
 };
 
 struct GMTrainSkillConfirm_Struct {	// SoF only

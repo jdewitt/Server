@@ -2150,7 +2150,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
-	if (give_exp_client && !IsCorpse() && MerchantType == 0)
+	if (give_exp_client && !IsCorpse() && MerchantType == 0 && class_ != MERCHANT)
 	{
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
@@ -2194,6 +2194,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
+			kg->SplitExp((finalxp), this);
+			if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
+				killerMob->TrySpellOnKill(killed_level,spell);
+
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -2229,6 +2233,17 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		else
 		{
+			int conlevel = give_exp->GetLevelCon(GetLevel());
+			if (conlevel != CON_GREEN)
+			{
+				if(GetOwner() && GetOwner()->IsClient()){
+				}
+				else {
+					give_exp_client->AddEXP((finalxp), conlevel); // Pyro: Comment this if NPC death crashes zone
+					if(killerMob && (killerMob->GetID() == give_exp_client->GetID() || killerMob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
+						killerMob->TrySpellOnKill(killed_level,spell);
+				}
+			}
 			 /* Send the EVENT_KILLED_MERIT event */
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 

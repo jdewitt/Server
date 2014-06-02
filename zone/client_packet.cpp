@@ -1260,7 +1260,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	// Outgoing client packet
-	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation)
+	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation || (delta_x != 0 || delta_y != 0 || delta_z != 0) && animation == 0)
 	{
 		x_pos			= ppu->x_pos;
 		y_pos			= ppu->y_pos;
@@ -8726,6 +8726,28 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			{
 				pps->aa_array[r].AA = zone->EmuToEQMacAA(pps->aa_array[r].AA);
 				pps->aa_array[r].value = pps->aa_array[r].value*16;
+			}
+		}
+		int s = 0;
+		for(r = 0; s < 74; s++)
+		{
+			SkillUseTypes currentskill = (SkillUseTypes) s;
+			if(pps->skills[s] > 0)
+				continue;
+			else
+			{
+				int haveskill = GetMaxSkillAfterSpecializationRules(currentskill, MaxSkill(currentskill, GetClass(), RuleI(Character, MaxLevel)));
+				if(haveskill > 0)
+				{
+					//If we never get the skill, value is 255. If we qualify for it it's 0, if we get it but don't yet qualify it's 254.
+					uint16 t_level = SkillTrainLevel(currentskill, GetClass());
+					if(t_level > GetLevel())
+						pps->skills[s] = 254;
+					else
+						pps->skills[s] = 0;
+				}
+				else
+					pps->skills[s] = 255;
 			}
 		}
 		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA

@@ -2283,11 +2283,15 @@ Opcode _MAC_NET_MSG_NoNameApprovalMsg:
 Opcode _MAC_NET_MSG_netphysicsinfo:
  Name: accel
   Type: char
+ Name: h
   Type: unsigned char
  Name: rate_h
   Type: char
+ Name: x_pos
   Type: short
+ Name: y_pos
   Type: short
+ Name: z_pos
   Type: short
  Name: velocities
   Type: unsigned long

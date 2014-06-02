@@ -98,6 +98,7 @@ bool DatabaseMySQL::GetStatusLSAccountTable(std::string &name, unsigned int &cli
 			}
 		}
 	}
+	return false;
 }
 
 bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
