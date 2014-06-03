@@ -1092,6 +1092,7 @@ DECODE(OP_MoveItem)
 {
 	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
+	_log(INVENTORY__ERROR, "EQMAC DECODE to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
 	if(eq->to_slot == 0)
 		emu->to_slot=30;
 	else if((eq->to_slot >= 250 && eq->to_slot <= 329) || (eq->to_slot >= 2030 && eq->to_slot <= 2109)) 
@@ -1107,6 +1108,7 @@ DECODE(OP_MoveItem)
 		emu->from_slot=eq->from_slot;
 
 	IN(number_in_stack);
+	_log(INVENTORY__ERROR, "EQMAC DECODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", emu->to_slot, emu->from_slot, emu->number_in_stack);
 	FINISH_DIRECT_DECODE();
 }
 

@@ -3492,7 +3492,7 @@ void command_equipitem(Client *c, const Seperator *sep){
 				c->Message(13, "Error: Partial stack added to existing stack exceeds allowable stacksize");
 				return;
 			}
-			else if(c->SwapItem(mi)) {
+			else if(c->SwapItem(mi) == 1) {
 				c->FastQueuePacket(&outapp);
 
 				// below code has proper logic, but client does not like to have cursor charges changed

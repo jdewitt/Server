@@ -2862,6 +2862,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
+	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -2908,9 +2909,19 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probably SwapItem(mi)");
-		SwapItemResync(mi); }
+	
+	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
+		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		{
+			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
+			SwapItemResync(mi); 
+		}
+		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		{
+			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
+			return;
+		}
+	}
 
 	return;
 }
