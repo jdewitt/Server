@@ -4246,6 +4246,9 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
+			m_pp.ATR_PET_LOH_timer = static_cast<uint32>(time(nullptr));
+			m_pp.UnknownTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "LoH set to %i in the database", m_pp.ATR_PET_LOH_timer);
 		}
 		else if ((castspell->spell_id == SPELL_HARM_TOUCH
 			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
@@ -4262,6 +4265,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 				spell_to_cast = SPELL_HARM_TOUCH2;
 
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
+			m_pp.HarmTouchTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "HT set to %i in the database", m_pp.HarmTouchTimer);
 		}
 		
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
@@ -8744,7 +8749,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 		int s = 0;
-		for(r = 0; s < 74; s++)
+		for(r = 0; s < HIGHEST_SKILL; s++)
 		{
 			SkillUseTypes currentskill = (SkillUseTypes) s;
 			if(pps->skills[s] > 0)

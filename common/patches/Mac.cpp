@@ -249,7 +249,12 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-
+	for(r = 0; r < 50; r++) {
+		eq->innate[r] = 255;
+	}
+	OUT(ATR_PET_LOH_timer);
+	OUT(UnknownTimer);
+	OUT(HarmTouchTimer);
 	int value = RuleI(Character,ConsumptionValue);
 
 	float tpercent = (float)emu->thirst_level/(float)value;
@@ -1855,6 +1860,18 @@ ENCODE(OP_Sound){
 	OUT(faction);
 	OUT(faction_mod);
 	FINISH_ENCODE();
+}
+
+ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetBuffWindow) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Unknown){
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	_log(EQMAC__LOG, "Dropped an invalid packet: %s",opcodes->EmuToName(in->GetOpcode()));
+
+	delete in;
+	return;
 }
 
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {

@@ -119,5 +119,9 @@ D(OP_CombatAbility);
 E(OP_Projectile);
 E(OP_Charm);
 E(OP_Sound);
+//Below are invalid opcodes ONLY
+E(OP_Unknown);
+E(OP_PetBuffWindow);
+E(OP_PetitionUpdate);
 #undef E
 #undef D
