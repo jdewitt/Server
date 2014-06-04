@@ -310,7 +310,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		FatalError("Game over, Insert coin to try again.");
+		FatalError("Invalid username or password.");
 	}
 
 	return;
@@ -319,190 +319,8 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
-	if(status != cs_waiting_for_login)
-	{
-		server_log->Log(log_network_error, "Login received after already having logged in.");
-		return;
-	}
-
-	if((size - 12) % 8 != 0)
-	{
-		server_log->Log(log_network_error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
-		return;
-	}
-
-	status = cs_logged_in;
-
-	string e_user;
-	string e_hash;
-	char *e_buffer = nullptr;
-	unsigned int d_account_id = 0;
-	string d_pass_hash;
-
-#ifdef WIN32
-	e_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-
-	int buffer_len = strlen(e_buffer);
-	e_hash.assign(e_buffer, buffer_len);
-	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
-
-	if(server.options.IsTraceOn())
-	{
-		server_log->Log(log_client, "User: %s", e_user.c_str());
-		server_log->Log(log_client, "Hash: %s", e_hash.c_str());
-	}
-
-	server.eq_crypto->DeleteHeap(e_buffer);
-#else
-	e_buffer = DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-
-	int buffer_len = strlen(e_buffer);
-	e_hash.assign(e_buffer, buffer_len);
-	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
-
-	if(server.options.IsTraceOn())
-	{
-		server_log->Log(log_client, "User: %s", e_user.c_str());
-		server_log->Log(log_client, "Hash: %s", e_hash.c_str());
-	}
-
-	_HeapDeleteCharBuffer(e_buffer);
-#endif
-
-	bool result;
-	in_addr in;
-	in.s_addr = connection->GetRemoteIP();
-
-	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
-	{
-		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
-
-
-		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
-		{
-			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account not exist, PC");
-		}
-		if (server.options.IsCreateOn() && server.options.IsLoginFailsOn())
-		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account created, PC");
-			}
-			/*eventually add a unix time stamp calculator from last id in log that matches IP
-			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, e_user, e_hash, "", 1, string(inet_ntoa(in)));
-
-			result = false;
-		}
-		result = false;
-	}
-	else
-	{
-		if(d_pass_hash.compare(e_hash) == 0)
-		{
-			unsigned int unlock = 1;
-			if (server.db->GetStatusLSAccountTable(e_user, unlock))
-			{
-				result = true;
-			}
-			else
-			{
-				if (server.options.IsLoginFailsOn())
-				{
-					server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Unauthorized client login attempt.");
-				}
-				result = false;
-			}
-		}
-		else
-		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "PC bad password");
-			}
-			result = false;
-		}
-	}
-
-	if(result)
-	{
-		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
-		GenerateKey();
-		account_id = d_account_id;
-		account_name = e_user;
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
-		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
-		LoginLoginAccepted_Struct* llas = (LoginLoginAccepted_Struct *)outapp->pBuffer;
-		llas->unknown1 = llrs->unknown1;
-		llas->unknown2 = llrs->unknown2;
-		llas->unknown3 = llrs->unknown3;
-		llas->unknown4 = llrs->unknown4;
-		llas->unknown5 = llrs->unknown5;
-
-		Login_ReplyBlock_Struct * lrbs = new Login_ReplyBlock_Struct;
-		memset(lrbs, 0, sizeof(Login_ReplyBlock_Struct));
-
-		lrbs->failed_attempts = 0;
-		lrbs->message = 0x01;
-		lrbs->lsid = d_account_id;
-		lrbs->unknown3[3] = 0x03;
-		lrbs->unknown4[3] = 0x02;
-		lrbs->unknown5[0] = 0xe7;
-		lrbs->unknown5[1] = 0x03;
-		lrbs->unknown6[0] = 0xff;
-		lrbs->unknown6[1] = 0xff;
-		lrbs->unknown6[2] = 0xff;
-		lrbs->unknown6[3] = 0xff;
-		lrbs->unknown7[0] = 0xa0;
-		lrbs->unknown7[1] = 0x05;
-		lrbs->unknown8[3] = 0x02;
-		lrbs->unknown9[0] = 0xff;
-		lrbs->unknown9[1] = 0x03;
-		lrbs->unknown11[0] = 0x63;
-		lrbs->unknown12[0] = 0x01;
-		memcpy(lrbs->key, key.c_str(), key.size());
-
-#ifdef WIN32
-		unsigned int e_size;
-		char *encrypted_buffer = server.eq_crypto->Encrypt((const char*)lrbs, 75, e_size);
-		memcpy(llas->encrypt, encrypted_buffer, 80);
-		server.eq_crypto->DeleteHeap(encrypted_buffer);
-#else
-		unsigned int e_size;
-		char *encrypted_buffer = Encrypt((const char*)lrbs, 75, e_size);
-		memcpy(llas->encrypt, encrypted_buffer, 80);
-		_HeapDeleteCharBuffer(encrypted_buffer);
-#endif
-
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
-	}
-	else
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
-		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
-		LoginLoginFailed_Struct* llas = (LoginLoginFailed_Struct *)outapp->pBuffer;
-		llas->unknown1 = llrs->unknown1;
-		llas->unknown2 = llrs->unknown2;
-		llas->unknown3 = llrs->unknown3;
-		llas->unknown4 = llrs->unknown4;
-		llas->unknown5 = llrs->unknown5;
-		memcpy(llas->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
-
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
-	}
+	//Login method not supported in PEQMac.
+	return;
 }
 
 void Client::FatalError(const char* message) {
@@ -611,7 +429,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		FatalError("Game over, Insert coin to try again.");
+		FatalError("Invalid username or password.");
 	}
 }
 

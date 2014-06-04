@@ -40,7 +40,7 @@ public:
 	* but it's the most trivial way to do this.
 	*/
 #ifdef WIN32
-	LoginServer() : config(nullptr), db(nullptr), eq_crypto(nullptr), SM(nullptr) { }
+	LoginServer() : config(nullptr), db(nullptr), SM(nullptr) { }
 #else
 	LoginServer() : config(nullptr), db(nullptr) { }
 #endif
@@ -50,10 +50,6 @@ public:
 	Options options;
 	ServerManager *SM;
 	ClientManager *CM;
-
-#ifdef WIN32
-	Encryption *eq_crypto;
-#endif
 };
 
 #endif

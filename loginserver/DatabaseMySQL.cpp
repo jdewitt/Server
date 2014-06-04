@@ -111,7 +111,10 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	stringstream query(stringstream::in | stringstream::out);
-	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << name << "'";
+	char tmpUN[1024];
+	mysql_real_escape_string(db, tmpUN, name.c_str(), name.length());(tmpUN, name.c_str(), name.length());
+
+	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '" << tmpUN << "'";
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
@@ -238,9 +241,12 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 		return;
 	}
 
+	char tmpUN[1024];
+	mysql_real_escape_string(db, tmpUN, name.c_str(), name.length());
+
 	stringstream query(stringstream::in | stringstream::out);
 	query << "INSERT INTO " << server.options.GetAccessLogTable() << " SET account_id = " << account_id;
-	query << ", account_name = '" << account_name << "', IP = '" << IP << "', accessed = '" << accessed << "', reason = '" << reason << "'";
+	query << ", account_name = '" << tmpUN << "', IP = '" << IP << "', accessed = '" << accessed << "', reason = '" << reason << "'";
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
@@ -254,11 +260,14 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 	{
 		return;
 	}
+	char tmpUN[1024];
+	mysql_real_escape_string(db, tmpUN, name.c_str(), name.length());
+
 	if (created_by == 1)
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
-		query << id << ", AccountName = '" << name << "', AccountPassword = '";
+		query << id << ", AccountName = '" << tmpUN << "', AccountPassword = '";
 		query << password << "', AccountCreateDate = now(), created_by = '" << created_by;
 		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
 
@@ -271,7 +280,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 	{
 		stringstream query(stringstream::in | stringstream::out);
 		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
-		query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
+		query << id << ", AccountName = '" << tmpUN << "', AccountPassword = sha('";
 		query << password << "'), AccountCreateDate = now(), created_by = '" << created_by;
 		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
 

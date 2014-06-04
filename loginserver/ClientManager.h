@@ -70,10 +70,11 @@ private:
 	void ProcessDisconnect();
 
 	list<Client*> clients;
+	/*
 	OpcodeManager *titanium_ops;
 	EQStreamFactory *titanium_stream;
 	OpcodeManager *sod_ops;
-	EQStreamFactory *sod_stream;
+	EQStreamFactory *sod_stream;*/
 	OpcodeManager *old_ops;
 	EQStreamFactory *old_stream;
 };
