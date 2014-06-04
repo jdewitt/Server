@@ -1703,6 +1703,9 @@ void Group::NotifyAssistTarget(Client *c)
 	if(!c)
 		return;
 
+	if(c->GetClientVersion() == EQClientMac)
+		return;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
 
 	MarkNPC_Struct* mnpcs = (MarkNPC_Struct *)outapp->pBuffer;
@@ -1726,6 +1729,9 @@ void Group::NotifyTankTarget(Client *c)
 	if(!c)
 		return;
 
+	if(c->GetClientVersion() == EQClientMac)
+		return;
+
 	Mob *m = entity_list.GetMob(TankTargetID);
 
 	c->UpdateXTargetType(GroupTankTarget, m);
@@ -1734,6 +1740,9 @@ void Group::NotifyTankTarget(Client *c)
 void Group::NotifyPullerTarget(Client *c)
 {
 	if(!c)
+		return;
+
+	if(c->GetClientVersion() == EQClientMac)
 		return;
 
 	Mob *m = entity_list.GetMob(PullerTargetID);

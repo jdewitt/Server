@@ -249,7 +249,12 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-
+	for(r = 0; r < 50; r++) {
+		eq->innate[r] = 255;
+	}
+	OUT(ATR_PET_LOH_timer);
+	OUT(UnknownTimer);
+	OUT(HarmTouchTimer);
 	int value = RuleI(Character,ConsumptionValue);
 
 	float tpercent = (float)emu->thirst_level/(float)value;
@@ -1087,6 +1092,7 @@ DECODE(OP_MoveItem)
 {
 	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
+	_log(INVENTORY__ERROR, "EQMAC DECODE to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
 	if(eq->to_slot == 0)
 		emu->to_slot=30;
 	else if((eq->to_slot >= 250 && eq->to_slot <= 329) || (eq->to_slot >= 2030 && eq->to_slot <= 2109)) 
@@ -1102,6 +1108,7 @@ DECODE(OP_MoveItem)
 		emu->from_slot=eq->from_slot;
 
 	IN(number_in_stack);
+	_log(INVENTORY__ERROR, "EQMAC DECODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", emu->to_slot, emu->from_slot, emu->number_in_stack);
 	FINISH_DIRECT_DECODE();
 }
 
@@ -2123,6 +2130,234 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	eq->flymode = emu->flymode;
 
 	return eq;
+}
+
+ENCODE(OP_0x0193) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_0x0347) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AckPacket) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AnnoyingZoneUnknown) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ApproveZone) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AssistGroup) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AugmentInfo) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AugmentItem) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_AutoFire) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Bandolier) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BankerChange) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Barter) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Bazaar) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BazaarInspect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BecomeCorpse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BuffCreate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BuffFadeMsg) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BuffRemoveRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CameraEffect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CharacterCreateRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ClearBlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ClearNPCMarks) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ClientReady) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CloseContainer) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Command) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ConfirmDelete) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ConsentDeny) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CorpseDrop) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CrashDump) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_CustomTitles) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DelegateAbility) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DenyResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DiscordMerchantInventory) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DoGroupLeadershipAbility) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DumpName) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_DynamicWall) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_EnduranceUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_EnvDamage) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_EnvDamage2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Feedback) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FindPersonReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FindPersonRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FinishWindow) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FinishWindow2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FloatListThing) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_FriendsWho) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GMApproval) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GMBecomeNPC) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GMSearchCorpse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupAcknowledge) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupCancelInvite) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupDelete) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupLeadershipAAUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupRoles) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GroupUpdateLeaderAA) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildBank) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildManageAdd) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildManageBanker) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildManageRemove) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildManageStatus) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildMemberLevelUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildMemberUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildPublicNote) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_GuildUpdateURLAndChannel) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Heartbeat) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_InitialHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_InitialMobHealth) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemLinkClick) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemName) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_KnowledgeBase) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNDisarmTraps) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNInspect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNOpen) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNPickLock) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNSenseTraps) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LeadershipExpToggle) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LeadershipExpUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LevelAppearance) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFGAppearance) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFGGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFGGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFGResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFGuild) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LockoutTimerInfo) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LoginComplete) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LoginUnknown1) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LoginUnknown2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MarkNPC) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MobEnduranceUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MobManaUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_MoveLogRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_OpenContainer) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_OpenDiscordMerchant) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_OpenInventory) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetBuffWindow) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionBug) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionCheckout2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionQue) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionResolve) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionSearch) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionSearchResults) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionSearchText) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionUnCheckout) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PostEnterWorld) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PotionBelt) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PreLogoutReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PurchaseLeadershipAA) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PVPLeaderBoardDetailsReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_QueryResponseThing) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RandomReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RecipesFavorite) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RecipesSearch) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ReloadUI) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RequestKnowledgeBase) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RespawnWindow) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RestState) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ServerName) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SessionLogin) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SetChatServer2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SetGroupTarget) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SetTitleReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ShopItem) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Some3ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Some6ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SpawnPositionUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TargetBuffs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TargetHoTT) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TargetReject) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TestBuff) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TrackTarget) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TrackUnknown) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TradeBusy) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Untargetable) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_UpdateAA) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_UpdateLeadershipAA) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_VoiceMacroIn) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_VoiceMacroOut) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WeaponEquip2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WeaponUnequip2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Weblink) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_World_Client_CRC1) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_World_Client_CRC2) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WorldClientReady) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WorldComplete) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WorldLogout) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WorldObjectsSent) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_WorldUnknown001) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_XTargetAutoAddHaters) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_XTargetRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_XTargetResponse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ZoneComplete) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ZonePlayerToBind) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ZoneServerReady) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_Unknown){
+	EQApplicationPacket *in = *p;
+	*p = nullptr;
+
+	_log(EQMAC__LOG, "Dropped an invalid packet: %s",opcodes->EmuToName(in->GetOpcode()));
+
+	delete in;
+	return;
 }
 
 } //end namespace Mac

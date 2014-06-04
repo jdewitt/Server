@@ -1260,7 +1260,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	// Outgoing client packet
-	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation)
+	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation || (delta_x != 0 || delta_y != 0 || delta_z != 0) && animation == 0)
 	{
 		x_pos			= ppu->x_pos;
 		y_pos			= ppu->y_pos;
@@ -1488,37 +1488,52 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				//Targeting something we shouldn't with /target
 				//but the client allows this without MQ so you don't flag it
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-				outapp->pBuffer[0] = 0x2f;
-				outapp->pBuffer[1] = 0x01;
-				outapp->pBuffer[4] = 0x0d;
+
 				if(GetTarget())
 				{
 					SetTarget(nullptr);
 				}
-				QueuePacket(outapp);
-				safe_delete(outapp);
+
+				if(GetClientVersion() > EQClientMac)
+				{
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
+					outapp->pBuffer[0] = 0x2f;
+					outapp->pBuffer[1] = 0x01;
+					outapp->pBuffer[4] = 0x0d;
+
+					QueuePacket(outapp);
+					safe_delete(outapp);
+				}
 				return;
 			}
-
+			
 			QueuePacket(app);
-			EQApplicationPacket hp_app;
 			GetTarget()->IsTargeted(1);
-			GetTarget()->CreateHPPacket(&hp_app);
-			QueuePacket(&hp_app, false);
+			if(GetClientVersion() > EQClientMac)
+			{
+				//Intel mac crashes when we send this.
+				EQApplicationPacket hp_app;
+				GetTarget()->CreateHPPacket(&hp_app);
+				QueuePacket(&hp_app, false);
+			}
+				
 		}
 		else
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-			outapp->pBuffer[0] = 0x2f;
-			outapp->pBuffer[1] = 0x01;
-			outapp->pBuffer[4] = 0x0d;
 			if(GetTarget())
 			{
 				SetTarget(nullptr);
 			}
-			QueuePacket(outapp);
-			safe_delete(outapp);
+			if(GetClientVersion() > EQClientMac)
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
+				outapp->pBuffer[0] = 0x2f;
+				outapp->pBuffer[1] = 0x01;
+				outapp->pBuffer[4] = 0x0d;
+
+				QueuePacket(outapp);
+				safe_delete(outapp);
+			}
 		}
 	}
 	else
@@ -2847,6 +2862,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
+	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -2893,9 +2909,19 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probably SwapItem(mi)");
-		SwapItemResync(mi); }
+	
+	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
+		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		{
+			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
+			SwapItemResync(mi); 
+		}
+		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		{
+			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
+			return;
+		}
+	}
 
 	return;
 }
@@ -4231,6 +4257,9 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
+			m_pp.ATR_PET_LOH_timer = static_cast<uint32>(time(nullptr));
+			m_pp.UnknownTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "LoH set to %i in the database", m_pp.ATR_PET_LOH_timer);
 		}
 		else if ((castspell->spell_id == SPELL_HARM_TOUCH
 			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
@@ -4247,6 +4276,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 				spell_to_cast = SPELL_HARM_TOUCH2;
 
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
+			m_pp.HarmTouchTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "HT set to %i in the database", m_pp.HarmTouchTimer);
 		}
 		
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
@@ -8729,7 +8760,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 		int s = 0;
-		for(r = 0; s < 74; s++)
+		for(r = 0; s < HIGHEST_SKILL; s++)
 		{
 			SkillUseTypes currentskill = (SkillUseTypes) s;
 			if(pps->skills[s] > 0)

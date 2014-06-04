@@ -2150,7 +2150,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
-	if (give_exp_client && !IsCorpse() && MerchantType == 0)
+	if (give_exp_client && !IsCorpse() && MerchantType == 0 && class_ != MERCHANT)
 	{
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
