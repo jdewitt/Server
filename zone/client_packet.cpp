@@ -868,7 +868,7 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 	LogFile->write(EQEMuLog::Error, "Client error: %s", error->character_name);
 	LogFile->write(EQEMuLog::Error, "Error message: %s", error->message);
 	Message(13, error->message);
-#if (EQDEBUG>=5)
+#if (EQDEBUG>=11)
 	DumpPacket(app);
 #endif
 	return;
@@ -2737,7 +2737,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
-	DumpPacket(app);
+	//DumpPacket(app);
 	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
 
 	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
@@ -3364,7 +3364,6 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
-	LogFile->write(EQEMuLog::Debug, "Hit Handle_OP_LootRequest");
 	if(GetClientVersion() > EQClientMac)
 	{
 		if (app->size != sizeof(uint32)) {
@@ -5180,7 +5179,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	RDTSC_Timer t1;
 	t1.start();
 	Merchant_Sell_Struct* mp=(Merchant_Sell_Struct*)app->pBuffer;
-#if EQDEBUG >= 5
+#if EQDEBUG >= 11
 		LogFile->write(EQEMuLog::Debug, "%s, purchase item..", GetName());
 		DumpPacket(app);
 #endif
@@ -5989,8 +5988,9 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 	m_pp.drakkin_tattoo		= fc->drakkin_tattoo;
 	m_pp.drakkin_details	= fc->drakkin_details;
 	Save();
-	Message_StringID(13,FACE_ACCEPTED);
-	//Message(13, "Facial features updated.");
+	if(GetClientVersion() > EQClientMac)
+		Message_StringID(13,FACE_ACCEPTED);
+
 	return;
 }
 

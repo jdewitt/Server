@@ -1864,6 +1864,32 @@ ENCODE(OP_Sound){
 	FINISH_ENCODE();
 }
 
+ENCODE(OP_FaceChange){
+	ENCODE_LENGTH_EXACT(FaceChange_Struct);
+	SETUP_DIRECT_ENCODE(FaceChange_Struct, structs::FaceChange_Struct);
+	OUT(haircolor);
+	OUT(beardcolor);
+	OUT(eyecolor1);
+	OUT(eyecolor2);
+	OUT(hairstyle);
+	OUT(beard);
+	OUT(face);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_FaceChange){
+	DECODE_LENGTH_EXACT(structs::FaceChange_Struct);
+	SETUP_DIRECT_DECODE(FaceChange_Struct, structs::FaceChange_Struct);
+	IN(haircolor);
+	IN(beardcolor);
+	IN(eyecolor1);
+	IN(eyecolor2);
+	IN(hairstyle);
+	IN(beard);
+	IN(face);
+FINISH_DIRECT_DECODE();
+}
+
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)

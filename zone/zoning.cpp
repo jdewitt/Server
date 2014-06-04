@@ -38,7 +38,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		return;
 	}
 
-#if EQDEBUG >= 5
+#if EQDEBUG >= 11
 	LogFile->write(EQEMuLog::Debug, "Zone request from %s", GetName());
 	DumpPacket(app);
 #endif

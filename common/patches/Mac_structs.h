@@ -1336,14 +1336,14 @@ struct GroupDisband_Struct
 	/*060*/	
 };
 
-struct ChangeLooks_Struct 
+struct FaceChange_Struct 
 {
 	/*000*/	uint8	haircolor;	// Comment: 
 	/*001*/	uint8	beardcolor;	// Comment: 
 	/*002*/	uint8	eyecolor1;	// Comment: the eyecolors always seem to be the same, maybe left and right eye?
 	/*003*/	uint8	eyecolor2;	// Comment: 
 	/*004*/	uint8	hairstyle;	// Comment: 
-	/*005*/	uint8	wode;		// Comment: Face Overlay? (barbarian only)
+	/*005*/	uint8	beard;		// Comment: Face Overlay? (barbarian only)
 	/*006*/	uint8	face;		// Comment: and beard
 	/*007*/	
 };
