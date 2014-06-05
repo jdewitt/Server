@@ -250,7 +250,7 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 
 bool ClientListEntry::CheckStale() {
 	stale++;
-	if (stale > 20) {
+	if (stale >= 3) {
 		if (pOnline > CLE_Status_Offline)
 			SetOnline(CLE_Status_Offline);
 		else
