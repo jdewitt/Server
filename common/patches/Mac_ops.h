@@ -119,6 +119,8 @@ D(OP_CombatAbility);
 E(OP_Projectile);
 E(OP_Charm);
 E(OP_Sound);
+E(OP_FaceChange);
+D(OP_FaceChange);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);

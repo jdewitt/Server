@@ -1402,8 +1402,10 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		//SetTint(dst_slot_id,src_inst->GetColor());
 		if (src_inst->GetCharges() > 0 && (src_inst->GetCharges() < (int16)move_in->number_in_stack || move_in->number_in_stack > src_inst->GetItem()->StackSize))
 		{
-			Message(13,"Error: Insufficent number in stack.");
-			_log(INVENTORY__ERROR, "Insufficent number in stack.");
+			//Damn Intel client sending SwapItem multiple times :I
+			if(GetClientVersion() > EQClientMac)
+				Message(13,"Error: Insufficent number in stack.");
+			_log(INVENTORY__ERROR, "Insufficent number in stack. Ignore this if on EQMac.");
 			return 0;
 		}
 	}
