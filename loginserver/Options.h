@@ -38,6 +38,7 @@ public:
 		encryption_mode(5),
 		local_network("127.0.0.1"),
 		network_ip("127.0.0.1"),
+		pass_salt(""),
 		reject_duplicate_servers(false) { }
 
 	/**
@@ -125,7 +126,7 @@ public:
 	*/
 	inline void LocalNetwork(std::string n) { local_network = n; }
 
-		/**
+	/**
 	* Sets local_network.
 	*/
 	inline void NetworkIP(std::string n) { network_ip = n; }
@@ -139,6 +140,16 @@ public:
 	* Return the value of local_network.
 	*/
 	inline std::string GetNetworkIP() const { return network_ip; }
+
+	/**
+	* Sets password salt
+	*/
+	inline void SetSalt(std::string n) { pass_salt = n; }
+	
+	/**
+	* Return the value of the password salt
+	*/
+	inline std::string GetSalt() const { return pass_salt; }
 
 	/**
 	* Sets account table.
@@ -217,6 +228,7 @@ private:
 	int encryption_mode;
 	std::string local_network;
 	std::string network_ip;
+	std::string pass_salt;
 	std::string access_log_table;
 	std::string account_table;
 	std::string world_account_table;

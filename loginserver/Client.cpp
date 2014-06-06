@@ -227,12 +227,15 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	status = cs_logged_in;
 
 	string ourdata = data;
+	if(ourdata.length() < sizeof("eqworld-52.989studios.com") + 1)
+		return;
 
 	//Get rid of that 989 studios part of the string, plus remove null term zero.
 	string userpass = ourdata.substr(0, ourdata.find("eqworld-52.989studios.com") - 1);
 
 	string username = userpass.substr(0, userpass.find("/"));
 	string password = userpass.substr(userpass.find("/") + 1);
+	string salt = server.options.GetSalt();
 
 	server_log->Log(log_network, "Username: %s", username.c_str());
 	server_log->Log(log_network, "Password: %s", password.c_str());
@@ -244,6 +247,8 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	char sha1hash[41];
 	in.s_addr = connection->GetRemoteIP();
 	bool result = false;
+
+	string userandpass = username + password + salt;
 	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
@@ -260,7 +265,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 			}
 			/*eventually add a unix time stamp calculator from last id that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, username, password, "", 2, string(inet_ntoa(in)));
+			server.db->UpdateLSAccountInfo(NULL, username, userandpass, "", 2, string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -269,7 +274,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		sha1::calc(password.c_str(), password.length(), sha1pass);
+		sha1::calc(userandpass.c_str(), userandpass.length(), sha1pass);
 		sha1::toHexString(sha1pass,sha1hash);
 		if(d_pass_hash.compare((char*)sha1hash) == 0)
 		{
@@ -365,28 +370,33 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	eq_crypto.DoEQDecrypt((unsigned char*)data, eqlogin, 40);
 	LoginCrypt_struct* lcs = (LoginCrypt_struct*)eqlogin;
 
-	string e_user = lcs->username; //e_user should be d_user as we're decrypted, but this variable name is required later on.
 	bool result;
 	in_addr in;
 	in.s_addr = connection->GetRemoteIP();
 
-	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
+	string username = lcs->username;
+	string password = lcs->password;
+	string salt = server.options.GetSalt();
+
+	string userandpass = password + salt;
+
+	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
-		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
+		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
 		
 		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
 		{
-			server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
+			server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
 		}
 		if (server.options.IsCreateOn())
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
+				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
 			}
 			/*eventually add a unix time stamp calculator from last id that matches IP
 			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, e_user, lcs->password, "", 2, string(inet_ntoa(in)));
+			server.db->UpdateLSAccountInfo(NULL, username.c_str(), userandpass.c_str(), "", 2, string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -395,7 +405,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	}
 	else
 	{
-		sha1::calc(lcs->password, strlen(lcs->password), sha1pass);
+		sha1::calc(userandpass.c_str(), userandpass.length(), sha1pass);
 		sha1::toHexString(sha1pass,sha1hash);
 		if(d_pass_hash.compare((char*)sha1hash) == 0)
 		{
@@ -405,7 +415,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		{
 			if (server.options.IsLoginFailsOn())
 			{
-				server.db->UpdateAccessLog(d_account_id, e_user, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
+				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Mac bad password");
 			}
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
@@ -417,7 +427,7 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
-		account_name = e_user;
+		account_name = username;
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(SessionId_Struct));
 		SessionId_Struct* s_id = (SessionId_Struct*)outapp->pBuffer;
 		// this is submitted to world server as "username"
