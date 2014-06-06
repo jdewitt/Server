@@ -3748,6 +3748,12 @@ void Client::SetHoTT(uint32 mobid) {
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration) {
 
+	if(GetClientVersion() == EQClientMac)
+	{
+		Message(0,"This client doesn't support popups!");
+		return;
+	}
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
 	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
 
@@ -4545,7 +4551,10 @@ void Client::ShowSkillsWindow()
 			WindowText += "<br>";
 		}
 	}
-	this->SendPopupToClient(WindowTitle, WindowText.c_str());
+	if(GetClientVersion() > EQClientMac)
+		this->SendPopupToClient(WindowTitle, WindowText.c_str());
+	else
+		this->Message(0,"%s",WindowText.c_str());
 }
 
 

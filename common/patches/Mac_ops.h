@@ -60,6 +60,7 @@ D(OP_Consume)
 E(OP_ReadBook)
 D(OP_ReadBook)
 E(OP_Illusion)
+D(OP_Illusion)
 E(OP_ShopRequest)
 D(OP_ShopRequest)
 E(OP_ShopInventoryPacket)
@@ -181,8 +182,6 @@ E(OP_GetGuildMOTD);
 E(OP_GetGuildMOTDReply);
 E(OP_GiveMoney);
 E(OP_GMApproval);
-E(OP_GMBecomeNPC);
-E(OP_GMSearchCorpse);
 E(OP_GMTrainSkillConfirm);
 E(OP_GroupAcknowledge);
 E(OP_GroupCancelInvite);

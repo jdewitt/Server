@@ -1243,6 +1243,25 @@ ENCODE(OP_Illusion)
 	FINISH_ENCODE();
 }
 
+DECODE(OP_Illusion) 
+{
+	DECODE_LENGTH_EXACT(structs::Illusion_Struct);
+	SETUP_DIRECT_DECODE(Illusion_Struct, structs::Illusion_Struct);
+	IN(spawnid);
+	IN(race);
+	IN(gender);
+	IN(texture);
+	IN(helmtexture);
+	IN(face);
+	IN(hairstyle);
+	IN(haircolor);
+	IN(beard);
+	IN(beardcolor);
+	IN(size);
+
+	FINISH_DIRECT_DECODE();
+}
+
 ENCODE(OP_ShopRequest)
 {
 	ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
@@ -2215,8 +2234,6 @@ ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMApproval) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GMBecomeNPC) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GMSearchCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupAcknowledge) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupCancelInvite) { ENCODE_FORWARD(OP_Unknown); }

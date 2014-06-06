@@ -11010,9 +11010,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		char CharName[64], TimeOfDeath[20], Buffer[512];
 
-		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
-					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
-					"</td><td></td><td></td></tr>";
+		std::string PopupText = "";
 
 
 		while ((Row = mysql_fetch_row(Result)))
@@ -11031,7 +11029,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			bool CorpseRezzed = atoi(Row[6]);
 			bool CorpseBuried = atoi(Row[7]);
 
-			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+			sprintf(Buffer, "Name: %s  Zone: %s  Loc: %8.0f, %8.0f, %8.0f,  Date: %s  Rezzed: %s  Buried: %s",
 				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
 				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
 
@@ -11045,11 +11043,12 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		}
 
-		PopupText += "</table>";
-
 		mysql_free_result(Result);
 
-		SendPopupToClient("Corpses", PopupText.c_str());
+		if(GetClientVersion() > EQClientMac)
+			SendPopupToClient("Corpses", PopupText.c_str());
+		else
+			Message(0,"%s",PopupText.c_str());
 	}
 	else{
 		Message(0, "Query failed: %s.", errbuf);
