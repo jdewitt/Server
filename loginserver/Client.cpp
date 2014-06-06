@@ -248,7 +248,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	in.s_addr = connection->GetRemoteIP();
 	bool result = false;
 
-	string userandpass = username + password + salt;
+	string userandpass = password + salt;
 	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
