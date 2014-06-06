@@ -868,7 +868,7 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 	LogFile->write(EQEMuLog::Error, "Client error: %s", error->character_name);
 	LogFile->write(EQEMuLog::Error, "Error message: %s", error->message);
 	Message(13, error->message);
-#if (EQDEBUG>=5)
+#if (EQDEBUG>=11)
 	DumpPacket(app);
 #endif
 	return;
@@ -2737,7 +2737,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
-	DumpPacket(app);
+	//DumpPacket(app);
 	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
 
 	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
@@ -2862,6 +2862,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
+	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -2908,9 +2909,19 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		_log(INVENTORY__SLOTS, "WTF Some shit failed. Probably SwapItem(mi)");
-		SwapItemResync(mi); }
+	
+	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
+		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		{
+			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
+			SwapItemResync(mi); 
+		}
+		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		{
+			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
+			return;
+		}
+	}
 
 	return;
 }
@@ -3353,7 +3364,6 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
-	LogFile->write(EQEMuLog::Debug, "Hit Handle_OP_LootRequest");
 	if(GetClientVersion() > EQClientMac)
 	{
 		if (app->size != sizeof(uint32)) {
@@ -4246,6 +4256,9 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
+			m_pp.ATR_PET_LOH_timer = static_cast<uint32>(time(nullptr));
+			m_pp.UnknownTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "LoH set to %i in the database", m_pp.ATR_PET_LOH_timer);
 		}
 		else if ((castspell->spell_id == SPELL_HARM_TOUCH
 			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
@@ -4262,6 +4275,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 				spell_to_cast = SPELL_HARM_TOUCH2;
 
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
+			m_pp.HarmTouchTimer = static_cast<uint32>(time(nullptr));
+			Message(0, "HT set to %i in the database", m_pp.HarmTouchTimer);
 		}
 		
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
@@ -5164,7 +5179,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	RDTSC_Timer t1;
 	t1.start();
 	Merchant_Sell_Struct* mp=(Merchant_Sell_Struct*)app->pBuffer;
-#if EQDEBUG >= 5
+#if EQDEBUG >= 11
 		LogFile->write(EQEMuLog::Debug, "%s, purchase item..", GetName());
 		DumpPacket(app);
 #endif
@@ -5973,8 +5988,9 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 	m_pp.drakkin_tattoo		= fc->drakkin_tattoo;
 	m_pp.drakkin_details	= fc->drakkin_details;
 	Save();
-	Message_StringID(13,FACE_ACCEPTED);
-	//Message(13, "Facial features updated.");
+	if(GetClientVersion() > EQClientMac)
+		Message_StringID(13,FACE_ACCEPTED);
+
 	return;
 }
 
@@ -8744,7 +8760,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 		int s = 0;
-		for(r = 0; s < 74; s++)
+		for(r = 0; s < HIGHEST_SKILL; s++)
 		{
 			SkillUseTypes currentskill = (SkillUseTypes) s;
 			if(pps->skills[s] > 0)
@@ -10994,9 +11010,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		char CharName[64], TimeOfDeath[20], Buffer[512];
 
-		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
-					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
-					"</td><td></td><td></td></tr>";
+		std::string PopupText = "";
 
 
 		while ((Row = mysql_fetch_row(Result)))
@@ -11015,7 +11029,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			bool CorpseRezzed = atoi(Row[6]);
 			bool CorpseBuried = atoi(Row[7]);
 
-			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+			sprintf(Buffer, "Name: %s  Zone: %s  Loc: %8.0f, %8.0f, %8.0f,  Date: %s  Rezzed: %s  Buried: %s",
 				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
 				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
 
@@ -11029,11 +11043,12 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		}
 
-		PopupText += "</table>";
-
 		mysql_free_result(Result);
 
-		SendPopupToClient("Corpses", PopupText.c_str());
+		if(GetClientVersion() > EQClientMac)
+			SendPopupToClient("Corpses", PopupText.c_str());
+		else
+			Message(0,"%s",PopupText.c_str());
 	}
 	else{
 		Message(0, "Query failed: %s.", errbuf);

@@ -1024,7 +1024,10 @@ struct PlayerProfile_Struct
 /*12808*/	uint8				perAA;				//For Mac
 /*12809*/	uint8				unknown12844[35];
 /*12844*/	Bandolier_Struct	bandoliers[MAX_PLAYER_BANDOLIER];
-/*14124*/	uint8				unknown14160[4506];
+/*14124*/	uint32				ATR_PET_LOH_timer;
+			uint32				UnknownTimer;
+			uint32				HarmTouchTimer;
+/*14128*/	uint8				unknown14160[4494];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;
 /*19244*/	PotionBelt_Struct	potionbelt;			//there should be 3 more of these

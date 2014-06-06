@@ -25,45 +25,45 @@ extern bool run_server;
 
 ClientManager::ClientManager()
 {
-	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
-	titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
-	titanium_ops = new RegularOpcodeManager;
-	if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
-	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
-			server.config->GetVariable("Titanium", "opcodes").c_str());
-		run_server = false;
-	}
+	//int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
+	//titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
+	//titanium_ops = new RegularOpcodeManager;
+	//if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
+	//{
+	//	server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
+	//		server.config->GetVariable("Titanium", "opcodes").c_str());
+	//	run_server = false;
+	//}
 
-	if(titanium_stream->Open())
-	{
-		server_log->Log(log_network, "ClientManager listening on Titanium stream.");
-	}
-	else
-	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't open Titanium stream.");
-		run_server = false;
-	}
+	//if(titanium_stream->Open())
+	//{
+	//	server_log->Log(log_network, "ClientManager listening on Titanium stream.");
+	//}
+	//else
+	//{
+	//	server_log->Log(log_error, "ClientManager fatal error: couldn't open Titanium stream.");
+	//	run_server = false;
+	//}
 
-	int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
-	sod_stream = new EQStreamFactory(LoginStream, sod_port);
-	sod_ops = new RegularOpcodeManager;
-	if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
-	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
-			server.config->GetVariable("SoD", "opcodes").c_str());
-		run_server = false;
-	}
+	//int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
+	//sod_stream = new EQStreamFactory(LoginStream, sod_port);
+	//sod_ops = new RegularOpcodeManager;
+	//if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
+	//{
+	//	server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
+	//		server.config->GetVariable("SoD", "opcodes").c_str());
+	//	run_server = false;
+	//}
 
-	if(sod_stream->Open())
-	{
-		server_log->Log(log_network, "ClientManager listening on SoD stream.");
-	}
-	else
-	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't open SoD stream.");
-		run_server = false;
-	}
+	//if(sod_stream->Open())
+	//{
+	//	server_log->Log(log_network, "ClientManager listening on SoD stream.");
+	//}
+	//else
+	//{
+	//	server_log->Log(log_error, "ClientManager fatal error: couldn't open SoD stream.");
+	//	run_server = false;
+	//}
 
 	int old_port = atoi(server.config->GetVariable("Old", "port").c_str());
 	old_stream = new EQStreamFactory(OldStream, old_port);
@@ -89,27 +89,27 @@ ClientManager::ClientManager()
 
 ClientManager::~ClientManager()
 {
-	if(titanium_stream)
-	{
-		titanium_stream->Close();
-		delete titanium_stream;
-	}
-
-	if(titanium_ops)
-	{
-		delete titanium_ops;
-	}
-
-	if(sod_stream)
-	{
-		sod_stream->Close();
-		delete sod_stream;
-	}
-
-	if(sod_ops)
-	{
-		delete sod_ops;
-	}
+//	if(titanium_stream)
+//	{
+//		titanium_stream->Close();
+//		delete titanium_stream;
+//	}
+//
+//	if(titanium_ops)
+//	{
+//		delete titanium_ops;
+//	}
+//
+//	if(sod_stream)
+//	{
+//		sod_stream->Close();
+//		delete sod_stream;
+//	}
+//
+//	if(sod_ops)
+//	{
+//		delete sod_ops;
+//	}
 
 	if(old_stream)
 	{
@@ -126,6 +126,7 @@ ClientManager::~ClientManager()
 void ClientManager::Process()
 {
 	ProcessDisconnect();
+	/*
 	EQStream *cur = titanium_stream->Pop();
 	while(cur)
 	{
@@ -151,12 +152,13 @@ void ClientManager::Process()
 		clients.push_back(c);
 		cur = sod_stream->Pop();
 	}
+	*/
 	EQOldStream *oldcur = old_stream->PopOld();
 	while(oldcur)
 	{
 		struct in_addr in;
 		in.s_addr = oldcur->GetRemoteIP();
-		server_log->Log(log_network, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(oldcur->GetRemotePort()));
+		server_log->Log(log_network, "New Old client connection from %s:%d", inet_ntoa(in), ntohs(oldcur->GetRemotePort()));
 
 		oldcur->SetOpcodeManager(&old_ops);
 		Client *c = new Client(oldcur, cv_old);

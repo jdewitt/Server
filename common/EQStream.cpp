@@ -1058,11 +1058,7 @@ EQApplicationPacket *p=nullptr;
 
 bool EQStream::HasOutgoingData()
 {
-bool flag;
-
-	//once closed, we have nothing more to say
-	if(CheckClosed())
-		return(false);
+	bool flag;
 
 	MOutboundQueue.lock();
 	flag=(!NonSequencedQueue.empty());
@@ -1363,8 +1359,7 @@ void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
 	EQStreamState orig_state = GetState();
 	if (orig_state == CLOSING && !outgoing_data) {
 		_log(NET__NET_TRACE, _L "Out of data in closing state, disconnecting." __L);
-		_SendDisconnect();
-		SetState(DISCONNECTING);
+		SetState(CLOSED);
 	} else if (LastPacket && (now-LastPacket) > timeout) {
 		switch(orig_state) {
 		case CLOSING:
@@ -1941,8 +1936,8 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 		pack->dwSEQ = SACK.dwGSQ++; // Agz: Added this commented rest    
 		if(pack->dwSEQ == 0xFFFF)
 		{
-		SACK.dwGSQ = 1;
-		pack->dwSEQ = 1;
+			SACK.dwGSQ = 1;
+			pack->dwSEQ = 1;
 		}	  
 		pack->HDR.a6_Closing    = 1;// Agz: Lets try to uncomment this line again
 		pack->HDR.a2_Closing    = 1;// and this
@@ -1957,7 +1952,6 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 		SendQueue.push(p);
 		SACK.dwGSQ++; 
 		safe_delete(pack);//delete pack;
-
 		return;
 	}
 
@@ -1996,7 +1990,6 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 
 		no_ack_sent_timer->Disable();
 		safe_delete(pack);//delete pack;
-
 		return;
 	}
 
@@ -2197,7 +2190,7 @@ void EQOldStream::CheckTimers(void)
 			packetspending++;
 			if(++pack->resend_count > 15) {
 				pm_state = CLOSING;
-				MakeEQPacket(0);
+				_SendDisconnect();
 			}
 		}
 		no_ack_received_timer->Start(1000);
@@ -2317,7 +2310,6 @@ void EQOldStream::OutboundQueueClear()
 
 	MOutboundQueue.lock();
 	while (p = SendQueue.pop()) {
-		MySendPacketStruct *p = SendQueue.pop();
 		safe_delete_array(p->buffer);
 		p->size = 0;
 		p = 0;
@@ -2363,14 +2355,13 @@ void EQOldStream::SendPacketQueue(bool Block)
 	// ************ Processing finished ************ //
 	MOutboundQueue.unlock();
 	//see if we need to send our disconnect and finish our close
-	if(SendQueue.empty() && OutQueue.empty()) {
+	if(SendQueue.empty() && OutQueue.empty() && ResendQueue.empty()) {
 		//no more data to send
 		if(CheckState(CLOSING)) {
 			_log(NET__DEBUG, _L "All outgoing data flushed, closing stream." __L );
 			//we are waiting for the queues to empty, now we can do our disconnect.
 			//this packet will not actually go out until the next call to Write().
-			_SendDisconnect();
-			SetState(DISCONNECTING);
+			SetState(CLOSED);
 		}
 	}
 
@@ -2378,11 +2369,7 @@ void EQOldStream::SendPacketQueue(bool Block)
 
 bool EQOldStream::HasOutgoingData()
 {
-bool flag;
-
-	//once closed, we have nothing more to say
-	if(CheckClosed())
-		return(false);
+	bool flag;
 
 	MOutboundQueue.lock();
 	flag=(!SendQueue.empty());
@@ -2398,18 +2385,13 @@ bool outgoing_data = HasOutgoingData();	//up here to avoid recursive locking
 	if (orig_state == CLOSING && !outgoing_data) {
 		_log(NET__NET_TRACE, _L "Out of data in closing state, disconnecting." __L);
 		_SendDisconnect();
-		SetState(DISCONNECTING);
+		SetState(CLOSED);
 	} else if (LastPacket && (now-LastPacket) > timeout) {
 		switch(orig_state) {
 		case CLOSING:
 			//if we time out in the closing state, they are not acking us, just give up
 			_log(NET__DEBUG, _L "Timeout expired in closing state. Moving to closed state." __L);
 			_SendDisconnect();
-			SetState(CLOSED);
-			break;
-		case DISCONNECTING:
-			//we timed out waiting for them to send us the disconnect reply, just give up.
-			_log(NET__DEBUG, _L "Timeout expired in disconnecting state. Moving to closed state." __L);
 			SetState(CLOSED);
 			break;
 		case CLOSED:
@@ -2420,7 +2402,7 @@ bool outgoing_data = HasOutgoingData();	//up here to avoid recursive locking
 			//we will almost certainly time out again waiting for the disconnect reply, but oh well.
 			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
 			_SendDisconnect();
-			SetState(DISCONNECTING);
+			SetState(CLOSING);
 			break;
 		default:
 			break;
@@ -2484,21 +2466,13 @@ EQStream::MatchState EQOldStream::CheckSignature(const EQStream::Signature *sig)
 
 void EQOldStream::_SendDisconnect()
 {
-	if(CheckClosed())
-		return;
-
+	MOutboundQueue.lock();
 	MakeEQPacket(0);
+	MOutboundQueue.unlock();
 
 }
 void EQOldStream::Close() {
-	if(HasOutgoingData()) {
-		//there is pending data, wait for it to go out.
-		_log(NET__DEBUG, _L "Stream requested to Close(), but there is pending data, waiting for it." __L);
 		SetState(CLOSING);
-	} else {
-		//otherwise, we are done, we can drop immediately.
 		_SendDisconnect();
 		_log(NET__DEBUG, _L "Stream closing immediate due to Close()" __L);
-		SetState(DISCONNECTING);
-	}
 }

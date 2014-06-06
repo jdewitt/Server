@@ -1336,14 +1336,14 @@ struct GroupDisband_Struct
 	/*060*/	
 };
 
-struct ChangeLooks_Struct 
+struct FaceChange_Struct 
 {
 	/*000*/	uint8	haircolor;	// Comment: 
 	/*001*/	uint8	beardcolor;	// Comment: 
 	/*002*/	uint8	eyecolor1;	// Comment: the eyecolors always seem to be the same, maybe left and right eye?
 	/*003*/	uint8	eyecolor2;	// Comment: 
 	/*004*/	uint8	hairstyle;	// Comment: 
-	/*005*/	uint8	wode;		// Comment: Face Overlay? (barbarian only)
+	/*005*/	uint8	beard;		// Comment: Face Overlay? (barbarian only)
 	/*006*/	uint8	face;		// Comment: and beard
 	/*007*/	
 };
@@ -2517,7 +2517,17 @@ struct PlayerProfile_Struct
 	/*2968*/	uint32	copper_cursor;
 	/*2972*/	uint8	currency[16];	    //Unused currency?
 	/*2988*/	uint16	skills[74];			// Player Skills
-	/*3136*/	uint8	innate[101];
+	/*3136*/	uint16	innate[23];
+	/*3182*/	uint16	innate_unknowns[4];	//Always 255.
+	/*3190*/	uint16	innate_monk_ranger;	//Monk and Ranger are 0.
+	/*3192*/	uint16	innate_ogre;		//Ogre is 0.
+	/*3194*/	uint16	innate_unknown;		//Always 255.
+	/*3196*/	uint16	innate_druid;		//Only Druids are 0.
+	/*3198*/	uint16	innate_sk;			//Only SKs have this set as 0 in pp
+	/*3200*/	uint16	innate_all;			//Everybody seems to have 0 here.
+	/*3202*/	uint16	innate_paladin;		//Only Paladins have this as 0.
+	/*3204*/	uint16	innate_[16];
+	/*3236*/	uint8	unknown_skillvoid;			//255
 	/*3237*/    uint16  air_supply;
 	/*3239*/    uint8   texture;
 	/*3240*/	float   height;
@@ -2589,7 +2599,7 @@ struct PlayerProfile_Struct
 	/*6004*/	uint8	Unknown6004[708];
 	/*6712*/	uint32	WrathWildTimer;
 	/*6716*/	uint32	UnknownTimer;
-	/*6720*/	uint32	UnknownTimer2;
+	/*6720*/	uint32	HarmTouchTimer;
 	/*6724*/	uint8	Unknown6724[1736];
 	/*8460*/
 };

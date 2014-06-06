@@ -3748,6 +3748,12 @@ void Client::SetHoTT(uint32 mobid) {
 
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration) {
 
+	if(GetClientVersion() == EQClientMac)
+	{
+		Message(0,"This client doesn't support popups!");
+		return;
+	}
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
 	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
 
@@ -4545,7 +4551,10 @@ void Client::ShowSkillsWindow()
 			WindowText += "<br>";
 		}
 	}
-	this->SendPopupToClient(WindowTitle, WindowText.c_str());
+	if(GetClientVersion() > EQClientMac)
+		this->SendPopupToClient(WindowTitle, WindowText.c_str());
+	else
+		this->Message(0,"%s",WindowText.c_str());
 }
 
 
@@ -7097,5 +7106,15 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
+}
+
+void Client::RewindCommand()
+{
+	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
+		Message(0,"You must wait before using #rewind again.");
+	} else {
+		MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
+		rewind_timer.Start(30000, true);
+	}
 }
 

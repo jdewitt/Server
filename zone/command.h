@@ -186,6 +186,7 @@ void command_myskills(Client *c, const Seperator *sep);
 void command_depop(Client *c, const Seperator *sep);
 void command_depopzone(Client *c, const Seperator *sep);
 void command_repop(Client *c, const Seperator *sep);
+void command_rewind(Client *c, const Seperator *sep);
 void command_spawnstatus(Client *c, const Seperator *sep);
 void command_nukebuffs(Client *c, const Seperator *sep);
 void command_zuwcoords(Client *c, const Seperator *sep);
