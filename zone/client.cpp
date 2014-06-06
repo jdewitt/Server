@@ -7099,3 +7099,13 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	safe_delete(outapp);
 }
 
+void Client::RewindCommand()
+{
+	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
+		Message(0,"You must wait before using #rewind again.");
+	} else {
+		MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
+		rewind_timer.Start(30000, true);
+	}
+}
+

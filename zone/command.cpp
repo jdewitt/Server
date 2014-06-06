@@ -351,6 +351,7 @@ int command_init(void){
 		command_add("reloadzonepoints","- Reload zone points from database",150,command_reloadzps) ||
 		command_add("reloadzps",nullptr,0,command_reloadzps) ||
 		command_add("repop","[delay] - Repop the zone with optional delay",100,command_repop) ||
+		command_add("rewind",nullptr,0,command_rewind) ||
 		command_add("resetaa","- Resets a Player's AA in their profile.",200,command_resetaa) ||
 		command_add("revoke","[charname] [1/0] - Makes charname unable to talk on OOC",200,command_revoke) ||
 		command_add("rf",nullptr,80,command_randomfeatures) ||
@@ -4214,6 +4215,11 @@ void command_repop(Client *c, const Seperator *sep){
 		c->Message(0, "Zone depoped. Repoping now.");
 		zone->Repop();
 	}
+}
+
+void command_rewind(Client *c, const Seperator *sep){
+	c->RewindCommand();
+	return;
 }
 
 void command_spawnstatus(Client *c, const Seperator *sep){
