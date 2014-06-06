@@ -149,6 +149,13 @@ int main()
 		server.options.NetworkIP(mip);
 	}
 
+	//Parse local network option.
+	std::string pws = server.config->GetVariable("options", "salt");
+	if(pws.size() > 0)
+	{
+		server.options.SetSalt(pws);
+	}
+
 	//Parse reject duplicate servers option.
 	if(server.config->GetVariable("options", "reject_duplicate_servers").compare("TRUE") == 0)
 	{
