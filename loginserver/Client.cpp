@@ -227,7 +227,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	status = cs_logged_in;
 
 	string ourdata = data;
-	if(ourdata.length() < sizeof("eqworld-52.989studios.com") + 1)
+	if(size < strlen("eqworld-52.989studios.com") + 1)
 		return;
 
 	//Get rid of that 989 studios part of the string, plus remove null term zero.
