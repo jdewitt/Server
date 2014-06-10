@@ -122,6 +122,8 @@ E(OP_Charm);
 E(OP_Sound);
 E(OP_FaceChange);
 D(OP_FaceChange);
+D(OP_Assist);
+E(OP_Assist);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
