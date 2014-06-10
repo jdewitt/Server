@@ -392,10 +392,6 @@ bool lua_bury_player_corpse(uint32 char_id) {
 	return quest_manager.buryplayercorpse(char_id);
 }
 
-void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons, uint32 duration) {
-	quest_manager.popup(title, text, id, buttons, duration);
-}
-
 void lua_clear_spawn_timers() {
 	quest_manager.clearspawntimers();
 }
@@ -1016,7 +1012,6 @@ luabind::scope lua_register_general() {
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
 		luabind::def("get_player_burried_corpse_count", &lua_get_player_burried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
-		luabind::def("popup", &lua_popup),
 		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
 		luabind::def("zone_emote", &lua_zone_emote),
 		luabind::def("world_emote", &lua_world_emote),
@@ -1251,11 +1246,8 @@ luabind::scope lua_register_client_version() {
 		.enum_("constants")
 		[
 			luabind::value("Unknown", static_cast<int>(EQClientUnknown)),
-			luabind::value("62", static_cast<int>(EQClient62)),
-			luabind::value("Titanium", static_cast<int>(EQClientTitanium)),
-			luabind::value("SoF", static_cast<int>(EQClientSoF)),
-			luabind::value("SoD", static_cast<int>(EQClientSoD)),
-			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot))
+			luabind::value("EQMac", static_cast<int>(EQClientMac)),
+			luabind::value("Evolution", static_cast<int>(EQClientEvolution))
 		];
 }
 

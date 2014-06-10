@@ -65,12 +65,7 @@ SET(common_sources
 	worldconn.cpp
 	XMLParser.cpp
 	platform.cpp
-	patches/Client62.cpp
 	patches/patches.cpp
-	patches/SoD.cpp
-	patches/SoF.cpp
-	patches/Titanium.cpp
-	patches/Underfoot.cpp
 	patches/Mac.cpp
 	patches/Evolution.cpp
 	SocketLib/Base64.cpp
@@ -187,20 +182,7 @@ SET(common_headers
 	XMLParser.h
 	ZoneNumbers.h
 	platform.h
-	patches/Client62.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_structs.h
 	patches/patches.h
-	patches/SoD.h
-	patches/SoD_itemfields.h
-	patches/SoD_ops.h
-	patches/SoD_structs.h
-	patches/SoF.h
-	patches/SoF_itemfields.h
-	patches/SoF_opcode_list.h
-	patches/SoF_ops.h
-	patches/SoF_structs.h
 	patches/Mac.h
 	patches/Mac_structs.h
 	patches/Mac_ops.h
@@ -210,14 +192,6 @@ SET(common_headers
 	patches/SSDeclare.h
 	patches/SSDefine.h
 	patches/SSRegister.h
-	patches/Titanium.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_structs.h
-	patches/Underfoot.h
-	patches/Underfoot_itemfields.h
-	patches/Underfoot_ops.h
-	patches/Underfoot_structs.h
 	SocketLib/Base64.h
 	SocketLib/File.h
 	SocketLib/HttpdCookies.h
@@ -236,37 +210,11 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Patches FILES
-	patches/Client62.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_structs.h
 	patches/patches.h
-	patches/SoD.h
-	patches/SoD_itemfields.h
-	patches/SoD_ops.h
-	patches/SoD_structs.h
-	patches/SoF.h
-	patches/SoF_itemfields.h
-	patches/SoF_opcode_list.h
-	patches/SoF_ops.h
-	patches/SoF_structs.h
 	patches/SSDeclare.h
 	patches/SSDefine.h
 	patches/SSRegister.h
-	patches/Titanium.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_structs.h
-	patches/Underfoot.h
-	patches/Underfoot_itemfields.h
-	patches/Underfoot_ops.h
-	patches/Underfoot_structs.h
-	patches/Client62.cpp
 	patches/patches.cpp
-	patches/SoD.cpp
-	patches/SoF.cpp
-	patches/Titanium.cpp
-	patches/Underfoot.cpp
 	patches/Mac.cpp
 	patches/Mac.h
 	patches/Mac_ops.h
@@ -323,7 +271,6 @@ ADD_LIBRARY(Common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
-	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)

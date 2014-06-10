@@ -2023,30 +2023,6 @@ XS(XS__npcfeature)
 	XSRETURN_EMPTY;
 }
 
- XS(XS__popup); // prototype to pass -Wmissing-prototypes
- XS(XS__popup) {
-		dXSARGS;
-	int popupid = 0;
-	int buttons = 0;
-	int duration = 0;
-
-	if((items < 2) || (items > 5))
-				Perl_croak(aTHX_ "Usage: popup(windowtitle, text, popupid, buttons, duration)");
-
-	if(items >= 3)
-		popupid = (int)SvIV(ST(2));
-
-	if(items >= 4)
-		buttons = (int)SvIV(ST(3));
-
-	if(items == 5)
-		duration = (int)SvIV(ST(4));
-
-		quest_manager.popup(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), popupid, buttons, duration);
-
-		XSRETURN_EMPTY;
-}
-
 XS(XS__clearspawntimers);
 XS(XS__clearspawntimers)
 {
@@ -2967,7 +2943,6 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
 		newXS(strcpy(buf, "playerfeature"), XS__playerfeature, file);
 		newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
-		newXS(strcpy(buf, "popup"), XS__popup, file);
 		newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
 		newXS(strcpy(buf, "ze"), XS__ze, file);
 		newXS(strcpy(buf, "we"), XS__we, file);

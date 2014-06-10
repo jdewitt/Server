@@ -147,8 +147,7 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	Client* trader = owner->CastToClient();
 	if (with && with->IsClient()) {
 		int16 fromid = 0;
-		if(with->GetClientVersion() == EQClientMac)
-			fromid = trader->GetID();
+		fromid = trader->GetID();
 		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView,fromid);
 		if (inst->GetItem()->ItemClass == 1) {
 			for (uint16 i=0; i<10; i++) {
@@ -804,12 +803,9 @@ void Client::Trader_EndTrader() {
 			safe_delete(outapp);
 			safe_delete(gis);
 
-			if(Customer->GetClientVersion() == EQClientMac)
-			{
-				EQApplicationPacket empty(OP_ShopEndConfirm);
-				Customer->QueuePacket(&empty);
-				Customer->Save();
-			}
+			EQApplicationPacket empty(OP_ShopEndConfirm);
+			Customer->QueuePacket(&empty);
+			Customer->Save();
 		}
 	}
 
@@ -883,12 +879,8 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 void Client::SendSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 	ItemInst* inst= database.LoadSingleTraderItem(CharID, SerialNumber);
-	if(GetClientVersion() == EQClientMac)
-		BulkSendTraderInventory(CharID);
-	else if(inst) {
-		SendItemPacket(30, inst, ItemPacketMerchant);
-		safe_delete(inst);
-	}
+
+	BulkSendTraderInventory(CharID);
 
 }
 
@@ -918,17 +910,9 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 				}
 				inst->SetMerchantSlot(i);
 				inst->SetPrice(TraderItems->ItemCost[i]);
-				if(GetClientVersion() == EQClientMac)
-				{
 					std::string packet = inst->Serialize(30);
 					ser_items[i] = packet;
 					size += packet.length();
-				}
-				else
-				{
-					SendItemPacket(30, inst, ItemPacketMerchant);
-					safe_delete(inst);
-				}
 			}
 			else
 				_log(TRADING__CLIENT, "Client::BulkSendTraderInventory nullptr inst pointer");
@@ -936,8 +920,6 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 		else
 			_log(TRADING__CLIENT, "Client::BulkSendTraderInventory nullptr item pointer or item is NODROP %8X",item);
 	}
-	if(GetClientVersion() == EQClientMac)
-	{
 		int8 count = 0;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, size);
 		uchar* ptr = outapp->pBuffer;
@@ -954,7 +936,6 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
-	}
 	safe_delete(TraderItems);
 }
 
@@ -1068,7 +1049,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 		Customer->SendSingleTraderItem(this->CharacterID(), SerialNumber);
 		m_inv.DeleteItem(Slot, Quantity);
 	}
-	else if(Customer->GetClientVersion() == EQClientMac)
+	else
 	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
 		Merchant_DelItem_Struct* tdis = (Merchant_DelItem_Struct*)outapp->pBuffer;
@@ -1084,23 +1065,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 		safe_delete(outapp);
 
 		m_inv.DeleteItem(Slot);
-	}
-	else {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderDelItem,sizeof(TraderDelItem_Struct));
-		TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
-
-		tdis->Unknown000 = 0;
-		tdis->TraderID = Customer->GetID();
-		tdis->ItemID = SerialNumber;
-		tdis->Unknown012 = 0;
-
-		_pkt(TRADING__PACKETS, outapp);
-
-		Customer->QueuePacket(outapp);
-		safe_delete(outapp);
-
-		m_inv.DeleteItem(Slot);
-
 	}
 	// This updates the trader. Removes it from his trading bags.
 	//
@@ -1282,10 +1246,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	outtbs->ItemID = tbs->ItemID;
 
 	const ItemInst* BuyItem;
-	if(GetClientVersion() == EQClientMac)
-		BuyItem = Trader->FindTraderItemByID(tbs->ItemID);
-	else
-		BuyItem = Trader->FindTraderItemBySerialNumber(tbs->ItemID);
+	BuyItem = Trader->FindTraderItemByID(tbs->ItemID);
 
 	if(!BuyItem) {
 		_log(TRADING__CLIENT, "Unable to find item on trader.");
@@ -1372,9 +1333,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	TotalCost -= (mus->silver * 10);
 	mus->copper = TotalCost;
 
-	bool updateclient = false;
-	if(Trader->GetClientVersion() == EQClientMac)
-		updateclient = true;
+	bool updateclient = true;
 	Trader->AddMoneyToPP(mus->copper,mus->silver,mus->gold,mus->platinum,updateclient);
 
 	mus->platinum = Trader->GetPlatinum();
@@ -1382,12 +1341,6 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	mus->silver = Trader->GetSilver();
 	mus->copper = Trader->GetCopper();
 	SlotID = Trader->FindTraderItem(tbs->ItemID, outtbs->Quantity);
-
-	if(Trader->GetClientVersion() > EQClientMac)
-	{
-		Trader->QueuePacket(outapp2);
-		_pkt(TRADING__PACKETS, outapp2);
-	}
 
 	if(RuleB(Bazaar, AuditTrail))
 		BazaarAuditTrail(Trader->GetName(), GetName(), BuyItem->GetItem()->Name, outtbs->Quantity, outtbs->Price, 0);
@@ -1771,10 +1724,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 SellerID, uint32 CustomerID, T
 			_log(TRADING__CLIENT, "Sending price update for %s, Serial No. %i with %i charges",
 							item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-			if(Customer->GetClientVersion() == EQClientMac)
-				Customer->BulkSendTraderInventory(SellerCharID);
-			else
-				Customer->SendItemPacket(30, inst, ItemPacketMerchant);
+			Customer->BulkSendTraderInventory(SellerCharID);
 		}
 	}
 
@@ -1799,8 +1749,6 @@ static void UpdateTraderCustomerPriceChanged(uint32 SellerID, uint32 CustomerID,
 	if(NewPrice == 0) {
 
 		// If the new price is 0, remove the item(s) from the window.
-		if(Customer->GetClientVersion() == EQClientMac)
-		{
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
 			Merchant_DelItem_Struct* tdis = (Merchant_DelItem_Struct*)outapp->pBuffer;
 			
@@ -1820,34 +1768,6 @@ static void UpdateTraderCustomerPriceChanged(uint32 SellerID, uint32 CustomerID,
 			}
 			safe_delete(outapp);
 			return;
-		}
-		else
-		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderDelItem,sizeof(TraderDelItem_Struct));
-			TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
-
-			tdis->Unknown000 = 0;
-			tdis->TraderID = Customer->GetID();
-			tdis->Unknown012 = 0;
-			Customer->Message(13, "The Trader has withdrawn the %s from sale.", item->Name);
-
-			for(int i = 0; i < 80; i++) {
-
-				if(gis->ItemID[i] == ItemID) {
-					tdis->ItemID = gis->SerialNumber[i];
-					_log(TRADING__CLIENT, "Telling customer to remove item %i with %i charges and S/N %i",
-								ItemID, Charges, gis->SerialNumber[i]);
-
-					_pkt(TRADING__PACKETS, outapp);
-
-					Customer->QueuePacket(outapp);
-				}
-			}
-
-			safe_delete(outapp);
-
-			return;
-		}
 
 	}
 	_log(TRADING__CLIENT, "Sending price updates to customer %s", Customer->GetName());
@@ -1879,10 +1799,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 SellerID, uint32 CustomerID,
 		_log(TRADING__CLIENT, "Sending price update for %s, Serial No. %i with %i charges",
 						item->Name, gis->SerialNumber[i], gis->Charges[i]);
 
-		if(Customer->GetClientVersion() == EQClientMac)
-			Customer->BulkSendTraderInventory(SellerCharID);
-		else
-			Customer->SendItemPacket(30, inst, ItemPacketMerchant);
+		Customer->BulkSendTraderInventory(SellerCharID);
 	}
 	safe_delete(inst);
 }
@@ -2527,11 +2444,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
 
-	if(GetClientVersion() >= EQClientSoD)
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
-	}
-
 	sprintf(Buf, "%s", Buyer->GetName()); Buf += 64;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
@@ -2551,11 +2463,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerTransactionComplete);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
-
-	if(Buyer->GetClientVersion() >= EQClientSoD)
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
-	}
 
 	sprintf(Buf, "%s", GetName()); Buf += 64;
 

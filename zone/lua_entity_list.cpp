@@ -217,7 +217,7 @@ void Lua_EntityList::RemoveFromTargets(Lua_Mob mob) {
 
 void Lua_EntityList::RemoveFromTargets(Lua_Mob mob, bool RemoveFromXTargets) {
 	Lua_Safe_Call_Void();
-	self->RemoveFromTargets(mob, RemoveFromXTargets);
+	self->RemoveFromTargets(mob);
 }
 
 void Lua_EntityList::ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target) {

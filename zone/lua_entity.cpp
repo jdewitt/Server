@@ -27,11 +27,6 @@ bool Lua_Entity::IsMob() {
 	return self->IsMob();
 }
 
-bool Lua_Entity::IsMerc() {
-	Lua_Safe_Call_Bool();
-	return self->IsMerc();
-}
-
 bool Lua_Entity::IsCorpse() {
 	Lua_Safe_Call_Bool();
 	return self->IsCorpse();
@@ -116,7 +111,6 @@ luabind::scope lua_register_entity() {
 		.def("IsClient", &Lua_Entity::IsClient)
 		.def("IsNPC", &Lua_Entity::IsNPC)
 		.def("IsMob", &Lua_Entity::IsMob)
-		.def("IsMerc", &Lua_Entity::IsMerc)
 		.def("IsCorpse", &Lua_Entity::IsCorpse)
 		.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
 		.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)

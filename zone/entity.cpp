@@ -1129,8 +1129,7 @@ void EntityList::SendZoneSpawns(Client *client)
 	while (it != mob_list.end()) {
 		Mob *ent = it->second;
 		if (!(ent->InZone()) || (ent->IsClient())) {
-			if (ent->CastToClient()->GMHideMe(client) ||
-					ent->CastToClient()->IsHoveringForRespawn()) {
+			if (ent->CastToClient()->GMHideMe(client)) {
 				++it;
 				continue;
 			}
@@ -1156,8 +1155,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->InZone()) {
-			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client) ||
-					spawn->CastToClient()->IsHoveringForRespawn()))
+			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client)))
 				continue;
 			memset(&ns, 0, sizeof(NewSpawn_Struct));
 			spawn->FillSpawnStruct(&ns, client);
@@ -1247,7 +1245,7 @@ void EntityList::ReplaceWithTarget(Mob *pOldMob, Mob *pNewTarget)
 	}
 }
 
-void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
+void EntityList::RemoveFromTargets(Mob *mob)
 {
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
@@ -1258,73 +1256,9 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 			continue;
 
 		m->RemoveFromHateList(mob);
-
-		if (RemoveFromXTargets) {
-			if (m->IsClient())
-				m->CastToClient()->RemoveXTarget(mob, false);
-			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient())
-				mob->CastToClient()->RemoveXTarget(m, false);
-		}
 	}
 }
 
-void EntityList::RemoveFromXTargets(Mob *mob)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		it->second->RemoveXTarget(mob, false);
-		++it;
-	}
-}
-
-void EntityList::RemoveFromAutoXTargets(Mob *mob)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		it->second->RemoveXTarget(mob, true);
-		++it;
-	}
-}
-
-void EntityList::RefreshAutoXTargets(Client *c)
-{
-	if (!c)
-		return;
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *m = it->second;
-		++it;
-
-		if (!m || m->GetHP() <= 0)
-			continue;
-
-		if (m->CheckAggro(c) && !c->IsXTarget(m)) {
-			c->AddAutoXTarget(m);
-			break;
-		}
-
-	}
-}
-
-void EntityList::RefreshClientXTargets(Client *c)
-{
-	if (!c)
-		return;
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c2 = it->second;
-		++it;
-
-		if (!c2)
-			continue;
-
-		if (c2->IsClientXTarget(c))
-			c2->UpdateClientXTarget(c);
-	}
-}
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
 		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits)
@@ -1363,23 +1297,6 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		if (Send && (c->GetClientVersionBit() & ClientVersionBits))
 			c->QueuePacket(app, ackreq);
-	}
-}
-
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-		++it;
-
-		if (!c || ((c == sender) && !iSendToSender))
-			continue;
-
-		if (!c->IsXTarget(sender))
-			continue;
-
-		c->QueuePacket(app);
 	}
 }
 
@@ -2829,8 +2746,6 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			if (targ->IsClient()) {
 				if (it->second->GetLevel() >= 35 && MakeRandomInt(1, 100) <= 60)
 					it->second->AddFeignMemory(targ->CastToClient());
-				else
-					targ->CastToClient()->RemoveXTarget(it->second, false);
 			}
 		}
 		++it;
@@ -2842,7 +2757,6 @@ void EntityList::ClearZoneFeignAggro(Client *targ)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		it->second->RemoveFromFeignMemory(targ);
-		targ->CastToClient()->RemoveXTarget(it->second, false);
 		++it;
 	}
 }
@@ -3495,23 +3409,6 @@ void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
 			mob->EnableLogging();
 		else
 			mob->DisableLogging();
-	}
-}
-
-void EntityList::UpdateHoTT(Mob *target)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-		if (c->GetTarget() == target) {
-			if (target->GetTarget())
-				c->SetHoTT(target->GetTarget()->GetID());
-			else
-				c->SetHoTT(0);
-
-			c->UpdateXTargetType(TargetsTarget, target->GetTarget());
-		}
-		++it;
 	}
 }
 
@@ -4274,8 +4171,6 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if (c && (c->GetClientVersion() >= EQClientSoD))
-			c->QueuePacket(outapp);
 
 		++it;
 	}

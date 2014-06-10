@@ -153,7 +153,6 @@ Client::Client(EQStreamInterface* ieqs)
 	charm_cast_timer(3500),
 	qglobal_purge_timer(30000),
 	TrackingTimer(2000),
-	RespawnFromHoverTimer(0),
 	ItemTickTimer(10000),
 	ItemQuestTimer(500)
 {
@@ -357,15 +356,6 @@ Client::~Client() {
 
 	UpdateWho(2);
 
-	if(IsHoveringForRespawn())
-	{
-		m_pp.zone_id = m_pp.binds[0].zoneId;
-		m_pp.zoneInstance = 0;
-		x_pos = m_pp.binds[0].x;
-		y_pos = m_pp.binds[0].y;
-		z_pos = m_pp.binds[0].z;
-	}
-
 	// we save right now, because the client might be zoning and the world
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown
@@ -373,8 +363,6 @@ Client::~Client() {
 	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);
-
-	ClearRespawnOptions();
 
 	numclients--;
 	UpdateWindowTitle();
@@ -1154,37 +1142,7 @@ void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 	//
 	snprintf(OutMessage, MaxMessageLength, "%s", message); OutMessage[MaxMessageLength]='\0';
 
-	if(GetClientVersion() != EQClientMac)
-	{
-		// npcnames longer than 60 characters crash the client when they log back in
-		const int MaxNPCNameLength = 60;
-		char OutNPCName[MaxNPCNameLength+1];
-		snprintf(OutNPCName, MaxNPCNameLength, "%s", npcname); OutNPCName[MaxNPCNameLength]='\0';
-		uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
-		EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
-		SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
-
-		sm->header[0] = 0;
-		sm->header[1] = 2;
-		sm->header[2] = 0;
-		sm->msg_type = 0x0a;
-		sm->target_spawn_id = GetID();
-
-		char *dest = &sm->sayer[0];
-
-		memcpy(dest, OutNPCName, strlen(OutNPCName) + 1);
-
-		dest = dest + strlen(OutNPCName) + 13;
-
-		memcpy(dest, OutMessage, strlen(OutMessage) + 1);
-
-		QueuePacket(app);
-
-		safe_delete(app);
-	}
 	//EQMac SpecialMesg works for Message but not here (end result of quest say) No clue why, but workaround for now.
-	else
-	{
 		uint32 len_packet = sizeof(OldSpecialMesg_Struct) + strlen(OutMessage) + 1;
 		EQApplicationPacket* app = new EQApplicationPacket(OP_OldSpecialMesg, len_packet);
 		OldSpecialMesg_Struct* sm=(OldSpecialMesg_Struct*)app->pBuffer;
@@ -1194,7 +1152,6 @@ void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 
 		QueuePacket(app);
 		safe_delete(app);
-	}
 }
 
 void Client::SetMaxHP() {
@@ -1562,11 +1519,6 @@ void Client::SendManaUpdatePacket() {
 	if (!Connected() || IsCasting())
 		return;
 
-	if (GetClientVersion() >= EQClientSoD) {
-		SendManaUpdate();
-		SendEnduranceUpdate();
-	}
-
 	//std::cout << "Sending mana update: " << (cur_mana - last_reported_mana) << std::endl;
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
 
@@ -1596,14 +1548,6 @@ void Client::SendManaUpdatePacket() {
 			mmus->mana = GetManaPercent();
 			meus->endurance = GetEndurancePercent();
 
-
-			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= EQClientSoD))
-				{
-					g->members[i]->CastToClient()->QueuePacket(outapp);
-					g->members[i]->CastToClient()->QueuePacket(outapp2);
-				}
-
 			safe_delete(outapp);
 			safe_delete(outapp2);
 		}
@@ -1623,7 +1567,6 @@ void Client::SendManaUpdate()
 	mus->max_mana = GetMaxMana();
 	mus->spawn_id = GetID();
 	QueuePacket(mana_app);
-	entity_list.QueueClientsByXTarget(this, mana_app, false);
 	safe_delete(mana_app);
 }
 
@@ -1636,7 +1579,6 @@ void Client::SendEnduranceUpdate()
 	eus->max_end = GetMaxEndurance();
 	eus->spawn_id = GetID();
 	QueuePacket(end_app);
-	entity_list.QueueClientsByXTarget(this, end_app, false);
 	safe_delete(end_app);
 }
 
@@ -1842,18 +1784,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if(GetClientVersion() >= EQClientSoF)
-		{
-			const ItemInst *inst = m_inv[book->invslot];
-			if(inst)
-				out->type = inst->GetItem()->Book;
-			else
-				out->type = book->type;
-		}
-		else
-		{
-			out->type = book->type;
-		}
+		out->type = book->type;
 		out->invslot = book->invslot;
 		memcpy(out->booktext, booktxt2.c_str(), length);
 
@@ -1988,8 +1919,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.platinum = m_pp.platinum + tmp2;
 	}
 	tmp-=tmp2*1000;
-	if (updateclient && GetClientVersion() == EQClientMac)
-		SendClientMoneyUpdate(3,tmp2);
+	SendClientMoneyUpdate(3,tmp2);
 
 	// Add Amount of Gold
 	tmp2 = tmp/100;
@@ -2000,8 +1930,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.gold = m_pp.gold + tmp2;
 	}
 	tmp-=tmp2*100;
-	if (updateclient && GetClientVersion() == EQClientMac)
-		SendClientMoneyUpdate(2,tmp2);
+	SendClientMoneyUpdate(2,tmp2);
 
 	// Add Amount of Silver
 	tmp2 = tmp/10;
@@ -2012,8 +1941,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.silver = m_pp.silver + tmp2;
 	}
 	tmp-=tmp2*10;
-	if (updateclient && GetClientVersion() == EQClientMac)
-		SendClientMoneyUpdate(1,tmp2);
+	SendClientMoneyUpdate(1,tmp2);
 
 	// Add Copper
 	//tmp	= tmp - (tmp2* 10);
@@ -2026,8 +1954,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	} else {
 		m_pp.copper = m_pp.copper + tmp2;
 	}
-	if (updateclient && GetClientVersion() == EQClientMac)
-		SendClientMoneyUpdate(0,tmp2);
+	SendClientMoneyUpdate(0,tmp2);
 
 	//send them all at once, since the above code stopped working.
 	if(updateclient)
@@ -2045,26 +1972,22 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	int32 new_value = m_pp.platinum + platinum;
 	if(new_value >= 0 && new_value > m_pp.platinum)
 		m_pp.platinum += platinum;
-		if (updateclient && GetClientVersion() == EQClientMac)
-			SendClientMoneyUpdate(3,platinum);
+		SendClientMoneyUpdate(3,platinum);
 
 	new_value = m_pp.gold + gold;
 	if(new_value >= 0 && new_value > m_pp.gold)
 		m_pp.gold += gold;
-		if (updateclient && GetClientVersion() == EQClientMac)
-			SendClientMoneyUpdate(2,gold);
+		SendClientMoneyUpdate(2,gold);
 
 	new_value = m_pp.silver + silver;
 	if(new_value >= 0 && new_value > m_pp.silver)
 		m_pp.silver += silver;
-		if (updateclient && GetClientVersion() == EQClientMac)
-			SendClientMoneyUpdate(1,silver);
+		SendClientMoneyUpdate(1,silver);
 
 	new_value = m_pp.copper + copper;
 	if(new_value >= 0 && new_value > m_pp.copper)
 		m_pp.copper += copper;
-		if (updateclient && GetClientVersion() == EQClientMac)
-			SendClientMoneyUpdate(0,copper);
+		SendClientMoneyUpdate(0,copper);
 
 	if(updateclient)
 		SendMoneyUpdate();
@@ -2079,18 +2002,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 }
 
 void Client::SendMoneyUpdate() {
-
-	if(GetClientVersion() > EQClientMac){
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyUpdate,sizeof(MoneyUpdate_Struct));
-		MoneyUpdate_Struct* mus= (MoneyUpdate_Struct*)outapp->pBuffer;
-
-		mus->platinum = m_pp.platinum;
-		mus->gold = m_pp.gold;
-		mus->silver = m_pp.silver;
-		mus->copper = m_pp.copper;
-
-		FastQueuePacket(&outapp);
-	}
+//CAVEREM
 }
 
 bool Client::HasMoney(uint64 Copper) {
@@ -2703,40 +2615,16 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
 
-	if (GetClientVersionBit() & BIT_SoDAndLater) {
-		if (filter->filters[FilterDOT] == 0)
-			ClientFilters[FilterDOT] = FilterShow;
-		else if (filter->filters[FilterDOT] == 1)
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else if (filter->filters[FilterDOT] == 2)
-			ClientFilters[FilterDOT] = FilterShowGroupOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
-	} else {
-		if (filter->filters[FilterDOT] == 0) // show functions as self only
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
-	}
+	if (filter->filters[FilterDOT] == 0) // show functions as self only
+		ClientFilters[FilterDOT] = FilterShowSelfOnly;
+	else
+		ClientFilters[FilterDOT] = FilterHide;
 
 	Filter1(FilterPetHits);
 	Filter1(FilterPetMisses);
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
-
-	if (GetClientVersionBit() & BIT_SoDAndLater) {
-		if (filter->filters[FilterHealOverTime] == 0)
-			ClientFilters[FilterHealOverTime] = FilterShow;
-		// This is called 'Show Mine Only' in the clients, but functions the same as show
-		// so instead of apply special logic, just set to show
-		else if (filter->filters[FilterHealOverTime] == 1)
-			ClientFilters[FilterHealOverTime] = FilterShow;
-		else
-			ClientFilters[FilterHealOverTime] = FilterHide;
-	} else {
-		// these clients don't have a 'self only' filter
-		Filter1(FilterHealOverTime);
-	}
+	Filter1(FilterHealOverTime);
 }
 
 // this version is for messages with no parameters
@@ -2748,34 +2636,16 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 		return;
 	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
 		return;
-	if(GetClientVersion() > EQClientMac)
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SimpleMessage,12);
-		SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
-		sms->color=type;
-		sms->string_id=string_id;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, 12);
+	OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
+	fm->string_id = string_id;
+	fm->type = type;
 
-		sms->unknown8=0;
-
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+	if(distance>0)
+		entity_list.QueueCloseClients(this,outapp,false,distance);
 	else
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, 12);
-		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
-		fm->string_id = string_id;
-		fm->type = type;
-
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+		QueuePacket(outapp);
+	safe_delete(outapp);
 
 }
 
@@ -2826,8 +2696,6 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	for(argcount = length = 0; message_arg[argcount]; argcount++)
 		length += strlen(message_arg[argcount]) + 1;
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
 		fm->string_id = string_id;
@@ -2845,27 +2713,6 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 		else
 			QueuePacket(outapp);
 		safe_delete(outapp);
-	}
-	else
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
-		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-		fm->string_id = string_id;
-		fm->type = type;
-		bufptr = fm->message;
-		for(i = 0; i < argcount; i++)
-		{
-			strcpy(bufptr, message_arg[i]);
-			bufptr += strlen(message_arg[i]) + 1;
-		}
-
-
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
-	}
 }
 
 // helper function, returns true if we should see the message
@@ -3125,7 +2972,7 @@ uint8 Client::SlotConvert2(uint8 slot){
 
 void Client::Escape()
 {
-	entity_list.RemoveFromTargets(this, true);
+	entity_list.RemoveFromTargets(this);
 	SetInvisible(1);
 
 	Message_StringID(MT_Skills, ESCAPE);
@@ -3735,50 +3582,6 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_
 		safe_delete(outapp);
 }
 
-void Client::SetHoTT(uint32 mobid) {
-	if(GetClientVersion() == EQClientMac)
-		return;
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_TargetHoTT, sizeof(ClientTarget_Struct));
-	ClientTarget_Struct *ct = (ClientTarget_Struct *) outapp->pBuffer;
-	ct->new_target = mobid;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration) {
-
-	if(GetClientVersion() == EQClientMac)
-	{
-		Message(0,"This client doesn't support popups!");
-		return;
-	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
-	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
-
-	if((strlen(Title) > (sizeof(olms->Title)-1)) ||
-		(strlen(Text) > (sizeof(olms->Text)-1))) return;
-
-	strcpy(olms->Title, Title);
-	strcpy(olms->Text, Text);
-
-	olms->Buttons = Buttons;
-
-	if(Duration > 0)
-		olms->Duration = Duration * 1000;
-	else
-		olms->Duration = 0xffffffff;
-
-	olms->PopupID = PopupID;
-	olms->NegativeID = 0;
-
-	sprintf(olms->ButtonName0, "%s", "Yes");
-	sprintf(olms->ButtonName1, "%s", "No");
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...) {
 	va_list argptr;
 	char buffer[4096];
@@ -4204,16 +4007,6 @@ void Client::IncrementAggroCount() {
 	//
 	if(AggroCount > 1)
 		return;
-
-	if(GetClientVersion() >= EQClientSoF) {
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 1);
-		char *Buffer = (char *)outapp->pBuffer;
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x01);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-
 }
 
 void Client::DecrementAggroCount() {
@@ -4237,15 +4030,6 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 
-	if(GetClientVersion() >= EQClientSoF) {
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
-		char *Buffer = (char *)outapp->pBuffer;
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, RuleI(Character, RestRegenTimeToActivate));
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
 }
 
 void Client::SendPVPStats()
@@ -4342,7 +4126,6 @@ void Client::SendRespawnBinds()
 
 	//Packet header
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, initial_respawn_selection); //initial selection (from 0)
-	VARSTRUCT_ENCODE_TYPE(uint32, buffer, RuleI(Character, RespawnFromHoverTimer) * 1000);
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, 0); //unknown
 	VARSTRUCT_ENCODE_TYPE(uint32, buffer, num_options); //number of options to display
 
@@ -4551,10 +4334,7 @@ void Client::ShowSkillsWindow()
 			WindowText += "<br>";
 		}
 	}
-	if(GetClientVersion() > EQClientMac)
-		this->SendPopupToClient(WindowTitle, WindowText.c_str());
-	else
-		this->Message(0,"%s",WindowText.c_str());
+	this->Message(0,"%s",WindowText.c_str());
 }
 
 
@@ -5192,8 +4972,7 @@ void Client::SendZonePoints()
 	while(iterator.MoreElements())
 	{
 		ZonePoint* data = iterator.GetData();
-		if(GetClientVersion() == EQClientMac)
-			data->target_zone_instance = 0;
+		data->target_zone_instance = 0;
 		if(GetClientVersionBit() & data->client_version_mask)
 		{
 			zp->zpe[i].iterator = data->number;
@@ -5899,7 +5678,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	if(use_window) {
 		if(final_stats.size() < 4096)
 		{
-			uint32 Buttons = (client->GetClientVersion() < EQClientSoD) ? 0 : 1;
+			uint32 Buttons = 1;
 			client->SendWindow(0, POPUPID_UPDATE_SHOWSTATSWINDOW, Buttons, "Cancel", "Update", 0, 1, this, "", "%s", final_stats.c_str());
 			goto Extra_Info;
 		}
@@ -5940,250 +5719,6 @@ void Client::OpenLFGuildWindow()
 
 	outapp->WriteUInt32(6);
 
-	FastQueuePacket(&outapp);
-}
-
-bool Client::IsXTarget(const Mob *m) const
-{
-	if(!XTargettingAvailable() || !m || (m->GetID() == 0))
-		return false;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(XTargets[i].ID == m->GetID())
-			return true;
-	}
-	return false;
-}
-
-bool Client::IsClientXTarget(const Client *c) const
-{
-	if(!XTargettingAvailable() || !c)
-		return false;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(!strcasecmp(XTargets[i].Name, c->GetName()))
-			return true;
-	}
-	return false;
-}
-
-
-void Client::UpdateClientXTarget(Client *c)
-{
-	if(!XTargettingAvailable() || !c)
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(!strcasecmp(XTargets[i].Name, c->GetName()))
-		{
-			XTargets[i].ID = c->GetID();
-			SendXTargetPacket(i, c);
-		}
-	}
-}
-
-void Client::AddAutoXTarget(Mob *m)
-{
-	if(!XTargettingAvailable() || !XTargetAutoAddHaters)
-		return;
-
-	if(IsXTarget(m))
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
-		{
-			XTargets[i].ID = m->GetID();
-			SendXTargetPacket(i, m);
-			break;
-		}
-	}
-}
-
-void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
-{
-	if(!XTargettingAvailable())
-		return;
-
-	bool HadFreeAutoSlotsBefore = false;
-
-	int FreedAutoSlots = 0;
-
-	if(m->GetID() == 0)
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(OnlyAutoSlots && (XTargets[i].Type !=Auto))
-			continue;
-
-		if(XTargets[i].ID == m->GetID())
-		{
-			if(XTargets[i].Type == CurrentTargetNPC)
-				XTargets[i].Type = Auto;
-
-			if(XTargets[i].Type == Auto)
-				++FreedAutoSlots;
-
-			XTargets[i].ID = 0;
-
-			SendXTargetPacket(i, nullptr);
-		}
-		else
-		{
-			if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
-				HadFreeAutoSlotsBefore = true;
-		}
-	}
-	// If there are more mobs aggro on us than we had auto-hate slots, add one of those haters into the slot(s) we just freed up.
-	if(!HadFreeAutoSlotsBefore && FreedAutoSlots)
-		entity_list.RefreshAutoXTargets(this);
-}
-
-void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
-{
-	if(GetClientVersion() == EQClientMac)
-		return;
-
-	if(!XTargettingAvailable())
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(XTargets[i].Type == Type)
-		{
-			if(m)
-				XTargets[i].ID = m->GetID();
-			else
-				XTargets[i].ID = 0;
-
-			if(Name)
-				strncpy(XTargets[i].Name, Name, 64);
-
-			SendXTargetPacket(i, m);
-		}
-	}
-}
-
-void Client::SendXTargetPacket(uint32 Slot, Mob *m)
-{
-	if(!XTargettingAvailable())
-		return;
-
-	uint32 PacketSize = 18;
-
-	if(m)
-		PacketSize += strlen(m->GetCleanName());
-	else
-	{
-		PacketSize += strlen(XTargets[Slot].Name);
-	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_XTargetResponse, PacketSize);
-	outapp->WriteUInt32(GetMaxXTargets());
-	outapp->WriteUInt32(1);
-	outapp->WriteUInt32(Slot);
-	if(m)
-	{
-		outapp->WriteUInt8(1);
-	}
-	else
-	{
-		if (strlen(XTargets[Slot].Name) && ((XTargets[Slot].Type == CurrentTargetPC) ||
-			(XTargets[Slot].Type == GroupTank) ||
-			(XTargets[Slot].Type == GroupAssist) ||
-			(XTargets[Slot].Type == Puller) ||
-			(XTargets[Slot].Type == RaidAssist1) ||
-			(XTargets[Slot].Type == RaidAssist2) ||
-			(XTargets[Slot].Type == RaidAssist3)))
-		{
-			outapp->WriteUInt8(2);
-		}
-		else
-		{
-			outapp->WriteUInt8(0);
-		}
-	}
-	outapp->WriteUInt32(XTargets[Slot].ID);
-	outapp->WriteString(m ? m->GetCleanName() : XTargets[Slot].Name);
-	FastQueuePacket(&outapp);
-}
-
-void Client::RemoveGroupXTargets()
-{
-	if(!XTargettingAvailable())
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if ((XTargets[i].Type == GroupTank) ||
-			(XTargets[i].Type == GroupAssist) ||
-			(XTargets[i].Type == Puller) ||
-			(XTargets[i].Type == RaidAssist1) ||
-			(XTargets[i].Type == RaidAssist2) ||
-			(XTargets[i].Type == RaidAssist3) ||
-			(XTargets[i].Type == GroupMarkTarget1) ||
-			(XTargets[i].Type == GroupMarkTarget2) ||
-			(XTargets[i].Type == GroupMarkTarget3))
-		{
-			XTargets[i].ID = 0;
-			XTargets[i].Name[0] = 0;
-			SendXTargetPacket(i, nullptr);
-		}
-	}
-}
-
-void Client::RemoveAutoXTargets()
-{
-	if(!XTargettingAvailable())
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(XTargets[i].Type == Auto)
-		{
-			XTargets[i].ID = 0;
-			XTargets[i].Name[0] = 0;
-			SendXTargetPacket(i, nullptr);
-		}
-	}
-}
-
-void Client::ShowXTargets(Client *c)
-{
-	if(!c)
-		return;
-
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-		c->Message(0, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
-}
-
-void Client::SetMaxXTargets(uint8 NewMax)
-{
-	if(!XTargettingAvailable())
-		return;
-
-	if(NewMax > XTARGET_HARDCAP)
-		return;
-
-	MaxXTargets = NewMax;
-
-	Save(0);
-
-	for(int i = MaxXTargets; i < XTARGET_HARDCAP; ++i)
-	{
-		XTargets[i].Type = Auto;
-		XTargets[i].ID = 0;
-		XTargets[i].Name[0] = 0;
-	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
-	outapp->WriteUInt32(GetMaxXTargets());
-	outapp->WriteUInt32(0);
 	FastQueuePacket(&outapp);
 }
 
@@ -6284,11 +5819,8 @@ void Client::SendWebLink(const char *website)
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if(!(ClientVersionBit & BIT_RoFAndLater))
-	{
-		Message_StringID(0, PICK_LORE);
-		return;
-	}
+	Message_StringID(0, PICK_LORE);
+	return;
 
 	const Item_Struct *item = database.GetItem(ItemID);
 
@@ -6805,107 +6337,6 @@ void Client::SendItemScale(ItemInst *inst) {
 		SendItemPacket(slot, inst, ItemPacketCharmUpdate);
 		CalcBonuses();
 	}
-}
-
-void Client::AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float heading, bool initial_selection, int8 position)
-{
-	//If respawn window is already open, any changes would create an inconsistency with the client
-	if (IsHoveringForRespawn()) { return; }
-
-	if (zoneid == 0)
-		zoneid = zone->GetZoneID();
-
-	//Create respawn option
-	RespawnOption res_opt;
-	res_opt.name = option_name;
-	res_opt.zoneid = zoneid;
-	res_opt.x = x;
-	res_opt.y = y;
-	res_opt.z = z;
-	res_opt.heading = heading;
-
-	if (position == -1 || position >= respawn_options.size())
-	{
-		//No position specified, or specified beyond the end, simply append
-		respawn_options.push_back(res_opt);
-		//Make this option the initial selection for the window if desired
-		if (initial_selection)
-			initial_respawn_selection = static_cast<uint8>(respawn_options.size()) - 1;
-	}
-	else if (position == 0)
-	{
-		respawn_options.push_front(res_opt);
-		if (initial_selection)
-			initial_respawn_selection = 0;
-	}
-	else
-	{
-		//Insert new option between existing options
-		std::list<RespawnOption>::iterator itr;
-		uint8 pos = 0;
-		for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-		{
-			if (pos++ == position)
-			{
-				respawn_options.insert(itr,res_opt);
-				//Make this option the initial selection for the window if desired
-				if (initial_selection)
-					initial_respawn_selection = pos;
-				return;
-			}
-		}
-	}
-}
-
-bool Client::RemoveRespawnOption(std::string option_name)
-{
-	//If respawn window is already open, any changes would create an inconsistency with the client
-	if (IsHoveringForRespawn() || respawn_options.empty()) { return false; }
-
-	bool had = false;
-	RespawnOption* opt;
-	std::list<RespawnOption>::iterator itr;
-	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-	{
-		opt = &(*itr);
-		if (opt->name.compare(option_name) == 0)
-		{
-			itr = respawn_options.erase(itr);
-			had = true;
-			//could be more with the same name, so keep going...
-		}
-	}
-	return had;
-}
-
-bool Client::RemoveRespawnOption(uint8 position)
-{
-	//If respawn window is already open, any changes would create an inconsistency with the client
-	if (IsHoveringForRespawn() || respawn_options.empty()) { return false; }
-
-	//Easy cases first...
-	if (position == 0)
-	{
-		respawn_options.pop_front();
-		return true;
-	}
-	else if (position == (respawn_options.size() - 1))
-	{
-		respawn_options.pop_back();
-		return true;
-	}
-
-	std::list<RespawnOption>::iterator itr;
-	uint8 pos = 0;
-	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-	{
-		if (pos++ == position)
-		{
-			respawn_options.erase(itr);
-			return true;
-		}
-	}
-	return false;
 }
 
 void Client::SetHunger(int32 in_hunger)

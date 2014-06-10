@@ -470,19 +470,10 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			args.push_back(m_inst);
 			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0, &args);
 
-			if(sender->GetClientVersion() == EQClientMac)
-			{
 				int charges = m_inst->GetCharges();
 				if(charges < 1)
 					charges = 1;
 				sender->SummonItem(m_inst->GetItem()->ID,charges);
-			}
-			else
-			{
-				// Transfer item to client
-				sender->PutItemInInventory(SLOT_CURSOR, *m_inst, false);
-				sender->SendItemPacket(SLOT_CURSOR, m_inst, ItemPacketSummonItem);
-			}
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(SLOT_CURSOR);
@@ -551,13 +542,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			//Clear out no-drop and no-rent items first if different player opens it
 			if(user != last_user)
 				m_inst->ClearByFlags(byFlagSet, byFlagSet);
-
-			if(sender->GetClientVersion() > EQClientMac)
-			{
-				EQApplicationPacket* outapp=new EQApplicationPacket(OP_ClientReady,0);
-				sender->QueuePacket(outapp);
-				safe_delete(outapp);
-			}
 
 			for (uint8 i=0; i<10; i++) {
 				const ItemInst* inst = m_inst->GetItem(i);

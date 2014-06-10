@@ -1059,13 +1059,6 @@ void Client::BuyAA(AA_Action* action)
 		m_pp.aapoints -= real_cost;
 
 		Save();
-		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 8) && (aa2->hotkey_sid == 4294967295u))
-			&& ((aa2->max_level == (cur_level+1)) && aa2->sof_next_id)){
-			SendAA(aa2->id);
-			SendAA(aa2->sof_next_id);
-		}
-		else if(GetClientVersionBit() >= 2)
-			SendAA(aa2->id);
 
 		SendAATable();
 
@@ -1089,8 +1082,7 @@ void Client::SendAATimer(uint32 ability, uint32 begin, uint32 end) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 	int32 tmp = ability;
-	if(GetClientVersion() == EQClientMac)
-		tmp = zone->EmuToEQMacAA(ability);
+	tmp = zone->EmuToEQMacAA(ability);
 	uaaout->ability = tmp;
 	uaaout->begin = begin;
 	uaaout->end = end;
@@ -1105,8 +1097,6 @@ void Client::SendAATimers() {
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 
 	//EQMac sends timers for all the abilities you have, even if they have never been used.
-	if(GetClientVersion() == EQClientMac)
-	{
 		uint8 macaaid = 0;
 		for(uint32 i=0;i < MAX_PP_AA_ARRAY;i++)
 		{
@@ -1138,30 +1128,11 @@ void Client::SendAATimers() {
 				}
 			}
 		}
-	}
-	else
-	{
-		PTimerList::iterator c,e;
-		c = p_timers.begin();
-		e = p_timers.end();
-		for(; c != e; ++c) {
-			PersistentTimer *cur = c->second;
-			if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
-				continue;	//not an AA timer
-			//send timer
-			uaaout->begin = cur->GetStartTime();
-			uaaout->end = static_cast<uint32>(time(nullptr));
-			uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
-			QueuePacket(outapp);
-		}
-	}
 
 	safe_delete(outapp);
 }
 
 void Client::SendAATable() {
-	if(GetClientVersion() == EQClientMac)
-	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(OldAATable_Struct));
 
 		OldAATable_Struct* aa2 = (OldAATable_Struct *)outapp->pBuffer;
@@ -1185,23 +1156,6 @@ void Client::SendAATable() {
 		}	
 		QueuePacket(outapp);
 		safe_delete(outapp);
-	}
-	else
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
-
-		AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
-		aa2->aa_spent = GetAAPointsSpent();
-
-		uint32 i;
-		for(i=0;i < MAX_PP_AA_ARRAY;i++){
-			aa2->aa_list[i].aa_skill = aa[i]->AA;
-			aa2->aa_list[i].aa_value = aa[i]->value;
-			aa2->aa_list[i].unknown08 = 0;
-		}
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
 }
 
 void Client::SendPreviousAA(uint32 id, int seq){
@@ -1331,9 +1285,6 @@ void Client::SendAA(uint32 id, int seq) {
 	3) When you zone/buy your player profile will be checked and determine what AA can be displayed base on what you have already.
 	*/
 
-	if (RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (saa2->hotkey_sid == 4294967295u))
-		aa_stack = true;
-
 	if (aa_stack){
 		uint32 aa_AA = 0;
 		uint32 aa_value = 0;
@@ -1400,12 +1351,6 @@ void Client::SendAA(uint32 id, int seq) {
 			//Prevent removal of previous AA from window if next AA belongs to a higher client version.
 			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
-			if (saa_next &&
-				(((GetClientVersionBit() == 8) && (saa_next->clientver > 4))
-				|| ((GetClientVersionBit() == 16) && (saa_next->clientver > 5))
-				|| ((GetClientVersionBit() == 32) && (saa_next->clientver > 6)))){
-				saa->next_id=0xFFFFFFFF;
-			}
 		}
 
 		else{

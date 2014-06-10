@@ -247,8 +247,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	npc_aggro = d->npc_aggro;
 
-	if(!IsMerc())
-		AI_Start();
+	AI_Start();
 
 	d_meele_texture1 = d->d_meele_texture1;
 	d_meele_texture2 = d->d_meele_texture2;
@@ -424,20 +423,11 @@ void NPC::QueryLoot(Client* to) {
 	for(; cur != end; ++cur) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item)
-			if (to->GetClientVersion() >= EQClientSoF)
-			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
-			else if (to->GetClientVersion() == EQClientMac)
-			{
+		{
 				static char itemid[7];
 				sprintf(itemid, "%06d", item->ID);
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%c%s%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, 0x30, itemid, item->Name, 0x12);
-			}
-			else
-			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
+		}
 		else
 			LogFile->write(EQEMuLog::Error, "Database error, invalid item");
 		x++;

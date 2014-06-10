@@ -74,45 +74,12 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 void Client::SendGuildURL()
 {
-	if(GetClientVersion() < EQClientSoF)
-		return;
-
-	if(IsInAGuild())
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
-
-		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
-
-		if(guild_mgr.GetGuildURL(GuildID(), guuacs->Text))
-		{
-			guuacs->Action = 0;
-			FastQueuePacket(&outapp);
-		}
-		else
-			safe_delete(outapp);
-	}
+//CAVEREM
 }
 
 void Client::SendGuildChannel()
 {
-	if(GetClientVersion() < EQClientSoF)
-		return;
-
-	if(IsInAGuild())
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
-
-		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
-
-		if(guild_mgr.GetGuildChannel(GuildID(), guuacs->Text))
-		{
-			guuacs->Action = 1;
-
-			FastQueuePacket(&outapp);
-		}
-		else
-			safe_delete(outapp);
-	}
+//CAVEREM
 }
 
 void Client::SendGuildSpawnAppearance() {
@@ -135,13 +102,9 @@ void Client::SendGuildList() {
 	outapp = new EQApplicationPacket(OP_GuildsList);
 
 	//ask the guild manager to build us a nice guild list packet
-	if(GetClientVersion() == EQClientMac)
-	{
-		 OldGuildsList_Struct* guildstruct = guild_mgr.MakeOldGuildList(outapp->size);
-		 outapp->pBuffer = reinterpret_cast<uchar*>(guildstruct);
-	}
-	else
-		outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
+	 OldGuildsList_Struct* guildstruct = guild_mgr.MakeOldGuildList(outapp->size);
+	outapp->pBuffer = reinterpret_cast<uchar*>(guildstruct);
+
 	if(outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;

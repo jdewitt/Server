@@ -240,7 +240,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
 	if (mob->IsClient()) {
-		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn())
+		if (!mob->CastToClient()->ClientFinishedLoading())
 			return false;
 	}
 
@@ -1178,8 +1178,6 @@ void Mob::ClearFeignMemory() {
 	while (RememberedCharID != feign_memory_list.end())
 	{
 		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-		if(remember_client != nullptr) //Still in zone
-			remember_client->RemoveXTarget(this, false);
 		++RememberedCharID;
 	}
 

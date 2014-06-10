@@ -681,12 +681,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	char ConnectionType;
 
-	if(ClientVersionBit & BIT_UnderfootAndLater)
-		ConnectionType = 'U';
-	else if(ClientVersionBit & BIT_SoFAndLater)
-		ConnectionType = 'S';
-	else
-		ConnectionType = 'C';
+	ConnectionType = 'C';
 
 	EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_SetChatServer);
 	char buffer[112];
@@ -705,26 +700,6 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	QueuePacket(outapp2);
 	safe_delete(outapp2);
 
-	if(ClientVersionBit & !BIT_Mac)
-	{
-		outapp2 = new EQApplicationPacket(OP_SetChatServer2);
-
-		if(ClientVersionBit & BIT_TitaniumAndEarlier)
-			ConnectionType = 'M';
-
-		sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-			Config->MailHost.c_str(),
-			Config->MailPort,
-			Config->ShortName.c_str(),
-			this->GetCharName(), ConnectionType, MailKey
-		);
-		outapp2->size=strlen(buffer)+1;
-		outapp2->pBuffer = new uchar[outapp2->size];
-		memcpy(outapp2->pBuffer,buffer,outapp2->size);
-		QueuePacket(outapp2);
-		safe_delete(outapp2);
-	}
-
 	EnterWorld();
 
 	return true;
@@ -740,15 +715,6 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 		SendCharInfo();
 	}
 
-	return true;
-}
-
-bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
-	// HoT sends this to world while zoning and wants it echoed back.
-	if(ClientVersionBit & BIT_RoFAndLater)
-	{
-		QueuePacket(app);
-	}
 	return true;
 }
 
@@ -833,11 +799,8 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 				SendGuildList();
 				return true;
 		}
+		
 		case OP_ZoneChange:
-		{
-			// HoT sends this to world while zoning and wants it echoed back.
-			return HandleZoneChangePacket(app);
-		}
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
 		case OP_CrashDump:
@@ -1227,18 +1190,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	clog(WORLD__CLIENT,"Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	// validate the char creation struct
-	if(ClientVersionBit & BIT_SoFAndLater) {
-		if(!CheckCharCreateInfoSoF(cc))
-		{
-			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
-			return false;
-		}
-	} else {
-		if(!CheckCharCreateInfoTitanium(cc))
-		{
-			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
-			return false;
-		}
+	if(!CheckCharCreateInfoTitanium(cc))
+	{
+		clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
+		return false;
 	}
 
 	// Convert incoming cc_s to the new PlayerProfile_Struct
@@ -1328,39 +1283,24 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	//If server is PVP by default, make all character set to it.
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
-	//If it is an SoF Client and the SoF Start Zone rule is set, send new chars there
-	if((ClientVersionBit & BIT_SoFAndLater) && (RuleI(World, SoFStartZoneID) > 0)) {
-		clog(WORLD__CLIENT,"Found 'SoFStartZoneID' rule setting: %i", (RuleI(World, SoFStartZoneID)));
-		pp.zone_id = (RuleI(World, SoFStartZoneID));
+	// if there's a startzone variable put them in there
+	if(database.GetVariable("startzone", startzone, 50))
+	{
+		clog(WORLD__CLIENT,"Found 'startzone' variable setting: %s", startzone);
+		pp.zone_id = database.GetZoneID(startzone);
 		if(pp.zone_id)
 			database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
 		else
-			clog(WORLD__CLIENT_ERR,"Error getting zone id for Zone ID %i", (RuleI(World, SoFStartZoneID)));
+			clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
 	}
-	else
+	else	// otherwise use normal starting zone logic
 	{
-		// if there's a startzone variable put them in there
-		if(database.GetVariable("startzone", startzone, 50))
-		{
-			clog(WORLD__CLIENT,"Found 'startzone' variable setting: %s", startzone);
-			pp.zone_id = database.GetZoneID(startzone);
-			if(pp.zone_id)
-				database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
-			else
-				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
-		}
-		else	// otherwise use normal starting zone logic
-		{
-			bool ValidStartZone = false;
+		bool ValidStartZone = false;
 
-			if(ClientVersionBit & BIT_Client62AndTitanium)
-				ValidStartZone = database.GetStartZone(&pp, cc);			
-			else
-				ValidStartZone = database.GetStartZoneSoF(&pp, cc);
+		ValidStartZone = database.GetStartZoneSoF(&pp, cc);
 
-			if(!ValidStartZone)
-				return false;
-		}
+		if(!ValidStartZone)
+			return false;
 	}
 
 	if(!pp.zone_id)

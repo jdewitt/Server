@@ -345,15 +345,11 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 
 	if(!RuleB(Character, LeaveNakedCorpses) || RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) {
 		// cash
-		// Let's not move the cash when 'RespawnFromHover = true' && 'client->GetClientVersion() < EQClientSoF' since the client doesn't.
-		// (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < EQClientSoF) {
 			SetCash(pp->copper, pp->silver, pp->gold, pp->platinum);
 			pp->copper = 0;
 			pp->silver = 0;
 			pp->gold = 0;
 			pp->platinum = 0;
-		}
 
 		// get their tints
 		memcpy(item_tint, &client->GetPP().item_tint, sizeof(item_tint));
@@ -366,14 +362,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 		bool cursor = false;
 		for(i = 0; i <= 30; i++)
 		{
-			if(i == 21 && client->GetClientVersion() >= EQClientSoF) {
-				item = client->GetInv().GetItem(9999);
-				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-					std::list<uint32> slot_list = MoveItemToCorpse(client, item, 9999);
-					removed_list.merge(slot_list);
-				}
-
-			}
 
 			item = client->GetInv().GetItem(i);
 			if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
@@ -381,9 +369,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 				removed_list.merge(slot_list);
 			}
 		}
-
-		// cursor queue // (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < EQClientSoF) {
 
 			// bumped starting assignment to 8001 because any in-memory 'slot 8000' item was moved above as 'slot 30'
 			// this was mainly for client profile state reflection..should match db player inventory entries now.
@@ -398,7 +383,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 					cursor = true;
 				}
 			}
-		}
 
 		if(removed_list.size() != 0) {
 			std::stringstream ss("");
@@ -1001,17 +985,13 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		uint8 containercount = 0;
 		int corpselootlimit;
 
-		if(client->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-		else if(client->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-		else { corpselootlimit = 30; }
+		corpselootlimit = 30;
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
 			item_data->lootslot = 0xFFFF;
 
-			int8 offset = 22;
-			if(client->GetClientVersion() == EQClientMac)
-				offset = 0;
+			int8 offset = 0;
 			// Dont display the item if it's in a bag
 			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
 			if(!IsPlayerCorpse() || item_data->equipSlot <= 30 || item_data->equipSlot == 9999 || tCanLoot>=3 ||
@@ -1059,10 +1039,6 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// Disgrace: Client seems to require that we send the packet back...
 	client->QueuePacket(app);
-
-	// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
-	// server has now sent all the items on the corpse.
-	if(client->GetClientVersion() >= EQClientSoD) { SendLootReqErrorPacket(client, 6); }
 }
 
 void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
@@ -1111,9 +1087,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	ItemInst *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
-	int offset = 22;
-	if(client->GetClientVersion() == EQClientMac)
-		offset = 0;
+	int offset = 0;
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if(GetPKItem()>1)
@@ -1321,11 +1295,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit;
-
-	if (to->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-	else if (to->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-	else { corpselootlimit = 30; }
+	int corpselootlimit = 30;
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;

@@ -191,7 +191,7 @@ public:
 	* Groups
 	*/
 	uint32	GetGroupID(const char* name);
-	void	SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc = false);
+	void	SetGroupID(const char* name, uint32 id, uint32 charid);
 	void	ClearGroup(uint32 gid = 0);
 	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
 

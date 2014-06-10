@@ -234,7 +234,6 @@
 	void Handle_OP_AugmentInfo(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
-	void Handle_OP_RespawnWindow(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
@@ -254,8 +253,6 @@
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
 	void Handle_OP_LFGuild(const EQApplicationPacket *app);
-	void Handle_OP_XTargetRequest(const EQApplicationPacket *app);
-	void Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);
