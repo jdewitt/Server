@@ -1909,6 +1909,20 @@ DECODE(OP_FaceChange){
 FINISH_DIRECT_DECODE();
 }
 
+ENCODE(OP_Assist){
+	ENCODE_LENGTH_EXACT(EntityId_Struct);
+	SETUP_DIRECT_ENCODE(EntityId_Struct, structs::EntityId_Struct);
+	OUT(entity_id);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_Assist){
+	DECODE_LENGTH_EXACT(structs::EntityId_Struct);
+	SETUP_DIRECT_DECODE(EntityId_Struct, structs::EntityId_Struct);
+	IN(entity_id);
+FINISH_DIRECT_DECODE();
+}
+
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)
