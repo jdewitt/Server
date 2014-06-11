@@ -1686,10 +1686,9 @@ EQOldStream::~EQOldStream()
 	safe_delete(no_ack_received_timer);//delete no_ack_received_timer;
 	safe_delete(no_ack_sent_timer);//delete no_ack_sent_timer;
 	safe_delete(keep_alive_timer);//delete keep_alive_timer;
-	_log(NET__DEBUG, "Killing outbound packet queue");
+	_log(NET__DEBUG, "Killing outbound and inbound packet queue");
 	OutboundQueueClear();
 	InboundQueueClear();
-	PacketQueueClear();
 	SetState(CLOSED);
 }
 
@@ -1828,10 +1827,9 @@ bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
 	/************ CHECK FOR THREAD TERMINATION ************/
 	if(pack->HDR.a2_Closing && pack->HDR.a6_Closing)
 	{
-		if(!pm_state)
+		if(pm_state == CLOSING)
 		{
-			pm_state = CLOSING;
-			_SendDisconnect(); // Agz: Added a close packet
+			pm_state = CLOSED;
 		}
 	}
 	/************ END CHECK THREAD TERMINATION ************/
@@ -1869,7 +1867,9 @@ bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
 			uint32 sizep = 0;
 			buf = fragment_group->AssembleData(&sizep);
 			EQRawApplicationPacket *app = new EQRawApplicationPacket(fragment_group->GetOpcode(), buf, sizep);
+			MOutboundQueue.lock();
 			OutQueue.push(app);
+			MOutboundQueue.unlock();
 			return true;
 		}
 		else
@@ -1883,7 +1883,9 @@ bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
 		EQRawApplicationPacket *app = new EQRawApplicationPacket(pack->dwOpCode ,pack->pExtra, pack->dwExtraSize);   
 		if(app->GetRawOpcode() != 62272 && (app->GetRawOpcode() != 0 || app->Size() > 2)) //ClientUpdate
 			_log(NET__DEBUG, "Received old opcode - 0x%x size: %i", app->GetRawOpcode(), app->Size());
+		MOutboundQueue.lock();
 		OutQueue.push(app);
+		MOutboundQueue.unlock();
 		return true;
 	}
 	/************ END FRAGMENT CHECK ************/
@@ -1893,7 +1895,6 @@ bool EQOldStream::ProcessPacket(EQOldPacket* pack, bool from_buffer)
 
 void EQOldStream::CheckBufferedPackets()
 {
-	MOutboundQueue.lock();
 // Should use a hash table or sorted list instead....
 	int num=0; // Counting buffered packets for debug output
 	std::vector<EQOldPacket*>::iterator iterator;
@@ -1911,7 +1912,6 @@ void EQOldStream::CheckBufferedPackets()
 		iterator++;
 		}
 	}
-	MOutboundQueue.unlock();
 }
 
 /************************************************************************/
@@ -1929,7 +1929,7 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 	int16 restore_op = 0x0000;
 
 	/************ PM STATE = NOT ACTIVE ************/
-	if(pm_state == CLOSING)
+	if(pm_state == CLOSING || !app)
 	{
 		EQOldPacket *pack = new EQOldPacket();
 
@@ -1949,7 +1949,9 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 		MySendPacketStruct *p = new MySendPacketStruct;
 
 		p->buffer = pack->ReturnPacket(&p->size);
-		SendQueue.push(p);
+		MOutboundQueue.lock();
+		SendQueue.push(p);  
+		MOutboundQueue.unlock();
 		SACK.dwGSQ++; 
 		safe_delete(pack);//delete pack;
 		return;
@@ -1986,7 +1988,9 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 			pack->dwSEQ = 1;
 		}
 		p->buffer = pack->ReturnPacket(&p->size);
+		MOutboundQueue.lock();
 		SendQueue.push(p);  
+		MOutboundQueue.unlock();
 
 		no_ack_sent_timer->Disable();
 		safe_delete(pack);//delete pack;
@@ -2116,7 +2120,9 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 				//	cout << "OutgoingARQ pack->dwARQ:" << (unsigned short)pack->dwARQ << " SACK.dwARQ:" << (unsigned short)SACK.dwARQ << endl;
 				}
 				OutgoingARQ(pack->dwARQ);
+				MOutboundQueue.lock();
 				ResendQueue.push(pack);
+				MOutboundQueue.unlock();
 				packetspending++;
 				SACK.dwARQ++;
 			}
@@ -2136,7 +2142,9 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 			SACK.dwGSQ = 1;
 			}
 			p->buffer = pack->ReturnPacket(&p->size);
+			MOutboundQueue.lock();
 			SendQueue.push(p);
+			MOutboundQueue.unlock();
 			    
 			if(pack->HDR.a4_ASQ)
 				SACK.dbASQ_low++;
@@ -2161,7 +2169,6 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 void EQOldStream::CheckTimers(void)
 {
 	bool setClosing = false;
-	MOutboundQueue.lock();
 	/************ When did we last get a packet? ************/
 
 
@@ -2182,15 +2189,19 @@ void EQOldStream::CheckTimers(void)
 			pack->dwSEQ = 1;
 			}
 			p->buffer = pack->ReturnPacket(&p->size);
+			MOutboundQueue.lock();
 			SendQueue.push(p);
+			MOutboundQueue.unlock();
 		}
 		while(pack = q.pop())
 		{
+			MOutboundQueue.lock();
 			ResendQueue.push(pack);
+			MOutboundQueue.unlock();
 			packetspending++;
 			if(++pack->resend_count > 15) {
-				pm_state = CLOSING;
 				_SendDisconnect();
+				return;
 			}
 		}
 		no_ack_received_timer->Start(1000);
@@ -2201,12 +2212,10 @@ void EQOldStream::CheckTimers(void)
 		EQProtocolPacket app(0xFFFF, nullptr, 0);
 		MakeEQPacket(&app);
 	}
-	MOutboundQueue.unlock();
 }
 
 void EQOldStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 {
-	MOutboundQueue.lock();
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
 
 	if(p == nullptr)
@@ -2221,12 +2230,10 @@ void EQOldStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, p->pBuffer, p->size);
 	MakeEQPacket( pack2, ack_req);
 	delete pack2;
-	MOutboundQueue.unlock();
 }
 
 void EQOldStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 {
-	MOutboundQueue.lock();
 	EQApplicationPacket *pack=*p;
 	*p = nullptr;		//clear caller's pointer.. effectively takes ownership
 
@@ -2246,11 +2253,6 @@ void EQOldStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 	if(p == nullptr)
 		return;
 
-	if(OpMgr == nullptr || *OpMgr == nullptr) {
-		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping.");
-		delete p;
-		return;
-	}
 	EQProtocolPacket* pack2 = new EQProtocolPacket(opcode, pack->pBuffer, pack->size);
 
 	if(pack->emu_opcode != OP_MobUpdate && pack->emu_opcode != OP_MobHealth && pack->emu_opcode != OP_HPUpdate)
@@ -2258,7 +2260,6 @@ void EQOldStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 	MakeEQPacket(pack2, ack_req);
 	delete pack;
 	delete pack2;
-	MOutboundQueue.unlock();
 }
 
 EQApplicationPacket *EQOldStream::PopPacket()
@@ -2299,6 +2300,13 @@ EQRawApplicationPacket *p=nullptr;
 	while (p = OutQueue.pop()) {
 		safe_delete(p);
 	}
+// Send all the packets we "made"
+	for(int i = 0; i < buffered_packets.size(); i++) {
+		safe_delete(buffered_packets[i]);
+	}
+
+	buffered_packets.clear();
+
 	MInboundQueue.unlock();
 }
 
@@ -2306,7 +2314,7 @@ void EQOldStream::OutboundQueueClear()
 {
 	MySendPacketStruct *p=nullptr;
 
-	_log(NET__APP_TRACE, _L "Clearing outbound queue" __L);
+	_log(NET__APP_TRACE, _L "Clearing outbound & resend queue" __L);
 
 	MOutboundQueue.lock();
 	while (p = SendQueue.pop()) {
@@ -2314,6 +2322,11 @@ void EQOldStream::OutboundQueueClear()
 		p->size = 0;
 		p = 0;
 	}
+	while (ResendQueue.pop()) {
+		EQOldPacket* pp = ResendQueue.pop();
+		safe_delete(p);
+	}
+
 	MOutboundQueue.unlock();
 }
 
@@ -2354,17 +2367,28 @@ void EQOldStream::SendPacketQueue(bool Block)
 	}
 	// ************ Processing finished ************ //
 	MOutboundQueue.unlock();
-	//see if we need to send our disconnect and finish our close
-	if(SendQueue.empty() && OutQueue.empty() && ResendQueue.empty()) {
-		//no more data to send
-		if(CheckState(CLOSING)) {
-			_log(NET__DEBUG, _L "All outgoing data flushed, closing stream." __L );
-			//we are waiting for the queues to empty, now we can do our disconnect.
-			//this packet will not actually go out until the next call to Write().
-			SetState(CLOSED);
-		}
-	}
+}
 
+void EQOldStream::FinalizePacketQueue()
+{
+	// Get first send packet on queue and send it!
+	MySendPacketStruct* p = 0;    
+	sockaddr_in to;	
+	memset((char *) &to, 0, sizeof(to));
+	to.sin_family = AF_INET;
+	to.sin_port = remote_port;
+	to.sin_addr.s_addr = remote_ip;
+	MOutboundQueue.lock();
+	while(p = SendQueue.pop())
+	{
+		sendto(listening_socket, (char *) p->buffer, p->size, 0, (sockaddr*)&to, sizeof(to));
+		safe_delete_array(p->buffer);
+		p->size = 0;
+		p = 0;
+	}
+	// ************ Processing finished ************ //
+	pm_state = CLOSED;
+	MOutboundQueue.unlock();
 }
 
 bool EQOldStream::HasOutgoingData()
@@ -2372,7 +2396,7 @@ bool EQOldStream::HasOutgoingData()
 	bool flag;
 
 	MOutboundQueue.lock();
-	flag=(!SendQueue.empty());
+	flag=!(SendQueue.empty() && ResendQueue.empty());
 	MOutboundQueue.unlock();
 	return flag;
 }
@@ -2385,24 +2409,13 @@ bool outgoing_data = HasOutgoingData();	//up here to avoid recursive locking
 	if (orig_state == CLOSING && !outgoing_data) {
 		_log(NET__NET_TRACE, _L "Out of data in closing state, disconnecting." __L);
 		_SendDisconnect();
-		SetState(CLOSED);
 	} else if (LastPacket && (now-LastPacket) > timeout) {
 		switch(orig_state) {
-		case CLOSING:
-			//if we time out in the closing state, they are not acking us, just give up
-			_log(NET__DEBUG, _L "Timeout expired in closing state. Moving to closed state." __L);
-			_SendDisconnect();
-			SetState(CLOSED);
-			break;
-		case CLOSED:
-			_log(NET__DEBUG, _L "Timeout expired in closed state??" __L);
-			break;
 		case ESTABLISHED:
 			//we timed out during normal operation. Try to be nice about it.
 			//we will almost certainly time out again waiting for the disconnect reply, but oh well.
 			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
 			_SendDisconnect();
-			SetState(CLOSING);
 			break;
 		default:
 			break;
@@ -2430,6 +2443,7 @@ EQStream::MatchState EQOldStream::CheckSignature(const EQStream::Signature *sig)
 	EQStream::MatchState res = EQStream::MatchState::MatchNotReady;
 
 	MInboundQueue.lock();
+	MOutboundQueue.lock();
 	if (!OutQueue.empty()) {
 		//this is already getting hackish...
 		p = OutQueue.top();
@@ -2460,19 +2474,17 @@ EQStream::MatchState EQOldStream::CheckSignature(const EQStream::Signature *sig)
 		}
 	}
 	MInboundQueue.unlock();
+	MOutboundQueue.unlock();
 
 	return(res);
 }
 
 void EQOldStream::_SendDisconnect()
 {
-	MOutboundQueue.lock();
 	MakeEQPacket(0);
-	MOutboundQueue.unlock();
-
+	FinalizePacketQueue();
 }
 void EQOldStream::Close() {
-		SetState(CLOSING);
-		_SendDisconnect();
-		_log(NET__DEBUG, _L "Stream closing immediate due to Close()" __L);
+	_SendDisconnect();
+	_log(NET__DEBUG, _L "Stream closing immediate due to Close()" __L);
 }
