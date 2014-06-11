@@ -2127,7 +2127,12 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	safe_delete(app);
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp;
+	if(oos->IsNPC())
+		give_exp = oos;
+
+	else
+		give_exp = hate_list.GetDamageTop(this);
 
 	if(give_exp == nullptr)
 		give_exp = killer;
@@ -3754,11 +3759,10 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
-
-	if (acthealed > 100) {
+	if (acthealed > 1) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
-				// message to caster
+				// message to caster	
 				if (caster->IsClient() && caster == this) {
 					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
 						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
@@ -3786,11 +3790,12 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 								YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 				}
 			} else { // normal heals
-				FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-						YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				if(strcasecmp(GetCleanName(),caster->GetCleanName()) == 0)
+					Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
+				else
+					Message(MT_NonMelee, "%s has healed you for %i points of damage.", caster->GetCleanName(), acthealed);
 				if (caster != this)
-					caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-							YOU_HEAL, GetCleanName(), itoa(acthealed));
+					caster->Message(MT_NonMelee, "You have healed %s for %i points of damage.", GetCleanName(), acthealed);
 			}
 		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);

@@ -98,7 +98,8 @@ Mob::Mob(const char* in_name,
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
-		flee_timer(FLEE_CHECK_TIMER)
+		flee_timer(FLEE_CHECK_TIMER),
+		eqmac_timer(100)
 
 {
 	targeted = 0;

@@ -2861,6 +2861,9 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
@@ -2911,18 +2914,20 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	
 	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		int si = SwapItem(mi);
+		if(si == 0 || (si == 2 && GetClientVersion() > EQClientMac))
 		{
 			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
 			SwapItemResync(mi); 
 		}
-		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		else if(si == 2 && GetClientVersion() == EQClientMac)
 		{
 			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
 			return;
 		}
 	}
 
+	eqmac_timer.Start(100, true);
 	return;
 }
 
@@ -3234,6 +3239,9 @@ void Client::Handle_OP_Save(const EQApplicationPacket *app)
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if (app->size != sizeof(Who_All_Struct)) {
 		std::cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << std::endl;
 		return;
@@ -3243,7 +3251,10 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 	if(whoall->type == 0) // SoF only, for regular /who
 		entity_list.ZoneWho(this, whoall);
 	else
+	{
 		WhoAll(whoall);
+		eqmac_timer.Start(100, true);
+	}
 	return;
 }
 
@@ -6421,6 +6432,9 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 
 void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if(app->size != sizeof(Inspect_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectRequest, size=%i, expected %i", app->size, sizeof(Inspect_Struct));
 		return;
@@ -6430,9 +6444,14 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 	Mob* tmp			= entity_list.GetMob(ins->TargetID);
 
 	if(tmp != 0 && tmp->IsClient()) {
-		if(tmp->CastToClient()->GetClientVersion() < EQClientSoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
+		if(tmp->CastToClient()->GetClientVersion() < EQClientSoF) { 
+			tmp->CastToClient()->QueuePacket(app); 
+			eqmac_timer.Start(100, true);
+		} // Send request to target
 		// Inspecting an SoF or later client will make the server handle the request
-		else { ProcessInspectRequest(tmp->CastToClient(), this); }
+		else { 
+			ProcessInspectRequest(tmp->CastToClient(), this); 
+		}
 	}
 
 	return;
