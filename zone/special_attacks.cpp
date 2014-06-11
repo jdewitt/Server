@@ -808,10 +808,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 
 	if (!ChanceAvoidConsume || (ChanceAvoidConsume < 100 && MakeRandomInt(0,99) > ChanceAvoidConsume)){
 
-		if(GetClientVersion() == EQClientMac)
-			DeleteItemInInventory(ammo_slot, 1, false);
-		else
-			DeleteItemInInventory(ammo_slot, 1, true);
+		DeleteItemInInventory(ammo_slot, 1, false);
 		mlog(COMBAT__RANGED, "Consumed one arrow from slot %d", ammo_slot);
 	} else {
 		mlog(COMBAT__RANGED, "Endless Quiver prevented ammo consumption.");
@@ -1212,10 +1209,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	DoThrowingAttackDmg(GetTarget(), RangeWeapon, item);
 
 	//consume ammo
-	if(GetClientVersion() == EQClientMac)
 		DeleteItemInInventory(ammo_slot, 1, false);
-	else
-		DeleteItemInInventory(ammo_slot, 1, true);
 	CheckIncreaseSkill(SkillThrowing, GetTarget());
 
 	//break invis when you attack

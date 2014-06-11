@@ -130,11 +130,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 		buffs[buffslot].magic_rune = 0;
 		buffs[buffslot].numhits = 0;
 
-		if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
-		{
-			EQApplicationPacket *outapp = MakeBuffsPacket(false);
-			CastToClient()->FastQueuePacket(&outapp);
-		}
 	}
 
 	if(IsNPC())
@@ -816,37 +811,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(IsClient())
 				{
 					CastToClient()->SetSenseExemption(true);
-
-					if(CastToClient()->GetClientVersionBit() & BIT_SoDAndLater)
-					{
-						bodyType bt = BT_Undead;
-
-						int MessageID = SENSE_UNDEAD;
-
-						if(effect == SE_SenseSummoned)
-						{
-							bt = BT_Summoned;
-							MessageID = SENSE_SUMMONED;
-						}
-						else if(effect == SE_SenseAnimals)
-						{
-							bt = BT_Animal;
-							MessageID = SENSE_ANIMAL;
-						}
-
-						Mob *ClosestMob = entity_list.GetClosestMobByBodyType(this, bt);
-
-						if(ClosestMob)
-						{
-							Message_StringID(MT_Spells, MessageID);
-							SetHeading(CalculateHeadingToTarget(ClosestMob->GetX(), ClosestMob->GetY()));
-							SetTarget(ClosestMob);
-							CastToClient()->SendTargetCommand(ClosestMob->GetID());
-							SendPosUpdate(2);
-						}
-						else
-							Message_StringID(clientMessageError, SENSE_NOTHING);
-					}
 				}
 				break;
 			}
@@ -1022,8 +986,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
-					if(CastToClient()->GetClientVersion() == EQClientMac)
-						effect_value = 98;
+					effect_value = 98;
 
 					if(MakeRandomInt(0, 99) < effect_value)
 					{
@@ -1032,11 +995,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					else
 					{
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
-						if(CastToClient()->GetClientVersion() == EQClientMac)
-						{
-							ZoneChange_Struct *zc = new struct ZoneChange_Struct;
-							CastToClient()->SendZoneCancel(zc);
-						}
+						ZoneChange_Struct *zc = new struct ZoneChange_Struct;
+						CastToClient()->SendZoneCancel(zc);
 						_log(EQMAC__LOG, "Gate failed. Wah wah.");
 					}
 				}
@@ -1637,10 +1597,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Locate Corpse");
 #endif
-				// This is handled by the client prior to SoD.
-				//
-				if(IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
-					CastToClient()->LocateCorpse();
 
 				break;
 			}
@@ -3123,7 +3079,7 @@ void Mob::BuffProcess()
 						mlog(SPELLS__BUFFS, "Buff %d in slot %d has %d tics remaining.", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
-				else if(IsClient() && !(CastToClient()->GetClientVersionBit() & BIT_SoFAndLater))
+				else if(IsClient())
 				{
 					buffs[buffs_i].UpdateClient = true;
 				}
@@ -3425,10 +3381,6 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			}
 			case SE_LocateCorpse:
 			{
-				// This is handled by the client prior to SoD.
-
-				if(IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
-					CastToClient()->LocateCorpse();
 			}
 			case SE_TotalHP:
 			{
@@ -3868,23 +3820,15 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		SendPetBuffsToClient();
 	}
-	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
-				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
+	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 		if(GetTarget() == this) {
 			CastToClient()->QueuePacket(outapp);
 		}
 
 		safe_delete(outapp);
-	}
-
-	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
-	{
-		EQApplicationPacket *outapp = MakeBuffsPacket(false);
-		CastToClient()->FastQueuePacket(&outapp);
 	}
 
 	if (iRecalcBonuses)
@@ -6026,13 +5970,8 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		//Only use fire graphic for fire spells.
 		if (spells[spell_id].resisttype == RESIST_FIRE) {
 		
-			if (IsClient()){
-				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
+			if (IsClient())
 					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
-				else 
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
-				}
-		
 			else
 				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
 

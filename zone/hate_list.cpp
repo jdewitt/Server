@@ -375,13 +375,6 @@ Mob *HateList::GetTop(Mob *center)
 		if(topClientTypeInRange != nullptr && top != nullptr) {
 			bool isTopClientType = top->IsClient();
 
-			if(!isTopClientType) {
-				if(top->IsMerc()) {
-					isTopClientType = true;
-					topClientTypeInRange = top;
-				}
-			}
-
 			if(!isTopClientType)
 				return topClientTypeInRange ? topClientTypeInRange : nullptr;
 

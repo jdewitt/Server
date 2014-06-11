@@ -150,14 +150,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			ShieldEquiped(true);
 	}
 
-	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
-	{
-		const ItemInst* inst = m_inv[9999];
-		if(inst)
-			AddItemBonuses(inst, newbon);
-	}
-
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();
@@ -2713,13 +2705,6 @@ void Client::CalcItemScale()
 	if(CalcItemScale(400, 405))
 		changed = true;
 
-	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
-	{
-		if(CalcItemScale(9999, 10000))
-			changed = true;
-	}
-
 	if(changed)
 	{
 		CalcBonuses();
@@ -2791,13 +2776,6 @@ void Client::DoItemEnterZone() {
 
 	if(DoItemEnterZone(400, 405))
 		changed = true;
-
-	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
-	{
-		if(DoItemEnterZone(9999, 10000))
-			changed = true;
-	}
 
 	if(changed)
 	{

@@ -1905,15 +1905,15 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	safe_delete_array(escape_str);
 }
 
-void Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
+void Database::SetGroupID(const char* name,uint32 id, uint32 charid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	if(id == 0){ //removing you from table
-	if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc), errbuf))
+	if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s'",charid, name), errbuf))
 		LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", errbuf);
 	}
 	else{
-	if (!RunQuery(query, MakeAnyLenString(&query, "replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc), errbuf))
+	if (!RunQuery(query, MakeAnyLenString(&query, "replace into group_id set charid=%i, groupid=%i, name='%s'",charid, id, name), errbuf))
 		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", errbuf);
 	}
 	safe_delete_array(query);

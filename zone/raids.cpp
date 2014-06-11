@@ -1419,18 +1419,6 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
-				if(c->GetClientVersion() >= EQClientSoD)
-				{
-					outapp.SetOpcode(OP_MobManaUpdate);
-					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-					mmus->spawn_id = members[x].member->GetID();
-					mmus->mana = members[x].member->GetManaPercent();
-					c->QueuePacket(&outapp, false);
-					outapp.SetOpcode(OP_MobEnduranceUpdate);
-					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-					meus->endurance = members[x].member->GetEndurancePercent();
-					c->QueuePacket(&outapp, false);
-				}
 			}
 		}
 	}
@@ -1455,18 +1443,6 @@ void Raid::SendHPPacketsFrom(Mob *m)
 			if(!m->IsClient() || ((members[x].member != m->CastToClient()) && (members[x].GroupNumber == gid)))
 			{
 				members[x].member->QueuePacket(&hpapp, false);
-				if(members[x].member->GetClientVersion() >= EQClientSoD)
-				{
-					outapp.SetOpcode(OP_MobManaUpdate);
-					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-					mmus->spawn_id = m->GetID();
-					mmus->mana = m->GetManaPercent();
-					members[x].member->QueuePacket(&outapp, false);
-					outapp.SetOpcode(OP_MobEnduranceUpdate);
-					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-					meus->endurance = m->GetEndurancePercent();
-					members[x].member->QueuePacket(&outapp, false);
-				}
 			}
 		}
 	}

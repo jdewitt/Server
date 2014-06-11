@@ -36,7 +36,6 @@ public:
 	bool IsClient();
 	bool IsNPC();
 	bool IsMob();
-	bool IsMerc();
 	bool IsCorpse();
 	bool IsPlayerCorpse();
 	bool IsNPCCorpse();

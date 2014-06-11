@@ -168,7 +168,6 @@ public:
 	void playertexture(int newtexture);
 	void playerfeature(char *feature, int setting);
 	void npcfeature(char *feature, int setting);
-	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);

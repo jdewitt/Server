@@ -58,7 +58,6 @@ public:
 	virtual bool IsClient()			const { return false; }
 	virtual bool IsNPC()			const { return false; }
 	virtual bool IsMob()			const { return false; }
-	virtual bool IsMerc()			const { return false; }
 	virtual bool IsCorpse()			const { return false; }
 	virtual bool IsPlayerCorpse()	const { return false; }
 	virtual bool IsNPCCorpse()		const { return false; }
@@ -270,9 +269,7 @@ public:
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
-	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
-	void	RemoveFromXTargets(Mob* mob);
-	void	RemoveFromAutoXTargets(Mob* mob);
+	void	RemoveFromTargets(Mob* mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float dist=200, Mob* SkipThisMob = 0, bool ackreq = true,eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
@@ -282,7 +279,6 @@ public:
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
 						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
 
-	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
@@ -323,7 +319,6 @@ public:
 	void	HalveAggro(Mob* who);
 	void	DoubleAggro(Mob* who);
 	void	Evade(Mob *who);
-	void	UpdateHoTT(Mob* target);
 
 	void	Process();
 	void	ClearAggro(Mob* targ);
@@ -387,8 +382,6 @@ public:
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
 	uint16 GetFreeID();
-	void RefreshAutoXTargets(Client *c);
-	void RefreshClientXTargets(Client *c);
 
 protected:
 	friend class Zone;

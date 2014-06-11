@@ -102,13 +102,7 @@ public:
 	void	UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle = 0);
 	void	UnDelegatePuller(const char *OldMainAssistName, uint8 toggle = 0);
 	bool	IsNPCMarker(Client *c);
-	void	SetGroupAssistTarget(Mob *m);
-	void	SetGroupTankTarget(Mob *m);
-	void	SetGroupPullerTarget(Mob *m);
 	bool	HasRole(Mob *m, uint8 Role);
-	void	NotifyAssistTarget(Client *c);
-	void	NotifyTankTarget(Client *c);
-	void	NotifyPullerTarget(Client *c);
 	void	DelegateMarkNPC(const char *NewNPCMarkerName);
 	void	UnDelegateMarkNPC(const char *OldNPCMarkerName);
 	void	NotifyMainTank(Client *c, uint8 toggle = 0);
@@ -130,7 +124,6 @@ public:
 	void	QueueHPPacketsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
-	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
 
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];

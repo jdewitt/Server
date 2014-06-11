@@ -1991,13 +1991,6 @@ void QuestManager::npcfeature(char *feature, int setting)
 										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
 }
 
-void QuestManager::popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration)
-{
-	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->SendPopupToClient(title, text, popupid, buttons, Duration);
-}
-
 void QuestManager::clearspawntimers() {
 	if(zone) {
 		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
@@ -2447,20 +2440,9 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 
 	if(initiator)
 	{
-		if (initiator->GetClientVersion() >= EQClientSoF)
-		{
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"00000000000000000000000000000000000000000000",LinkName,0x12);
-		}
-		else if (initiator->GetClientVersion() == EQClientMac)
-		{
 			static char itemid[7];
 			sprintf(itemid, "%06d", sayid);
 			sprintf(linktext,"%c%c%s%s%s%c",0x12,0x30,itemid,"",LinkName,0x12);
-		}
-		else
-		{
-			sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"000000000000000000000000000000000000000",LinkName,0x12);
-		}
 	}
 	else {	// If no initiator, create an RoF saylink, since older clients handle RoF ones better than RoF handles older ones.
 		sprintf(linktext,"%c%06X%s%s%c",0x12,sayid,"0000000000000000000000000000000000000000000000000",LinkName,0x12);

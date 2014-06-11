@@ -1612,17 +1612,9 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(c->GetClientVersion() >= EQClientSoD) {
-		g->NotifyMainTank(c, 1);
-		g->NotifyPuller(c, 1);
-	}
-
 	g->NotifyMainAssist(c, 1);
 
 	g->NotifyMarkNPC(c);
-	g->NotifyAssistTarget(c);
-	g->NotifyTankTarget(c);
-	g->NotifyPullerTarget(c);
 	g->SendMarkedNPCsToMember(c);
 
 }

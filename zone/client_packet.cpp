@@ -109,8 +109,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
 	ConnectingOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
-	ConnectingOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
-	ConnectingOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
 	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectingOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTDCon;
 	ConnectingOpcodes[OP_BazaarSearch] = &Client::Handle_OP_BazaarSearchCon;
@@ -321,7 +319,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_AugmentInfo] = &Client::Handle_OP_AugmentInfo;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
-	ConnectedOpcodes[OP_RespawnWindow] = &Client::Handle_OP_RespawnWindow;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
@@ -342,8 +339,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
 	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
 	ConnectedOpcodes[OP_LFGuild] = &Client::Handle_OP_LFGuild;
-	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
-	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -577,18 +572,6 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	conn_state = ClientSpawnRequested;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket;
-	if(GetClientVersion() > EQClientMac)
-	{
-		// Send Zone Doors
-		
-		if(entity_list.MakeDoorSpawnPacket(outapp, this))
-		{
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-	}
-	else
-	{
 		uint8 count = 0;
 		if(entity_list.SendZoneDoorsBulk(outapp, this, count))
 		{
@@ -596,36 +579,12 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 			if(count > 1)
 				safe_delete(outapp);
 		}
-	}
 	
 	entity_list.SendZoneObjects(this);
 	SendZonePoints();
 
-	// Live does this
-	if(GetClientVersion() > EQClientMac)
-	{
-		outapp = new EQApplicationPacket(OP_SendAAStats, 0);
-		FastQueuePacket(&outapp);
-
-		// Tell client they can continue we're done
-		outapp = new EQApplicationPacket(OP_ZoneServerReady, 0);
-		FastQueuePacket(&outapp);
-		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-		FastQueuePacket(&outapp);
-
-		// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
-		outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-	{
-		outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-		FastQueuePacket(&outapp);
-	}
-
-	if(strncasecmp(zone->GetShortName(), "bazaar", 6) == 0 && GetClientVersion() > EQClientMac)
-		SendBazaarWelcome();
+	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
+	FastQueuePacket(&outapp);
 
 	conn_state = ZoneContentsSent;
 
@@ -703,13 +662,9 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-
-	if(GetClientVersion() == EQClientMac)
-	{
-		outapp = new EQApplicationPacket(OP_ZoneInAvatarSet,1);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+	outapp = new EQApplicationPacket(OP_ZoneInAvatarSet,1);
+	QueuePacket(outapp);
+	safe_delete(outapp);
 
 	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
 	ZoneInSendName_Struct* zonesendname=(ZoneInSendName_Struct*)outapp->pBuffer;
@@ -1229,10 +1184,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	delta_y			= ppu->delta_y;
 	delta_z			= ppu->delta_z;
 	delta_heading	= ppu->delta_heading;
-	if(GetClientVersion() == EQClientMac)
-		heading			= ppu->heading;
-	else
-		heading			= EQ19toFloat(ppu->heading);
+	heading			= ppu->heading;
 
 	if(IsTracking() && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos))){
 		if(MakeRandomFloat(0, 100) < 70)//should be good
@@ -1425,26 +1377,12 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 		{
 			SetTarget(nt);
 			if ((nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
-				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
-				(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
+				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
 				nt->SendBuffsToClient(this);
 		}
 		else
 		{
 			SetTarget(nullptr);
-			SetHoTT(0);
-			UpdateXTargetType(TargetsTarget, nullptr);
-
-			Group *g = GetGroup();
-
-			if(g && g->HasRole(this, RoleAssist))
-				g->SetGroupAssistTarget(0);
-
-			if(g && g->HasRole(this, RoleTank))
-				g->SetGroupTankTarget(0);
-
-			if(g && g->HasRole(this, RolePuller))
-				g->SetGroupPullerTarget(0);
 
 			return;
 		}
@@ -1452,33 +1390,8 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 	else
 	{
 		SetTarget(nullptr);
-		SetHoTT(0);
-		UpdateXTargetType(TargetsTarget, nullptr);
 		return;
 	}
-
-	// HoTT
-	if (GetTarget() && GetTarget()->GetTarget())
-	{
-		SetHoTT(GetTarget()->GetTarget()->GetID());
-		UpdateXTargetType(TargetsTarget, GetTarget()->GetTarget());
-	}
-	else
-	{
-		SetHoTT(0);
-		UpdateXTargetType(TargetsTarget, nullptr);
-	}
-
-	Group *g = GetGroup();
-
-	if(g && g->HasRole(this, RoleAssist))
-		g->SetGroupAssistTarget(GetTarget());
-
-	if(g && g->HasRole(this, RoleTank))
-		g->SetGroupTankTarget(GetTarget());
-
-	if(g && g->HasRole(this, RolePuller))
-		g->SetGroupPullerTarget(GetTarget());
 
 	// For /target, send reject or success packet
 	if (app->GetOpcode() == OP_TargetCommand) {
@@ -1493,46 +1406,17 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				{
 					SetTarget(nullptr);
 				}
-
-				if(GetClientVersion() > EQClientMac)
-				{
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-					outapp->pBuffer[0] = 0x2f;
-					outapp->pBuffer[1] = 0x01;
-					outapp->pBuffer[4] = 0x0d;
-
-					QueuePacket(outapp);
-					safe_delete(outapp);
-				}
 				return;
 			}
 			
 			QueuePacket(app);
 			GetTarget()->IsTargeted(1);
-			if(GetClientVersion() > EQClientMac)
-			{
-				//Intel mac crashes when we send this.
-				EQApplicationPacket hp_app;
-				GetTarget()->CreateHPPacket(&hp_app);
-				QueuePacket(&hp_app, false);
-			}
-				
 		}
 		else
 		{
 			if(GetTarget())
 			{
 				SetTarget(nullptr);
-			}
-			if(GetClientVersion() > EQClientMac)
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetReject, sizeof(TargetReject_Struct));
-				outapp->pBuffer[0] = 0x2f;
-				outapp->pBuffer[1] = 0x01;
-				outapp->pBuffer[4] = 0x0d;
-
-				QueuePacket(outapp);
-				safe_delete(outapp);
 			}
 		}
 	}
@@ -1577,11 +1461,6 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				GetTarget()->IsTargeted(1);
 				SetSenseExemption(false);
-				return;
-			}
-			else if(IsXTarget(GetTarget()))
-			{
-				GetTarget()->IsTargeted(1);
 				return;
 			}
 			else if(GetBindSightTarget())
@@ -1966,56 +1845,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
             }
 			else
 			{
-				if(GetClientVersion() >= EQClientSoD && !inst->IsEquipable(GetBaseRace(),GetClass()))
-				{
-					if(item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol)
-					{
-						LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
-					}
-					else
-					{
-						int value = RuleI(Character,ConsumptionValue);
-						//This is food/drink - consume it
-						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < (value*.85))
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == ItemTypeDrink && m_pp.thirst_level < (value*.85))
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == ItemTypeAlcohol)
-						{
-#if EQDEBUG >= 1
-							LogFile->write(EQEMuLog::Debug, "Drinking Alcohol from slot:%i", slot_id);
-#endif
-							// This Seems to be handled in OP_DeleteItem handling
-							//DeleteItemInInventory(slot_id, 1, false);
-							//entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
-							//Should add intoxication level to the PP at some point
-							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
-						}
-
-						if (m_pp.hunger_level > value)
-							m_pp.hunger_level = value;
-						if (m_pp.thirst_level > value)
-							m_pp.thirst_level = value;
-
-						EQApplicationPacket *outapp2;
-						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-						Stamina_Struct* sta = (Stamina_Struct*)outapp2->pBuffer;
-						sta->food = m_pp.hunger_level;
-						sta->water = m_pp.thirst_level;
-
-						QueuePacket(outapp2);
-						safe_delete(outapp2);
-					}
-
-				}
-				else
-				{
-					LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
-				}
+				LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
 			}
 		}
 		else
@@ -2342,22 +2172,11 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() > EQClientMac)
-	{
-		if (app->size != sizeof(GMTrainee_Struct)) {
-			LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(GMTrainee_Struct), app->size);
-			DumpPacket(app);
-			return;
-		}
-	}
-	else
-	{
 		if (app->size != sizeof(OldGMTrainee_Struct)) {
 			LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(OldGMTrainee_Struct), app->size);
 			DumpPacket(app);
 			return;
 		}
-	}
 	OPGMTraining(app);
 	return;
 }
@@ -2490,13 +2309,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
 			{
-				if(GetClientVersion() < EQClientSoF)
-				{
 					char *hack_str = nullptr;
 					MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Invis: %i", sa->parameter);
 					database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
 					safe_delete_array(hack_str);
-				}
 			}
 			return;
 		}
@@ -2659,8 +2475,6 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 void Client::Handle_OP_Death(const EQApplicationPacket *app)
 {
 	bool EnvDeath = false;
-	if(GetClientVersion() == EQClientMac)
-	{
 		LogFile->write(EQEMuLog::Debug,"Client hit OP_Death");
 		if(app->size != sizeof(OldDeath_Struct))
 		{
@@ -2693,30 +2507,6 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 			Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
 			return;
 		}
-	}
-
-	else
-	{
-		if(app->size != sizeof(Death_Struct))
-		{
-			return;
-		}
-
-		Death_Struct* ds = (Death_Struct*)app->pBuffer;
-
-		//I think this attack_skill value is really a value from SkillDamageTypes...
-		if(ds->attack_skill > HIGHEST_SKILL) {
-			mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
-			return;
-		}
-
-		if(GetHP() > 0)
-			return;
-
-		Mob* killer = entity_list.GetMob(ds->killer_id);
-		Death(killer, ds->damage, ds->spell_id, (SkillUseTypes)ds->attack_skill);
-		return;
-	}
 }
 
 void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
@@ -2911,12 +2701,12 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	
 	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		if(SwapItem(mi) == 0)
 		{
 			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
 			SwapItemResync(mi); 
 		}
-		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		else if(SwapItem(mi) == 2)
 		{
 			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
 			return;
@@ -2943,10 +2733,7 @@ void Client::Handle_OP_DeleteCharge(const EQApplicationPacket *app)
 		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
 		int16 IntoxicationIncrease;
 
-		if(GetClientVersion() < EQClientSoD)
-			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
-		else
-			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
+		IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
 
 		if(IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
@@ -3325,30 +3112,17 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 
 void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() > EQClientMac)
-	{
-		if (app->size != sizeof(uint32)) {
-			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
-			return;
-		}
-	}
-	else
-	{
 		if (app->size != sizeof(uint16)) {
 			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint16) << std::endl;
 			return;
 		}
-	}
 
 	SetLooting(false);
 
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
 		//Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
-		if(GetClientVersion() >= EQClientSoD)
-			Corpse::SendEndLootErrorPacket(this);
-		else
-			Corpse::SendLootReqErrorPacket(this);
+		Corpse::SendLootReqErrorPacket(this);
 		return;
 	}
 	else if (!entity->IsCorpse()) {
@@ -3364,20 +3138,10 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() > EQClientMac)
-	{
-		if (app->size != sizeof(uint32)) {
-			std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
-			return;
-		}
-	}
-	else
-	{
 		if (app->size != sizeof(uint16)) {
 			std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint16) << std::endl;
 			return;
 		}
-	}
 	
 	SetLooting(true);
 
@@ -3554,12 +3318,7 @@ void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
 {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildsList");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
-
-	if(GetClientVersion() == EQClientMac)
-		SendPlayerGuild();
-
-	else
-		SendGuildList();
+	SendPlayerGuild();
 }
 
 void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
@@ -3577,13 +3336,11 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 		return;
 	}
 	if(!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_MOTD)) {
-		if(GetClientVersion() > EQClientMac)
-			Message(13, "You do not have permissions to edit your guild's MOTD.");
 		return;
 	}
 
 	GuildMOTD_Struct* gmotd=(GuildMOTD_Struct*)app->pBuffer;
-	if(GetClientVersion() == EQClientMac && gmotd->motd[0] == 0)
+	if(gmotd->motd[0] == 0)
 	{
 		mlog(GUILDS__ERROR, "Client is trying to remove MOTD. This may be intentional but still will be prevented for now.");
 		return; //EQMac sends this on login, and it overwrites the existing MOTD. Need to figure out a better way to handle it
@@ -3607,9 +3364,7 @@ void Client::Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app)
 
 void Client::Handle_OP_BazaarSearchCon(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() == EQClientMac)
-		SendBazaarWelcome();
-
+	SendBazaarWelcome();
 	return;
 }
 
@@ -3728,10 +3483,7 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 
 		//NOTE: we could do cross-zone lookups here...
 		char target[64];
-		if(GetClientVersion() == EQClientMac)
-			strcpy(target,gml->name);
-		else
-			strcpy(target,gml->target);
+		strcpy(target,gml->name);
 
 		Client* newleader = entity_list.GetClientByName(target);
 		if(newleader) {
@@ -3999,11 +3751,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			Message(0,"%s successfully removed from your guild.",gc->othername);
 			entity_list.QueueClientsGuild(this, outapp, false, GuildID());
 			safe_delete(outapp);
-		}
-		else
-		{
-			if(GetClientVersion() > EQClientMac)
-				Message(0,"Unable to remove %s from your guild.",gc->othername);
 		}
 	}
 //	SendGuildMembers(GuildID(), true);
@@ -4323,10 +4070,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
 		int16 IntoxicationIncrease;
 
-		if(GetClientVersion() < EQClientSoD)
-			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
-		else
-			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
+		IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
 
 		if(IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
@@ -4501,22 +4245,11 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 	else
 	{
 		//EQMac sends a second CancelTrade packet. Since "with" and the trade became invalid the first time around, this handles the second which prevents the client from bugging.
-		if(GetClientVersion() == EQClientMac)
-		{
 			CancelTrade_Struct* msg = (CancelTrade_Struct*) app->pBuffer;
 			QueuePacket(app);
 			LogFile->write(EQEMuLog::Debug, "Cancelled second trade. from is: %i.", msg->fromid);
-		}
 	}
 
-	if(GetClientVersion() > EQClientMac)
-	{
-		EQApplicationPacket end_trade1(OP_FinishWindow, 0);
-		QueuePacket(&end_trade1);
-
-		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-		QueuePacket(&end_trade2);
-	}
 	return;
 }
 
@@ -5438,11 +5171,9 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(DistNoRoot(*vendor) > USE_NPC_RANGE2)
 		return;
 
-	if(GetClientVersion() == EQClientMac)
-	{
-		if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
-			mp->itemslot = mp->itemslot+1;
-	}
+	if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
+		mp->itemslot = mp->itemslot+1;
+
 	uint32 price=0;
 	uint32 itemid = GetItemIDAt(mp->itemslot);
 	if(itemid == 0)
@@ -5508,12 +5239,8 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		}
 		inst2->SetMerchantCount(MerchantQuantity);
 
-		if(GetClientVersion() == EQClientMac)
-			BulkSendMerchantInventory(vendor->CastToNPC()->MerchantType,vendor->GetNPCTypeID());
-		else
-		{
-			SendItemPacket(freeslot-1, inst2, ItemPacketMerchant);
-		}
+		BulkSendMerchantInventory(vendor->CastToNPC()->MerchantType,vendor->GetNPCTypeID());
+
 		safe_delete(inst2);
 	}
 
@@ -5561,8 +5288,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(inst->IsCharged())
 		mp->quantity = 1; 
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(OldMerchant_Purchase_Struct));
 		OldMerchant_Purchase_Struct* mco=(OldMerchant_Purchase_Struct*)outapp->pBuffer;
 
@@ -5576,18 +5301,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		mco->playerid=this->GetID();
 		QueuePacket(outapp);
 		safe_delete(outapp);
-	}
-	else
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
-		Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
-		mco->npcid = vendor->GetID();
-		mco->itemslot=mp->itemslot;
-		mco->quantity=mp->quantity;
-		mco->price=price;
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
 
 	SendMoneyUpdate();
 	t1.start();
@@ -5599,44 +5312,15 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() == EQClientMac)
-	{
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopEndConfirm, 2);
 		outapp->pBuffer[0] = 0x0a;
 		outapp->pBuffer[1] = 0x66;
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		Save();
-	}
-	else
-	{
-		EQApplicationPacket empty(OP_ShopEndConfirm);
-		QueuePacket(&empty);
-	}
 
 	return;
 }
-
-/*
-void Client::Handle_OP_CloseContainer(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(CloseContainer_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size on CloseContainer_Struct: Expected %i, Got %i",
-			sizeof(CloseContainer_Struct), app->size);
-		return;
-	}
-
-	SetTradeskillObject(nullptr);
-
-	ClickObjectAck_Struct* oos = (ClickObjectAck_Struct*)app->pBuffer;
-	Entity* entity = entity_list.GetEntityObject(oos->drop_id);
-	if (entity && entity->IsObject()) {
-		Object* object = entity->CastToObject();
-		object->Close();
-	}
-	return;
-}
-*/
 
 void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 {
@@ -5683,20 +5367,9 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 
 	SetTradeskillObject(nullptr);
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		EQApplicationPacket end_trade1(OP_ClickObjectAction, 0);
 		QueuePacket(&end_trade1);
-	}
-	
-	else
-	{
-		EQApplicationPacket end_trade1(OP_FinishWindow, 0);
-		QueuePacket(&end_trade1);
 
-		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-		QueuePacket(&end_trade2);
-	}
 	return;
 }
 
@@ -5988,8 +5661,6 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 	m_pp.drakkin_tattoo		= fc->drakkin_tattoo;
 	m_pp.drakkin_details	= fc->drakkin_details;
 	Save();
-	if(GetClientVersion() > EQClientMac)
-		Message_StringID(13,FACE_ACCEPTED);
 
 	return;
 }
@@ -6186,8 +5857,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
-			if(inviter->CastToClient()->GetClientVersion() < EQClientSoD)
-			{
 				EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
 				strcpy(outgj->membername, inviter->GetName());
@@ -6196,17 +5865,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 				group->GetGroupAAs(&outgj->leader_aas);
 				inviter->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
-			}
-			else
-			{
-				// SoD and later
-				//
-				inviter->CastToClient()->SendGroupCreatePacket();
-
-				inviter->CastToClient()->SendGroupLeaderChangePacket(inviter->GetName());
-
-				inviter->CastToClient()->SendGroupJoinAcknowledge();
-			}
 
 		}
 		if(!group)
@@ -6223,15 +5881,8 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			inviter->CastToClient()->UpdateLFP();
 		}
 
-		if(GetClientVersion() >= EQClientSoD)
-			SendGroupJoinAcknowledge();
-
 		database.RefreshGroupFromDB(this);
 		group->SendHPPacketsTo(this);
-
-		// Temporary hack for SoD, as things seem to work quite differently
-		if(inviter->CastToClient()->GetClientVersion() >= EQClientSoD)
-			database.RefreshGroupFromDB(inviter->CastToClient());
 
 		//send updates to clients out of zone...
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
@@ -6430,9 +6081,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 	Mob* tmp			= entity_list.GetMob(ins->TargetID);
 
 	if(tmp != 0 && tmp->IsClient()) {
-		if(tmp->CastToClient()->GetClientVersion() < EQClientSoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
-		// Inspecting an SoF or later client will make the server handle the request
-		else { ProcessInspectRequest(tmp->CastToClient(), this); }
+		tmp->CastToClient()->QueuePacket(app); 
 	}
 
 	return;
@@ -6710,14 +6359,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		return;
 
 	uint32 PetCommand = pet->command;
-
-	// Handle Sit/Stand toggle in UF and later.
-	if(GetClientVersion() >= EQClientUnderfoot)
-	{
-		if(PetCommand == PET_SITDOWN)
-			if(mypet->GetPetOrder() == SPO_Sit)
-				PetCommand = PET_STANDUP;
-	}
 
 	switch(PetCommand)
 	{
@@ -7045,32 +6686,16 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 	}
 	BookRequest_Struct* book = (BookRequest_Struct*) app->pBuffer;
 	ReadBook(book);
-	if(GetClientVersion() >= EQClientSoF)
-	{
-		EQApplicationPacket EndOfBook(OP_FinishWindow, 0);
-		QueuePacket(&EndOfBook);
-	}
 	return;
 }
 
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() == EQClientMac)
-	{
 		if(app->size != sizeof(OldEmote_Struct)) {
 			LogFile->write(EQEMuLog::Error, "Received invalid sized ""OP_Emote: got %d, expected %d", app->size, sizeof(OldEmote_Struct));
 			DumpPacket(app);
 			return;
 		}
-	}
-	else
-	{
-		if(app->size != sizeof(Emote_Struct)) {
-			LogFile->write(EQEMuLog::Error, "Received invalid sized ""OP_Emote: got %d, expected %d", app->size, sizeof(Emote_Struct));
-			DumpPacket(app);
-			return;
-		}
-	}
 
 	// Calculate new packet dimensions
 	OldEmote_Struct* in	= (OldEmote_Struct*)app->pBuffer;
@@ -7400,24 +7025,8 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() == EQClientMac)
-	{
 		Handle_OP_EnvDamage(app);
 		return;
-	}
-
-	if(app->size != sizeof(CombatDamage_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Received invalid sized OP_Damage: got %d, expected %d", app->size,
-			sizeof(CombatDamage_Struct));
-		DumpPacket(app);
-		return;
-	}
-
-	// Broadcast to other clients
-	CombatDamage_Struct* damage = (CombatDamage_Struct*)app->pBuffer;
-	//dont send to originator of falling damage packets
-	entity_list.QueueClients(this, app, (damage->type==DamageTypeFalling));
-	return;
 }
 
 void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
@@ -7425,8 +7034,6 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 	mlog(AA__IN, "Received OP_AAAction");
 	mpkt(AA__IN, app);
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		char* packet_dump = "AAAction_IN.txt";
 		FileDumpPacketHex(packet_dump, app);
 
@@ -7483,38 +7090,6 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 			mlog(AA__MESSAGE, "Activating AA %d", action->ability);		
 			ActivateAA((aaID) action->ability);
 		}
-	}
-	else
-	{
-		if(app->size!=sizeof(AA_Action)){
-			printf("Error! OP_AAAction size didnt match!\n");
-		return;
-		}
-		AA_Action* action=(AA_Action*)app->pBuffer;
-
-		if(action->action == aaActionActivate) {//AA Hotkey
-			mlog(AA__MESSAGE, "Activating AA %d", action->ability);
-			ActivateAA((aaID) action->ability);
-		} else if(action->action == aaActionBuy) {
-			BuyAA(action);
-		}
-		else if(action->action == aaActionDisableEXP){ //Turn Off AA Exp
-			if(m_epp.perAA > 0)
-				Message_StringID(0, AA_OFF);
-			m_epp.perAA = 0;
-			SendAAStats();
-		} else if(action->action == aaActionSetEXP) {
-			if(m_epp.perAA == 0)
-				Message_StringID(0, AA_ON);
-			m_epp.perAA = action->exp_value;
-			if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA=0;	// stop exploit with sanity check
-			// send an update
-			SendAAStats();
-			SendAATable();
-		} else {
-			printf("Unknown AA action: %u %u 0x%x %d\n", action->action, action->ability, action->unknown08, action->exp_value);
-		}
-	}
 
 	return;
 }
@@ -8049,40 +7624,20 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 {
-	if(GetClientVersion() > EQClientMac)
-	{
-		if (app->size != sizeof(ControlBoat_Struct)) {
-			LogFile->write(EQEMuLog::Error, "Wrong size: OP_ControlBoat, size=%i, expected %i", app->size, sizeof(ControlBoat_Struct));
-			return;
-		}
-	}
-	else
-	{
 		if (app->size != sizeof(OldControlBoat_Struct)) {
 			LogFile->write(EQEMuLog::Error, "Wrong size: OP_ControlBoat, size=%i, expected %i", app->size, sizeof(OldControlBoat_Struct));
 			return;
 		}
-	}
 
 	bool TakeControl = false;
 	Mob* boat = 0;
 	int unknown5 = 0;
 	int16 boatid = 0;
-	if(GetClientVersion() > EQClientMac)
-	{
-		ControlBoat_Struct* cbs = (ControlBoat_Struct*)app->pBuffer;
-		boat = entity_list.GetMob(cbs->boatId);
-		TakeControl = cbs->TakeControl;
-		boatid = cbs->boatId;
-	}
-	else
-	{
 		OldControlBoat_Struct* cbs = (OldControlBoat_Struct*)app->pBuffer;
 		boat = entity_list.GetMob(cbs->boatId);
 		TakeControl = cbs->TakeControl;
 		unknown5 = cbs->unknown5;
 		boatid = cbs->boatId;
-	}
 			
 	if (boat == 0)
 		return;	// do nothing if the boat isn't valid
@@ -8110,16 +7665,11 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 		boat->SetTarget(0);
 	
 	EQApplicationPacket* outapp;
-	if(GetClientVersion() > EQClientMac)
-		outapp = new EQApplicationPacket(OP_ControlBoat,0);
-	else
-	{
 		outapp = new EQApplicationPacket(OP_ControlBoat,sizeof(OldControlBoat_Struct));
 		OldControlBoat_Struct* cbs2 = (OldControlBoat_Struct*)outapp->pBuffer;
 		cbs2->boatId = boatid;
 		cbs2->TakeControl = TakeControl;
 		cbs2->unknown5 = unknown5;
-	}
 
 	FastQueuePacket(&outapp);
 	safe_delete(outapp);
@@ -8743,9 +8293,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
-	//We need to send the EQMac AAIDs to those clients, but keep the Emu IDs in the DB.
-	if(GetClientVersion() == EQClientMac)
-	{
 		PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
 		memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
 
@@ -8786,42 +8333,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		memcpy(outapp->pBuffer,pps,outapp->size);
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-	}
-	else
-	{
-		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
-		m_pp.entityid = GetID();
-		memcpy(outapp->pBuffer,&m_pp,outapp->size);
-		outapp->priority = 6;
-		FastQueuePacket(&outapp);
-	}
 
 	if(m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
-
-	//pets don't save on zoning in EQMac
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		database.LoadPetInfo(this);
-		//this was moved before the spawn packets are sent
-		//in hopes that it adds more consistency...
-		//Remake pet
-		if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS)
-		{
-			MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-			if (GetPet() && GetPet()->IsNPC()) {
-				NPC *pet = GetPet()->CastToNPC();
-				pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-				pet->CalcBonuses();
-				pet->SetHP(m_petinfo.HP);
-				pet->SetMana(m_petinfo.Mana);
-			}
-			m_petinfo.SpellID = 0;
-		}
-		// Moved here so it's after where we load the pet data.
-		if(!GetAA(aaPersistentMinion))
-			memset(&m_suspendedminion, 0, sizeof(PetInfo));
-	}
 
 	////////////////////////////////////////////////////////////
 	// Server Zone Entry Packet
@@ -8857,8 +8371,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	////////////////////////////////////////////////////////////
 	// Character Inventory Packet
 	if (loaditems) {//dont load if a length error occurs
-		if(eqs->ClientVersion() == EQClientMac)
-			BulkSendItems();
+		BulkSendItems();
 		BulkSendInventoryItems();
 
 		// Send stuff on the cursor which isnt sent in bulk
@@ -8870,22 +8383,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			const ItemInst *inst=*it;
 			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 		}
-	}
-
-	///////////////////////////////////////
-
-	if (ClientVersionBit & BIT_UnderfootAndLater)
-
-	 {
-
-		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
-
-		outapp->WriteUInt32(GetMaxXTargets());
-
-		outapp->WriteUInt32(0);
-
-		FastQueuePacket(&outapp);
-
 	}
 
 	//////////////////////////////////////
@@ -9131,12 +8628,6 @@ void Client::CompleteConnect()
 	//sends appearances for all mobs not doing anim_stand aka sitting, looting, playing dead
 	entity_list.SendZoneAppearance(this);
 
-	if(GetClientVersion() > EQClientMac)
-	{
-		//sends the Nimbus particle effects (up to 3) for any mob using them
-		entity_list.SendNimbusEffects(this);
-	}
-
 	entity_list.SendUntargetable(this);
 
 	client_data_loaded = true;
@@ -9152,10 +8643,6 @@ void Client::CompleteConnect()
 	entity_list.SendTraders(this);
 
 	zoneinpacket_timer.Start();
-
-	if(GetPet() && GetClientVersion() > EQClientMac){
-		GetPet()->SendPetBuffsToClient();
-	}
 
 	if(GetGroup())
 		database.RefreshGroupFromDB(this);
@@ -9219,12 +8706,6 @@ void Client::CompleteConnect()
 
 	CalcItemScale();
 	DoItemEnterZone();
-
-	if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks && GetClientVersion() > EQClientMac)
-		GuildBanks->SendGuildBank(this);
-
-	if(GetClientVersion() >= EQClientSoD)
-		entity_list.SendFindableNPCList(this);
 
 	if(IsInAGuild())
 	{
@@ -10749,24 +10230,6 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 	safe_delete(outapp);
 }
 
-void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)
-{
-// This opcode is sent by the client when the player choses which bind to return to.
-// The client sends just a 4 byte packet with the selection number in it
-//
-	if(app->size != 4)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_RespawnWindow expected %i got %i",
-						4, app->size);
-		DumpPacket(app);
-		return;
-	}
-	char *Buffer = (char *)app->pBuffer;
-
-	uint32 Option = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-	HandleRespawnFromHover(Option);
-}
-
 void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(GroupUpdate_Struct))
@@ -11045,10 +10508,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		mysql_free_result(Result);
 
-		if(GetClientVersion() > EQClientMac)
-			SendPopupToClient("Corpses", PopupText.c_str());
-		else
-			Message(0,"%s",PopupText.c_str());
+		Message(0,"%s",PopupText.c_str());
 	}
 	else{
 		Message(0, "Query failed: %s.", errbuf);
@@ -12008,251 +11468,6 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
-{
-	if(app->size < 12)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_XTargetRequest, expected at least 12, got %i", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	uint32 Unknown000 = app->ReadUInt32(0);
-
-	if(Unknown000 != 1)
-		return;
-
-	uint32 Slot = app->ReadUInt32(4);
-
-	if(Slot >= XTARGET_HARDCAP)
-		return;
-
-	XTargetType Type = (XTargetType)app->ReadUInt32(8);
-
-	XTargets[Slot].Type = Type;
-	XTargets[Slot].ID = 0;
-	XTargets[Slot].Name[0] = 0;
-
-	switch(Type)
-	{
-		case Empty:
-		case Auto:
-		{
-			break;
-		}
-
-		case CurrentTargetPC:
-		{
-			char Name[65];
-
-			app->ReadString(Name, 12, 64);
-			Client *c = entity_list.GetClientByName(Name);
-			if(c)
-			{
-				XTargets[Slot].ID = c->GetID();
-				strncpy(XTargets[Slot].Name, c->GetName(), 64);
-			}
-			else
-			{
-				strncpy(XTargets[Slot].Name, Name, 64);
-			}
-			SendXTargetPacket(Slot, c);
-
-			break;
-		}
-
-		case CurrentTargetNPC:
-		{
-			char Name[65];
-			app->ReadString(Name, 12, 64);
-			Mob *m = entity_list.GetMob(Name);
-			if(m)
-			{
-				XTargets[Slot].ID = m->GetID();
-				SendXTargetPacket(Slot, m);
-				break;
-			}
-		}
-
-		case TargetsTarget:
-		{
-			if(GetTarget())
-				UpdateXTargetType(TargetsTarget, GetTarget()->GetTarget());
-			else
-				UpdateXTargetType(TargetsTarget, nullptr);
-
-			break;
-		}
-
-		case GroupTank:
-		{
-			Group *g = GetGroup();
-
-			if(g)
-			{
-				Client *c = entity_list.GetClientByName(g->GetMainTankName());
-
-				if(c)
-				{
-					XTargets[Slot].ID = c->GetID();
-					strncpy(XTargets[Slot].Name, c->GetName(), 64);
-				}
-				else
-				{
-					strncpy(XTargets[Slot].Name, g->GetMainTankName(), 64);
-				}
-				SendXTargetPacket(Slot, c);
-			}
-			break;
-		}
-		case GroupTankTarget:
-		{
-			Group *g = GetGroup();
-
-			if(g)
-				g->NotifyTankTarget(this);
-
-			break;
-		}
-
-		case GroupAssist:
-		{
-			Group *g = GetGroup();
-
-			if(g)
-			{
-				Client *c = entity_list.GetClientByName(g->GetMainAssistName());
-
-				if(c)
-				{
-					XTargets[Slot].ID = c->GetID();
-					strncpy(XTargets[Slot].Name, c->GetName(), 64);
-				}
-				else
-				{
-					strncpy(XTargets[Slot].Name, g->GetMainAssistName(), 64);
-				}
-				SendXTargetPacket(Slot, c);
-			}
-			break;
-		}
-
-		case GroupAssistTarget:
-		{
-
-			Group *g = GetGroup();
-
-			if(g)
-				g->NotifyAssistTarget(this);
-
-			break;
-		}
-
-		case Puller:
-		{
-			Group *g = GetGroup();
-
-			if(g)
-			{
-				Client *c = entity_list.GetClientByName(g->GetPullerName());
-
-				if(c)
-				{
-					XTargets[Slot].ID = c->GetID();
-					strncpy(XTargets[Slot].Name, c->GetName(), 64);
-				}
-				else
-				{
-					strncpy(XTargets[Slot].Name, g->GetPullerName(), 64);
-				}
-				SendXTargetPacket(Slot, c);
-			}
-			break;
-		}
-
-		case PullerTarget:
-		{
-
-			Group *g = GetGroup();
-
-			if(g)
-				g->NotifyPullerTarget(this);
-
-			break;
-		}
-
-		case GroupMarkTarget1:
-		case GroupMarkTarget2:
-		case GroupMarkTarget3:
-		{
-			Group *g = GetGroup();
-
-			if(g)
-				g->SendMarkedNPCsToMember(this);
-
-			break;
-		}
-
-		case RaidAssist1:
-		case RaidAssist2:
-		case RaidAssist3:
-		case RaidAssist1Target:
-		case RaidAssist2Target:
-		case RaidAssist3Target:
-		case RaidMarkTarget1:
-		case RaidMarkTarget2:
-		case RaidMarkTarget3:
-		{
-			// Not implemented yet.
-			break;
-		}
-
-		case MyPet:
-		{
-			Mob *m = GetPet();
-			if(m)
-			{
-				XTargets[Slot].ID = m->GetID();
-				SendXTargetPacket(Slot, m);
-
-			}
-			break;
-		}
-		case MyPetTarget:
-		{
-			Mob *m = GetPet();
-
-			if(m)
-				m = m->GetTarget();
-
-			if(m)
-			{
-				XTargets[Slot].ID = m->GetID();
-				SendXTargetPacket(Slot, m);
-
-			}
-			break;
-		}
-
-		default:
-			LogFile->write(EQEMuLog::Debug, "Unhandled XTarget Type %i", Type);
-			break;
-	}
-
-}
-
-void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
-{
-	if(app->size != 1)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_XTargetAutoAddHaters, expected 1, got %i", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	XTargetAutoAddHaters = app->ReadUInt8(0);
-}
-
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {
 	// Does not exist in Ti, UF or RoF clients
 	// SoF and SoD both send a 4-byte packet with a uint32 value of '8'
@@ -12317,19 +11532,5 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)
 {
 	//EQMac doesn't reply to this according to ShowEQ captures.
-	if(GetClientVersion() == EQClientMac)
-		return;
-	else
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
-		ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
-
-		FillSpawnStruct(&sze->player,CastToMob());
-		sze->player.spawn.curHp=1;
-		sze->player.spawn.NPC=0;
-		//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
-		sze->player.spawn.zoneID = zone->GetZoneID();
-		outapp->priority = 6;
-		FastQueuePacket(&outapp);
-	}
+	return;
 }

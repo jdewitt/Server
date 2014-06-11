@@ -1467,9 +1467,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 	if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 		char val1[20]={0};
-		if(GetClientVersion() > EQClientMac)
-			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
-			killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 	}
 
 	int exploss = 0;
@@ -1551,7 +1548,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 	entity_list.RemoveFromTargets(this);
 	hate_list.RemoveEnt(this);
-	RemoveAutoXTargets();
 
 
 	//remove ourself from all proximities
@@ -1624,10 +1620,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
-		if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
-			UnmemSpellAll(true);
-		else
-			UnmemSpellAll(false);
+		UnmemSpellAll(false);
 
 		if(RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel) || RuleB(Character, LeaveNakedCorpses))
 		{
@@ -1689,39 +1682,27 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	// we change the mob variables, not pp directly, because Save() will copy
 	// from these and overwrite what we set in pp anyway
 	//
-
-	if(LeftCorpse && (GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
+	if(isgrouped)
 	{
-		ClearDraggedCorpses();
-
-		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
-
-		SendRespawnBinds();
+		Group *g = GetGroup();
+		if(g)
+			g->MemberZoned(this);
 	}
-	else
-	{
-		if(isgrouped)
-		{
-			Group *g = GetGroup();
-			if(g)
-				g->MemberZoned(this);
-		}
 
-		Raid* r = entity_list.GetRaidByClient(this);
+	Raid* r = entity_list.GetRaidByClient(this);
 
-		if(r)
-			r->MemberZoned(this);
+	if(r)
+		r->MemberZoned(this);
 
-		dead_timer.Start(5000, true);
+	dead_timer.Start(5000, true);
 
-		m_pp.zone_id = m_pp.binds[0].zoneId;
-		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
+	m_pp.zone_id = m_pp.binds[0].zoneId;
+	m_pp.zoneInstance = 0;
+	database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
 
-		Save();
+	Save();
 
-		GoToDeath();
-	}
+	GoToDeath();
 
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);
 	return true;
@@ -1748,8 +1729,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if (this->GetOwnerID())
 			this->Say_StringID(NOT_LEGAL_TARGET);
 		if(other) {
-			if (other->IsClient())
-				other->CastToClient()->RemoveXTarget(this, false);
 			RemoveFromHateList(other);
 			mlog(COMBAT__ATTACKS, "I am not allowed to attack %s", other->GetName());
 		}
@@ -2068,10 +2047,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 		if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20]={0};
-
-			if(killerMob->CastToClient()->GetClientVersion() > EQClientMac)
-				entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
-				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	} else {
 
@@ -2097,7 +2072,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	SetPet(0);
 	Mob* killer = GetHateDamageTop(this);
 
-	entity_list.RemoveFromTargets(this, p_depop);
+	entity_list.RemoveFromTargets(this);
 
 	if(p_depop == true)
 		return false;
@@ -2270,7 +2245,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp_client)
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && !GetSwarmInfo()
+	if (!HasOwner() && class_ != MERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
 	{
@@ -2282,7 +2257,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			if(!killer->CastToClient()->GetGM() && killer->IsClient())
 				this->CheckMinMaxLevel(killer);
 		}
-		entity_list.RemoveFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
@@ -2349,8 +2323,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			}
 		}
 	}
-	else
-		entity_list.RemoveFromXTargets(this);
 
 	// Parse quests even if we're killed by an NPC
 	if(oos) {
@@ -2472,9 +2444,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 
 	hate_list.Add(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if(other->IsClient())
-		other->CastToClient()->AddAutoXTarget(this);
-
 	// then add pet owner if there's one
 	if (owner) { // Other is a pet, add him and it
 		// EverHood 6/12/06
@@ -2487,8 +2456,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 			if(!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
 				hate_list.Add(owner, 0, 0, false, !iBuffTic);
-				if(owner->IsClient())
-					owner->CastToClient()->AddAutoXTarget(this);
 			}
 		}
 	}
@@ -3676,9 +3643,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 							attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
 							}
 						}
-						else
-							if(attacker->CastToClient()->GetClientVersion() > EQClientMac)
-								entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
 				} else {
 					if(damage > 0) {
 						if(spell_id != SPELL_UNKNOWN)
@@ -3760,28 +3724,14 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 			if (IsBuffSpell(spell_id)) { // hots
 				// message to caster
 				if (caster->IsClient() && caster == this) {
-					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
-						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
-								HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
-					else
-						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
+					FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								YOU_HEALED, GetCleanName(), itoa(acthealed));
 				} else if (caster->IsClient() && caster != this) {
-					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
-						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
-								HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
-								spells[spell_id].name);
-					else
 						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								YOU_HEAL, GetCleanName(), itoa(acthealed));
 				}
 				// message to target
 				if (IsClient() && caster != this) {
-					if (CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
-						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
-								HOT_HEALED_OTHER, caster->GetCleanName(),
-								itoa(acthealed), spells[spell_id].name);
-					else
 						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
 								YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 				}

@@ -864,8 +864,6 @@ void WorldServer::Process() {
 
 					group->UpdateGroupAAs();
 
-					if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
-					{
 						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
 						strcpy(outgj->membername, Inviter->GetName());
@@ -874,15 +872,6 @@ void WorldServer::Process() {
 						group->GetGroupAAs(&outgj->leader_aas);
 						Inviter->CastToClient()->QueuePacket(outapp);
 						safe_delete(outapp);
-					}
-					else
-					{
-						// SoD and later
-						//
-						Inviter->CastToClient()->SendGroupCreatePacket();
-						Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
-						Inviter->CastToClient()->SendGroupJoinAcknowledge();
-					}
 				}
 				if(!group)
 					break;

@@ -114,11 +114,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//on a zone line.
 		if(zone_mode == ZoneUnsolicited)
 		{
-			if(target_zone_id == zone->GetZoneID() && GetClientVersion() != EQClientMac)
-			{
-				SendZoneCancel(zc);
-				return;
-			}
 
 			zone_point = zone->GetClosestZonePoint(GetX(), GetY(), GetZ(), target_zone_id, this, ZONEPOINT_ZONE_RANGE);
 			//if we didnt get a zone point, or its to a different zone,
@@ -575,13 +570,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 				ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
-				// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
-				//
-				if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
-					gmg->bind_zone_id = 0;
-				else
 				gmg->bind_zone_id = zoneID;
-
 				gmg->x = x;
 				gmg->y = y;
 				gmg->z = z;
@@ -611,7 +600,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			FastQueuePacket(&outapp);
 			safe_delete(outapp);
 		}
-		else if(zm == EvacToSafeCoords  || (zm == GateToBindPoint && GetClientVersion() == EQClientMac)) {
+		else if(zm == EvacToSafeCoords  || zm == GateToBindPoint) {
 			_log(EQMAC__LOG, "Zoning packet about to be sent (ETSC). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
@@ -700,11 +689,9 @@ void Mob::Gate() {
 }
 
 void Client::Gate() {
-	if(GetClientVersion() == EQClientMac)
-	{
-		ZoneChange_Struct *zc = new struct ZoneChange_Struct;
-		SendZoneCancel(zc);
-	}
+
+	ZoneChange_Struct *zc = new struct ZoneChange_Struct;
+	SendZoneCancel(zc);
 	Mob::Gate();
 }
 

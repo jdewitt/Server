@@ -47,9 +47,6 @@ int16 Client::GetMaxStat() const {
 	if (level < 61) {
 		base = 255;
 	}
-	else if (GetClientVersion() >= EQClientSoF) {
-		base = 255 + 5 * (level - 60);
-	}
 	else if (level < 71) {
 		base = 255 + 5 * (level - 60);
 	}
@@ -371,30 +368,14 @@ uint16 Mob::GetClassLevelFactor(){
 
 int32 Client::CalcBaseHP()
 {
-	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		int stats = GetSTA();
-		if(stats > 255) {
-			stats = (stats - 255) / 2;
-			stats += 255;
-		}
-		
-		base_hp = 5;
-		auto base_data = database.GetBaseData(GetLevel(), GetClass());
-		if(base_data) {
-			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
-			base_hp += (GetHeroicSTA() * 10);
-		}
-	}
-	else {
-		uint16 Post255;
-		uint16 lm=GetClassLevelFactor();
-		if((GetSTA()-255)/2 > 0)
-			Post255 = (GetSTA()-255)/2;
-		else
-			Post255 = 0;
+	uint16 Post255;
+	uint16 lm=GetClassLevelFactor();
+	if((GetSTA()-255)/2 > 0)
+		Post255 = (GetSTA()-255)/2;
+	else
+		Post255 = 0;
 
-		base_hp = (5)+(GetLevel()*lm/10) + (((GetSTA()-Post255)*GetLevel()*lm/3000)) + ((Post255*GetLevel())*lm/6000);
-	}
+	base_hp = (5)+(GetLevel()*lm/10) + (((GetSTA()-Post255)*GetLevel()*lm/3000)) + ((Post255*GetLevel())*lm/6000);
 	return base_hp;
 }
 
@@ -976,25 +957,6 @@ int32 Client::CalcBaseMana()
 		case 'I':
 			WisInt = GetINT();
 
-			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-
-				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
-					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
-				}
-
-				auto base_data = database.GetBaseData(GetLevel(), GetClass());
-				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
-				}
-			}
-			else
-			{
 				if((( WisInt - 199 ) / 2) > 0)
 					MindLesserFactor = ( WisInt - 199 ) / 2;
 				else
@@ -1005,31 +967,12 @@ int32 Client::CalcBaseMana()
 					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
 				else
 					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-			}
 			break;
 
 		case 'W':
 			WisInt = GetWIS();
 
-			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 
-				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201) {
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
-					}
-				}
-				else {
-					ConvertedWisInt = WisInt;
-				}
-
-				auto base_data = database.GetBaseData(GetLevel(), GetClass());
-				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
-				}
-			}
-			else
-			{
 				if((( WisInt - 199 ) / 2) > 0)
 					MindLesserFactor = ( WisInt - 199 ) / 2;
 				else
@@ -1040,7 +983,6 @@ int32 Client::CalcBaseMana()
 					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
 				else
 					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-			}
 			break;
 
 		case 'N': {
@@ -1172,10 +1114,7 @@ uint32 Client::CalcCurrentWeight() {
 	This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 
-	// SoD client has no weight for coin
-	if (GetClientVersion() < EQClientSoD) {
-		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
-	}
+	Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat;
 	if (Packrat > 0)
@@ -1902,23 +1841,6 @@ int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
 
-	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
-		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
-
-		if(stats > 201.0f) {
-			stats = 1.25f * (stats - 201.0f) + 352.5f;
-		} else if(stats > 100.0f) {
-			stats = 2.5f * (stats - 100.0f) + 100.0f;
-		}
-
-		auto base_data = database.GetBaseData(GetLevel(), GetClass());
-		if(base_data) {
-			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
-		}
-	}
-	else
-	{
 		int Stats = GetSTR()+GetSTA()+GetDEX()+GetAGI();
 		int LevelBase = GetLevel() * 15;
 
@@ -1947,7 +1869,6 @@ int32 Client::CalcBaseEndurance()
 
 		//take all of the sums from above, then multiply by level*0.075
 		base_end += ( bonus_sum * 3 * GetLevel() ) / 40;
-	}
 
 	return base_end;
 }

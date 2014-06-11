@@ -65,11 +65,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			} else {
 				x++;
 			}
-
-			if (GetClientVersion() >= EQClientSoF)
-				DeleteItemInInventory(9999, 0, true);
-			else
-				DeleteItemInInventory(9999, 0, false);	// Prevents Titanium crash
+			DeleteItemInInventory(9999, 0, false);
 		}
 	}
 
@@ -824,17 +820,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 				safe_delete(outapp);
 				
 			}
-			else if(GetClientVersion() > EQClientMac){
-				// Stackable, arrows, etc ? Delete one from the stack
-				outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(MoveItem_Struct));
-				DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
-				delitem->from_slot			= slot_id;
-				delitem->to_slot			= 0xFFFFFFFF;
-				delitem->number_in_stack	= 0xFFFFFFFF;
-				for(int loop=0;loop<quantity;loop++)
-					QueuePacket(outapp);
-				safe_delete(outapp);
-			}
 			else {
 				outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 				MoveItem_Struct* delitem	= (MoveItem_Struct*)outapp->pBuffer;
@@ -975,8 +960,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 		for (int16 i = 0; i < 9999; i++) // originally (i < 22)
 		{
 			if (i == 22) {
-				if(this->GetClientVersion() >= EQClientSoF) { i = 9999; } // added power source check for SoF+ clients
-				else { break; }
+				break;
 			}
 
 			if (!m_inv[i])
@@ -1098,34 +1082,7 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 	uint8 evolvedlevel = 0;
 	int hash = 0;
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
-	if (GetClientVersion() >= EQClientSoF)
-	{
-		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%05X" "%08X",
-			0,
-			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
-			evolving,
-			loregroup,
-			evolvedlevel,
-			0,
-			hash
-		);
-	}
-	else if (GetClientVersion() >= EQClientMac)
-	{
-		static char itemid[7];
-		sprintf(itemid, "%06d", item->ID);
-		MakeAnyLenString(&ret_link, "%1X" "%s",
-			0,
-			itemid
-		);
-	}
-	else
-	{
+
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
 			0,
 			item->ID,
@@ -1139,7 +1096,6 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 			evolvedlevel,
 			hash
 		);
-	}
 
 	return true;
 }
@@ -1403,8 +1359,6 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		if (src_inst->GetCharges() > 0 && (src_inst->GetCharges() < (int16)move_in->number_in_stack || move_in->number_in_stack > src_inst->GetItem()->StackSize))
 		{
 			//Damn Intel client sending SwapItem multiple times :I
-			if(GetClientVersion() > EQClientMac)
-				Message(13,"Error: Insufficent number in stack.");
 			_log(INVENTORY__ERROR, "Insufficent number in stack. Ignore this if on EQMac.");
 			return 0;
 		}
@@ -2063,13 +2017,6 @@ void Client::RemoveNoRent(bool client_update) {
 		}
 	}
 
-	// power source
-	const ItemInst* inst = m_inv[9999];
-	if(inst && !inst->GetItem()->NoRent) {
-		mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-		DeleteItemInInventory(9999, 0, (GetClientVersion() >= EQClientSoF) ? client_update : false); // Ti slot non-existent
-	}
-
 	// containers
 	for(slot_id = 251; slot_id <= 340; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
@@ -2212,18 +2159,6 @@ void Client::MoveSlotNotAllowed(bool client_update) {
 			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
 		}
-	}
-
-	// power source
-	slot_id = 9999;
-	if(m_inv[slot_id] && !m_inv[slot_id]->IsSlotAllowed(slot_id)) {
-		ItemInst* inst = m_inv.PopItem(slot_id);
-		bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
-		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-		mlog(INVENTORY__ERROR, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
-		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= EQClientSoF) ? client_update : false);
-		database.SaveInventory(character_id, nullptr, slot_id);
-		safe_delete(inst);
 	}
 
 	// No need to check inventory, cursor, bank or shared bank since they allow max item size and containers -U

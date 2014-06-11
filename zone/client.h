@@ -653,7 +653,6 @@ public:
 	bool	CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi = 0);
 	void	CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill);
 	void	SetLanguageSkill(int langid, int value);
-	void	SetHoTT(uint32 mobid);
 	void	ShowSkillsWindow();
 	void	SendStatsWindow(Client* client, bool use_window);
 
@@ -871,7 +870,6 @@ public:
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
 	uint16	GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill);
-	void	SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void	SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool	PendingTranslocate;
 	time_t	TranslocateTime;
@@ -931,16 +929,9 @@ public:
 	void LocateCorpse();
 	void SendTargetCommand(uint32 EntityID);
 	bool	MoveItemToInventory(ItemInst *BInst, bool UpdateClient = false);
-	void HandleRespawnFromHover(uint32 Option);
-	bool IsHoveringForRespawn() { return RespawnFromHoverTimer.Enabled(); }
 	std::list<RespawnOption> respawn_options;
-	void AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float h = 0, bool initial_selection = false, int8 position = -1);
-	bool RemoveRespawnOption(std::string option_name);
-	bool RemoveRespawnOption(uint8 position);
-	void ClearRespawnOptions() { respawn_options.clear(); }
 	void SetPendingRezzData(int XP, uint32 DBID, uint16 SpellID, const char *CorpseName) { PendingRezzXP = XP; PendingRezzDBID = DBID; PendingRezzSpellID = SpellID; PendingRezzCorpseName = CorpseName; }
 	bool IsRezzPending() { return PendingRezzSpellID > 0; }
-	void ClearHover();
 	inline bool IsBlockedBuff(int16 SpellID) { return PlayerBlockedBuffs.find(SpellID) != PlayerBlockedBuffs.end(); }
 	inline bool IsBlockedPetBuff(int16 SpellID) { return PetBlockedBuffs.find(SpellID) != PetBlockedBuffs.end(); }
 	bool IsDraggingCorpse(uint16 CorpseID);
@@ -952,19 +943,6 @@ public:
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
 	void SendNewZone(NewZone_Struct newzone_data, char* name);
-	inline bool XTargettingAvailable() const { return ((ClientVersionBit & BIT_UnderfootAndLater) && RuleB(Character, EnableXTargetting)); }
-	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
-	void SetMaxXTargets(uint8 NewMax);
-	bool IsXTarget(const Mob *m) const;
-	bool IsClientXTarget(const Client *c) const;
-	void UpdateClientXTarget(Client *c);
-	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = nullptr);
-	void AddAutoXTarget(Mob *m);
-	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
-	void SendXTargetPacket(uint32 Slot, Mob *m);
-	void RemoveGroupXTargets();
-	void RemoveAutoXTargets();
-	void ShowXTargets(Client *c);
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
@@ -1209,7 +1187,6 @@ private:
 	Timer	charm_cast_timer;
 	Timer	qglobal_purge_timer;
 	Timer	TrackingTimer;
-	Timer	RespawnFromHoverTimer;
 
 	float	proximity_x;
 	float	proximity_y;

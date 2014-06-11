@@ -83,12 +83,7 @@ bool Client::Process() {
 		if(dead)
 		{
 			SetHP(-100);
-			if(RespawnFromHoverTimer.Check())
-				HandleRespawnFromHover(0);
 		}
-
-		if(IsTracking() && (GetClientVersion() >= EQClientSoD) && TrackingTimer.Check())
-			DoTracking();
 
 		if(hpupdate_timer.Check())
 			SendHPUpdate();
@@ -802,16 +797,6 @@ void Client::BulkSendInventoryItems() {
 		}	
 	}
 
-	// Power Source
-	if(GetClientVersion() >= EQClientSoF) {
-		const ItemInst* inst = m_inv[9999];
-		if(inst) {
-			std::string packet = inst->Serialize(9999);
-			ser_items[i++] = packet;
-			size += packet.length();
-		}
-	}
-
 	// Bank items
 	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
@@ -959,20 +944,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				else
 					inst->SetCharges(1);
 
-				if(GetClientVersion() == EQClientMac)
+				if(inst) 
 				{
-					if(inst) 
-					{
-						std::string packet = inst->Serialize(ml.slot-1);
-						ser_items[m] = packet;
-						size += packet.length();
-						m++;
-					}
-				}
-				else
-				{
-					SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
-					safe_delete(inst);
+					std::string packet = inst->Serialize(ml.slot-1);
+					ser_items[m] = packet;
+					size += packet.length();
+					m++;
 				}
 			}
 		}
@@ -1009,22 +986,14 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					inst->SetCharges(item->MaxCharges);//inst->SetCharges(charges);
 				else
 					inst->SetCharges(1);
-				if(GetClientVersion() == EQClientMac)
+				if(inst) 
 				{
-					if(inst) 
-					{
-						std::string packet = inst->Serialize(ml.slot-1);
-						ser_items[m] = packet;
-						size += packet.length();
-						m++;
-					}
+					std::string packet = inst->Serialize(ml.slot-1);
+					ser_items[m] = packet;
+					size += packet.length();
+					m++;
+				}
 
-				}
-				else
-				{
-					SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
-					safe_delete(inst);
-				}
 			}
 		}
 		tmp_merlist.push_back(ml);
@@ -1062,8 +1031,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		int8 count = 0;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopInventoryPacket, size);
 		uchar* ptr = outapp->pBuffer;
@@ -1079,7 +1046,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 		QueuePacket(outapp);
 		safe_delete(outapp);
-	}
 //		safe_delete_array(cpi);
 }
 
@@ -1150,7 +1116,6 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		//Was sending the packet back to initiate client zone...
 		//but that could be abusable, so lets go through proper channels
 		MovePC(ZoneID, InstanceID, x, y, z, GetHeading(), 0, ZoneSolicited);
-		entity_list.RefreshClientXTargets(this);
 	}
 	PendingRezzXP = -1;
 	PendingRezzSpellID = 0;
@@ -1569,8 +1534,6 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 	EQApplicationPacket* outapp = app->Copy();
 
-	if(GetClientVersion() == EQClientMac)
-	{
 		OldGMTrainee_Struct* gmtrain = (OldGMTrainee_Struct*) outapp->pBuffer;
 
 		Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
@@ -1613,60 +1576,13 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
 		}
 	}
-	else
-	{
-		EQApplicationPacket* outapp = app->Copy();
-		GMTrainee_Struct* gmtrain = (GMTrainee_Struct*) outapp->pBuffer;
-
-		Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
-
-		if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
-			return;
-
-		//you can only use your own trainer, client enforces this, but why trust it
-		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-		if(GetClass() != trains_class)
-			return;
-
-		//you have to be somewhat close to a trainer to be properly using them
-		if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
-			return;
-
-		SkillUseTypes sk;
-		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
-			if(sk == SkillTinkering && GetRace() != GNOME) {
-				gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
-			} else {
-				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules(sk, MaxSkill(sk, GetClass(), RuleI(Character, MaxLevel)));
-				//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
-				//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
-			}
-		}
-
-		uchar ending[]={0x34,0x87,0x8a,0x3F,0x01
-			,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
-			,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9,0xC9
-			,0x76,0x75,0x3f};
-		memcpy(&outapp->pBuffer[outapp->size-40],ending,sizeof(ending));
-		FastQueuePacket(&outapp);
-
-		// welcome message
-		if (pTrainer && pTrainer->IsNPC())
-		{
-			pTrainer->Say_StringID(MakeRandomInt(1204, 1207), GetCleanName());
-		}
-	}
-}
 
 void Client::OPGMEndTraining(const EQApplicationPacket *app)
 {
-	//if(GetClientVersion() > EQClientMac)
-	//{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
 		GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
 
 		FastQueuePacket(&outapp);
-	//}
 
 	Mob* pTrainer = entity_list.GetMob(p->npcid);
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
@@ -1822,29 +1738,6 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 
 
 		}
-	}
-
-	if(GetClientVersion() >= EQClientSoF) {
-		// The following packet decreases the skill points left in the Training Window and
-		// produces the 'You have increased your skill / learned the basics of' message.
-		//
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMTrainSkillConfirm, sizeof(GMTrainSkillConfirm_Struct));
-
-		GMTrainSkillConfirm_Struct *gmtsc = (GMTrainSkillConfirm_Struct *)outapp->pBuffer;
-		gmtsc->SkillID = gmskill->skill_id;
-
-		if(gmskill->skillbank == 1) {
-			gmtsc->NewSkill = (GetLanguageSkill(gmtsc->SkillID) == 1);
-			gmtsc->SkillID += 100;
-		}
-		else
-			gmtsc->NewSkill = (GetRawSkill((SkillUseTypes)gmtsc->SkillID) == 1);
-
-		gmtsc->Cost = Cost;
-
-		strcpy(gmtsc->TrainerName, pTrainer->GetCleanName());
-		QueuePacket(outapp);
-		safe_delete(outapp);
 	}
 
 	if(Cost)
@@ -2076,192 +1969,6 @@ void Client::DoTracking()
 	{
 		Message_StringID(MT_Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
 	}
-}
-
-void Client::HandleRespawnFromHover(uint32 Option)
-{
-	RespawnFromHoverTimer.Disable();
-
-	RespawnOption* chosen = nullptr;
-	bool is_rez = false;
-
-	//Find the selected option
-	if (Option == 0)
-	{
-		chosen = &respawn_options.front();
-	}
-	else if (Option == (respawn_options.size() - 1))
-	{
-		chosen = &respawn_options.back();
-		is_rez = true; //Rez must always be the last option
-	}
-	else
-	{
-		std::list<RespawnOption>::iterator itr;
-		uint32 pos = 0;
-		for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-		{
-			if (pos++ == Option)
-			{
-				chosen = &(*itr);
-				break;
-			}
-		}
-	}
-
-	//If they somehow chose an option they don't have, just send them to bind
-	RespawnOption* default_to_bind = nullptr;
-	if (!chosen)
-	{
-		/* put error logging here */
-		BindStruct* b = &m_pp.binds[0];
-		default_to_bind = new RespawnOption;
-		default_to_bind->name = "Bind Location";
-		default_to_bind->zoneid = b->zoneId;
-		default_to_bind->x = b->x;
-		default_to_bind->y = b->y;
-		default_to_bind->z = b->z;
-		default_to_bind->heading = b->heading;
-		chosen = default_to_bind;
-		is_rez = false;
-	}
-
-	if (chosen->zoneid == zone->GetZoneID()) //If they should respawn in the current zone...
-	{
-		if (is_rez)
-		{
-			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
-			{
-				_log(SPELLS__REZ, "Unexpected Rezz from hover request.");
-				return;
-			}
-			SetHP(GetMaxHP() / 5);
-
-			Corpse* corpse = entity_list.GetCorpseByName(PendingRezzCorpseName.c_str());
-
-			if (corpse)
-			{
-				x_pos = corpse->GetX();
-				y_pos = corpse->GetY();
-				z_pos = corpse->GetZ();
-			}
-
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
-			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
-
-			gmg->bind_zone_id = zone->GetZoneID();
-			gmg->bind_instance_id = zone->GetInstanceID();
-			gmg->x = GetX();
-			gmg->y = GetY();
-			gmg->z = GetZ();
-			gmg->heading = GetHeading();
-			strcpy(gmg->zone_name, "Resurrect");
-
-			FastQueuePacket(&outapp);
-
-			ClearHover();
-			SendHPUpdate();
-			OPRezzAnswer(1, PendingRezzSpellID, zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ());
-
-			if (corpse && corpse->IsCorpse())
-			{
-				_log(SPELLS__REZ, "Hover Rez in zone %s for corpse %s",
-						zone->GetShortName(), PendingRezzCorpseName.c_str());
-
-				_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
-
-				corpse->Rezzed(true);
-				corpse->CompleteRezz();
-			}
-		}
-		else //Not rez
-		{
-			PendingRezzSpellID = 0;
-
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + chosen->name.length() + 1);
-			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
-
-			gmg->bind_zone_id = zone->GetZoneID();
-			gmg->x = chosen->x;
-			gmg->y = chosen->y;
-			gmg->z = chosen->z;
-			gmg->heading = chosen->heading;
-			strcpy(gmg->zone_name, chosen->name.c_str());
-
-			FastQueuePacket(&outapp);
-
-			CalcBonuses();
-			SetHP(GetMaxHP());
-			SetMana(GetMaxMana());
-			SetEndurance(GetMaxEndurance());
-
-			x_pos = chosen->x;
-			y_pos = chosen->y;
-			z_pos = chosen->z;
-			heading = chosen->heading;
-
-			ClearHover();
-			entity_list.RefreshClientXTargets(this);
-			SendHPUpdate();
-		}
-
-		//After they've respawned into the same zone, trigger EVENT_RESPAWN
-		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
-
-		//Pop Rez option from the respawn options list; 
-		//easiest way to make sure it stays at the end and
-		//doesn't disrupt adding/removing scripted options
-		respawn_options.pop_back();
-	}
-	else
-	{
-		//Heading to a different zone
-		if(isgrouped)
-		{
-			Group *g = GetGroup();
-			if(g)
-				g->MemberZoned(this);
-		}
-
-		Raid* r = entity_list.GetRaidByClient(this);
-		if(r)
-			r->MemberZoned(this);
-
-		m_pp.zone_id = chosen->zoneid;
-		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(chosen->zoneid));
-
-		Save();
-
-		MovePC(chosen->zoneid,chosen->x,chosen->y,chosen->z,chosen->heading,1);
-	}
-
-	safe_delete(default_to_bind);
-}
-
-void Client::ClearHover()
-{
-	// Our Entity ID is currently zero, set in Client::Death
-	SetID(entity_list.GetFreeID());
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
-	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
-
-	FillSpawnStruct(&sze->player,CastToMob());
-
-	sze->player.spawn.NPC = 0;
-	//sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
-
-	entity_list.QueueClients(this, outapp, false);
-	safe_delete(outapp);
-
-	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)
-	{
-		EQApplicationPacket *outapp = MakeBuffsPacket(false);
-		CastToClient()->FastQueuePacket(&outapp);
-	}
-
-	dead = false;
 }
 
 void Client::HandleLFGuildResponse(ServerPacket *pack)
