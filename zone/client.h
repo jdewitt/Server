@@ -1245,6 +1245,8 @@ private:
 
 	std::set<uint32> zone_flags;
 
+	int TotalSecondsPlayed;
+
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;
 	uint32 TotalKarma;

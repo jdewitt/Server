@@ -8377,7 +8377,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	conn_state = PlayerProfileLoaded;
 
 	m_pp.zone_id = zone->GetZoneID();
-	m_pp.zoneInstance = zone->GetInstanceID();
+	m_pp.zoneInstance = 0;
+
+	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
 
 	max_AAXP = RuleI(AA, ExpPerPoint);
 

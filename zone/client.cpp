@@ -513,6 +513,8 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
+	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
+	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
 	m_pp.lastlogin = time(nullptr);

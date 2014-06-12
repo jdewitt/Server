@@ -2250,7 +2250,6 @@ ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMApproval) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupAcknowledge) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupCancelInvite) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDelete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }

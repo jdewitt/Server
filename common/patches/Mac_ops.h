@@ -186,7 +186,6 @@ E(OP_GiveMoney);
 E(OP_GMApproval);
 E(OP_GMTrainSkillConfirm);
 E(OP_GroupAcknowledge);
-E(OP_GroupCancelInvite);
 E(OP_GroupDelete);
 E(OP_GroupDisbandOther);
 E(OP_GroupDisbandYou);
