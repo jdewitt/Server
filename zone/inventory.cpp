@@ -556,12 +556,6 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		return false;
 	}
 
-	// add any validated augments
-	for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
-		if(augments[iter])
-			inst->PutAugment(&database, iter, augments[iter]);
-	}
-
 	// attune item
 	if(attuned && inst->GetItem()->Attuneable)
 		inst->SetInstNoDrop(true);
@@ -707,18 +701,6 @@ uint32 Client::GetItemIDAt(int16 slot_id) {
 	return INVALID_ID;
 }
 
-// Returns an augment's ID that's in an item (returns INVALID_ID if not found)
-// Pass in the slot ID of the item and which augslot you want to check (0-4)
-uint32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
-	const ItemInst* inst = m_inv[slot_id];
-	if (inst)
-		if (inst->GetAugmentItemID(augslot))
-			return inst->GetAugmentItemID(augslot);
-
-	// None found
-	return INVALID_ID;
-}
-
 // Remove item from inventory
 void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
@@ -760,11 +742,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 		qsaudit->items[parent_offset].char_slot = slot_id;
 		qsaudit->items[parent_offset].item_id	= m_inv[slot_id]->GetID();
 		qsaudit->items[parent_offset].charges	= m_inv[slot_id]->GetCharges();
-		qsaudit->items[parent_offset].aug_1		= m_inv[slot_id]->GetAugmentItemID(1);
-		qsaudit->items[parent_offset].aug_2		= m_inv[slot_id]->GetAugmentItemID(2);
-		qsaudit->items[parent_offset].aug_3		= m_inv[slot_id]->GetAugmentItemID(3);
-		qsaudit->items[parent_offset].aug_4		= m_inv[slot_id]->GetAugmentItemID(4);
-		qsaudit->items[parent_offset].aug_5		= m_inv[slot_id]->GetAugmentItemID(5);
 
 		if(m_inv[slot_id]->IsType(ItemClassContainer)) {
 			for(uint8 bag_idx = 0; bag_idx < m_inv[slot_id]->GetItem()->BagSlots; bag_idx++) {
@@ -776,11 +753,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 					qsaudit->items[++parent_offset].char_slot	= bagslot_id;
 					qsaudit->items[parent_offset].item_id		= bagitem->GetID();
 					qsaudit->items[parent_offset].charges		= bagitem->GetCharges();
-					qsaudit->items[parent_offset].aug_1			= bagitem->GetAugmentItemID(1);
-					qsaudit->items[parent_offset].aug_2			= bagitem->GetAugmentItemID(2);
-					qsaudit->items[parent_offset].aug_3			= bagitem->GetAugmentItemID(3);
-					qsaudit->items[parent_offset].aug_4			= bagitem->GetAugmentItemID(4);
-					qsaudit->items[parent_offset].aug_5			= bagitem->GetAugmentItemID(5);
 				}
 			}
 		}
@@ -905,7 +877,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 		{
 			if(bag_item_data[i] == nullptr)
 				continue;
-			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug1, bag_item_data[i]->aug2, bag_item_data[i]->aug3, bag_item_data[i]->aug4, bag_item_data[i]->aug5);
+			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges);
 			interior_slot = Inventory::CalcSlotId(slot_id, i);
 			mlog(INVENTORY__SLOTS, "Putting bag loot item %s (%d) into slot %d (bag slot %d)", inst.GetItem()->Name, inst.GetItem()->ID, interior_slot, i);
 			PutLootInInventory(interior_slot, *bagitem);
@@ -1083,14 +1055,9 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 	int hash = 0;
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
 
-		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X" "%08X",
+		MakeAnyLenString(&ret_link, "%1X" "%05X" "%1X" "%04X" "%1X" "%08X",
 			0,
 			item->ID,
-			inst->GetAugmentItemID(0),
-			inst->GetAugmentItemID(1),
-			inst->GetAugmentItemID(2),
-			inst->GetAugmentItemID(3),
-			inst->GetAugmentItemID(4),
 			evolving,
 			loregroup,
 			evolvedlevel,
@@ -1204,14 +1171,9 @@ packet with the item number in it, but I cant seem to find it right now
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(name2)+68);
 	char buffer2[135] = {0};
 	char itemlink[135] = {0};
-	sprintf(itemlink,"%c0%06u0%05u-%05u-%05u-%05u-%05u00000000%c",
+	sprintf(itemlink,"%c0%06u000000000%c",
 		0x12,
 		item->ID,
-		inst->GetAugmentItemID(0),
-		inst->GetAugmentItemID(1),
-		inst->GetAugmentItemID(2),
-		inst->GetAugmentItemID(3),
-		inst->GetAugmentItemID(4),
 		0x12);
 	sprintf(buffer2,"%c%c%c%c%c%c%c%c%c%c%c%c%s",0x00,0x00,0x00,0x00,0xD3,0x01,0x00,0x00,0x1E,0x01,0x00,0x00,itemlink);
 	memcpy(outapp->pBuffer,buffer2,outapp->size);
@@ -1623,15 +1585,6 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			if (src_inst->GetItem()->Attuneable) {
 				src_inst->SetInstNoDrop(true);
 			}
-			if (src_inst->IsAugmented()) {
-				for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					if (src_inst->GetAugment(i)) {
-						if (src_inst->GetAugment(i)->GetItem()->Attuneable) {
-							src_inst->GetAugment(i)->SetInstNoDrop(true);
-						}
-					}
-				}
-			}
 			SetMaterial(dst_slot_id,src_inst->GetItem()->ID);
 		}
 		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return 0; }
@@ -1800,12 +1753,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 		qsaudit->items[move_count].from_slot	= from_slot_id;
 		qsaudit->items[move_count].to_slot		= to_slot_id;
 		qsaudit->items[move_count].item_id		= from_inst->GetID();
-		qsaudit->items[move_count].charges		= from_inst->GetCharges();
-		qsaudit->items[move_count].aug_1		= from_inst->GetAugmentItemID(1);
-		qsaudit->items[move_count].aug_2		= from_inst->GetAugmentItemID(2);
-		qsaudit->items[move_count].aug_3		= from_inst->GetAugmentItemID(3);
-		qsaudit->items[move_count].aug_4		= from_inst->GetAugmentItemID(4);
-		qsaudit->items[move_count++].aug_5		= from_inst->GetAugmentItemID(5);
+		qsaudit->items[move_count++].charges		= from_inst->GetCharges();
 
 		if(from_inst->IsType(ItemClassContainer)) {
 			for(uint8 bag_idx = 0; bag_idx < from_inst->GetItem()->BagSlots; bag_idx++) {
@@ -1815,12 +1763,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 					qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(from_slot_id, bag_idx);
 					qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(to_slot_id, bag_idx);
 					qsaudit->items[move_count].item_id		= from_baginst->GetID();
-					qsaudit->items[move_count].charges		= from_baginst->GetCharges();
-					qsaudit->items[move_count].aug_1		= from_baginst->GetAugmentItemID(1);
-					qsaudit->items[move_count].aug_2		= from_baginst->GetAugmentItemID(2);
-					qsaudit->items[move_count].aug_3		= from_baginst->GetAugmentItemID(3);
-					qsaudit->items[move_count].aug_4		= from_baginst->GetAugmentItemID(4);
-					qsaudit->items[move_count++].aug_5		= from_baginst->GetAugmentItemID(5);
+					qsaudit->items[move_count++].charges		= from_baginst->GetCharges();
 				}
 			}
 		}
@@ -1833,12 +1776,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 			qsaudit->items[move_count].from_slot	= to_slot_id;
 			qsaudit->items[move_count].to_slot		= from_slot_id;
 			qsaudit->items[move_count].item_id		= to_inst->GetID();
-			qsaudit->items[move_count].charges		= to_inst->GetCharges();
-			qsaudit->items[move_count].aug_1		= to_inst->GetAugmentItemID(1);
-			qsaudit->items[move_count].aug_2		= to_inst->GetAugmentItemID(2);
-			qsaudit->items[move_count].aug_3		= to_inst->GetAugmentItemID(3);
-			qsaudit->items[move_count].aug_4		= to_inst->GetAugmentItemID(4);
-			qsaudit->items[move_count++].aug_5		= to_inst->GetAugmentItemID(5);
+			qsaudit->items[move_count++].charges		= to_inst->GetCharges();
 
 			if(to_inst->IsType(ItemClassContainer)) {
 				for(uint8 bag_idx = 0; bag_idx < to_inst->GetItem()->BagSlots; bag_idx++) {
@@ -1848,12 +1786,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 						qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(to_slot_id, bag_idx);
 						qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(from_slot_id, bag_idx);
 						qsaudit->items[move_count].item_id		= to_baginst->GetID();
-						qsaudit->items[move_count].charges		= to_baginst->GetCharges();
-						qsaudit->items[move_count].aug_1		= to_baginst->GetAugmentItemID(1);
-						qsaudit->items[move_count].aug_2		= to_baginst->GetAugmentItemID(2);
-						qsaudit->items[move_count].aug_3		= to_baginst->GetAugmentItemID(3);
-						qsaudit->items[move_count].aug_4		= to_baginst->GetAugmentItemID(4);
-						qsaudit->items[move_count++].aug_5		= to_baginst->GetAugmentItemID(5);
+						qsaudit->items[move_count++].charges		= to_baginst->GetCharges();
 					}
 				}
 			}

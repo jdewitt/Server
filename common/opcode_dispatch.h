@@ -84,10 +84,8 @@ IN_Cr(OP_ClientUpdate);
 
 IN_Cz(OP_ClientReady);
 IN_C(OP_ClientError, ClientError_Struct);
-IN_C(OP_ApproveZone, ApproveZone_Struct);
 IN_Cr(OP_TGB);
 
-IN(OP_AckPacket, uint32);
 IN(OP_ClientUpdate, PlayerPositionUpdateClient_Struct);
 IN(OP_AutoAttack, uint32);
 IN(OP_AutoAttack2, uint32);
@@ -191,7 +189,6 @@ IN(OP_RecipeDetails, uint32);
 IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 IN(OP_TradeSkillCombine, NewCombine_Struct);
 IN(OP_ItemName, ItemNamePacket_Struct);
-IN(OP_AugmentItem, AugmentItem_Struct);
 IN(OP_ClickDoor, ClickDoor_Struct);
 INr(OP_CreateObject);	//?
 IN(OP_FaceChange, FaceChange_Struct);
@@ -308,7 +305,6 @@ OUT(OP_SendMaxCharacters, MaxCharacters_Struct);
 OUT(OP_AAExpUpdate, AAExpUpdate_Struct);
 OUT(OP_Action, Action_Struct);
 OUT(OP_Animation, Animation_Struct);
-OUT(OP_AnnoyingZoneUnknown, AnnoyingZoneUnknown_Struct);
 OUT(OP_BankerChange, BankerChange_Struct);
 OUT(OP_BecomeTrader, BecomeTrader_Struct);
 OUT(OP_BeginCast, BeginCast_Struct);

@@ -282,13 +282,6 @@ public:
 	bool IsEquipable(uint16 race, uint16 class_) const;
 	bool IsEquipable(int16 slot_id) const;
 
-	//
-	// Augements
-	//
-	inline bool IsAugmentable() const { return m_item->AugSlotType[0]!=0 || m_item->AugSlotType[1]!=0 || m_item->AugSlotType[2]!=0 || m_item->AugSlotType[3]!=0 || m_item->AugSlotType[4]!=0; }
-	bool AvailableWearSlot(uint32 aug_wear_slots) const;
-	int8 AvailableAugmentSlot(int32 augtype) const;
-	inline int32 GetAugmentType() const { return m_item->AugType; }
 
 	inline bool IsExpendable() const { return ((m_item->Click.Type == ET_Expendable ) || (m_item->ItemType == ItemTypePotion)); }
 
@@ -308,17 +301,6 @@ public:
 	uint8 GetTotalItemCount() const;
 	bool IsNoneEmptyContainer();
 	std::map<uint8, ItemInst*>* GetContents() { return &m_contents; }
-
-	//
-	// Augments
-	//
-	ItemInst* GetAugment(uint8 slot) const;
-	uint32 GetAugmentItemID(uint8 slot) const;
-	void PutAugment(uint8 slot, const ItemInst& inst);
-	void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
-	void DeleteAugment(uint8 slot);
-	ItemInst* RemoveAugment(uint8 index);
-	bool IsAugmented();
 
 	// Has attack/delay?
 	bool IsWeapon() const;

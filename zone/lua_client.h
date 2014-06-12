@@ -152,7 +152,6 @@ public:
 	void SetMaterial(int slot_id, uint32 item_id);
 	void Undye();
 	int GetItemIDAt(int slot_id);
-	int GetAugmentIDAt(int slot_id, int aug_slot);
 	void DeleteItemInInventory(int slot_id, int quantity);
 	void DeleteItemInInventory(int slot_id, int quantity, bool update_client);
 	void SummonItem(uint32 item_id);

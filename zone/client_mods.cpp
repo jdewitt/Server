@@ -1897,14 +1897,6 @@ int Client::GetRawACNoShield(int &shield_ac) const
 		{
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for(uint8 i = 0; i < MAX_AUGMENT_SLOTS; i++)
-			{
-				if(inst->GetAugment(i))
-				{
-					ac -= inst->GetAugment(i)->GetItem()->AC;
-					shield_ac += inst->GetAugment(i)->GetItem()->AC;
-				}
-			}
 		}
 	}
 	return ac;

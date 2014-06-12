@@ -630,11 +630,6 @@ int Lua_Client::GetItemIDAt(int slot_id) {
 	return self->GetItemIDAt(slot_id);
 }
 
-int Lua_Client::GetAugmentIDAt(int slot_id, int aug_slot) {
-	Lua_Safe_Call_Int();
-	return self->GetAugmentIDAt(slot_id, aug_slot);
-}
-
 void Lua_Client::DeleteItemInInventory(int slot_id, int quantity) {
 	Lua_Safe_Call_Void();
 	self->DeleteItemInInventory(slot_id, quantity);
@@ -1340,7 +1335,6 @@ luabind::scope lua_register_client() {
 		.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)
 		.def("Undye", (void(Lua_Client::*)(void))&Lua_Client::Undye)
 		.def("GetItemIDAt", (int(Lua_Client::*)(int))&Lua_Client::GetItemIDAt)
-		.def("GetAugmentIDAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetAugmentIDAt)
 		.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int))&Lua_Client::DeleteItemInInventory)
 		.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int,bool))&Lua_Client::DeleteItemInInventory)
 		.def("SummonItem", (void(Lua_Client::*)(uint32))&Lua_Client::SummonItem)

@@ -154,8 +154,6 @@ int command_init(void){
 		command_add("altactivate", "[argument] - activates alternate advancement abilities, use altactivate help for more information", 0, command_altactivate) ||
 		command_add("appearance","[type] [value] - Send an appearance packet for you or your target",150,command_appearance) ||
 		command_add("attack","[targetname] - Make your NPC target attack targetname",150,command_attack) ||
-		//command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
-		
 		command_add("ban","[name] - Ban by character name",150,command_ban) ||
 		command_add("beard","- Change the beard of your target",80,command_beard) ||
 		command_add("beardcolor","- Change the beard color of your target",80,command_beardcolor) ||
@@ -10717,20 +10715,6 @@ void command_zopp(Client *c, const Seperator *sep){
 		safe_delete(FakeItemInst);
 	}
 }
-
-/* void command_augmentitem(Client *c, const Seperator *sep){
-	if (!c)
-		return;
-
-		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000;
-		in_augment->unknown02[0] = 0;
-		in_augment->unknown02[1] = 0;
-		in_augment->augment_slot = -1;
-		if(c->GetTradeskillObject() != nullptr)
-		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
-		safe_delete_array(in_augment);
-}*/
 
 void command_questerrors(Client *c, const Seperator *sep){
 	std::list<std::string> err;

@@ -6206,22 +6206,6 @@ void Client::TryItemTick(int slot)
 	//Only look at augs in main inventory
 	if(slot > 21) { return; }
 
-	for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-	{
-		ItemInst * a_inst = inst->GetAugment(x);
-		if(!a_inst) { continue; }
-
-		iid = a_inst->GetID();
-
-		if(zone->tick_items.count(iid) > 0)
-		{
-			if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
-			{
-				ItemInst* e_inst = (ItemInst*)a_inst;
-				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-			}
-		}
-	}
 }
 
 void Client::ItemTimerCheck()
@@ -6261,23 +6245,6 @@ void Client::TryItemTimer(int slot)
 	
 	if(slot > 21) {
 		return;
-	}
-
-	for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-	{
-		ItemInst * a_inst = inst->GetAugment(x);
-		if(!a_inst) {
-			continue;
-		}
-
-		auto item_timers = a_inst->GetTimers();
-		auto it_iter = item_timers.begin();
-		while(it_iter != item_timers.end()) {
-			if(it_iter->second.Check()) {
-				parse->EventItem(EVENT_TIMER, this, a_inst, nullptr, it_iter->first, 0);
-			}
-			++it_iter;
-		}
 	}
 }
 

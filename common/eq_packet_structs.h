@@ -2231,13 +2231,6 @@ struct Stun_Struct { // 4 bytes total
 	uint32 duration; // Duration of stun
 };
 
-struct AugmentItem_Struct {
-/*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
-/*04*/	int32	augment_slot;
-/*08*/
-};
-
 // OP_Emote
 struct Emote_Struct {
 /*0000*/	uint32 unknown01;
@@ -3270,11 +3263,6 @@ struct DyeStruct
 	};
 };
 
-struct ApproveZone_Struct {
-	char	name[64];
-	uint32	zoneid;
-	uint32	approve;
-};
 struct ZoneInSendName_Struct {
 	uint32	unknown0;
 	char	name[64];
@@ -3900,11 +3888,6 @@ struct MobHealth_Struct {
 	uint8 hp;
 };
 
-struct AnnoyingZoneUnknown_Struct {
-	uint32	entity_id;
-	uint32	value;		//always 4
-};
-
 struct LoadSpellSet_Struct {
 	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
 	uint32 unknown;					//there seems to be an extra field in this packet...
@@ -4020,14 +4003,6 @@ struct OldControlBoat_Struct
 	/*002*/	bool	TakeControl;	// 01 if taking control, 00 if releasing it
 	/*003*/ uint8   unknown5;	// no idea what these last byte represent
 	/*004*/							
-};
-
-struct AugmentInfo_Struct
-{
-/*000*/ uint32	itemid;		// id of the solvent needed
-/*004*/ uint8	window;		// window to display the information in
-/*005*/	uint8	unknown005[67];	// total packet length 72, all the rest were always 00
-/*072*/
 };
 
 struct ClearObject_Struct

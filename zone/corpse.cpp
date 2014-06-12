@@ -429,7 +429,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 	ItemInst *interior_item;
 	std::list<uint32> returnlist;
 
-	AddItem(item->GetItem()->ID, item->GetCharges(), equipslot, item->GetAugmentItemID(0), item->GetAugmentItemID(1), item->GetAugmentItemID(2), item->GetAugmentItemID(3), item->GetAugmentItemID(4));
+	AddItem(item->GetItem()->ID, item->GetCharges(), equipslot);
 	returnlist.push_back(equipslot);
 
 	// Qualified bag slot iterations. processing bag slots that don't exist is probably not a good idea.
@@ -443,7 +443,7 @@ std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16
 
 			if(interior_item)
 			{
-				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot, interior_item->GetAugmentItemID(0), interior_item->GetAugmentItemID(1), interior_item->GetAugmentItemID(2), interior_item->GetAugmentItemID(3), interior_item->GetAugmentItemID(4));
+				AddItem(interior_item->GetItem()->ID, interior_item->GetCharges(), interior_slot);
 				returnlist.push_back(Inventory::CalcSlotId(equipslot, bagindex));
 				client->DeleteItemInInventory(interior_slot, 0, true, false);
 			}
@@ -999,7 +999,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
 					if(client && item) {
-						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug1, item_data->aug2, item_data->aug3, item_data->aug4, item_data->aug5);
+						ItemInst* inst = database.CreateItem(item, item_data->charges);
 						if(inst) {
 							client->SendItemPacket(i + offset, inst, ItemPacketLoot); // 22 is the corpse inventory start offset for Ti(EMu) but not EQMac!
 							safe_delete(inst);
@@ -1105,7 +1105,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	if (item != 0)
 	{
 		if(item_data)
-			inst = database.CreateItem(item, item_data?item_data->charges:0, item_data->aug1, item_data->aug2, item_data->aug3, item_data->aug4, item_data->aug5);
+			inst = database.CreateItem(item, item_data?item_data->charges:0);
 		else
 			inst = database.CreateItem(item);
 	}
@@ -1120,25 +1120,6 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 			BeingLootedBy = 0;
 			delete inst;
 			return;
-		}
-
-		if(inst->IsAugmented())
-		{
-			for(int i=0; i<MAX_AUGMENT_SLOTS; i++)
-			{
-				ItemInst *itm = inst->GetAugment(i);
-				if(itm)
-				{
-					if(client->CheckLoreConflict(itm->GetItem()))
-					{
-						client->Message_StringID(0,LOOT_LORE_ERROR);
-						SendEndLootErrorPacket(client);
-						BeingLootedBy = 0;
-						delete inst;
-						return;
-					}
-				}
-			}
 		}
 
 		char buf[88];

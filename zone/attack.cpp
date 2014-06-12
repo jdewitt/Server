@@ -950,12 +950,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
-					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
-						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
-					}
-				}
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
 			else
@@ -987,12 +981,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
-					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
-						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
-					}
-				}
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
 		}
@@ -1022,15 +1010,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				eledmg = (eledmg * against->ResistSpell(weapon_item->GetItem()->ElemDmgType, 0, this) / 100);
 			}
 		}
-
-		if(weapon_item){
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt)
-						eledmg += (weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
-				}
-			}
-		}
 	}
 
 	if(against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)){
@@ -1050,18 +1029,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 				else{
 					banedmg += weapon_item->GetItem()->BaneDmgRaceAmt;
-				}
-			}
-
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
-					}
-
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgRace == against->GetRace()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgRaceAmt;
-					}
 				}
 			}
 		}
@@ -1095,18 +1062,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 				else{
 					banedmg += weapon_item->GetItem()->BaneDmgRaceAmt;
-				}
-			}
-
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
-					}
-
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgRace == against->GetRace()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgRaceAmt;
-					}
 				}
 			}
 		}
@@ -3957,36 +3912,6 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	if(!RuleB(Combat, OneProcPerWeapon))
 		proced = false;
 
-	if (!proced && inst) {
-		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-			const ItemInst *aug_i = inst->GetAugment(r);
-			if (!aug_i) // no aug, try next slot!
-				continue;
-			const Item_Struct *aug = aug_i->GetItem();
-			if (!aug)
-				continue;
-
-			if (aug->Proc.Type == ET_CombatProc) {
-				float APC = ProcChance * (100.0f + // Proc chance for this aug
-					static_cast<float>(aug->ProcRate)) / 100.0f;
-				if (MakeRandomFloat(0, 1) <= APC) {
-					if (aug->Proc.Level > ourlevel) {
-						if (IsPet()) {
-							Mob *own = GetOwner();
-							if (own)
-								own->Message_StringID(13, PROC_PETTOOLOW);
-						} else {
-							Message_StringID(13, PROC_TOOLOW);
-						}
-					} else {
-						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-						if (RuleB(Combat, OneProcPerWeapon))
-							break;
-					}
-				}
-			}
-		}
-	}
 	// TODO: Powersource procs
 	if (HasSkillProcs())
 		TrySkillProc(on, skillinuse, ProcChance);

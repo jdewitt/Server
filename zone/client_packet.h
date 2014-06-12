@@ -9,13 +9,11 @@
 	void Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app);
 	void Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app);
-	void Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket *app);
 	void Handle_Connect_OP_WearChange(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientError(const EQApplicationPacket *app);
-	void Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientReady(const EQApplicationPacket *app);
 	void Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app);
 	void Handle_Connect_OP_TGB(const EQApplicationPacket *app);
@@ -38,7 +36,6 @@
 	void Handle_OP_ClearSurname(const EQApplicationPacket *app);
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_Assist(const EQApplicationPacket *app);
-	void Handle_OP_AssistGroup(const EQApplicationPacket *app);
 	void Handle_OP_GMTraining(const EQApplicationPacket *app);
 	void Handle_OP_GMEndTraining(const EQApplicationPacket *app);
 	void Handle_OP_GMTrainSkill(const EQApplicationPacket *app);
@@ -127,7 +124,6 @@
 	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_TradeSkillCombine(const EQApplicationPacket *app);
 	void Handle_OP_ItemName(const EQApplicationPacket *app);
-	void Handle_OP_AugmentItem(const EQApplicationPacket *app);
 	void Handle_OP_ClickDoor(const EQApplicationPacket *app);
 	void Handle_OP_CreateObject(const EQApplicationPacket *app);
 	void Handle_OP_FaceChange(const EQApplicationPacket *app);
@@ -180,7 +176,6 @@
 	void Handle_OP_TrackTarget(const EQApplicationPacket *app);
 	void Handle_OP_Track(const EQApplicationPacket *app);
 	void Handle_OP_TrackUnknown(const EQApplicationPacket *app);
-	void Handle_0x0193(const EQApplicationPacket *app);
 	void Handle_0x01e7(const EQApplicationPacket *app);
 	void Handle_OP_ClientError(const EQApplicationPacket *app);
 	void Handle_OP_ReloadUI(const EQApplicationPacket *app);
@@ -212,7 +207,6 @@
 	void Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
 	void Handle_OP_LoadSpellSet(const EQApplicationPacket *app);
-	void Handle_OP_AutoFire(const EQApplicationPacket *app);
 	void Handle_OP_Rewind(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
@@ -231,7 +225,6 @@
 	void Handle_OP_ClearNPCMarks(const EQApplicationPacket *app);
 	void Handle_OP_DelegateAbility(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
-	void Handle_OP_AugmentInfo(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
