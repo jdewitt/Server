@@ -34,8 +34,6 @@ public:
 	bool IsStackable();
 	bool IsEquipable(int race, int class_);
 	bool IsEquipable(int slot_id);
-	bool IsAugmentable();
-	int GetAugmentType();
 	bool IsExpendable();
 	Lua_ItemInst GetItem(int slot);
 	Lua_Item GetItem();
@@ -43,9 +41,6 @@ public:
 	Lua_Item GetUnscaledItem(int slot);
 	uint32 GetItemID(int slot);
 	int GetTotalItemCount();
-	Lua_ItemInst GetAugment(int slot);
-	uint32 GetAugmentItemID(int slot);
-	bool IsAugmented();
 	bool IsWeapon();
 	bool IsAmmo();
 	uint32 GetID();

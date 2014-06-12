@@ -97,13 +97,11 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_ReqClientSpawn] = &Client::Handle_Connect_OP_ReqClientSpawn;
 	ConnectingOpcodes[OP_SendExpZonein] = &Client::Handle_Connect_OP_SendExpZonein;
 	ConnectingOpcodes[OP_WorldObjectsSent] = &Client::Handle_Connect_OP_WorldObjectsSent;
-	ConnectingOpcodes[OP_ZoneComplete] = &Client::Handle_Connect_OP_ZoneComplete;
 	ConnectingOpcodes[OP_ReqNewZone] = &Client::Handle_Connect_OP_ReqNewZone;
 	ConnectingOpcodes[OP_SpawnAppearance] = &Client::Handle_Connect_OP_SpawnAppearance;
 	ConnectingOpcodes[OP_WearChange] = &Client::Handle_Connect_OP_WearChange;
 	ConnectingOpcodes[OP_ClientUpdate] = &Client::Handle_Connect_OP_ClientUpdate;
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
-	ConnectingOpcodes[OP_ApproveZone] = &Client::Handle_Connect_OP_ApproveZone;
 	ConnectingOpcodes[OP_TGB] = &Client::Handle_Connect_OP_TGB;
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
@@ -135,7 +133,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ClearSurname] = &Client::Handle_OP_ClearSurname;
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_Assist] = &Client::Handle_OP_Assist;
-	ConnectedOpcodes[OP_AssistGroup] = &Client::Handle_OP_AssistGroup;
 	ConnectedOpcodes[OP_GMTraining] = &Client::Handle_OP_GMTraining;
 	ConnectedOpcodes[OP_GMEndTraining] = &Client::Handle_OP_GMEndTraining;
 	ConnectedOpcodes[OP_GMTrainSkill] = &Client::Handle_OP_GMTrainSkill;
@@ -221,7 +218,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RecipeAutoCombine] = &Client::Handle_OP_RecipeAutoCombine;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
 	ConnectedOpcodes[OP_ItemName] = &Client::Handle_OP_ItemName;
-	ConnectedOpcodes[OP_AugmentItem] = &Client::Handle_OP_AugmentItem;
 	ConnectedOpcodes[OP_ClickDoor] = &Client::Handle_OP_ClickDoor;
 	ConnectedOpcodes[OP_GroundSpawn] = &Client::Handle_OP_CreateObject;
 	ConnectedOpcodes[OP_FaceChange] = &Client::Handle_OP_FaceChange;
@@ -272,7 +268,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_TrackTarget] = &Client::Handle_OP_TrackTarget;
 	ConnectedOpcodes[OP_Track] = &Client::Handle_OP_Track;
 	ConnectedOpcodes[OP_TrackUnknown] = &Client::Handle_OP_TrackUnknown;
-	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
 	ConnectedOpcodes[OP_ClientError] = &Client::Handle_OP_ClientError;
 	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
@@ -297,7 +292,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
-	ConnectedOpcodes[OP_AutoFire] = &Client::Handle_OP_AutoFire;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
@@ -316,7 +310,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
 	ConnectedOpcodes[OP_DelegateAbility] = &Client::Handle_OP_DelegateAbility;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
-	ConnectedOpcodes[OP_AugmentInfo] = &Client::Handle_OP_AugmentInfo;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
@@ -367,9 +360,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	EmuOpcode opcode = app->GetOpcode();
-	if (opcode == OP_AckPacket) {
-		return true;
-	}
 
 	#if EQDEBUG >= 11
 		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
@@ -776,14 +766,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
-{
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_0x0347, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	return;
-}
-
 void Client::Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket *app)
 {
 	return;
@@ -829,18 +811,6 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(ApproveZone_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size on OP_ApproveZone: Expected %i, Got %i",
-			sizeof(ApproveZone_Struct), app->size);
-		return;
-	}
-	ApproveZone_Struct* azone =(ApproveZone_Struct*)app->pBuffer;
-	azone->approve=1;
-	QueuePacket(app);
-	return;
-}
 
 void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 {
@@ -1751,30 +1721,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			return;
 		}
 
-        int r;
-        bool tryaug = false;
-        ItemInst* clickaug = 0;
-        Item_Struct* augitem = 0;
-
-        for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-            const ItemInst* aug_i = inst->GetAugment(r);
-            if(!aug_i)
-                continue;
-            const Item_Struct* aug = aug_i->GetItem();
-            if(!aug)
-                continue;
-
-            if ( (aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2) )
-            {
-                tryaug = true;
-                clickaug = (ItemInst*)aug_i;
-                augitem = (Item_Struct*)aug;
-                spell_id = aug->Click.Effect;
-                break;
-            }
-        }
-
-		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
+ 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
 		{
 			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
 		}
@@ -1816,33 +1763,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					return;
 				}
 			}
-            else if (tryaug)
-            {
-                if (clickaug->GetCharges() == 0)
-                {
-                    //Message(0, "This item is out of charges.");
-                    Message_StringID(13, ITEM_OUT_OF_CHARGES);
-                    return;
-                }
-                if(GetLevel() >= augitem->Click.Level2)
-                {
-					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
-					inst = m_inv[slot_id];
-					if(!inst)
-					{
-						return;
-					}
-
-					if(i == 0) {
-						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
-					}
-                }
-                else
-                {
-                    Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
-                    return;
-                }
-            }
 			else
 			{
 				LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
@@ -2157,16 +2077,6 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 	}
 
 	FastQueuePacket(&outapp);
-	return;
-}
-
-void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(EntityId_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AssistGroup expected %i got %i", sizeof(EntityId_Struct), app->size);
-		return;
-	}
-	QueuePacket(app);
 	return;
 }
 
@@ -2617,7 +2527,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 	}
 
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4]);
+	ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -5126,11 +5036,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		qsaudit->items[0].char_slot		= freeslotid;
 		qsaudit->items[0].item_id		= m_inv[freeslotid]->GetID();
 		qsaudit->items[0].charges		= mpo->quantity;
-		qsaudit->items[0].aug_1			= m_inv[freeslotid]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2			= m_inv[freeslotid]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3			= m_inv[freeslotid]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4			= m_inv[freeslotid]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5			= m_inv[freeslotid]->GetAugmentItemID(5);
 
 		qspack->Deflate();
 		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
@@ -5266,11 +5171,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		qsaudit->items[0].char_slot		= mp->itemslot;
 		qsaudit->items[0].item_id		= itemid;
 		qsaudit->items[0].charges		= charges;
-		qsaudit->items[0].aug_1			= m_inv[mp->itemslot]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2			= m_inv[mp->itemslot]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3			= m_inv[mp->itemslot]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4			= m_inv[mp->itemslot]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5			= m_inv[mp->itemslot]->GetAugmentItemID(5);
 
 		qspack->Deflate();
 		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
@@ -5590,20 +5490,6 @@ void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
 		strcpy(p->name,item->Name);
 		FastQueuePacket(&outapp);
 	}
-	return;
-}
-
-void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(AugmentItem_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for AugmentItem_Struct: Expected: %i, Got: %i",
-			sizeof(AugmentItem_Struct), app->size);
-		return;
-	}
-
-	// Delegate to tradeskill object to perform combine
-	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
-	Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
 	return;
 }
 
@@ -7434,13 +7320,6 @@ void Client::Handle_OP_TrackUnknown(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_0x0193(const EQApplicationPacket *app)
-{
-	// Not sure what this opcode does. It started being sent when OP_ClientUpdate was
-	// changed to pump OP_ClientUpdate back out instead of OP_MobUpdate
-	// 2 bytes: 00 00
-}
-
 void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 {
 	ClientError_Struct* error = (ClientError_Struct*)app->pBuffer;
@@ -8920,18 +8799,6 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(bool)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AutoFire expected %i got %i", sizeof(bool), app->size);
-		DumpPacket(app);
-		return;
-	}
-	bool *af = (bool*)app->pBuffer;
-	auto_fire = *af;
-	auto_attack = false;
-	SetAttackTimer();
-}
 void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 {
 	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
@@ -10132,52 +9999,6 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	FastQueuePacket(&outapp);
 }
 
-
-void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app) {
-
-	// This packet is sent by the client when an Augment item information window is opened.
-	// We respond with an OP_ReadBook containing the type of distiller required to remove the augment.
-	// The OP_Augment packet includes a window parameter to determine which Item window in the UI the
-	// text is to be displayed in. out->type = 2 indicates the BookText_Struct contains item information.
-	//
-
-	if(app->size != sizeof(AugmentInfo_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AugmentInfo expected %i got %i",
-					sizeof(AugmentInfo_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-	AugmentInfo_Struct* AugInfo = (AugmentInfo_Struct*) app->pBuffer;
-
-	char *outstring = nullptr;
-
-	const Item_Struct * item = database.GetItem(AugInfo->itemid);
-
-	if (item)
-	{
-		MakeAnyLenString(&outstring, "You must use the solvent %s to remove this augment safely.", item->Name);
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, strlen(outstring) + sizeof(BookText_Struct));
-
-		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
-
-		out->window = AugInfo->window;
-
-		out->type = 2;
-
-		out->invslot = 0;
-
-		strcpy(out->booktext, outstring);
-
-		safe_delete_array(outstring);
-
-		FastQueuePacket(&outapp);
-	}
-}
-
 void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 {
 	// This Opcode is sent by the client when the Leaderboard button on the PVP Stats window is pressed.
@@ -10648,12 +10469,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				Allowed = false;
 			}
 			else if(CursorItemInst->IsNoneEmptyContainer())
-			{
-				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
-				Allowed = false;
-			}
-			else if(CursorItemInst->IsAugmented())
 			{
 				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 

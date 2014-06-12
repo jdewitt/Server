@@ -2177,15 +2177,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
-ENCODE(OP_0x0193) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_0x0347) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AckPacket) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AnnoyingZoneUnknown) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ApproveZone) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AssistGroup) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AugmentInfo) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AugmentItem) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_AutoFire) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Bandolier) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BankerChange) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Barter) { ENCODE_FORWARD(OP_Unknown); }

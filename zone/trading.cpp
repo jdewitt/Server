@@ -376,11 +376,6 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 					qsaudit->items[item_count].to_slot		= 0;
 					qsaudit->items[item_count].item_id		= inst->GetID();
 					qsaudit->items[item_count].charges		= inst->GetCharges();
-					qsaudit->items[item_count].aug_1		= inst->GetAugmentItemID(1);
-					qsaudit->items[item_count].aug_2		= inst->GetAugmentItemID(2);
-					qsaudit->items[item_count].aug_3		= inst->GetAugmentItemID(3);
-					qsaudit->items[item_count].aug_4		= inst->GetAugmentItemID(4);
-					qsaudit->items[item_count].aug_5		= inst->GetAugmentItemID(5);
 
 					if(finalizer) { qsaudit->char2_count++; }
 					else { qsaudit->char1_count++; }
@@ -401,11 +396,6 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 							qsaudit->items[item_count].to_slot		= 0;
 							qsaudit->items[item_count].item_id		= baginst->GetID();
 							qsaudit->items[item_count].charges		= baginst->GetCharges();
-							qsaudit->items[item_count].aug_1		= baginst->GetAugmentItemID(1);
-							qsaudit->items[item_count].aug_2		= baginst->GetAugmentItemID(2);
-							qsaudit->items[item_count].aug_3		= baginst->GetAugmentItemID(3);
-							qsaudit->items[item_count].aug_4		= baginst->GetAugmentItemID(4);
-							qsaudit->items[item_count].aug_5		= baginst->GetAugmentItemID(5);
 
 							if(finalizer) { qsaudit->char2_count++; }
 							else { qsaudit->char1_count++; }
@@ -541,12 +531,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 					qsaudit->items[qsaudit->char_count].char_slot	= slot_id;
 					qsaudit->items[qsaudit->char_count].item_id		= trade_inst->GetID();
-					qsaudit->items[qsaudit->char_count].charges		= trade_inst->GetCharges();
-					qsaudit->items[qsaudit->char_count].aug_1		= trade_inst->GetAugmentItemID(1);
-					qsaudit->items[qsaudit->char_count].aug_2		= trade_inst->GetAugmentItemID(2);
-					qsaudit->items[qsaudit->char_count].aug_3		= trade_inst->GetAugmentItemID(3);
-					qsaudit->items[qsaudit->char_count].aug_4		= trade_inst->GetAugmentItemID(4);
-					qsaudit->items[qsaudit->char_count++].aug_5		= trade_inst->GetAugmentItemID(5);
+					qsaudit->items[qsaudit->char_count++].charges		= trade_inst->GetCharges();
 
 					if(trade_inst->IsType(ItemClassContainer)) {
 						for(uint8 bag_idx = 0; bag_idx < trade_inst->GetItem()->BagSlots; bag_idx++) {
@@ -557,12 +542,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 								qsaudit->items[qsaudit->char_count].char_slot	= Inventory::CalcSlotId(slot_id, bag_idx);
 								qsaudit->items[qsaudit->char_count].item_id		= trade_baginst->GetID();
-								qsaudit->items[qsaudit->char_count].charges		= trade_baginst->GetCharges();
-								qsaudit->items[qsaudit->char_count].aug_1		= trade_baginst->GetAugmentItemID(1);
-								qsaudit->items[qsaudit->char_count].aug_2		= trade_baginst->GetAugmentItemID(2);
-								qsaudit->items[qsaudit->char_count].aug_3		= trade_baginst->GetAugmentItemID(3);
-								qsaudit->items[qsaudit->char_count].aug_4		= trade_baginst->GetAugmentItemID(4);
-								qsaudit->items[qsaudit->char_count++].aug_5		= trade_baginst->GetAugmentItemID(5);
+								qsaudit->items[qsaudit->char_count++].charges		= trade_baginst->GetCharges();
 							}
 						}
 					}

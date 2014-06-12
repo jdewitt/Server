@@ -169,11 +169,6 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		return;
 	}
 
-	if(inst->GetAugmentType()==0 && isAug == true)
-	{
-		return;
-	}
-
 	const Item_Struct *item = inst->GetItem();
 
 	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
@@ -512,10 +507,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 
 	if (!isAug)
 	{
-		int i;
-		for(i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-			AddItemBonuses(inst->GetAugment(i),newbon,true);
-		}
+
 	}
 
 }
@@ -2733,27 +2725,6 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 			}
 		}
 
-		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-		{
-			ItemInst * a_inst = inst->GetAugment(x);
-			if(!a_inst)
-				continue;
-
-			if(a_inst->IsScaling())
-			{
-				uint16 oldexp = a_inst->GetExp();
-				parse->EventItem(EVENT_SCALE_CALC, this, a_inst, nullptr, "", 0);
-
-				if (a_inst->GetExp() != oldexp)
-				{
-					a_inst->ScaleItem();
-					changed = true;
-					update_slot = true;
-				}
-			}
-		}
-
 		if(update_slot)
 		{
 			SendItemPacket(i, inst, ItemPacketCharmUpdate);
@@ -2811,30 +2782,6 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			}
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-		}
-
-		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-		{
-			ItemInst *a_inst = inst->GetAugment(x);
-			if(!a_inst)
-				continue;
-
-			if(a_inst->IsScaling())
-			{
-				uint16 oldexp = a_inst->GetExp();
-
-				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, a_inst, nullptr, "", 0);
-
-				if (a_inst->GetExp() != oldexp)
-				{
-					a_inst->ScaleItem();
-					changed = true;
-					update_slot = true;
-				}
-			} else {
-				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, a_inst, nullptr, "", 0);
-			}
 		}
 
 		if(update_slot)

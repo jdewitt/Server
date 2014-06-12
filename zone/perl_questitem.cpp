@@ -193,33 +193,6 @@ XS(XS_QuestItem_GetCharges)
 	XSRETURN(1);
 }
 
-XS(XS_QuestItem_GetAugment); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_GetAugment)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, augment_id)");
-	{
-		ItemInst*	THIS;
-		int16		slot_id = (int16)SvIV(ST(1));
-		ItemInst*	RETVAL;
-
-		if (sv_derived_from(ST(0), "QuestItem")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(ItemInst *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetAugment(slot_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_QuestItem_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_GetID)
 {
@@ -272,7 +245,6 @@ XS(boot_QuestItem)
 		newXSproto(strcpy(buf, "IsType"), XS_QuestItem_IsType, file, "$$");
 		newXSproto(strcpy(buf, "IsAttuned"), XS_QuestItem_IsAttuned, file, "$");
 		newXSproto(strcpy(buf, "GetCharges"), XS_QuestItem_GetCharges, file, "$");
-		newXSproto(strcpy(buf, "GetAugment"), XS_QuestItem_GetAugment, file, "$$");
 		newXSproto(strcpy(buf, "GetID"), XS_QuestItem_GetID, file, "$");
 
 	XSRETURN_YES;

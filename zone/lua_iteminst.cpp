@@ -59,16 +59,6 @@ bool Lua_ItemInst::IsEquipable(int slot_id) {
 	return self->IsEquipable(slot_id);
 }
 
-bool Lua_ItemInst::IsAugmentable() {
-	Lua_Safe_Call_Bool();
-	return self->IsAugmentable();
-}
-
-int Lua_ItemInst::GetAugmentType() {
-	Lua_Safe_Call_Int();
-	return self->GetAugmentType();
-}
-
 bool Lua_ItemInst::IsExpendable() {
 	Lua_Safe_Call_Bool();
 	return self->IsExpendable();
@@ -97,21 +87,6 @@ uint32 Lua_ItemInst::GetItemID(int slot) {
 int Lua_ItemInst::GetTotalItemCount() {
 	Lua_Safe_Call_Int();
 	return self->GetTotalItemCount();
-}
-
-Lua_ItemInst Lua_ItemInst::GetAugment(int slot) {
-	Lua_Safe_Call_Class(Lua_ItemInst);
-	return self->GetAugment(slot);
-}
-
-uint32 Lua_ItemInst::GetAugmentItemID(int slot) {
-	Lua_Safe_Call_Int();
-	return self->GetAugmentItemID(slot);
-}
-
-bool Lua_ItemInst::IsAugmented() {
-	Lua_Safe_Call_Bool();
-	return self->IsAugmented();
 }
 
 bool Lua_ItemInst::IsWeapon() {
@@ -275,16 +250,11 @@ luabind::scope lua_register_iteminst() {
 		.def("IsStackable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsStackable)
 		.def("IsEquipable", (bool(Lua_ItemInst::*)(int,int))&Lua_ItemInst::IsEquipable)
 		.def("IsEquipable", (bool(Lua_ItemInst::*)(int))&Lua_ItemInst::IsEquipable)
-		.def("IsAugmentable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmentable)
-		.def("GetAugmentType", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetAugmentType)
 		.def("IsExpendable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsExpendable)
 		.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItem)
 		.def("GetUnscaledItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetUnscaledItem)
 		.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
 		.def("GetTotalItemCount", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
-		.def("GetAugment", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugment)
-		.def("GetAugmentItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugmentItemID)
-		.def("IsAugmented", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmented)
 		.def("IsWeapon", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsWeapon)
 		.def("IsAmmo", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAmmo)
 		.def("GetID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetID)

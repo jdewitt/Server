@@ -511,29 +511,16 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 	//ItemInst* inst = nullptr;
 
 	uint32 len_query = MakeAnyLenString(&query, "select "
-		"bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5 from object_contents where parentid=%i", parentid);
+		"bagidx,itemid,charges from object_contents where parentid=%i", parentid);
 
 	if (RunQuery(query, len_query, errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			uint8 index = (uint8)atoi(row[0]);
 			uint32 item_id = (uint32)atoi(row[1]);
 			int8 charges = (int8)atoi(row[2]);
-			uint32 aug[5];
-			aug[0]	= (uint32)atoi(row[3]);
-			aug[1]	= (uint32)atoi(row[4]);
-			aug[2]	= (uint32)atoi(row[5]);
-			aug[3]	= (uint32)atoi(row[6]);
-			aug[4]	= (uint32)atoi(row[7]);
 
 			ItemInst* inst = database.CreateItem(item_id, charges);
 			if (inst) {
-				if (inst->GetItem()->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
-						if (aug[i]) {
-								inst->PutAugment(&database, i, aug[i]);
-						}
-					}
-				}
 				// Put item inside world container
 				container->PutItem(index, *inst);
 				safe_delete(inst);
@@ -568,17 +555,11 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 		ItemInst* inst = container->GetItem(index);
 		if (inst) {
 			uint32 item_id = inst->GetItem()->ID;
-			uint32 augslot[5] = { 0, 0, 0, 0, 0 };
-			if (inst->IsType(ItemClassCommon)) {
-				for(int i=0;i<5;i++) {
-					ItemInst *auginst=inst->GetAugment(i);
-					augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-				}
-			}
+
 			uint32 len_query = MakeAnyLenString(&query,
 
-				"replace into object_contents (zoneid,parentid,bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5,droptime) values (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,now())",
-				zone_id, parent_id, index, item_id, inst->GetCharges(),augslot[0],augslot[1],augslot[2],augslot[3],augslot[4]);
+				"replace into object_contents (zoneid,parentid,bagidx,itemid,charges,droptime) values (%i,%i,%i,%i,%i,now())",
+				zone_id, parent_id, index, item_id, inst->GetCharges());
 
 			if (!RunQuery(query, len_query, errbuf)) {
 				LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", errbuf);

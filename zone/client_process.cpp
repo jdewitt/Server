@@ -214,51 +214,6 @@ bool Client::Process() {
 			}
 		}
 
-		if(AutoFireEnabled()){
-			ItemInst *ranged = GetInv().GetItem(SLOT_RANGE);
-			if(ranged)
-			{
-				if(ranged->GetItem() && ranged->GetItem()->ItemType == ItemTypeBow){
-					if(ranged_timer.Check(false)){
-						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
-								if(CheckLosFN(GetTarget())){
-									//client has built in los check, but auto fire does not.. done last.
-									RangedAttack(GetTarget());
-										if (CheckDoubleRangedAttack())
-											RangedAttack(GetTarget(), true);
-								}
-								else
-									ranged_timer.Start();
-							}
-							else
-								ranged_timer.Start();
-						}
-						else
-							ranged_timer.Start();
-					}
-				}
-				else if(ranged->GetItem() && (ranged->GetItem()->ItemType == ItemTypeLargeThrowing || ranged->GetItem()->ItemType == ItemTypeSmallThrowing)){
-					if(ranged_timer.Check(false)){
-						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
-								if(CheckLosFN(GetTarget())){
-									//client has built in los check, but auto fire does not.. done last.
-									ThrowingAttack(GetTarget());
-								}
-								else
-									ranged_timer.Start();
-							}
-							else
-								ranged_timer.Start();
-						}
-						else
-							ranged_timer.Start();
-					}
-				}
-			}
-		}
-
 		Mob *auto_attack_target = GetTarget();
 		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check())
 		{

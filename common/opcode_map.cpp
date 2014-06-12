@@ -15,7 +15,6 @@ void load_opcode_names()
 	opcode_map[0x0176]="LiveOP_Heartbeat";
 	opcode_map[0x02d7]="LiveOP_ReloadUI";
 	opcode_map[0x01eb]="LiveOP_IncreaseStats";
-	opcode_map[0x0134]="LiveOP_ApproveZone";
 	opcode_map[0x01d5]="LiveOP_Dye";
 	opcode_map[0x0168]="LiveOP_Stamina";
 	opcode_map[0x014d]="LiveOP_ControlBoat";
@@ -68,7 +67,6 @@ void load_opcode_names()
 	opcode_map[0x01ca]="LiveOP_TraderBuy";
 	opcode_map[0x01ac]="LiveOP_PetCommands";
 	opcode_map[0x0042]="LiveOP_TradeSkillCombine";
-	opcode_map[0x02e5]="LiveOP_AugmentItem";
 	opcode_map[0x0367]="LiveOP_ItemName";
 	opcode_map[0x02cd]="LiveOP_ShopItem";
 	opcode_map[0x0065]="LiveOP_ShopPlayerBuy";
@@ -281,7 +279,6 @@ void load_opcode_names()
 	opcode_map[0x015e]="LiveOP_World_Client_CRC2";
 	opcode_map[0x0269]="LiveOP_SetChatServer";
 	opcode_map[0x0264]="LiveOP_ZoneServerInfo";
-	opcode_map[0x0017]="LiveOP_AckPacket";
 	opcode_map[0x012c]="LiveOP_WearChange";
 	opcode_map[0x1FA1]="LiveOP_WorldObjectsSent";
 	opcode_map[0x39C4]="LiveOP_BlockedBuffs";

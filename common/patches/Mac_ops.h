@@ -125,15 +125,6 @@ D(OP_FaceChange);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
-E(OP_0x0193);
-E(OP_0x0347);
-E(OP_AckPacket);
-E(OP_AnnoyingZoneUnknown);
-E(OP_ApproveZone);
-E(OP_AssistGroup);
-E(OP_AugmentInfo);
-E(OP_AugmentItem);
-E(OP_AutoFire);
 E(OP_Bandolier);
 E(OP_BankerChange);
 E(OP_Barter);

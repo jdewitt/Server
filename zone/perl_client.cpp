@@ -2893,34 +2893,6 @@ XS(XS_Client_GetItemIDAt)
 	XSRETURN(1);
 }
 
-XS(XS_Client_GetAugmentIDAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAugmentIDAt)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, slot_id, augslot)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-		int16		slot_id = (int16)SvIV(ST(1));
-		int16		augslot = (uint8)SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetAugmentIDAt(slot_id, augslot);
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DeleteItemInInventory)
 {
@@ -4033,43 +4005,6 @@ XS(XS_Client_GetItemAt)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetInv().GetItem(slot);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetAugmentAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAugmentAt)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, slot, aug_slot)");
-	{
-		Client *		THIS;
-		ItemInst *		RETVAL;
-		uint32 slot = (int32)SvIV(ST(1));
-		uint32 aug_slot = (int32)SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		ItemInst * inst = THIS->GetInv().GetItem(slot);
-		if(inst)
-		{
-			RETVAL = inst->GetAugment(aug_slot);
-		}
-		else
-		{
-			RETVAL = nullptr;
-		}
-
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
 	}
@@ -5609,7 +5544,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 		newXSproto(strcpy(buf, "Undye"), XS_Client_Undye, file, "$");
 		newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
-		newXSproto(strcpy(buf, "GetAugmentIDAt"), XS_Client_GetAugmentIDAt, file, "$$$");
 		newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
 		newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
 		newXSproto(strcpy(buf, "SetStats"), XS_Client_SetStats, file, "$$$");
@@ -5650,7 +5584,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 		newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
 		newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
-		newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
 		newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
 		newXSproto(strcpy(buf, "SetStartZone"), XS_Client_SetStartZone, file, "$$");
 		newXSproto(strcpy(buf, "KeyRingAdd"), XS_Client_KeyRingAdd, file, "$$");

@@ -1006,11 +1006,6 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 				if (quantity_found >= quantity)
 					return it->first;
 			}
-
-			for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1)
-					return SLOT_AUGMENT; // Only one augment per slot.
-			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -1021,10 +1016,6 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 					quantity_found += (baginst->GetCharges() <= 0) ? 1 : baginst->GetCharges();
 					if (quantity_found >= quantity)
 						return Inventory::CalcSlotId(it->first, itb->first);
-				}
-				for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
-						return SLOT_AUGMENT; // Only one augment per slot.
 				}
 			}
 		}
@@ -1051,10 +1042,6 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 				if (quantity_found >= quantity)
 					return SLOT_CURSOR;
 			}
-			for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1)
-					return SLOT_AUGMENT; // Only one augment per slot.
-			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -1066,11 +1053,6 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 					if (quantity_found >= quantity)
 						return Inventory::CalcSlotId(SLOT_CURSOR, itb->first);
 				}
-				for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
-						return SLOT_AUGMENT; // Only one augment per slot.
-				}
-
 			}
 		}
 	}
@@ -1161,12 +1143,6 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 			if (inst->GetItem()->LoreGroup == loregroup)
 				return it->first;
 
-			ItemInst* Aug;
-			for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				Aug = inst->GetAugment(i);
-				if (Aug && Aug->GetItem()->LoreGroup == loregroup)
-					return SLOT_AUGMENT; // Only one augment per slot.
-			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -1176,12 +1152,6 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(it->first, itb->first);
 
-				ItemInst* Aug2;
-				for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					Aug2 = baginst->GetAugment(i);
-					if (Aug2 && Aug2->GetItem()->LoreGroup == loregroup)
-						return SLOT_AUGMENT; // Only one augment per slot.
-				}
 			}
 		}
 	}
@@ -1204,12 +1174,6 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 			if (inst->GetItem()->LoreGroup == loregroup)
 				return SLOT_CURSOR;
 
-			ItemInst* Aug;
-			for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				Aug = inst->GetAugment(i);
-				if (Aug && Aug->GetItem()->LoreGroup == loregroup)
-					return SLOT_AUGMENT; // Only one augment per slot.
-			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -1218,15 +1182,6 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(SLOT_CURSOR, itb->first);
-
-
-				ItemInst* Aug2;
-				for (int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					Aug2 = baginst->GetAugment(i);
-					if (Aug2 && Aug2->GetItem()->LoreGroup == loregroup)
-						return SLOT_AUGMENT; // Only one augment per slot.
-				}
-
 			}
 		}
 	}
@@ -1416,39 +1371,6 @@ bool ItemInst::IsEquipable(int16 slot_id) const
 	return false;
 }
 
-bool ItemInst::AvailableWearSlot(uint32 aug_wear_slots) const
-{
-	if (m_item->ItemClass != ItemClassCommon || !m_item)
-		return false;
-
-	int i;
-	for (i = 0; i<23; i++) {
-		if (m_item->Slots & (1 << i)) {
-			if (aug_wear_slots & (1 << i))
-				break;
-		}
-	}
-
-	return (i<23) ? true : false;
-}
-
-int8 ItemInst::AvailableAugmentSlot(int32 augtype) const
-{
-	if (m_item->ItemClass != ItemClassCommon || !m_item)
-		return -1;
-
-	int i;
-	for (i = 0; i<5; i++) {
-		if (!GetItem(i)) {
-			if (augtype == -1 || (m_item->AugSlotType[i] && ((1 << (m_item->AugSlotType[i] - 1)) & augtype)))
-				break;
-		}
-
-	}
-
-	return (i<5) ? i : -1;
-}
-
 // Retrieve item inside container
 ItemInst* ItemInst::GetItem(uint8 index) const
 {
@@ -1595,69 +1517,6 @@ bool ItemInst::IsNoneEmptyContainer()
 
 	for (int i = 0; i < m_item->BagSlots; ++i)
 		if (GetItem(i))
-			return true;
-
-	return false;
-}
-
-// Retrieve augment inside item
-ItemInst* ItemInst::GetAugment(uint8 slot) const
-{
-	if (m_item->ItemClass == ItemClassCommon)
-		return GetItem(slot);
-
-	return nullptr;
-}
-
-uint32 ItemInst::GetAugmentItemID(uint8 slot) const
-{
-	uint32 id = 0;
-	if (m_item->ItemClass == ItemClassCommon) {
-		return GetItemID(slot);
-	}
-
-	return id;
-}
-
-// Add an augment to the item
-void ItemInst::PutAugment(uint8 slot, const ItemInst& augment)
-{
-	if (m_item->ItemClass == ItemClassCommon)
-		PutItem(slot, augment);
-}
-
-void ItemInst::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
-{
-	if (item_id != 0) {
-		const ItemInst* aug = db->CreateItem(item_id);
-		if (aug)
-		{
-			PutAugment(slot, *aug);
-			safe_delete(aug);
-		}
-	}
-}
-
-// Remove augment from item and destroy it
-void ItemInst::DeleteAugment(uint8 index)
-{
-	if (m_item->ItemClass == ItemClassCommon)
-		DeleteItem(index);
-}
-
-// Remove augment from item and return it
-ItemInst* ItemInst::RemoveAugment(uint8 index)
-{
-	if (m_item->ItemClass == ItemClassCommon)
-		return PopItem(index);
-
-	return nullptr;
-}
-
-bool ItemInst::IsAugmented()
-{
-	for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
-		if (GetAugmentItemID(i))
 			return true;
 
 	return false;

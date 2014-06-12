@@ -325,7 +325,6 @@ public:
 	void	CheckQuests(const char* zonename, const char* message, uint32 npc_id, uint32 item_id, Mob* other);
 	void	LogLoot(Client* player,Corpse* corpse,const Item_Struct* item);
 	bool	AutoAttackEnabled() const { return auto_attack; }
-	bool	AutoFireEnabled() const { return auto_fire; }
 	void	MakeCorpse(uint32 exploss);
 
 	bool	ChangeFirstName(const char* in_firstname,const char* gmname);
@@ -758,7 +757,6 @@ public:
 	void	SetMaterial(int16 slot_id, uint32 item_id);
 	void	Undye();
 	uint32	GetItemIDAt(int16 slot_id);
-	uint32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	bool	PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update = false);
 	bool	PushItemOnCursor(const ItemInst& inst, bool client_update = false);
 	void	DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);

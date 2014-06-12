@@ -416,13 +416,13 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 
 	if (is_charid) {
 		len_query = MakeAnyLenString(&query,
-			"SELECT sb.slotid,sb.itemid,sb.charges,sb.augslot1,sb.augslot2,sb.augslot3,sb.augslot4,sb.augslot5,sb.custom_data from sharedbank sb "
+			"SELECT sb.slotid,sb.itemid,sb.charges, sb.custom_data from sharedbank sb "
 			"INNER JOIN character_ ch ON ch.account_id=sb.acctid "
 			"WHERE ch.id=%i", id);
 	}
 	else {
 		len_query = MakeAnyLenString(&query,
-			"SELECT slotid,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5,custom_data from sharedbank WHERE acctid=%i", id);
+			"SELECT slotid,itemid,charges,custom_data from sharedbank WHERE acctid=%i", id);
 	}
 
 	if (RunQuery(query, len_query, errbuf, &result)) {
@@ -430,26 +430,13 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 			int16 slot_id	= (int16)atoi(row[0]);
 			uint32 item_id	= (uint32)atoi(row[1]);
 			int8 charges	= (int8)atoi(row[2]);
-			uint32 aug[5];
-			aug[0]	= (uint32)atoi(row[3]);
-			aug[1]	= (uint32)atoi(row[4]);
-			aug[2]	= (uint32)atoi(row[5]);
-			aug[3]	= (uint32)atoi(row[6]);
-			aug[4]	= (uint32)atoi(row[7]);
 			const Item_Struct* item = GetItem(item_id);
 
 			if (item) {
 				int16 put_slot_id = SLOT_INVALID;
 
 				ItemInst* inst = CreateBaseItem(item, charges);
-				if (item->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
-						if (aug[i]) {
-							inst->PutAugment(this, i, aug[i]);
-						}
-					}
-				}
-				if(row[8]) {
+				if(row[3]) {
 					std::string data_str(row[8]);
 					std::string id;
 					std::string value;
@@ -516,7 +503,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,"
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,"
 		"instnodrop,custom_data FROM inventory WHERE charid=%i ORDER BY slotid", char_id), errbuf, &result)) {
 
 		while ((row = mysql_fetch_row(result))) {
@@ -524,13 +511,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 			uint32 item_id	= atoi(row[1]);
 			uint16 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
-			uint32 aug[5];
-			aug[0]	= (uint32)atoul(row[4]);
-			aug[1]	= (uint32)atoul(row[5]);
-			aug[2]	= (uint32)atoul(row[6]);
-			aug[3]	= (uint32)atoul(row[7]);
-			aug[4]	= (uint32)atoul(row[8]);
-			bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+			bool instnodrop	= (row[4] && (uint16)atoi(row[4])) ? true : false;
 
 			const Item_Struct* item = GetItem(item_id);
 
@@ -539,8 +520,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
 				ItemInst* inst = CreateBaseItem(item, charges);
 
-				if(row[10]) {
-					std::string data_str(row[10]);
+				if(row[5]) {
+					std::string data_str(row[5]);
 					std::string id;
 					std::string value;
 					bool use_id = true;
@@ -573,14 +554,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 					inst->SetCharges(-1);
 				else
 					inst->SetCharges(charges);
-
-				if (item->ItemClass == ItemClassCommon) {
-					for(int i=0;i<5;i++) {
-						if (aug[i]) {
-							inst->PutAugment(this, i, aug[i]);
-						}
-					}
-				}
 
 				if (slot_id>=8000 && slot_id <= 8999)
 					put_slot_id = inv->PushCursor(*inst);
@@ -624,7 +597,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	bool ret = false;
 
 	// Retrieve character inventory
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,augslot1,augslot2,augslot3,augslot4,augslot5,"
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT slotid,itemid,charges,color,"
 		"instnodrop,custom_data FROM inventory INNER JOIN character_ ch ON ch.id=charid WHERE ch.name='%s' AND ch.account_id=%i ORDER BY slotid",
 		name, account_id), errbuf, &result))
 	{
@@ -633,13 +606,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			uint32 item_id	= atoi(row[1]);
 			int8 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
-			uint32 aug[5];
-			aug[0]	= (uint32)atoi(row[4]);
-			aug[1]	= (uint32)atoi(row[5]);
-			aug[2]	= (uint32)atoi(row[6]);
-			aug[3]	= (uint32)atoi(row[7]);
-			aug[4]	= (uint32)atoi(row[8]);
-			bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+			bool instnodrop	= (row[4] && (uint16)atoi(row[4])) ? true : false;
 			const Item_Struct* item = GetItem(item_id);
 			int16 put_slot_id = SLOT_INVALID;
 			if(!item)
@@ -648,8 +615,8 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			ItemInst* inst = CreateBaseItem(item, charges);
 			inst->SetInstNoDrop(instnodrop);
 
-			if(row[10]) {
-				std::string data_str(row[10]);
+			if(row[5]) {
+				std::string data_str(row[5]);
 				std::string id;
 				std::string value;
 				bool use_id = true;
@@ -678,13 +645,6 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 				inst->SetColor(color);
 			inst->SetCharges(charges);
 
-			if (item->ItemClass == ItemClassCommon) {
-				for(int i=0;i<5;i++) {
-					if (aug[i]) {
-						inst->PutAugment(this, i, aug[i]);
-					}
-				}
-			}
 			if (slot_id>=8000 && slot_id <= 8999)
 				put_slot_id = inv->PushCursor(*inst);
 			else
@@ -889,25 +849,6 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			item.FactionAmt3 = (int32)atoul(row[ItemField::factionamt3]);
 			item.FactionAmt4 = (int32)atoul(row[ItemField::factionamt4]);
 			strcpy(item.CharmFile,row[ItemField::charmfile]);
-			item.AugType = (uint32)atoul(row[ItemField::augtype]);
-			item.AugSlotType[0] = (uint8)atoi(row[ItemField::augslot1type]);
-			item.AugSlotVisible[0] = (uint8)atoi(row[ItemField::augslot1visible]);
-			item.AugSlotUnk2[0] = 0;
-			item.AugSlotType[1] = (uint8)atoi(row[ItemField::augslot2type]);
-			item.AugSlotVisible[1] = (uint8)atoi(row[ItemField::augslot2visible]);
-			item.AugSlotUnk2[1] = 0;
-			item.AugSlotType[2] = (uint8)atoi(row[ItemField::augslot3type]);
-			item.AugSlotVisible[2] = (uint8)atoi(row[ItemField::augslot3visible]);
-			item.AugSlotUnk2[2] = 0;
-			item.AugSlotType[3] = (uint8)atoi(row[ItemField::augslot4type]);
-			item.AugSlotVisible[3] = (uint8)atoi(row[ItemField::augslot4visible]);
-			item.AugSlotUnk2[3] = 0;
-			item.AugSlotType[4] = (uint8)atoi(row[ItemField::augslot5type]);
-			item.AugSlotVisible[4] = (uint8)atoi(row[ItemField::augslot5visible]);
-			item.AugSlotUnk2[4] = 0;
-			item.LDoNTheme = (uint32)atoul(row[ItemField::ldontheme]);
-			item.LDoNPrice = (uint32)atoul(row[ItemField::ldonprice]);
-			item.LDoNSold = (uint32)atoul(row[ItemField::ldonsold]);
 			item.BagType = (uint8)atoi(row[ItemField::bagtype]);
 			item.BagSlots = (uint8)atoi(row[ItemField::bagslots]);
 			item.BagSize = (uint8)atoi(row[ItemField::bagsize]);
@@ -1298,18 +1239,13 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint
 
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
+ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges)
 {
 	const Item_Struct* item = nullptr;
 	ItemInst* inst = nullptr;
 	item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
-		inst->PutAugment(this, 0, aug1);
-		inst->PutAugment(this, 1, aug2);
-		inst->PutAugment(this, 2, aug3);
-		inst->PutAugment(this, 3, aug4);
-		inst->PutAugment(this, 4, aug5);
 	}
 
 	return inst;
@@ -1317,16 +1253,11 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
+ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges)
 {
 	ItemInst* inst = nullptr;
 	if (item) {
 		inst = CreateBaseItem(item, charges);
-		inst->PutAugment(this, 0, aug1);
-		inst->PutAugment(this, 1, aug2);
-		inst->PutAugment(this, 2, aug3);
-		inst->PutAugment(this, 3, aug4);
-		inst->PutAugment(this, 4, aug5);
 	}
 
 	return inst;

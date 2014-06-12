@@ -607,14 +607,6 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		if(wpn) {
 			primaryweapondamage = GetWeaponDamage(other, wpn);
 			backstab_dmg = wpn->GetItem()->BackstabDmg;
-			for(int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
-			{
-				ItemInst *aug = wpn->GetAugment(i);
-				if(aug)
-				{
-					backstab_dmg += aug->GetItem()->BackstabDmg;
-				}
-			}
 		}
 	}
 	else{

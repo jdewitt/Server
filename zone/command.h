@@ -315,7 +315,6 @@ void command_picklock(Client *c, const Seperator *sep);
 void command_qtest(Client *c, const Seperator *sep);
 void command_mysql(Client *c, const Seperator *sep);
 void command_zopp(Client *c, const Seperator *sep);
-void command_augmentitem(Client *c, const Seperator *sep);
 void command_questerrors(Client *c, const Seperator *sep);
 void command_enablerecipe(Client *c, const Seperator *sep);
 void command_disablerecipe(Client *c, const Seperator *sep);

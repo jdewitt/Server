@@ -4828,29 +4828,6 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 						SizeProcList = SympatheticProcList.size();
 					}
 			}
-
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
-			{
-				if (SizeProcList > MAX_SYMPATHETIC)
-					continue;
-
-				ItemInst *aug = nullptr;
-				aug = ins->GetAugment(y);
-				if(aug)
-				{
-					const Item_Struct* TempItemAug = aug->GetItem();
-					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
-
-						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
-
-						if (proc_spellid > 0)
-						{
-							SympatheticProcList.push_back(proc_spellid);
-							SizeProcList = SympatheticProcList.size();
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -4948,42 +4925,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 						realTotal = Total;
 						UsedItem = TempItem;
 						UsedFocusID = TempItem->Focus.Effect;
-					}
-				}
-			}
-
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
-			{
-				ItemInst *aug = nullptr;
-				aug = ins->GetAugment(y);
-				if(aug)
-				{
-					const Item_Struct* TempItemAug = aug->GetItem();
-					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
-						if(rand_effectiveness) {
-							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
-							if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
-								focus_max_real = focus_max;
-								UsedItem = TempItem;
-								UsedFocusID = TempItemAug->Focus.Effect;
-							} else if (focus_max < 0 && focus_max < focus_max_real) {
-								focus_max_real = focus_max;
-								UsedItem = TempItem;
-								UsedFocusID = TempItemAug->Focus.Effect;
-							}
-						}
-						else {
-							Total = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
-							if (Total > 0 && realTotal >= 0 && Total > realTotal) {
-								realTotal = Total;
-								UsedItem = TempItem;
-								UsedFocusID = TempItemAug->Focus.Effect;
-							} else if (Total < 0 && Total < realTotal) {
-								realTotal = Total;
-								UsedItem = TempItem;
-								UsedFocusID = TempItemAug->Focus.Effect;
-							}
-						}
 					}
 				}
 			}

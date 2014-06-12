@@ -1156,52 +1156,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT))
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-		bool fromaug = false;
 		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-		Item_Struct* augitem = 0;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
-		for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-			const ItemInst* aug_i = inst->GetAugment(r);
-
-			if(!aug_i)
-				continue;
-			const Item_Struct* aug = aug_i->GetItem();
-			if(!aug)
-				continue;
-
-			if ( aug->Click.Effect == spell_id )
-			{
-				recastdelay = aug_i->GetItem()->RecastDelay;
-				recasttype = aug_i->GetItem()->RecastType;
-				fromaug = true;
-				break;
-			}
-		}
-
-		//Test the aug recast delay
-		if(IsClient() && fromaug && recastdelay > 0)
-		{
-			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
-				Message_StringID(13, SPELL_RECAST);
-				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
-				InterruptSpell();
-				return;
-			}
-			else
-			{
-				//Can we start the timer here?  I don't see why not.
-				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-			}
-		}
-
-		if (inst && inst->IsType(ItemClassCommon) && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
+		if (inst && inst->IsType(ItemClassCommon) && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges())
 		{
 			//const Item_Struct* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
-
-			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
 				mlog(SPELLS__CASTING, "Spell %d: Consuming a charge from item %s (%d) which had %d/%d charges.", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);

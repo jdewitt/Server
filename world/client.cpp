@@ -743,9 +743,6 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		clog(WORLD__CLIENT_ERR,"Expecting OP_SendLoginInfo, got %s", OpcodeNames[opcode]);
 		return false;
 	}
-	else if (opcode == OP_AckPacket) {
-		return true;
-	}
 
 	switch(opcode)
 	{
