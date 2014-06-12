@@ -2848,48 +2848,40 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	message_arg[i++] = message9;
 
 	for(argcount = length = 0; message_arg[argcount]; argcount++)
+    {
 		length += strlen(message_arg[argcount]) + 1;
+    }
+
+    EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 
 	if(GetClientVersion() == EQClientMac)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
 		fm->string_id = string_id;
 		fm->type = type;
 		bufptr = fm->message;
-		for(i = 0; i < argcount; i++)
-		{
-			strcpy(bufptr, message_arg[i]);
-			bufptr += strlen(message_arg[i]) + 1;
-		}
-
-
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
 	}
 	else
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
 		fm->string_id = string_id;
 		fm->type = type;
 		bufptr = fm->message;
-		for(i = 0; i < argcount; i++)
-		{
-			strcpy(bufptr, message_arg[i]);
-			bufptr += strlen(message_arg[i]) + 1;
-		}
+    }
+
+    for(i = 0; i < argcount; i++)
+    {
+        strcpy(bufptr, message_arg[i]);
+        bufptr += strlen(message_arg[i]) + 1;
+    }
 
 
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+    if(distance>0)
+        entity_list.QueueCloseClients(this,outapp,false,distance);
+    else
+        QueuePacket(outapp);
+    safe_delete(outapp);
+
 }
 
 // helper function, returns true if we should see the message
@@ -2982,13 +2974,27 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	message_arg[i++] = message9;
 
 	for (argcount = length = 0; message_arg[argcount]; argcount++)
+    {
 		length += strlen(message_arg[argcount]) + 1;
+    }
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
+    EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+
+	if(GetClientVersion() == EQClientMac)
+	{
+		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
+		fm->string_id = string_id;
+		fm->type = type;
+		bufptr = fm->message;
+	}
+	else
+	{
+		FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+		fm->string_id = string_id;
+		fm->type = type;
+		bufptr = fm->message;
+    }
+
 	for (i = 0; i < argcount; i++) {
 		strcpy(bufptr, message_arg[i]);
 		bufptr += strlen(message_arg[i]) + 1;
