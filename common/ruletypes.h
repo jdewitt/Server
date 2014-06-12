@@ -117,6 +117,10 @@ RULE_INT ( Skills, MaxTrainTradeskills, 21 )
 RULE_BOOL ( Skills, UseLimitTradeskillSearchSkillDiff, true )
 RULE_INT ( Skills, MaxTradeskillSearchSkillDiff, 50 )
 RULE_INT ( Skills, MaxTrainSpecializations, 50 )	// Max level a GM trainer will train casting specializations
+RULE_INT ( Skills, TrackingMultiplier, 2) //Overall tracking multiplier. No previous comparable value.
+RULE_INT ( Skills, TrackingBardMultiplier, 7) //Tracking multiplier for Bard. Was 7
+RULE_INT ( Skills, TrackingDruidMultiplier, 8) //Tracking multiplier for Druid. Was 10
+RULE_INT ( Skills, TrackingRangerMultiplier, 9) //Tracking multiplier for Ranger. Was 12
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Pets )

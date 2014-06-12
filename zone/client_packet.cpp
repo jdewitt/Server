@@ -7306,6 +7306,19 @@ void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 		Message(13,"Ability recovery time not yet met.");
 		return;
 	}
+
+	if(IsSitting())
+	{
+		Message_StringID(MT_Skills, FORAGE_STANDING);
+		return;
+	}
+
+	if(IsStunned() || IsMezzed() || AutoAttackEnabled())
+	{
+		Message_StringID(MT_Skills, FORAGE_COMBAT);
+		return;
+	}
+
 	p_timers.Start(pTimerForaging, ForagingReuseTime-1);
 
 	ForageItem();
