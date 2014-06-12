@@ -660,6 +660,7 @@ public:
 	uint16	MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
 	inline	uint16	MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	uint8	SkillTrainLevel(SkillUseTypes skillid, uint16 class_);
+	uint8	SkillTrainLvl(SkillUseTypes skillid, uint16 class_) const;
 
 	void TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid);
 	void SendTradeskillDetails(uint32 recipe_id);

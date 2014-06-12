@@ -2188,10 +2188,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(MakeRandomFloat(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %i percent chance (mod %d)", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			_log(SKILLS__GAIN, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			_log(SKILLS__GAIN, "Skill %d at value %d failed to gain with %i percent chance (mod %d)", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
 		_log(SKILLS__GAIN, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
@@ -2223,7 +2223,13 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 }
 
 bool Client::HasSkill(SkillUseTypes skill_id) const {
-	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
+	if(skill_id == SkillMeditate)
+	{
+		if(SkillTrainLvl(skill_id, GetClass()) >= GetLevel())
+			return true;
+	}
+	else
+		return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
 bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
@@ -2235,7 +2241,11 @@ uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) cons
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
-uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
+uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_) {
+	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+}
+
+uint8 Client::SkillTrainLvl(SkillUseTypes skillid, uint16 class_) const {
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 

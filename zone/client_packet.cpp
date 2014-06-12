@@ -3115,6 +3115,9 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		return; //You cannot hide if you do not have hide
 	}
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if(!p_timers.Expired(&database, pTimerHide, false)) {
 		Message(13,"Ability recovery time not yet met.");
 		return;
@@ -3163,6 +3166,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		}
 		FastQueuePacket(&outapp);
 	}
+	eqmac_timer.Start(100, true);
 	return;
 }
 
@@ -8804,12 +8808,15 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 				int haveskill = GetMaxSkillAfterSpecializationRules(currentskill, MaxSkill(currentskill, GetClass(), RuleI(Character, MaxLevel)));
 				if(haveskill > 0)
 				{
-					//If we never get the skill, value is 255. If we qualify for it it's 0, if we get it but don't yet qualify it's 254.
+					pps->skills[s] = 254;
+					//If we never get the skill, value is 255. If we qualify for it AND do not need to train it it's 0, if we get it but don't yet qualify or it needs to be trained it's 254.
 					uint16 t_level = SkillTrainLevel(currentskill, GetClass());
-					if(t_level > GetLevel())
-						pps->skills[s] = 254;
-					else
-						pps->skills[s] = 0;
+					if(t_level <= GetLevel())
+					{
+						//Meditate does not need to be trained.
+						if(t_level == 1 || currentskill == SkillMeditate)
+							pps->skills[s] = 0;
+					}
 				}
 				else
 					pps->skills[s] = 255;
