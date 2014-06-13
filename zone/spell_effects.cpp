@@ -1022,9 +1022,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
-					if(CastToClient()->GetClientVersion() == EQClientMac)
-						effect_value = 98;
-
 					if(MakeRandomInt(0, 99) < effect_value)
 					{
 						Gate();				

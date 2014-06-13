@@ -3012,6 +3012,9 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		Message(13,"Ability recovery time not yet met.");
 		return;
 	}
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	int reuse = FeignDeathReuseTime;
 	switch (GetAA(aaRapidFeign))
 	{
@@ -3046,6 +3049,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 	}
 	else {
 		SetFeigned(true);
+		eqmac_timer.Start(100, true);
 	}
 
 	CheckIncreaseSkill(SkillFeignDeath, nullptr, 5);
@@ -5430,7 +5434,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	t1.stop();
-	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
 
