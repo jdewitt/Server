@@ -3261,6 +3261,7 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 	else
 	{
 		WhoAll(whoall);
+		Message(0, "Whoall request recieved. If you do not see who displayed, please inform the server admins of the time this occured and relog as you are bugged");
 		eqmac_timer.Start(100, true);
 	}
 	return;
@@ -4978,10 +4979,12 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 	Mob* gt = entity_list.GetMob(gmg->charname);
 	if (gt != nullptr) {
 		this->MovePC(zone->GetZoneID(), zone->GetInstanceID(), gt->GetX(), gt->GetY(), gt->GetZ(), gt->GetHeading());
+		Message(0, "Entity was not found, either it's a typo, or whoall bug.");
 	}
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected.");
 	else {
+		Message(0, "Entity was found server side. Packet being sent to world.");
 		ServerPacket* pack = new ServerPacket(ServerOP_GMGoto, sizeof(ServerGMGoto_Struct));
 		memset(pack->pBuffer, 0, pack->size);
 		ServerGMGoto_Struct* wsgmg = (ServerGMGoto_Struct*) pack->pBuffer;

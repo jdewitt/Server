@@ -129,7 +129,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	),
 	//these must be listed in the order they appear in client.h
-	position_timer(250),
+	position_timer(100), //WAS 250 CAVEDUDE
 	hpupdate_timer(1800),
 	camp_timer(29000),
 	process_timer(100),
@@ -7128,7 +7128,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if(itemid > 0)
-		SummonItem(itemid,0,0,0,0,0,0,false,SLOT_POWER_SOURCE);
+		SummonItem(itemid,1,0,0,0,0,0,false,SLOT_POWER_SOURCE);
 
 	if(faction)
 	{

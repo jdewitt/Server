@@ -431,9 +431,19 @@ void Client::SetLevel(uint8 set_level, bool command)
 	{
 		SetHP(CalcMaxHP()); // Why not, lets give them a free heal
 	}
+	if(!RuleB(Character, ManaOnLevel))
+	{
+		int mp = CalcMaxMana();
+		if(GetMana() > mp)
+			SetMana(mp);
+	}
+	else
+	{
+		SetMana(CalcMaxMana()); // Why not, lets give them a free heal
+	}
 
 	SendHPUpdate();
-	SetMana(CalcMaxMana());
+	SendManaUpdate();
 	UpdateWho();
 	Save();
 }
