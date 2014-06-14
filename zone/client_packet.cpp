@@ -7142,7 +7142,7 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 	Animation_Struct *s = (Animation_Struct *) app->pBuffer;
 
 	//might verify spawn ID, but it wouldent affect anything
-    Animation action = static_cast<Animation>(s->action);
+	Animation action = static_cast<Animation>(s->action);
 	DoAnim(action, s->value);
 
 	return;
