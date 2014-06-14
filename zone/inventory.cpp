@@ -1366,7 +1366,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 					return 2;
 			}
 		}
-
+		_log(INVENTORY__ERROR, "dst_inst IS FALSE: Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
 		return 0;
 	}
 	//verify shared bank transactions in the database
@@ -1566,7 +1566,10 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			// Nothing in destination slot: split stack into two
 			if ((int16)move_in->number_in_stack >= src_inst->GetCharges()) {
 				// Move entire stack
-				if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return 0; }
+				if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { 
+					mlog(INVENTORY__ERROR, "Could not move entire stack from %d to %d with stack size %d. Dest empty.", src_slot_id, dst_slot_id, move_in->number_in_stack);
+					return 0; 
+				}
 				mlog(INVENTORY__SLOTS, "Move entire stack from %d to %d with stack size %d. Dest empty.", src_slot_id, dst_slot_id, move_in->number_in_stack);
 			}
 			else {
@@ -1587,7 +1590,10 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 			SetMaterial(dst_slot_id,src_inst->GetItem()->ID);
 		}
-		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return 0; }
+		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) {
+			mlog(INVENTORY__ERROR, "Could not move entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
+			return 0; 
+		}
 		mlog(INVENTORY__SLOTS, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
 		if(src_slot_id < 22 || src_slot_id == 9999) {

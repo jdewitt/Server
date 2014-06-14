@@ -2391,7 +2391,7 @@ struct UseDiscipline_Struct
 	/*0001*/ uint8 unknown[3];			   // Comment: Seems to be always 0 
 };
 
-struct GlobalID_Struct
+struct EntityId_Struct
 {
 	/*000*/	int16 entity_id;
 	/*002*/

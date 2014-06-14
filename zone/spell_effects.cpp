@@ -986,8 +986,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(!spellbonuses.AntiGate){
 
-					effect_value = 98;
-
 					if(MakeRandomInt(0, 99) < effect_value)
 					{
 						Gate();				
@@ -5926,7 +5924,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 	if (spells[spell_id].CastingAnim == 64)
 		anim = 44; //Corrects for animation error.
 
-	DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
+	DoAnim(static_cast<Animation>(anim), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
 	return true;
 }			
 

@@ -1023,13 +1023,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			if(reg_focus > 0)
 				mlog(SPELLS__CASTING, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
 			Client *c = this->CastToClient();
-			int component, component_count, inv_slot_id;
+			int component, component_count, inv_slot_id, expcomponent;
 			bool missingreags = false;
 			for(int t_count = 0; t_count < 4; t_count++) {
 				component = spells[spell_id].components[t_count];
 				component_count = spells[spell_id].component_counts[t_count];
+				expcomponent = spells[spell_id].NoexpendReagent[t_count];
 
-				if (component == -1)
+				if (component == -1 && expcomponent == -1)
 					continue;
 
 				// bard components are requirements for a certain instrument type, not a specific item
@@ -1090,7 +1091,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 				// handle the components for traditional casters
 				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
+					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1 && c->GetInv().HasItem(expcomponent, 1, invWhereWorn|invWherePersonal) == -1) // item not found
 					{
 						if (!missingreags)
 						{
@@ -1098,7 +1099,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							missingreags=true;
 						}
 
-						const Item_Struct *item = database.GetItem(component);
+						const Item_Struct *item;
+						if(component != -1)
+							item = database.GetItem(component);
+						else if(expcomponent != -1)
+							item = database.GetItem(expcomponent);
+
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
 							mlog(SPELLS__CASTING_ERR, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
@@ -1958,7 +1964,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-	DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+	DoAnim(static_cast<Animation>(spells[spell_id].CastingAnim), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 
 	// Set and send the nimbus effect if this spell has one
 	int NimbusEffect = GetNimbusEffect(spell_id);
@@ -2172,7 +2178,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	}
 
 	//do we need to do this???
-	DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+	DoAnim(static_cast<Animation>(spells[spell_id].CastingAnim), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 	if(IsClient())
 		CastToClient()->CheckSongSkillIncrease(spell_id);
 

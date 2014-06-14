@@ -161,7 +161,7 @@ public:
 		uint32 unknown06 = 0, uint32 unknown18 = 0);
 	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
-	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
+	void DoAnim(Animation animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsItem = false, float speed = 0,
 		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt, const char *IDFile = nullptr);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
@@ -1207,6 +1207,8 @@ protected:
 	SpecialAbility SpecialAbilities[MAX_SPECIAL_ATTACK];
 	bool bEnraged;
 	bool destructibleobject;
+
+	Timer eqmac_timer;
 
 private:
 	void _StopSong(); //this is not what you think it is

@@ -162,6 +162,7 @@ private:
 
 	string account_name;
 	unsigned int account_id;
+	bool sentsessioninfo;
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
 	string key;

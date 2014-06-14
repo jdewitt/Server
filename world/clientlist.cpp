@@ -759,7 +759,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	safe_delete(output);
 	}
 	catch(...){
-		_log(WORLD__ZONELIST_ERR,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
+		_log(WORLD__ZONELIST_ERR,"Unknown error in world's SendWhoAll (probably mem error), ignoring... Player id is: %i, Name is: %s", fromid, to);
 		return;
 	}
 }

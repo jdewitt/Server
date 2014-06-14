@@ -1909,6 +1909,20 @@ DECODE(OP_FaceChange){
 FINISH_DIRECT_DECODE();
 }
 
+ENCODE(OP_Assist){
+	ENCODE_LENGTH_EXACT(EntityId_Struct);
+	SETUP_DIRECT_ENCODE(EntityId_Struct, structs::EntityId_Struct);
+	OUT(entity_id);
+	FINISH_ENCODE();
+}
+
+DECODE(OP_Assist){
+	DECODE_LENGTH_EXACT(structs::EntityId_Struct);
+	SETUP_DIRECT_DECODE(EntityId_Struct, structs::EntityId_Struct);
+	IN(entity_id);
+FINISH_DIRECT_DECODE();
+}
+
 structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int type) {
 
 	if(!inst)
@@ -2226,7 +2240,6 @@ ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMApproval) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupAcknowledge) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupCancelInvite) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDelete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
