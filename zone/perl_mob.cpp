@@ -1173,7 +1173,7 @@ XS(XS_Mob_DoAnim)
 		else {
 			type = (int)SvIV(ST(2));
 		}
-        Animation animation = static_cast<Animation>(animnum);
+		Animation animation = static_cast<Animation>(animnum);
 		THIS->DoAnim(animation, type);
 	}
 	XSRETURN_EMPTY;
