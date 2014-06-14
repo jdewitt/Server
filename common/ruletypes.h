@@ -29,7 +29,7 @@ RULE_INT ( Character, DeathExpLossMaxLevel, 255 )	// Any level greater than this
 RULE_INT ( Character, DeathItemLossLevel, 10 )
 RULE_INT ( Character, DeathExpLossMultiplier, 3) //Adjust how much exp is lost
 RULE_BOOL( Character, UseDeathExpLossMult, false ) //Adjust to use the above multiplier or to use code default.
-RULE_INT ( Character, CorpseDecayTimeMS, 10800000 )
+RULE_INT ( Character, CorpseDecayTimeMS, 604800000 ) // 7 days
 RULE_INT ( Character, CorpseResTimeMS, 10800000 ) // time before cant res corpse(3 hours)
 RULE_BOOL( Character, LeaveCorpses, true )
 RULE_BOOL( Character, LeaveNakedCorpses, true )
@@ -73,7 +73,7 @@ RULE_INT ( Character, ItemDSMitigationCap, 50)
 RULE_INT ( Character, ItemEnduranceRegenCap, 15)
 RULE_INT ( Character, ItemExtraDmgCap, 150) // Cap for bonuses to melee skills like Bash, Frenzy, etc
 RULE_INT ( Character, HasteCap, 100) // Haste cap for non-v3(overhaste) haste.
-RULE_INT ( Character, SkillUpModifier, 100) //skill ups are at 100%
+RULE_INT ( Character, SkillUpModifier, 60) //skill ups are at 100%
 RULE_BOOL ( Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL ( Character, BindAnywhere, false)
 RULE_INT ( Character, RestRegenPercent, 0) // Set to >0 to enable rest state bonus HP and mana regen.
@@ -169,7 +169,7 @@ RULE_CATEGORY( Zone )
 RULE_INT ( Zone, NPCPositonUpdateTicCount, 32 ) //ms between intervals of sending a position update to the entire zone.
 RULE_INT ( Zone, ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
 RULE_INT ( Zone, GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
-RULE_BOOL ( Zone, EnableShadowrest, 1 ) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
+RULE_BOOL ( Zone, EnableShadowrest, 0 ) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
 RULE_BOOL ( Zone, UsePlayerCorpseBackups, true) // Keeps backups of player corpses.
 RULE_INT ( Zone, MQWarpExemptStatus, -1 ) // Required status level to exempt the MQWarpDetector. Set to -1 to disable this feature.
 RULE_INT ( Zone, MQZoneExemptStatus, -1 ) // Required status level to exempt the MQZoneDetector. Set to -1 to disable this feature.
@@ -409,6 +409,11 @@ RULE_BOOL ( NPC, SmartLastFightingDelayMoving, true)
 RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_TRADE sub in their script
 RULE_INT ( NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL ( NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
+RULE_INT ( NPC, SpeedMultiplier, 31 ) //this is used to multiply an NPCs movement rate, yeilding map units..
+RULE_INT ( NPC, RunAnimRatio, 37 )	//This is the multiplier of eqemu speed to get client speed
+									//tweak this if pathing mobs seem to jump forward or backwards
+									//this should prolly be dynamic based on ping time or something.. who knows
+									//Values found in the emu somewhere at one point in time: 36, 43
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Aggro )

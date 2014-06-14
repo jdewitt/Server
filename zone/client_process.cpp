@@ -470,7 +470,7 @@ bool Client::Process() {
 
 			// Send a position packet every 8 seconds - if not done, other clients
 			// see this char disappear after 10-12 seconds of inactivity
-			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
+			if (position_timer_counter >= 16) { // Approx. 4 ticks per second
 				entity_list.SendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
 				pLastUpdate = Timer::GetCurrentTime();
 				pLastUpdateWZ = pLastUpdate;

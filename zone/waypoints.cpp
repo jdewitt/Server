@@ -609,8 +609,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	tar_vy = y - ny;
 	tar_vz = z - nz;
 
-	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
-	//speed *= NPC_SPEED_MULTIPLIER;
+	//pRunAnimSpeed = (int8)(speed*RuleI(NPC, RunAnimRatio));
+	//speed *= RuleI(NPC, SpeedMultiplier);
 
 	mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
@@ -735,8 +735,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 bool Mob::CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ) {
 	if(IsNPC() || IsClient() || IsPet()) {
-		pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
-		speed *= NPC_SPEED_MULTIPLIER;
+		pRunAnimSpeed = (int8)(speed*RuleI(NPC, RunAnimRatio));
+		speed *= RuleI(NPC, SpeedMultiplier);
 	}
 
 	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
@@ -770,8 +770,8 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 	if (tar_vx == 0 && tar_vy == 0)
 		return false;
-	pRunAnimSpeed = (uint8)(speed*NPC_RUNANIM_RATIO);
-	speed *= NPC_SPEED_MULTIPLIER;
+	pRunAnimSpeed = (uint8)(speed*RuleI(NPC, RunAnimRatio));
+	speed *= RuleI(NPC, SpeedMultiplier);
 
 	mlog(AI__WAYPOINTS, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, tar_vx, tar_vy, tar_vz, speed, pRunAnimSpeed);
 
