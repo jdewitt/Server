@@ -1208,6 +1208,8 @@ protected:
 	bool bEnraged;
 	bool destructibleobject;
 
+	Timer eqmac_timer;
+
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;

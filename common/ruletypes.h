@@ -52,6 +52,7 @@ RULE_INT ( Character, EnduranceRegenMultiplier, 100)
 RULE_INT ( Character, ConsumptionMultiplier, 100) //item's hunger restored = this value * item's food level, 100 = normal, 50 = people eat 2x as fast, 200 = people eat 2x as slow
 RULE_INT ( Character, ConsumptionValue, 6000) //How "full" each consumption of food or drink will make the player. EQEmu default is 6000.
 RULE_BOOL( Character, HealOnLevel, false)
+RULE_BOOL( Character, ManaOnLevel, false)
 RULE_BOOL( Character, FeignKillsPet, false)
 RULE_INT ( Character, ItemManaRegenCap, 15)
 RULE_INT ( Character, ItemHealthRegenCap, 35)
@@ -117,6 +118,10 @@ RULE_INT ( Skills, MaxTrainTradeskills, 21 )
 RULE_BOOL ( Skills, UseLimitTradeskillSearchSkillDiff, true )
 RULE_INT ( Skills, MaxTradeskillSearchSkillDiff, 50 )
 RULE_INT ( Skills, MaxTrainSpecializations, 50 )	// Max level a GM trainer will train casting specializations
+RULE_INT ( Skills, TrackingMultiplier, 2) //Overall tracking multiplier. No previous comparable value.
+RULE_INT ( Skills, TrackingBardMultiplier, 7) //Tracking multiplier for Bard. Was 7
+RULE_INT ( Skills, TrackingDruidMultiplier, 8) //Tracking multiplier for Druid. Was 10
+RULE_INT ( Skills, TrackingRangerMultiplier, 9) //Tracking multiplier for Ranger. Was 12
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Pets )
@@ -392,7 +397,7 @@ RULE_CATEGORY( NPC )
 RULE_INT ( NPC, MinorNPCCorpseDecayTimeMS, 450000 ) //level<55
 RULE_INT ( NPC, MajorNPCCorpseDecayTimeMS, 1500000 ) //level>=55
 RULE_INT ( NPC, CorpseUnlockTimer, 150000 )
-RULE_INT ( NPC, EmptyNPCCorpseDecayTimeMS, 0 )
+RULE_INT ( NPC, EmptyNPCCorpseDecayTimeMS, 30000 )
 RULE_BOOL (NPC, UseItemBonusesForNonPets, true)
 RULE_INT ( NPC, SayPauseTimeInSec, 5)
 RULE_INT ( NPC, OOCRegen, 0)

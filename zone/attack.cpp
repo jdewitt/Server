@@ -2127,7 +2127,12 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	safe_delete(app);
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp;
+	if(oos->IsNPC())
+		give_exp = oos;
+
+	else
+		give_exp = hate_list.GetDamageTop(this);
 
 	if(give_exp == nullptr)
 		give_exp = killer;
@@ -2270,7 +2275,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp_client)
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && !GetSwarmInfo()
+	if (give_exp_client && !HasOwner() && !IsMerc() && class_ != MERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
 	{
@@ -2284,6 +2289,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 		entity_list.RemoveFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
+
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
@@ -3509,15 +3515,13 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(HasDied()) {
 			bool IsSaved = false;
 
-			if(TryDivineSave())
+			if(TryDivineSave()) {
 				IsSaved = true;
+            }
 
 			if(!IsSaved && !TrySpellOnDeath()) {
 				SetHP(-500);
-
-				if(Death(attacker, damage, spell_id, skill_used)) {
-					return;
-				}
+				Death(attacker, damage, spell_id, skill_used);
 			}
 		}
 		else{
@@ -3673,12 +3677,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 						{
 							if(!attacker->CastToClient()->GetFilter(FilterDamageShields) == FilterHide)
 							{
-							attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
+								attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
 							}
 						}
 						else
-							if(attacker->CastToClient()->GetClientVersion() > EQClientMac)
-								entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
+							char val1[20]={0};
+							attacker->Message_StringID(MT_NonMelee,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
 				} else {
 					if(damage > 0) {
 						if(spell_id != SPELL_UNKNOWN)
@@ -3754,11 +3758,10 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
-
-	if (acthealed > 100) {
+	if (acthealed > 1) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
-				// message to caster
+				// message to caster	
 				if (caster->IsClient() && caster == this) {
 					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
 						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
@@ -3786,11 +3789,12 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 								YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 				}
 			} else { // normal heals
-				FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-						YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				if(strcasecmp(GetCleanName(),caster->GetCleanName()) == 0)
+					Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
+				else
+					Message(MT_NonMelee, "%s has healed you for %i points of damage.", caster->GetCleanName(), acthealed);
 				if (caster != this)
-					caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-							YOU_HEAL, GetCleanName(), itoa(acthealed));
+					caster->Message(MT_NonMelee, "You have healed %s for %i points of damage.", GetCleanName(), acthealed);
 			}
 		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);

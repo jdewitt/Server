@@ -2861,6 +2861,9 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
@@ -2911,18 +2914,20 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	
 	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
-		if(SwapItem(mi) == 0 || (SwapItem(mi) == 2 && GetClientVersion() > EQClientMac))
+		int si = SwapItem(mi);
+		if(si == 0 || (si == 2 && GetClientVersion() > EQClientMac))
 		{
 			_log(INVENTORY__ERROR, "WTF Some shit failed. SwapItem: %i, IsValidSlot (from): %i, IsValidSlot (to): %i", SwapItem(mi), IsValidSlot(mi->from_slot), IsValidSlot(mi->to_slot));
 			SwapItemResync(mi); 
 		}
-		else if(SwapItem(mi) == 2 && GetClientVersion() == EQClientMac)
+		else if(si == 2 && GetClientVersion() == EQClientMac)
 		{
 			_log(INVENTORY__ERROR, "Handling EQMac SwapItem double packet by ignoring.");
 			return;
 		}
 	}
 
+	eqmac_timer.Start(100, true);
 	return;
 }
 
@@ -3007,6 +3012,9 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		Message(13,"Ability recovery time not yet met.");
 		return;
 	}
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	int reuse = FeignDeathReuseTime;
 	switch (GetAA(aaRapidFeign))
 	{
@@ -3041,6 +3049,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 	}
 	else {
 		SetFeigned(true);
+		eqmac_timer.Start(100, true);
 	}
 
 	CheckIncreaseSkill(SkillFeignDeath, nullptr, 5);
@@ -3110,6 +3119,9 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		return; //You cannot hide if you do not have hide
 	}
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if(!p_timers.Expired(&database, pTimerHide, false)) {
 		Message(13,"Ability recovery time not yet met.");
 		return;
@@ -3158,6 +3170,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		}
 		FastQueuePacket(&outapp);
 	}
+	eqmac_timer.Start(100, true);
 	return;
 }
 
@@ -3234,6 +3247,9 @@ void Client::Handle_OP_Save(const EQApplicationPacket *app)
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if (app->size != sizeof(Who_All_Struct)) {
 		std::cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << std::endl;
 		return;
@@ -3243,7 +3259,11 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 	if(whoall->type == 0) // SoF only, for regular /who
 		entity_list.ZoneWho(this, whoall);
 	else
+	{
 		WhoAll(whoall);
+		Message(0, "Whoall request recieved. If you do not see who displayed, please inform the server admins of the time this occured and relog as you are bugged");
+		eqmac_timer.Start(100, true);
+	}
 	return;
 }
 
@@ -4959,10 +4979,12 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 	Mob* gt = entity_list.GetMob(gmg->charname);
 	if (gt != nullptr) {
 		this->MovePC(zone->GetZoneID(), zone->GetInstanceID(), gt->GetX(), gt->GetY(), gt->GetZ(), gt->GetHeading());
+		Message(0, "Entity was not found, either it's a typo, or whoall bug.");
 	}
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected.");
 	else {
+		Message(0, "Entity was found server side. Packet being sent to world.");
 		ServerPacket* pack = new ServerPacket(ServerOP_GMGoto, sizeof(ServerGMGoto_Struct));
 		memset(pack->pBuffer, 0, pack->size);
 		ServerGMGoto_Struct* wsgmg = (ServerGMGoto_Struct*) pack->pBuffer;
@@ -5415,7 +5437,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	t1.stop();
-	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
 
@@ -6421,6 +6442,9 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 
 void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	if(app->size != sizeof(Inspect_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectRequest, size=%i, expected %i", app->size, sizeof(Inspect_Struct));
 		return;
@@ -6430,9 +6454,14 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 	Mob* tmp			= entity_list.GetMob(ins->TargetID);
 
 	if(tmp != 0 && tmp->IsClient()) {
-		if(tmp->CastToClient()->GetClientVersion() < EQClientSoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
+		if(tmp->CastToClient()->GetClientVersion() < EQClientSoF) { 
+			tmp->CastToClient()->QueuePacket(app); 
+			eqmac_timer.Start(100, true);
+		} // Send request to target
 		// Inspecting an SoF or later client will make the server handle the request
-		else { ProcessInspectRequest(tmp->CastToClient(), this); }
+		else { 
+			ProcessInspectRequest(tmp->CastToClient(), this); 
+		}
 	}
 
 	return;
@@ -7287,6 +7316,19 @@ void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 		Message(13,"Ability recovery time not yet met.");
 		return;
 	}
+
+	if(IsSitting())
+	{
+		Message_StringID(MT_Skills, FORAGE_STANDING);
+		return;
+	}
+
+	if(IsStunned() || IsMezzed() || AutoAttackEnabled())
+	{
+		Message_StringID(MT_Skills, FORAGE_COMBAT);
+		return;
+	}
+
 	p_timers.Start(pTimerForaging, ForagingReuseTime-1);
 
 	ForageItem();
@@ -8358,7 +8400,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	conn_state = PlayerProfileLoaded;
 
 	m_pp.zone_id = zone->GetZoneID();
-	m_pp.zoneInstance = zone->GetInstanceID();
+	m_pp.zoneInstance = 0;
+
+	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
 
 	max_AAXP = RuleI(AA, ExpPerPoint);
 
@@ -8770,12 +8814,15 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 				int haveskill = GetMaxSkillAfterSpecializationRules(currentskill, MaxSkill(currentskill, GetClass(), RuleI(Character, MaxLevel)));
 				if(haveskill > 0)
 				{
-					//If we never get the skill, value is 255. If we qualify for it it's 0, if we get it but don't yet qualify it's 254.
+					pps->skills[s] = 254;
+					//If we never get the skill, value is 255. If we qualify for it AND do not need to train it it's 0, if we get it but don't yet qualify or it needs to be trained it's 254.
 					uint16 t_level = SkillTrainLevel(currentskill, GetClass());
-					if(t_level > GetLevel())
-						pps->skills[s] = 254;
-					else
-						pps->skills[s] = 0;
+					if(t_level <= GetLevel())
+					{
+						//Meditate does not need to be trained.
+						if(t_level == 1 || currentskill == SkillMeditate)
+							pps->skills[s] = 0;
+					}
 				}
 				else
 					pps->skills[s] = 255;

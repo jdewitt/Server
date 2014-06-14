@@ -2873,16 +2873,17 @@ bool EntityList::MakeTrackPacket(Client *client)
 	uint32 distance = 0;
 	float MobDistance;
 
+	int base = RuleI(Skills, TrackingMultiplier) * client->GetSkill(SkillTracking);
+
 	if (client->GetClass() == DRUID)
-		distance = (client->GetSkill(SkillTracking) * 10);
+		distance = (client->GetSkill(SkillTracking) * RuleI(Skills, TrackingDruidMultiplier) + base);
 	else if (client->GetClass() == RANGER)
-		distance = (client->GetSkill(SkillTracking) * 12);
+		distance = (client->GetSkill(SkillTracking) * RuleI(Skills, TrackingRangerMultiplier) + base);
 	else if (client->GetClass() == BARD)
-		distance = (client->GetSkill(SkillTracking) * 7);
+		distance = (client->GetSkill(SkillTracking) * RuleI(Skills, TrackingBardMultiplier) + base);
+
 	if (distance <= 0)
 		return false;
-	if (distance < 300)
-		distance = 300;
 
 	uint32 spe= 0;
 	bool ret = false;

@@ -1660,13 +1660,8 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 void Client::OPGMEndTraining(const EQApplicationPacket *app)
 {
-	//if(GetClientVersion() > EQClientMac)
-	//{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
-		GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
-
-		FastQueuePacket(&outapp);
-	//}
+	
+	GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
 
 	Mob* pTrainer = entity_list.GetMob(p->npcid);
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
@@ -1748,7 +1743,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 
 		uint16 skilllevel = GetRawSkill(skill);
-		if(skilllevel == 0) {
+		if(skilllevel == 0 || (skilllevel == 254 && SkillTrainLevel(skill, GetClass()) <= GetLevel())) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
 			if (t_level == 0)
