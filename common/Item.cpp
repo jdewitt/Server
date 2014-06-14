@@ -779,8 +779,6 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 
 	if ((Container->BagType == BagTypeQuiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
 
-	if ((Container->BagType == BagTypeBandolier) && (ItemToTry->ItemType != ItemTypeSmallThrowing)) return false;
-
 	return true;
 }
 

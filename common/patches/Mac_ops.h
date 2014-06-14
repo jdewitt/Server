@@ -125,7 +125,6 @@ D(OP_FaceChange);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
-E(OP_Bandolier);
 E(OP_BankerChange);
 E(OP_Barter);
 E(OP_Bazaar);

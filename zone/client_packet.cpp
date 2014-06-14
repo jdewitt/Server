@@ -298,7 +298,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
-	ConnectedOpcodes[OP_Bandolier] = &Client::Handle_OP_Bandolier;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
 	ConnectedOpcodes[OP_LFGGetMatchesRequest] = &Client::Handle_OP_LFGGetMatchesRequest;
@@ -9451,35 +9450,6 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	}
 	PendingSacrifice = false;
 	SacrificeCaster.clear();
-}
-
-void Client::Handle_OP_Bandolier(const EQApplicationPacket *app) {
-
-	// Although there are three different structs for OP_Bandolier, they are all the same size.
-	//
-	if(app->size != sizeof(BandolierCreate_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_Bandolier expected %i got %i",
-					sizeof(BandolierCreate_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
-
-	switch(bs->action) {
-		case BandolierCreate:
-			CreateBandolier(app);
-			break;
-		case BandolierRemove:
-			RemoveBandolier(app);
-			break;
-		case BandolierSet:
-			SetBandolier(app);
-			break;
-		default:
-			LogFile->write(EQEMuLog::Debug, "Uknown Bandolier action %i", bs->action);
-
-	}
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
