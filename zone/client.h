@@ -1032,11 +1032,6 @@ private:
 	void	OPGMSummon(const EQApplicationPacket *app);
 	void	OPCombatAbility(const EQApplicationPacket *app);
 
-	// Bandolier Methods
-	void	CreateBandolier(const EQApplicationPacket *app);
-	void	RemoveBandolier(const EQApplicationPacket *app);
-	void	SetBandolier(const EQApplicationPacket *app);
-
 	void	HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
 	int16	CalcAC();

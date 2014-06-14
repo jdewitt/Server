@@ -334,7 +334,6 @@ N(OP_ZoneInAvatarSet),
 N(OP_ZoneServerReady),	//terrible name.
 N(OP_SendTitleList),
 N(OP_NewTitlesAvailable),
-N(OP_Bandolier),
 N(OP_OpenDiscordMerchant),
 N(OP_DiscordMerchantInventory),
 N(OP_GiveMoney),

@@ -2191,7 +2191,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
-ENCODE(OP_Bandolier) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BankerChange) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Barter) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Bazaar) { ENCODE_FORWARD(OP_Unknown); }
