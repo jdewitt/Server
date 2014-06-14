@@ -122,6 +122,8 @@ E(OP_Charm);
 E(OP_Sound);
 E(OP_FaceChange);
 D(OP_FaceChange);
+D(OP_Assist);
+E(OP_Assist);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
@@ -175,7 +177,6 @@ E(OP_GiveMoney);
 E(OP_GMApproval);
 E(OP_GMTrainSkillConfirm);
 E(OP_GroupAcknowledge);
-E(OP_GroupCancelInvite);
 E(OP_GroupDelete);
 E(OP_GroupDisbandOther);
 E(OP_GroupDisbandYou);

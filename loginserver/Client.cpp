@@ -34,6 +34,7 @@ Client::Client(EQStreamInterface *c, ClientVersion v)
 	version = v;
 	status = cs_not_sent_session_ready;
 	account_id = 0;
+	sentsessioninfo = false;
 	play_server_id = 0;
 	play_sequence_id = 0;
 }
@@ -293,29 +294,34 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 
 	if(result)
 	{
-		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
-		GenerateKey();
-		account_id = d_account_id;
-		account_name = username.c_str();
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(SessionId_Struct));
-		SessionId_Struct* s_id = (SessionId_Struct*)outapp->pBuffer;
-		// this is submitted to world server as "username"
-		sprintf(s_id->session_id, "LS#%i", account_id);
-		strcpy(s_id->unused, "unused");
-		s_id->unknown = 4;
-		connection->QueuePacket(outapp);
-		delete outapp;
 
-		string buf = server.options.GetNetworkIP();
-		EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_ServerName, buf.length() + 1);
-		strncpy((char*)outapp2->pBuffer, buf.c_str(), buf.length() + 1);
-		connection->QueuePacket(outapp2);
-		delete outapp2;
+		if(!sentsessioninfo)
+		{
+			server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
+			GenerateKey();
+			account_id = d_account_id;
+			account_name = username.c_str();
+			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(SessionId_Struct));
+			SessionId_Struct* s_id = (SessionId_Struct*)outapp->pBuffer;
+			// this is submitted to world server as "username"
+			sprintf(s_id->session_id, "LS#%i", account_id);
+			strcpy(s_id->unused, "unused");
+			s_id->unknown = 4;
+			connection->QueuePacket(outapp);
+			delete outapp;
+
+			string buf = server.options.GetNetworkIP();
+			EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_ServerName, buf.length() + 1);
+			strncpy((char*)outapp2->pBuffer, buf.c_str(), buf.length() + 1);
+			connection->QueuePacket(outapp2);
+			delete outapp2;
+			sentsessioninfo = true;
+		}
 
 	}
 	else
 	{
-		FatalError("Invalid username or password.");
+		//FatalError("Invalid username or password.");
 	}
 
 	return;

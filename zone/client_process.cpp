@@ -420,7 +420,7 @@ bool Client::Process() {
 
 			// Send a position packet every 8 seconds - if not done, other clients
 			// see this char disappear after 10-12 seconds of inactivity
-			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
+			if (position_timer_counter >= 16) { // Approx. 4 ticks per second
 				entity_list.SendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
 				pLastUpdate = Timer::GetCurrentTime();
 				pLastUpdateWZ = pLastUpdate;
@@ -1534,11 +1534,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 void Client::OPGMEndTraining(const EQApplicationPacket *app)
 {
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
-		GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
-
-		FastQueuePacket(&outapp);
-
+	GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
 	Mob* pTrainer = entity_list.GetMob(p->npcid);
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
@@ -1619,7 +1615,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 
 		uint16 skilllevel = GetRawSkill(skill);
-		if(skilllevel == 0) {
+		if(skilllevel == 0 || (skilllevel == 254 && SkillTrainLevel(skill, GetClass()) <= GetLevel())) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
 			if (t_level == 0)

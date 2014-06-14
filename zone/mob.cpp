@@ -98,7 +98,8 @@ Mob::Mob(const char* in_name,
 		bardsong_timer(6000),
 		gravity_timer(1000),
 		viral_timer(0),
-		flee_timer(FLEE_CHECK_TIMER)
+		flee_timer(FLEE_CHECK_TIMER),
+		eqmac_timer(100)
 
 {
 	targeted = 0;
@@ -1244,7 +1245,7 @@ void Mob::ShowStats(Client* client)
 	}
 }
 
-void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) {
+void Mob::DoAnim(Animation animnum, int type, bool ackreq, eqFilterType filter) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();

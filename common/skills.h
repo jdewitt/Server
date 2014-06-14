@@ -107,6 +107,7 @@ enum SkillUseTypes : uint32
 /*13869*/	SkillBerserking,
 /*13902*/	SkillTaunt,
 /*05837*/	SkillFrenzy,					// This appears to be the only listed one not grouped with the others
+            Skill2HPiercing = 99,
 
 // SoF+ specific skills
 // /*03670*/	SkillRemoveTraps,

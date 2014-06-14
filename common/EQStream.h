@@ -528,7 +528,7 @@ class EQOldStream : public EQStreamInterface {
 		virtual uint32 GetRemoteIP() const { return remote_ip; }
 		virtual uint16 GetRemotePort() const { return remote_port; }
 		virtual void ReleaseFromUse() { MInUse.lock(); if(active_users > 0) active_users--; MInUse.unlock(); }
-		virtual void RemoveData() { InboundQueueClear(); OutboundQueueClear(); PacketQueueClear(); /*if (CombinedAppPacket) delete CombinedAppPacket;*/ }
+		virtual void RemoveData() { InboundQueueClear(); OutboundQueueClear(); /*if (CombinedAppPacket) delete CombinedAppPacket;*/ }
 		virtual bool CheckState(EQStreamState state) { return GetState() == state; }
 		virtual std::string Describe() const { return("Direct EQOldStream"); }
 		virtual bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); if(IsWriting()) return true; return flag; }
@@ -537,6 +537,7 @@ class EQOldStream : public EQStreamInterface {
 		inline void PutInUse() { MInUse.lock(); active_users++; MInUse.unlock(); }
 		inline EQStreamState GetState() { EQStreamState s; MState.lock(); s=pm_state; MState.unlock(); return s; }
 		void	SendPacketQueue(bool Block = true);
+		void	FinalizePacketQueue();
 		void	ReceiveData(uchar* buf, int len);
 		void SetStreamType(EQStreamType t);
 		inline const EQStreamType GetStreamType() const { return StreamType; }

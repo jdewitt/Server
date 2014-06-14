@@ -129,7 +129,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	),
 	//these must be listed in the order they appear in client.h
-	position_timer(250),
+	position_timer(100), //WAS 250 CAVEDUDE
 	hpupdate_timer(1800),
 	camp_timer(29000),
 	process_timer(100),
@@ -501,6 +501,8 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
+	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
+	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
 	m_pp.lastlogin = time(nullptr);
@@ -671,7 +673,11 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 	return;
 }
 
-void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname) {
+void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname)
+{
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
@@ -772,18 +778,22 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			Message(0, "Error: You dont have permission to speak to the guild.");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, message))
 			Message(0, "Error: World server disconnected");
+		else
+			eqmac_timer.Start(200, true);
 		break;
 	}
 	case 2: { // GroupChat
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid) {
 			raid->RaidGroupSay((const char*) message, this);
+			eqmac_timer.Start(200, true);
 			break;
 		}
 
 		Group* group = GetGroup();
 		if(group != nullptr) {
 			group->GroupMessage(this,language,lang_skill,(const char*) message);
+			eqmac_timer.Start(200, true);
 		}
 		break;
 	}
@@ -791,6 +801,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid){
 			raid->RaidSay((const char*) message, this);
+			eqmac_timer.Start(200, true);
 		}
 		break;
 	}
@@ -800,6 +811,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			sender = GetPet();
 
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		eqmac_timer.Start(200, true);
 		break;
 	}
 	case 4: { // Auction
@@ -829,7 +841,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 
 			if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, message))
-			Message(0, "Error: World server disconnected");
+				Message(0, "Error: World server disconnected");
+			else
+				eqmac_timer.Start(200, true);
 		}
 		else if(!RuleB(Chat, ServerWideAuction)) {
 			Mob *sender = this;
@@ -838,6 +852,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			sender = GetPet();
 
 		entity_list.ChannelMessage(sender, chan_num, language, message);
+		eqmac_timer.Start(200, true);
 		}
 		break;
 	}
@@ -873,9 +888,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 
 			if (!worldserver.SendChannelMessage(this, 0, 5, 0, language, message))
-			{
 				Message(0, "Error: World server disconnected");
-			}
+			else
+				eqmac_timer.Start(200, true);
 		}
 		else if(!RuleB(Chat, ServerWideOOC))
 		{
@@ -885,6 +900,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				sender = GetPet();
 
 			entity_list.ChannelMessage(sender, chan_num, language, message);
+			eqmac_timer.Start(200, true);
 		}
 		break;
 	}
@@ -894,6 +910,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			Message(0, "Error: Only GMs can use this channel");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, message))
 			Message(0, "Error: World server disconnected");
+		else
+			eqmac_timer.Start(200, true);
 		break;
 	}
 	case 7: { // Tell
@@ -942,6 +960,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 			if(!worldserver.SendChannelMessage(this, target_name, chan_num, 0, language, message))
 				Message(0, "Error: World server disconnected");
+			else
+				eqmac_timer.Start(200, true);
 		break;
 	}
 	case 8: { // /say
@@ -965,6 +985,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			sender = GetPet();
 
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		eqmac_timer.Start(200, true);
 		parse->EventPlayer(EVENT_SAY, this, message, language);
 
 		if (sender != this)
@@ -997,6 +1018,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		// UCS Relay for Underfoot and later.
 		if(!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, message))
 			Message(0, "Error: World server disconnected");
+		else
+			eqmac_timer.Start(200, true);
 		break;
 	}
 	case 22:
@@ -1014,6 +1037,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		Buffer += 4;
 		snprintf(Buffer, sizeof(Emote_Struct) - 4, "%s %s", GetName(), message);
 		entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
+		eqmac_timer.Start(200, true);
 		safe_delete(outapp);
 		break;
 	}
@@ -2076,10 +2100,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(MakeRandomFloat(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			_log(SKILLS__GAIN, "Skill %d at value %d successfully gain with %i percent chance (mod %d)", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			_log(SKILLS__GAIN, "Skill %d at value %d failed to gain with %.4f%%chance (mod %d)", skillid, skillval, Chance, chancemodi);
+			_log(SKILLS__GAIN, "Skill %d at value %d failed to gain with %i percent chance (mod %d)", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
 		_log(SKILLS__GAIN, "Skill %d at value %d cannot increase due to maxmum %d", skillid, skillval, maxskill);
@@ -2111,7 +2135,13 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 }
 
 bool Client::HasSkill(SkillUseTypes skill_id) const {
-	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
+	if(skill_id == SkillMeditate)
+	{
+		if(SkillTrainLvl(skill_id, GetClass()) >= GetLevel())
+			return true;
+	}
+	else
+		return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
 bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
@@ -2123,7 +2153,11 @@ uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) cons
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
-uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
+uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_) {
+	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+}
+
+uint8 Client::SkillTrainLvl(SkillUseTypes skillid, uint16 class_) const {
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
@@ -2694,25 +2728,30 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	message_arg[i++] = message9;
 
 	for(argcount = length = 0; message_arg[argcount]; argcount++)
+    {
 		length += strlen(message_arg[argcount]) + 1;
+    }
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
-		OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
-		fm->string_id = string_id;
-		fm->type = type;
-		bufptr = fm->message;
-		for(i = 0; i < argcount; i++)
-		{
-			strcpy(bufptr, message_arg[i]);
-			bufptr += strlen(message_arg[i]) + 1;
-		}
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
+	fm->string_id = string_id;
+	fm->type = type;
+	bufptr = fm->message;
 
 
-		if(distance>0)
-			entity_list.QueueCloseClients(this,outapp,false,distance);
-		else
-			QueuePacket(outapp);
-		safe_delete(outapp);
+    for(i = 0; i < argcount; i++)
+    {
+        strcpy(bufptr, message_arg[i]);
+        bufptr += strlen(message_arg[i]) + 1;
+    }
+
+
+    if(distance>0)
+        entity_list.QueueCloseClients(this,outapp,false,distance);
+    else
+        QueuePacket(outapp);
+    safe_delete(outapp);
+
 }
 
 // helper function, returns true if we should see the message
@@ -2805,13 +2844,17 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	message_arg[i++] = message9;
 
 	for (argcount = length = 0; message_arg[argcount]; argcount++)
+    {
 		length += strlen(message_arg[argcount]) + 1;
+    }
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+    EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
 	bufptr = fm->message;
+
+
 	for (i = 0; i < argcount; i++) {
 		strcpy(bufptr, message_arg[i]);
 		bufptr += strlen(message_arg[i]) + 1;
@@ -6486,7 +6529,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if(itemid > 0)
-		SummonItem(itemid,0,0,0,0,0,0,false,SLOT_POWER_SOURCE);
+		SummonItem(itemid,1,0,0,0,0,0,false,SLOT_POWER_SOURCE);
 
 	if(faction)
 	{

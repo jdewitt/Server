@@ -52,11 +52,10 @@ extern WorldServer worldserver;
 
 extern EntityList entity_list;
 extern Zone* zone;
-
 bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon)
 {
 	// Determine animation
-	int type = 0;
+	Animation type = Animation::None;
 	if (weapon && weapon->IsType(ItemClassCommon)) {
 		const Item_Struct* item = weapon->GetItem();
 #if EQDEBUG >= 11
@@ -67,49 +66,49 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			case ItemType1HSlash: // 1H Slashing
 			{
 				skillinuse = Skill1HSlashing;
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case ItemType2HSlash: // 2H Slashing
 			{
 				skillinuse = Skill2HSlashing;
-				type = anim2HSlashing;
+				type = Animation::Slashing2H;
 				break;
 			}
 			case ItemType1HPiercing: // Piercing
 			{
 				skillinuse = Skill1HPiercing;
-				type = animPiercing;
+				type = Animation::Piercing;
 				break;
 			}
 			case ItemType1HBlunt: // 1H Blunt
 			{
 				skillinuse = Skill1HBlunt;
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case ItemType2HBlunt: // 2H Blunt
 			{
 				skillinuse = Skill2HBlunt;
-				type = anim2HSlashing; //anim2HWeapon
-				break;
+				type = Animation::Weapon2H; //anim2HWeapon
+              	break;
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
 				skillinuse = Skill1HPiercing; // change to Skill2HPiercing once activated
-				type = anim2HWeapon;
+				type = Animation::Weapon2H;
 				break;
 			}
 			case ItemTypeMartial:
 			{
 				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 			default:
 			{
 				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 		}// switch
@@ -120,54 +119,54 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 		{
 			case Skill1HSlashing: // 1H Slashing
 			{
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case Skill2HSlashing: // 2H Slashing
 			{
-				type = anim2HSlashing;
+				type = Animation::Slashing2H;
 				break;
 			}
 			case Skill1HPiercing: // Piercing
 			{
-				type = animPiercing;
+				type = Animation::Piercing;
 				break;
 			}
 			case Skill1HBlunt: // 1H Blunt
 			{
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;;
 				break;
 			}
 			case Skill2HBlunt: // 2H Blunt
 			{
-				type = anim2HSlashing; //anim2HWeapon
+				type = Animation::Weapon2H;
 				break;
 			}
-			case 99: // 2H Piercing // change to Skill2HPiercing once activated
+			case Skill2HPiercing: // 2H Piercing // change to Skill2HPiercing once activated
 			{
-				type = anim2HWeapon;
+				type = Animation::Weapon2H;
 				break;
 			}
 			case SkillHandtoHand:
 			{
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 			default:
 			{
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 		}// switch
 	}
 	else {
 		skillinuse = SkillHandtoHand;
-		type = animHand2Hand;
+		type = Animation::Hand2Hand;
 	}
 
 	// If we're attacking with the secondary hand, play the dual wield anim
 	if (Hand == 14)	// DW anim
-		type = animDualWield;
+		type = Animation::DualWield;
 
 	DoAnim(type);
 	return true;
@@ -1396,7 +1395,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 	if (damage > 0) {
 
 		if (spell_id == SPELL_UNKNOWN)
-			CheckIncreaseSkill(SkillDefense, other, -15);
+			CheckIncreaseSkill(SkillDefense, other, -25);
 	}
 }
 
@@ -2057,7 +2056,12 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	safe_delete(app);
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp;
+	if(oos->IsNPC())
+		give_exp = oos;
+
+	else
+		give_exp = hate_list.GetDamageTop(this);
 
 	if(give_exp == nullptr)
 		give_exp = killer;
@@ -2200,7 +2204,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp_client)
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	if (!HasOwner() && class_ != MERCHANT && !GetSwarmInfo()
+	if (give_exp_client && !HasOwner() && class_ != MERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
 	{
@@ -2213,6 +2217,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				this->CheckMinMaxLevel(killer);
 		}
 		uint16 emoteid = this->GetEmoteID();
+
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
@@ -3431,15 +3436,13 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(HasDied()) {
 			bool IsSaved = false;
 
-			if(TryDivineSave())
+			if(TryDivineSave()) {
 				IsSaved = true;
+            }
 
 			if(!IsSaved && !TrySpellOnDeath()) {
 				SetHP(-500);
-
-				if(Death(attacker, damage, spell_id, skill_used)) {
-					return;
-				}
+				Death(attacker, damage, spell_id, skill_used);
 			}
 		}
 		else{
@@ -3595,9 +3598,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 						{
 							if(!attacker->CastToClient()->GetFilter(FilterDamageShields) == FilterHide)
 							{
-							attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
+								attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
 							}
 						}
+						else
+							char val1[20]={0};
+							attacker->Message_StringID(MT_NonMelee,OTHER_HIT_NONMELEE,GetCleanName(),ConvertArray(damage,val1));
 				} else {
 					if(damage > 0) {
 						if(spell_id != SPELL_UNKNOWN)
@@ -3673,11 +3679,10 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
-
-	if (acthealed > 100) {
+	if (acthealed > 1) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
-				// message to caster
+				// message to caster	
 				if (caster->IsClient() && caster == this) {
 					FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								YOU_HEALED, GetCleanName(), itoa(acthealed));
@@ -3691,11 +3696,12 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 								YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 				}
 			} else { // normal heals
-				FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-						YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				if(strcasecmp(GetCleanName(),caster->GetCleanName()) == 0)
+					Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
+				else
+					Message(MT_NonMelee, "%s has healed you for %i points of damage.", caster->GetCleanName(), acthealed);
 				if (caster != this)
-					caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
-							YOU_HEAL, GetCleanName(), itoa(acthealed));
+					caster->Message(MT_NonMelee, "You have healed %s for %i points of damage.", GetCleanName(), acthealed);
 			}
 		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
