@@ -230,7 +230,6 @@ enum ContainerUseTypes : uint8
 /*3405*/	BagTypeBackPack,
 /*3406*/	BagTypeSmallChest,
 /*3407*/	BagTypeLargeChest,
-/*----*/	BagTypeBandolier,				// <*Database Reference Only>
 /*3408*/	BagTypeMedicineBag,
 /*3409*/	BagTypeToolBox,
 /*3410*/	BagTypeLexicon,

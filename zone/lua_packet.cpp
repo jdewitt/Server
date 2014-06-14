@@ -599,7 +599,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("ZoneServerReady	", static_cast<int>(OP_ZoneServerReady	)),
 			luabind::value("SendTitleList", static_cast<int>(OP_SendTitleList)),
 			luabind::value("NewTitlesAvailable", static_cast<int>(OP_NewTitlesAvailable)),
-			luabind::value("Bandolier", static_cast<int>(OP_Bandolier)),
 			luabind::value("OpenDiscordMerchant", static_cast<int>(OP_OpenDiscordMerchant)),
 			luabind::value("DiscordMerchantInventory", static_cast<int>(OP_DiscordMerchantInventory)),
 			luabind::value("GiveMoney", static_cast<int>(OP_GiveMoney)),
