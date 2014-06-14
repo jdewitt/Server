@@ -99,7 +99,7 @@ Mob::Mob(const char* in_name,
 		gravity_timer(1000),
 		viral_timer(0),
 		flee_timer(FLEE_CHECK_TIMER),
-		eqmac_timer(100)
+		eqmac_timer(200)
 
 {
 	targeted = 0;

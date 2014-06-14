@@ -1043,26 +1043,13 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 		return false;
 
 	const Item_Struct* item = inst->GetItem();
-	//format:
-	//0	itemid	aug1	aug2	aug3	aug4	aug5	evolving?	loregroup	evolved level	hash
-	//0	00000	00000	00000	00000	00000	00000	0			0000		0				00000000
-	//length:
-	//1	5		5		5		5		5		5		1			4			1				8		= 45
-	//evolving item info: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145#558
-	uint8 evolving = 0;
-	uint16 loregroup = 0;
-	uint8 evolvedlevel = 0;
-	int hash = 0;
-	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
 
-		MakeAnyLenString(&ret_link, "%1X" "%05X" "%1X" "%04X" "%1X" "%08X",
+	static char itemid[7];
+	sprintf(itemid, "%06d", item->ID);
+	MakeAnyLenString(&ret_link, "%1X" "%s",
 			0,
-			item->ID,
-			evolving,
-			loregroup,
-			evolvedlevel,
-			hash
-		);
+			itemid
+	);
 
 	return true;
 }
