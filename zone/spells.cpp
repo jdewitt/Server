@@ -2247,19 +2247,20 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
 
 						spu->spawn_id	= GetID();
-						spu->x_pos		= FloatToEQ19(GetX());
-						spu->y_pos		= FloatToEQ19(GetY());
-						spu->z_pos		= FloatToEQ19(GetZ());
+						spu->x_pos		= GetX();
+						spu->y_pos		= GetY();
+						spu->z_pos		= GetZ();
 						spu->delta_x	= NewFloatToEQ13(new_x);
 						spu->delta_y	= NewFloatToEQ13(new_y);
 						spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-						spu->heading	= FloatToEQ19(GetHeading());
+						spu->heading	= GetHeading();
 						spu->padding0002	=0;
 						spu->padding0006	=7;
 						spu->padding0014	=0x7f;
 						spu->padding0018	=0x5df27;
 						spu->animation = 0;
 						spu->delta_heading = NewFloatToEQ13(0);
+
 						outapp_push->priority = 6;
 						entity_list.QueueClients(this, outapp_push, true);
 						CastToClient()->FastQueuePacket(&outapp_push);
@@ -3547,13 +3548,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				double new_y = spells[spell_id].pushback * cos(double(look_heading * 3.141592 / 180.0));
 
 				spu->spawn_id	= spelltar->GetID();
-				spu->x_pos		= FloatToEQ19(spelltar->GetX());
-				spu->y_pos		= FloatToEQ19(spelltar->GetY());
-				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
+				spu->x_pos		= spelltar->GetX();
+				spu->y_pos		= spelltar->GetY();
+				spu->z_pos		= spelltar->GetZ();
 				spu->delta_x	= NewFloatToEQ13(new_x);
 				spu->delta_y	= NewFloatToEQ13(new_y);
 				spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
-				spu->heading	= FloatToEQ19(spelltar->GetHeading());
+				spu->heading	= spelltar->GetHeading();
 				spu->padding0002	=0;
 				spu->padding0006	=7;
 				spu->padding0014	=0x7f;
