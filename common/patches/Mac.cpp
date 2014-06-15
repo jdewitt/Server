@@ -1953,10 +1953,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   	}
   	else
   	{ 
-  		if(inst->GetMerchantCount() > 1)
-  			thejuice->Charges = inst->GetMerchantCount();
-  		else
-  			thejuice->Charges = 1;
+  		thejuice->Charges = 1;
   
   		thejuice->equipSlot = inst->GetMerchantSlot();
 		thejuice->Price = inst->GetPrice();  

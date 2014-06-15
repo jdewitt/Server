@@ -782,7 +782,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	}
 
 	if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
-		CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
+		CastToClient()->SendAATimer(spellid, 0, 0xFFFFFF);
 		CastToClient()->Message_StringID(15,ABILITY_FAILED);
 		CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
 	}
