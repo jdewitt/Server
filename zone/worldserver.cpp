@@ -862,14 +862,12 @@ void WorldServer::Process() {
 
 					database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
 
-					group->UpdateGroupAAs();
 
 						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
 						strcpy(outgj->membername, Inviter->GetName());
 						strcpy(outgj->yourname, Inviter->GetName());
 						outgj->action = groupActInviteInitial; // 'You have formed the group'.
-						group->GetGroupAAs(&outgj->leader_aas);
 						Inviter->CastToClient()->QueuePacket(outapp);
 						safe_delete(outapp);
 				}
@@ -983,7 +981,6 @@ void WorldServer::Process() {
 					group->SetMainAssist(AssistName);
 					group->SetPuller(PullerName);
 					group->SetNPCMarker(NPCMarkerName);
-					group->SetGroupAAs(&GLAA);
 
 				}
 			}

@@ -208,7 +208,6 @@ public:
 	void AddPVPPoints(uint32 points);
 	uint32 GetPVPPoints();
 	void QuestReadBook(const char *text, int type);
-	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();
 	void LearnRecipe(uint32 recipe);

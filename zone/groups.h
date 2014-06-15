@@ -89,10 +89,6 @@ public:
 	void	BalanceHP(int32 penalty, int32 range = 0, Mob* caster = nullptr);
 	void	BalanceMana(int32 penalty, int32 range = 0, Mob* caster = nullptr);
 	void	HealGroup(uint32 heal_amt, Mob* caster, int32 range = 0);
-	inline	void SetGroupAAs(GroupLeadershipAA_Struct *From) { memcpy(&LeaderAbilities, From, sizeof(GroupLeadershipAA_Struct)); }
-	inline	void GetGroupAAs(GroupLeadershipAA_Struct *Into) { memcpy(Into, &LeaderAbilities, sizeof(GroupLeadershipAA_Struct)); }
-	void	UpdateGroupAAs();
-	void	SaveGroupLeaderAA();
 	void	MarkNPC(Mob* Target, int Number);
 	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool includePets);
 	void	DelegateMainTank(const char *NewMainAssistName, uint8 toggle = 0);

@@ -106,7 +106,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
-	ConnectingOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
 	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectingOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTDCon;
 	ConnectingOpcodes[OP_BazaarSearch] = &Client::Handle_OP_BazaarSearchCon;
@@ -283,9 +282,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Heartbeat] = &Client::Handle_OP_Heartbeat;
 	ConnectedOpcodes[OP_SafePoint] = &Client::Handle_OP_SafePoint;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
-	ConnectedOpcodes[OP_BankerChange] = &Client::Handle_OP_BankerChange;
-	ConnectedOpcodes[OP_LeadershipExpToggle] = &Client::Handle_OP_LeadershipExpToggle;
-	ConnectedOpcodes[OP_PurchaseLeadershipAA] = &Client::Handle_OP_PurchaseLeadershipAA;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
@@ -322,10 +318,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
-	ConnectedOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
-	ConnectedOpcodes[OP_RemoveBlockedBuffs] = &Client::Handle_OP_RemoveBlockedBuffs;
-	ConnectedOpcodes[OP_ClearBlockedBuffs] = &Client::Handle_OP_ClearBlockedBuffs;
-	ConnectedOpcodes[OP_BuffRemoveRequest] = &Client::Handle_OP_BuffRemoveRequest;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
 	ConnectedOpcodes[OP_CorpseDrop] = &Client::Handle_OP_CorpseDrop;
 	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
@@ -5760,15 +5752,12 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CastToClient()->CharacterID());
 			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
 
-			group->UpdateGroupAAs();
-
 			//Invite the inviter into the group first.....dont ask
 				EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
 				strcpy(outgj->membername, inviter->GetName());
 				strcpy(outgj->yourname, inviter->GetName());
 				outgj->action = groupActInviteInitial; // 'You have formed the group'.
-				group->GetGroupAAs(&outgj->leader_aas);
 				inviter->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
 
@@ -8084,7 +8073,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			group->SetMainAssist(AssistName);
 			group->SetPuller(PullerName);
 			group->SetNPCMarker(NPCMarkerName);
-			group->SetGroupAAs(&GLAA);
 
 			//group->NotifyMainTank(this, 1);
 			//group->NotifyMainAssist(this, 1);
@@ -8600,90 +8588,6 @@ void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 	KeyRingList();
 }
 
-void Client::Handle_OP_LeadershipExpToggle(const EQApplicationPacket *app) {
-	if(app->size != 1) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_LeadershipExpToggle expected %i got %i", 1, app->size);
-		DumpPacket(app);
-		return;
-	}
-	uint8 *mode = (uint8 *) app->pBuffer;
-	if(*mode) {
-		m_pp.leadAAActive = 1;
-		Save();
-		Message_StringID(clientMessageYellow, LEADERSHIP_EXP_ON);
-	} else {
-		m_pp.leadAAActive = 0;
-		Save();
-		Message_StringID(clientMessageYellow, LEADERSHIP_EXP_OFF);
-	}
-}
-
-
-void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app) {
-	if(app->size != sizeof(uint32)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_LeadershipExpToggle expected %i got %i", 1, app->size);
-		DumpPacket(app);
-		return;
-	}
-	uint32 aaid = *((uint32 *) app->pBuffer);
-
-	if(aaid >= _maxLeaderAA)
-		return;
-
-	uint32 current_rank = m_pp.leader_abilities.ranks[aaid];
-	if(current_rank >= MAX_LEADERSHIP_TIERS) {
-		Message(13, "This ability can be trained no further.");
-		return;
-	}
-
-	uint8 cost = LeadershipAACosts[aaid][current_rank];
-	if(cost == 0) {
-		Message(13, "This ability can be trained no further.");
-		return;
-	}
-
-	//TODO: we need to enforce prerequisits
-
-	if(aaid >= raidAAMarkNPC) {
-		//it is a raid ability.
-		if(cost > m_pp.raid_leadership_points) {
-			Message(13, "You do not have enough points to purchase this ability.");
-			return;
-		}
-
-		//sell them the ability.
-		m_pp.raid_leadership_points -= cost;
-		m_pp.leader_abilities.ranks[aaid]++;
-	} else {
-		//it is a group ability.
-		if(cost > m_pp.group_leadership_points) {
-			Message(13, "You do not have enough points to purchase this ability.");
-			return;
-		}
-
-		//sell them the ability.
-		m_pp.group_leadership_points -= cost;
-		m_pp.leader_abilities.ranks[aaid]++;
-	}
-
-	//success, send them an update
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_UpdateLeadershipAA, sizeof(UpdateLeadershipAA_Struct));
-	UpdateLeadershipAA_Struct *u = (UpdateLeadershipAA_Struct *) outapp->pBuffer;
-	u->ability_id = aaid;
-	u->new_rank = m_pp.leader_abilities.ranks[aaid];
-	u->pointsleft = m_pp.group_leadership_points; // FIXME: Take into account raid abilities
-	FastQueuePacket(&outapp);
-
-	Group *g = GetGroup();
-
-	// Update all group members with the new AA the leader has purchased.
-	if(g) {
-		g->UpdateGroupAAs();
-		g->SendLeadershipAAUpdate();
-	}
-
-}
-
 void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(SetTitle_Struct)) {
@@ -8715,90 +8619,6 @@ void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 
 	if(outapp != nullptr)
 		FastQueuePacket(&outapp);
-}
-
-void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(BankerChange_Struct) && app->size!=4) //Titanium only sends 4 Bytes for this
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_BankerChange expected %i got %i", sizeof(BankerChange_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	uint32 distance = 0;
-	NPC *banker = entity_list.GetClosestBanker(this, distance);
-
-	if(!banker || distance > USE_NPC_RANGE2)
-	{
-		char *hacked_string = nullptr;
-		MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(money) but %s is non-existant or too far away (%u units).",
-			banker ? banker->GetName() : "UNKNOWN NPC", distance);
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-		safe_delete_array(hacked_string);
-		return;
-	}
-
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_BankerChange,nullptr,sizeof(BankerChange_Struct));
-	BankerChange_Struct *bc=(BankerChange_Struct *)outapp->pBuffer;
-
-	if(m_pp.platinum < 0)
-		m_pp.platinum = 0;
-	if(m_pp.gold < 0)
-		m_pp.gold = 0;
-	if(m_pp.silver < 0)
-		m_pp.silver = 0;
-	if(m_pp.copper < 0)
-		m_pp.copper = 0;
-
-	if(m_pp.platinum_bank < 0)
-		m_pp.platinum_bank = 0;
-	if(m_pp.gold_bank < 0)
-		m_pp.gold_bank = 0;
-	if(m_pp.silver_bank < 0)
-		m_pp.silver_bank = 0;
-	if(m_pp.copper_bank < 0)
-		m_pp.copper_bank = 0;
-
-	uint64 cp = static_cast<uint64>(m_pp.copper) +
-			(static_cast<uint64>(m_pp.silver) * 10) +
-			(static_cast<uint64>(m_pp.gold) * 100) +
-			(static_cast<uint64>(m_pp.platinum) * 1000);
-
-	m_pp.copper=cp%10;
-	cp/=10;
-	m_pp.silver=cp%10;
-	cp/=10;
-	m_pp.gold=cp%10;
-	cp/=10;
-	m_pp.platinum=cp;
-
-	cp = static_cast<uint64>(m_pp.copper_bank) +
-		(static_cast<uint64>(m_pp.silver_bank) * 10) +
-		(static_cast<uint64>(m_pp.gold_bank) * 100) +
-		(static_cast<uint64>(m_pp.platinum_bank) * 1000);
-
-	m_pp.copper_bank=cp%10;
-	cp/=10;
-	m_pp.silver_bank=cp%10;
-	cp/=10;
-	m_pp.gold_bank=cp%10;
-	cp/=10;
-	m_pp.platinum_bank=cp;
-
-	bc->copper=m_pp.copper;
-	bc->silver=m_pp.silver;
-	bc->gold=m_pp.gold;
-	bc->platinum=m_pp.platinum;
-
-	bc->copper_bank=m_pp.copper_bank;
-	bc->silver_bank=m_pp.silver_bank;
-	bc->gold_bank=m_pp.gold_bank;
-	bc->platinum_bank=m_pp.platinum_bank;
-
-	FastQueuePacket(&outapp);
-
-	return;
 }
 
 void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
@@ -9836,23 +9656,6 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) 
 			break;
 		}
 
-		case groupAAInspectBuffs:
-		{
-			Mob *Target = GetTarget();
-
-			if(!Target || !Target->IsClient())
-				return;
-
-			Group *g = GetGroup();
-
-			if(!g || (g->GroupCount() < 3))
-				return;
-
-			Target->CastToClient()->InspectBuffs(this, g->GetLeadershipAA(groupAAInspectBuffs));
-
-			break;
-		}
-
 		default:
 			break;
 	}
@@ -10747,216 +10550,6 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 		Message_StringID(clientMessageWhite, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
 	else
 		Message_StringID(clientMessageWhite, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
-}
-
-void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
-{
-	if(!RuleB(Spells, EnableBlockedBuffs))
-		return;
-
-	if(app->size != sizeof(BlockedBuffs_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_BlockedBuffs expected %i got %i",
-					sizeof(BlockedBuffs_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	std::set<uint32>::iterator Iterator;
-
-	BlockedBuffs_Struct *bbs = (BlockedBuffs_Struct*)app->pBuffer;
-
-	std::set<uint32> *BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
-
-	if(bbs->Initialise == 1)
-	{
-		BlockedBuffs->clear();
-
-		for(unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-		{
-			if((bbs->SpellID[i] > 0) && IsBeneficialSpell(bbs->SpellID[i]))
-			{
-				if(BlockedBuffs->find(bbs->SpellID[i]) == BlockedBuffs->end())
-						BlockedBuffs->insert(bbs->SpellID[i]);
-			}
-		}
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_BlockedBuffs, sizeof(BlockedBuffs_Struct));
-
-		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
-
-		for(unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			obbs->SpellID[i] = -1;
-
-		obbs->Pet = bbs->Pet;
-		obbs->Initialise = 1;
-		obbs->Flags = 0x54;
-		obbs->Count = BlockedBuffs->size();
-
-		unsigned int Element = 0;
-
-		Iterator = BlockedBuffs->begin();
-
-		while(Iterator != BlockedBuffs->end())
-		{
-			obbs->SpellID[Element++] = (*Iterator);
-				++Iterator;
-		}
-
-		FastQueuePacket(&outapp);
-		return;
-	}
-
-	if((bbs->Initialise == 0) && (bbs->Count > 0))
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_BlockedBuffs, sizeof(BlockedBuffs_Struct));
-
-		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
-
-		for(unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			obbs->SpellID[i] = -1;
-
-		obbs->Pet = bbs->Pet;
-		obbs->Initialise = 0;
-		obbs->Flags = 0x54;
-
-		for(unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-		{
-			if(!IsBeneficialSpell(bbs->SpellID[i]))
-				continue;
-
-			if((BlockedBuffs->size() < BLOCKED_BUFF_COUNT) && (BlockedBuffs->find(bbs->SpellID[i]) == BlockedBuffs->end()))
-				BlockedBuffs->insert(bbs->SpellID[i]);
-		}
-		obbs->Count = BlockedBuffs->size();
-
-		Iterator = BlockedBuffs->begin();
-
-		unsigned int Element = 0;
-
-		while(Iterator != BlockedBuffs->end())
-		{
-			obbs->SpellID[Element++] = (*Iterator);
-				++Iterator;
-		}
-
-		FastQueuePacket(&outapp);
-	}
-}
-
-void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
-{
-	if(!RuleB(Spells, EnableBlockedBuffs))
-		return;
-
-	if(app->size != sizeof(BlockedBuffs_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_RemoveBlockedBuffs expected %i got %i",
-					sizeof(BlockedBuffs_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-	BlockedBuffs_Struct *bbs = (BlockedBuffs_Struct*)app->pBuffer;
-
-	std::set<uint32> *BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
-
-	std::set<uint32> RemovedBuffs;
-
-	if(bbs->Count > 0)
-	{
-		std::set<uint32>::iterator Iterator;
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RemoveBlockedBuffs, sizeof(BlockedBuffs_Struct));
-
-		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
-
-		for(unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			obbs->SpellID[i] = 0;
-
-		obbs->Pet = bbs->Pet;
-		obbs->Initialise = 0;
-		obbs->Flags = 0x5a;
-
-		for(unsigned int i = 0; i < bbs->Count; ++i)
-		{
-			Iterator = BlockedBuffs->find(bbs->SpellID[i]);
-
-			if(Iterator != BlockedBuffs->end())
-			{
-				RemovedBuffs.insert(bbs->SpellID[i]);
-
-				BlockedBuffs->erase(Iterator);
-			}
-		}
-		obbs->Count = RemovedBuffs.size();
-
-		Iterator = RemovedBuffs.begin();
-
-		unsigned int Element = 0;
-
-		while(Iterator != RemovedBuffs.end())
-		{
-			obbs->SpellID[Element++] = (*Iterator);
-				++Iterator;
-		}
-
-		FastQueuePacket(&outapp);
-	}
-}
-void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
-{
-	if(!RuleB(Spells, EnableBlockedBuffs))
-		return;
-
-	if(app->size != 1)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_ClearBlockedBuffs expected 1 got %i", app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	bool Pet = app->pBuffer[0];
-
-	if(Pet)
-		PetBlockedBuffs.clear();
-	else
-		PlayerBlockedBuffs.clear();
-
-	QueuePacket(app);
-}
-
-void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
-{
-	// In SoD, this is used for clicking off Pet Buffs only. In Underfoot, it is used both for Client and Pets
-	// The payload contains buffslot and EntityID only, so we must check if the EntityID is ours or our pets.
-	//
-	VERIFY_PACKET_LENGTH(OP_BuffRemoveRequest, app, BuffRemoveRequest_Struct);
-
-	BuffRemoveRequest_Struct *brrs = (BuffRemoveRequest_Struct*)app->pBuffer;
-
-	Mob *m = nullptr;
-
-	if(brrs->EntityID == GetID())
-		m = this;
-	else if(brrs->EntityID == GetPetID())
-		m = GetPet();
-
-	if(!m)
-		return;
-
-	if(brrs->SlotID > (uint32)m->GetMaxTotalSlots())
-		return;
-
-	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
-
-	if(SpellID && IsBeneficialSpell(SpellID))
-		m->BuffFadeBySlot(brrs->SlotID, true);
 }
 
 void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)

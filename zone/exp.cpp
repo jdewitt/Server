@@ -23,29 +23,6 @@
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 
-
-static uint32 MaxBankedGroupLeadershipPoints(int Level)
-{
-	if(Level < 35)
-		return 4;
-
-	if(Level < 51)
-		return 6;
-
-	return 8;
-}
-
-static uint32 MaxBankedRaidLeadershipPoints(int Level)
-{
-	if(Level < 45)
-		return 6;
-
-	if(Level < 55)
-		return 8;
-
-	return 10;
-}
-
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 	uint32 add_exp = in_add_exp;
@@ -127,35 +104,6 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 				}
 			}
 		}
-
-		if(IsLeadershipEXPOn() && ((conlevel == CON_BLUE) || (conlevel == CON_WHITE) || (conlevel == CON_YELLOW) || (conlevel == CON_RED))) {
-			add_exp = static_cast<uint32>(static_cast<float>(add_exp) * 0.8f);
-
-			if(GetGroup())
-			{
-				if((m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
-				{
-					AddLeadershipEXP(GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA), 0);
-					Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
-				}
-				else
-					Message_StringID(MT_Leadership, MAX_GROUP_LEADERSHIP_POINTS);
-			}
-			else
-			{
-				if((m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel()))
-					&& (RuleI(Character, KillsPerRaidLeadershipAA) > 0))
-				{
-					AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
-					Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
-				}
-				else
-					Message_StringID(MT_Leadership, MAX_RAID_LEADERSHIP_POINTS);
-			}
-
-		}
-
 	}	//end !resexp
 
 	float aatotalmod = 1.0;
@@ -614,40 +562,6 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 			}
 		}
 	}
-}
-
-void Client::SetLeadershipEXP(uint32 group_exp, uint32 raid_exp) {
-	while(group_exp >= GROUP_EXP_PER_POINT) {
-		group_exp -= GROUP_EXP_PER_POINT;
-		m_pp.group_leadership_points++;
-		Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_POINT);
-	}
-	while(raid_exp >= RAID_EXP_PER_POINT) {
-		raid_exp -= RAID_EXP_PER_POINT;
-		m_pp.raid_leadership_points++;
-		Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_POINT);
-	}
-
-	m_pp.group_leadership_exp = group_exp;
-	m_pp.raid_leadership_exp = raid_exp;
-
-	SendLeadershipEXPUpdate();
-}
-
-void Client::AddLeadershipEXP(uint32 group_exp, uint32 raid_exp) {
-	SetLeadershipEXP(GetGroupEXP() + group_exp, GetRaidEXP() + raid_exp);
-}
-
-void Client::SendLeadershipEXPUpdate() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LeadershipExpUpdate, sizeof(LeadershipExpUpdate_Struct));
-	LeadershipExpUpdate_Struct* eu = (LeadershipExpUpdate_Struct *) outapp->pBuffer;
-
-	eu->group_leadership_exp = m_pp.group_leadership_exp;
-	eu->group_leadership_points = m_pp.group_leadership_points;
-	eu->raid_leadership_exp = m_pp.raid_leadership_exp;
-	eu->raid_leadership_points = m_pp.raid_leadership_points;
-
-	FastQueuePacket(&outapp);
 }
 
 uint32 Client::GetCharMaxLevelFromQGlobal() {

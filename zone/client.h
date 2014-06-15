@@ -534,15 +534,6 @@ public:
 	void	AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	void	SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void	AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);
-	void	SetLeadershipEXP(uint32 group_exp, uint32 raid_exp);
-	void	AddLeadershipEXP(uint32 group_exp, uint32 raid_exp);
-	void	SendLeadershipEXPUpdate();
-	bool	IsLeadershipEXPOn();
-	inline	int GetLeadershipAA(int AAID) { return m_pp.leader_abilities.ranks[AAID]; }
-	int	GroupLeadershipAAHealthEnhancement();
-	int	GroupLeadershipAAManaEnhancement();
-	int	GroupLeadershipAAHealthRegeneration();
-	int	GroupLeadershipAAOffenseEnhancement();
 	void	InspectBuffs(Client* Inspector, int Rank);
 	uint32	GetRaidPoints() { return(m_pp.raid_leadership_points); }
 	uint32	GetGroupPoints() { return(m_pp.group_leadership_points); }
@@ -563,9 +554,6 @@ public:
 	void	WhoAll();
 	bool	CheckLoreConflict(const Item_Struct* item);
 	void	ChangeLastName(const char* in_lastname);
-	void	GetGroupAAs(GroupLeadershipAA_Struct *into) const;
-	void	ClearGroupAAs();
-	void	UpdateGroupAAs(int32 points, uint32 type);
 	void	SacrificeConfirm(Client* caster);
 	void	Sacrifice(Client* caster);
 	void	GoToDeath();
@@ -931,8 +919,6 @@ public:
 	std::list<RespawnOption> respawn_options;
 	void SetPendingRezzData(int XP, uint32 DBID, uint16 SpellID, const char *CorpseName) { PendingRezzXP = XP; PendingRezzDBID = DBID; PendingRezzSpellID = SpellID; PendingRezzCorpseName = CorpseName; }
 	bool IsRezzPending() { return PendingRezzSpellID > 0; }
-	inline bool IsBlockedBuff(int16 SpellID) { return PlayerBlockedBuffs.find(SpellID) != PlayerBlockedBuffs.end(); }
-	inline bool IsBlockedPetBuff(int16 SpellID) { return PetBlockedBuffs.find(SpellID) != PetBlockedBuffs.end(); }
 	bool IsDraggingCorpse(uint16 CorpseID);
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
@@ -1260,8 +1246,6 @@ private:
 	uint16 PendingRezzSpellID;		// Only used for resurrect while hovering.
 	std::string PendingRezzCorpseName;	// Only used for resurrect while hovering.
 
-	std::set<uint32> PlayerBlockedBuffs;
-	std::set<uint32> PetBlockedBuffs;
 	std::list<std::pair<std::string, uint16> > DraggedCorpses;
 
 	uint8 MaxXTargets;
