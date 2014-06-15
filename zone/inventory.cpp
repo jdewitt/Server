@@ -1881,7 +1881,7 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 	// Construct packet
 	if(packet_type==ItemPacketViewLink)
 		opcode = OP_ItemLinkResponse;
-	else if(packet_type==ItemPacketTradeView && GetClientVersion() == EQClientMac)
+	else if(packet_type==ItemPacketTradeView)
 		opcode = OP_TradeItemPacket;
 	else
 		opcode = OP_ItemPacket;
