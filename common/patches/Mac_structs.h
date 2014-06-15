@@ -2538,7 +2538,7 @@ struct PlayerProfile_Struct
 	/*3272*/    uint8   unknown[76];
 	/*3348*/	uint8	autosplit;
 	/*3349*/	uint8	unknown3449[43];
-	/*3392*/	uint8	disc;
+	/*3392*/	uint8	expansions;			//Effects features such as /disc, AA, raid
 	/*3393*/	uint8	unknown3393[51];
 	/*3444*/	uint32	current_zone;		// 
 	/*3448*/	uint8	unknown3448[336];	// Lots of data on fake PP struct, none in normal decoded packet.

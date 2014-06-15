@@ -309,7 +309,8 @@ ENCODE(OP_PlayerProfile) {
 	for(r = 0; r < 9; r++) {
 		OUT(item_material[r]);
 	}
-	eq->disc=15;
+	eq->expansions=15;
+
 	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
 
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
