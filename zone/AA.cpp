@@ -271,7 +271,7 @@ void Client::ActivateAA(aaID activate){
 				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 			}
 			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
-			SendAATimer(AATimerID, 0, 0);
+			SendAATimer(activate, static_cast<uint32>(time(nullptr)), static_cast<uint32>(time(nullptr)));
 		}
 		HandleAAAction(aaid);
 	}
@@ -282,7 +282,7 @@ void Client::ActivateAA(aaID activate){
 		if(caa->reuse_time > 0)
 		{
 			uint32 timer_base = CalcAAReuseTimer(caa);
-			SendAATimer(AATimerID, 0, 0);
+			SendAATimer(activate, static_cast<uint32>(time(nullptr)), static_cast<uint32>(time(nullptr)));
 			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
 			if(activate == aaImprovedHarmTouch || activate == aaLeechTouch)
 			{
@@ -292,7 +292,7 @@ void Client::ActivateAA(aaID activate){
 			if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 				if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
 					//Reset on failed cast
-					SendAATimer(AATimerID, 0, 0xFFFFFF);
+					SendAATimer(activate, 0, 0xFFFFFF);
 					Message_StringID(15,ABILITY_FAILED);
 					p_timers.Clear(&database, AATimerID + pTimerAAStart);
 					return;
@@ -300,7 +300,7 @@ void Client::ActivateAA(aaID activate){
 			} else {
 				if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
 					//Reset on failed cast
-					SendAATimer(AATimerID, 0, 0xFFFFFF);
+					SendAATimer(activate, 0, 0xFFFFFF);
 					Message_StringID(15,ABILITY_FAILED);
 					p_timers.Clear(&database, AATimerID + pTimerAAStart);
 					return;
@@ -313,17 +313,7 @@ void Client::ActivateAA(aaID activate){
 				return;
 		}
 	}
-	// Check if AA is expendable
-	if (aas_send[activate - activate_val]->special_category == 7)
-	{
-		// Add the AA cost to the extended profile to track overall total
-		m_epp.expended_aa += aas_send[activate]->cost;
-		SetAA(activate, 0);
 
-		Save();
-		SendAA(activate);
-		SendAATable();
-	}
 }
 
 void Client::HandleAAAction(aaID activate) {
@@ -535,7 +525,7 @@ void Client::HandleAAAction(aaID activate) {
 	if(IsValidSpell(spell_id)) {
 		int aatid = GetAATimerID(activate);
 		if(!CastSpell(spell_id, target_id , 10, -1, -1, 0, -1, pTimerAAStart + aatid , CalcAAReuseTimer(caa), 1)) {
-			SendAATimer(aatid, 0, 0xFFFFFF);
+			SendAATimer(activate, 0, 0xFFFFFF);
 			Message_StringID(15,ABILITY_FAILED);
 			p_timers.Clear(&database, pTimerAAStart + aatid);
 			return;
@@ -1081,9 +1071,8 @@ void Client::BuyAA(AA_Action* action)
 void Client::SendAATimer(uint32 ability, uint32 begin, uint32 end) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
-	int32 tmp = ability;
-	tmp = zone->EmuToEQMacAA(ability);
-	uaaout->ability = tmp;
+
+	uaaout->ability = zone->EmuToEQMacAA(ability);
 	uaaout->begin = begin;
 	uaaout->end = end;
 	QueuePacket(outapp);
@@ -1114,7 +1103,7 @@ void Client::SendAATimers() {
 						PersistentTimer *cur = c->second;
 						if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
 							continue;	//not an AA timer
-						else if(cur->GetType() + pTimerAAStart == aa2->id)
+						else if(cur->GetType() == pTimerAAStart + aa2->spell_type)
 						{
 							starttime = cur->GetStartTime();
 							break;
@@ -1124,7 +1113,7 @@ void Client::SendAATimers() {
 					uaaout->end = static_cast<uint32>(time(nullptr));
 					uaaout->ability = zone->EmuToEQMacAA(aa2->id);
 					QueuePacket(outapp);
-					_log(ZONE__INIT, "Sending out timer for AA: %i. Timer start: %i Timer end: %i Recast Time: %i", uaaout->ability, uaaout->begin, uaaout->end, aa2->spell_refresh);
+					_log(EQMAC__LOG, "Sending out timer for AA: %i. Timer start: %i Timer end: %i Recast Time: %i", uaaout->ability, uaaout->begin, uaaout->end, aa2->spell_refresh);
 				}
 			}
 		}
