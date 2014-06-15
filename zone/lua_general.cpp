@@ -1155,10 +1155,6 @@ luabind::scope lua_register_events() {
 			luabind::value("weapon_proc", static_cast<int>(EVENT_WEAPON_PROC)),
 			luabind::value("equip_item", static_cast<int>(EVENT_EQUIP_ITEM)),
 			luabind::value("unequip_item", static_cast<int>(EVENT_UNEQUIP_ITEM)),
-			luabind::value("augment_item", static_cast<int>(EVENT_AUGMENT_ITEM)),
-			luabind::value("unaugment_item", static_cast<int>(EVENT_UNAUGMENT_ITEM)),
-			luabind::value("augment_insert", static_cast<int>(EVENT_AUGMENT_INSERT)),
-			luabind::value("augment_remove", static_cast<int>(EVENT_AUGMENT_REMOVE)),
 			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
 			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
 			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE)),
@@ -1215,8 +1211,7 @@ luabind::scope lua_register_slot() {
 			luabind::value("Cursor", static_cast<int>(SLOT_CURSOR)),
 			luabind::value("CursorEnd", 0xFFFE),
 			luabind::value("Tradeskill", static_cast<int>(SLOT_TRADESKILL)),
-			luabind::value("Augment", static_cast<int>(SLOT_AUGMENT)),
-			luabind::value("PowerSource", static_cast<int>(SLOT_POWER_SOURCE)),
+			luabind::value("PowerSource", static_cast<int>(SLOT_QUEST)),
 			luabind::value("Invalid", 0xFFFF)
 		];
 }
