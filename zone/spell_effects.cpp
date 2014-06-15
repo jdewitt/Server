@@ -3725,6 +3725,13 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				break;
 			}
 
+			case SE_AlterNPCLevel:
+			{
+				if (IsNPC())
+					SetLevel(GetOrigLevel());
+				break;
+			}
+
 			case SE_MovementSpeed:
 			{
 				if(IsClient())
