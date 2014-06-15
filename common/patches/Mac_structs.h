@@ -2537,7 +2537,9 @@ struct PlayerProfile_Struct
 	/*3256*/    char    boat[16];
 	/*3272*/    uint8   unknown[76];
 	/*3348*/	uint8	autosplit;
-	/*3349*/	uint8	unknown3449[95];
+	/*3349*/	uint8	unknown3449[43];
+	/*3392*/	uint8	disc;
+	/*3393*/	uint8	unknown3393[51];
 	/*3444*/	uint32	current_zone;		// 
 	/*3448*/	uint8	unknown3448[336];	// Lots of data on fake PP struct, none in normal decoded packet.
 	/*3784*/	uint32	bind_point_zone;	// Lyenu: Bind zone is saved as a int32 now

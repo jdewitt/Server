@@ -309,6 +309,7 @@ ENCODE(OP_PlayerProfile) {
 	for(r = 0; r < 9; r++) {
 		OUT(item_material[r]);
 	}
+	eq->disc=15;
 	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
 
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
@@ -2191,15 +2192,19 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
+ENCODE(OP_BankerChange) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Barter) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Bazaar) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BazaarInspect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BecomeCorpse) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BuffCreate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BuffFadeMsg) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_BuffRemoveRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CameraEffect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CharacterCreateRequest) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_ClearBlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearNPCMarks) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClientReady) { ENCODE_FORWARD(OP_Unknown); }
@@ -2272,6 +2277,14 @@ ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_KnowledgeBase) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNDisarmTraps) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNInspect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNOpen) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNPickLock) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LDoNSenseTraps) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LeadershipExpToggle) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_LeadershipExpUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LevelAppearance) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFGAppearance) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFGGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
@@ -2314,6 +2327,7 @@ ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PostEnterWorld) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PotionBelt) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PreLogoutReply) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_PurchaseLeadershipAA) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardDetailsReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
@@ -2329,6 +2343,8 @@ ENCODE(OP_RecipesFavorite) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipesSearch) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ReloadUI) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RemoveBlockedBuffs) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_RequestKnowledgeBase) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RespawnWindow) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RestState) { ENCODE_FORWARD(OP_Unknown); }
@@ -2361,6 +2377,7 @@ ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Untargetable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_UpdateAA) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_UpdateLeadershipAA) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_VoiceMacroIn) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_VoiceMacroOut) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
