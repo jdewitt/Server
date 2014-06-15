@@ -204,7 +204,6 @@ public:
 	void FlyMode(uint8 flymode);
 	uint8 FactionValue();
 	void wearchange(uint8 slot, uint16 texture);
-	void voicetell(const char *str, int macronum, int racenum, int gendernum);
     void LearnRecipe(uint32 recipe_id);
     void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);

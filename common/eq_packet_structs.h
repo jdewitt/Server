@@ -2080,17 +2080,6 @@ struct GroupJoin_Struct {
 /*0452*/
 };
 
-// SoD+ Struct
-struct GroupLeadershipAAUpdate_Struct
-{
-/*000*/	uint32	Unknown000;	// GroupID or Leader EntityID ?
-/*004*/	GroupLeadershipAA_Struct LeaderAAs;
-/*068*/	uint32	Unknown068[49];	// Was 63
-/*264*/	uint32	NPCMarkerID;
-/*268*/	uint32	Unknown268[13];
-/*320*/
-};
-
 struct GroupFollow_Struct { // SoF Follow Struct
 /*0000*/	char	name1[64];	// inviter
 /*0064*/	char	name2[64];	// invitee
@@ -3505,14 +3494,6 @@ struct SetTitleReply_Struct {
 
 enum { VoiceMacroTell = 1, VoiceMacroGroup = 2, VoiceMacroRaid = 3 };
 
-struct VoiceMacroIn_Struct {
-/*000*/	char	Unknown000[64];
-/*064*/	uint32	Type;	// 1 = Tell, 2 = Group, 3 = Raid
-/*068*/	char	Target[64];
-/*132*/	uint32	Unknown132;	// Seems to be 0x0000000c always
-/*136*/	uint32	MacroNumber;
-};
-
 struct VoiceMacroOut_Struct {
 /*000*/	char	From[64];
 /*064*/	uint32	Type;	// 1 = Tell, 2 = Group, 3 = Raid
@@ -3520,35 +3501,6 @@ struct VoiceMacroOut_Struct {
 /*072*/	uint32	Voice;
 /*076*/	uint32	MacroNumber;
 /*080*/	char	Unknown080[60];
-};
-
-struct LeadershipExpUpdate_Struct {
-/*0000*/ uint32 unknown0000;				// All zeroes?
-/*0004*/ uint32 group_leadership_exp;		// Group leadership exp value
-/*0008*/ uint32 group_leadership_points;	// Unspent group points
-/*0012*/ uint32 unknown0012;				// Type?
-/*0016*/ uint32 unknown0016;				// All zeroes?
-/*0020*/ uint32 raid_leadership_exp;		// Raid leadership exp value
-/*0024*/ uint32 raid_leadership_points;		// Unspent raid points
-/*0028*/ uint32 unknown0028;
-};
-
-struct UpdateLeadershipAA_Struct {
-/*00*/	uint32	ability_id;
-/*04*/	uint32	new_rank;
-/*08*/	uint32	pointsleft;
-/*12*/
-};
-
-enum
-{
-	GroupLeadershipAbility_MarkNPC = 0
-};
-
-struct DoGroupLeadershipAbility_Struct
-{
-/*000*/	uint32	Ability;
-/*000*/	uint32	Parameter;
 };
 
 struct DelegateAbility_Struct
@@ -3561,13 +3513,6 @@ struct DelegateAbility_Struct
 /*020*/	uint32	EntityID;
 /*024*/	uint32	Unknown024;
 /*028*/	char	Name[64];
-};
-
-struct GroupUpdateLeaderAA_Struct
-{
-/*000*/	char	Unknown000[64];
-/*064*/	GroupLeadershipAA_Struct LeaderAAs;
-/*128*/	char	unknown128[128];
 };
 
 struct MarkNPC_Struct

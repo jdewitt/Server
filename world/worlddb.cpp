@@ -165,7 +165,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						if(result2) {
 							row2 = mysql_fetch_row(result2);
 							ExtendedProfile_Struct* ext = (ExtendedProfile_Struct*)row2[0];
-							SetPlayerProfile(account_id,char_id,pp,inv,ext, 0, 0, 5);
+							SetPlayerProfile(account_id,char_id,pp,inv,ext, 0, 0);
 						}
 						mysql_free_result(result2);
 					}

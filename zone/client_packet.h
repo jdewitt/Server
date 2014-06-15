@@ -216,8 +216,6 @@
 	void Handle_OP_LFPCommand(const EQApplicationPacket *app);
 	void Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app);
 	void Handle_OP_Barter(const EQApplicationPacket *app);
-	void Handle_OP_VoiceMacroIn(const EQApplicationPacket *app);
-	void Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app);
 	void Handle_OP_ClearNPCMarks(const EQApplicationPacket *app);
 	void Handle_OP_DelegateAbility(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);

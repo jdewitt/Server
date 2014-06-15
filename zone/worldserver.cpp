@@ -193,62 +193,6 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-		case ServerOP_VoiceMacro: {
-
-			if (!ZoneLoaded)
-				break;
-
-			ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
-
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_VoiceMacroOut,sizeof(VoiceMacroOut_Struct));
-			VoiceMacroOut_Struct* vmo = (VoiceMacroOut_Struct*)outapp->pBuffer;
-
-			strcpy(vmo->From, svm->From);
-			vmo->Type = svm->Type;
-			vmo->Voice =svm->Voice;
-			vmo->MacroNumber = svm->MacroNumber;
-
-			switch(svm->Type) {
-				case VoiceMacroTell: {
-					Client* c = entity_list.GetClientByName(svm->To);
-					if(!c)
-						break;
-
-					c->QueuePacket(outapp);
-					break;
-				}
-
-				case VoiceMacroGroup: {
-					Group* g = entity_list.GetGroupByID(svm->GroupID);
-
-					if(!g)
-						break;
-
-					for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-						if(g->members[i] && g->members[i]->IsClient())
-							g->members[i]->CastToClient()->QueuePacket(outapp);
-
-					}
-					break;
-				}
-
-				case VoiceMacroRaid: {
-					Raid *r = entity_list.GetRaidByID(svm->RaidID);
-
-					if(!r)
-						break;
-
-					for(int i = 0; i < MAX_RAID_MEMBERS; i++)
-						if(r->members[i].member)
-							r->members[i].member->QueuePacket(outapp);
-
-					break;
-				}
-			}
-			safe_delete(outapp);
-			break;
-		}
-
 		case ServerOP_SpawnCondition: {
 			if(pack->size != sizeof(ServerSpawnCondition_Struct))
 				break;

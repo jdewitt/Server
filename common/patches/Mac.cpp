@@ -2204,7 +2204,6 @@ ENCODE(OP_BuffCreate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_BuffFadeMsg) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CameraEffect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CharacterCreateRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearNPCMarks) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClientReady) { ENCODE_FORWARD(OP_Unknown); }
@@ -2220,7 +2219,6 @@ ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DenyResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DiscordMerchantInventory) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_DoGroupLeadershipAbility) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DumpName) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DynamicWall) { ENCODE_FORWARD(OP_Unknown); }
@@ -2246,11 +2244,9 @@ ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupLeadershipAAUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupRoles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupUpdateLeaderAA) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildBank) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
@@ -2366,8 +2362,6 @@ ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Untargetable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_UpdateAA) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_VoiceMacroIn) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_VoiceMacroOut) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponUnequip2) { ENCODE_FORWARD(OP_Unknown); }
@@ -2379,9 +2373,6 @@ ENCODE(OP_WorldComplete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WorldLogout) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WorldObjectsSent) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WorldUnknown001) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_XTargetAutoAddHaters) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_XTargetRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_XTargetResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZoneComplete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZonePlayerToBind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZoneServerReady) { ENCODE_FORWARD(OP_Unknown); }
