@@ -442,12 +442,6 @@ bool Group::DelMemberOOZ(const char *Name) {
 		if(!strcasecmp(Name, membername[i]))
 			// This shouldn't be called if the member is in this zone.
 			if(!members[i]) {
-				if(!strncmp(GetLeaderName(), Name, 64))
-				{
-					//TODO: Transfer leadership if leader disbands OOZ.
-					UpdateGroupAAs();
-				}
-
 				memset(membername[i], 0, 64);
 				MemberRoles[i] = 0;
 				if(GroupCount() < 3)
@@ -1619,28 +1613,6 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 	safe_delete_array(Query);
 }
 
-void Group::SaveGroupLeaderAA()
-{
-	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
-	// This is done so that group members not in the same zone as the Leader still have access to this information.
-
-	char *Query = new char[200 + sizeof(GroupLeadershipAA_Struct)*2];
-
-	char *End = Query;
-
-	End += sprintf(End, "UPDATE group_leaders SET leadershipaa='");
-
-	End += database.DoEscapeString(End, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
-
-	End += sprintf(End,"' WHERE gid=%i LIMIT 1", GetID());
-
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	if (!database.RunQuery(Query, End - Query, errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", errbuff);
-
-	safe_delete_array(Query);
-}
-
 void Group::UnMarkNPC(uint16 ID)
 {
 	// Called from entity_list when the mob with the specified ID is being destroyed.
@@ -1749,26 +1721,13 @@ int8 Group::GetNumberNeedingHealedInGroup(int8 hpr, bool includePets) {
 	return needHealed;
 }
 
-void Group::UpdateGroupAAs()
-{
-	// This method updates the Groups Leadership abilities from the Player Profile of the Leader.
-	//
-	Mob *m = GetLeader();
-
-	if(m && m->IsClient())
-		m->CastToClient()->GetGroupAAs(&LeaderAbilities);
-	else
-		memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
-
-	SaveGroupLeaderAA();
-}
 
 void Group::QueueHPPacketsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app)
 {
 	// Send a mobs HP packets to group members if the leader has the NPC Health AA and the mob is the
 	// target of the group's main assist, or is marked, and the member doesn't already have the mob targeted.
 
-	if(!sender || !app || !GetLeadershipAA(groupAANPCHealth))
+	if(!sender || !app)
 		return;
 
 	uint16 SenderID = sender->GetID();
@@ -1820,8 +1779,6 @@ void Group::ChangeLeader(Mob* newleader)
 	strcpy(gu->yourname, oldleader->GetName());
 	SetLeader(newleader);
 	database.SetGroupLeaderName(GetID(), newleader->GetName());
-	UpdateGroupAAs();
-	gu->leader_aas = LeaderAbilities;
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (members[i] && members[i]->IsClient())
 		{

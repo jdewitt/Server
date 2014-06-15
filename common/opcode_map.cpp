@@ -281,7 +281,6 @@ void load_opcode_names()
 	opcode_map[0x0264]="LiveOP_ZoneServerInfo";
 	opcode_map[0x012c]="LiveOP_WearChange";
 	opcode_map[0x1FA1]="LiveOP_WorldObjectsSent";
-	opcode_map[0x39C4]="LiveOP_BlockedBuffs";
 	opcode_map[0x4656]="LiveOP_SpawnPositionUpdate";
 	opcode_map[0x4b61]="LiveOP_ManaUpdate";
 	opcode_map[0x02d6]="LiveOP_EnduranceUpdate";

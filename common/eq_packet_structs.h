@@ -518,14 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-// Underfoot & later struct.
-struct BuffRemoveRequest_Struct
-{
-/*00*/ uint32 SlotID;
-/*04*/ uint32 EntityID;
-/*08*/
- };
-
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
 /*004*/ uint32 spellid[BUFF_COUNT];
@@ -537,15 +529,6 @@ struct PetBuff_Struct {
 /*124*/ uint32 ticsremaining[BUFF_COUNT];
 /*224*/ uchar unknown705[20];
 /*244*/ uint32 buffcount;
-};
-
-struct BlockedBuffs_Struct
-{
-/*00*/ int32 SpellID[BLOCKED_BUFF_COUNT];
-/*80*/ uint32 Count;
-/*84*/ uint8 Pet;
-/*85*/ uint8 Initialise;
-/*86*/ uint16 Flags;
 };
 
 struct RemoveNimbusEffect_Struct
@@ -3537,17 +3520,6 @@ struct VoiceMacroOut_Struct {
 /*072*/	uint32	Voice;
 /*076*/	uint32	MacroNumber;
 /*080*/	char	Unknown080[60];
-};
-
-struct BankerChange_Struct {
-	uint32	platinum;
-	uint32	gold;
-	uint32	silver;
-	uint32	copper;
-	uint32	platinum_bank;
-	uint32	gold_bank;
-	uint32	silver_bank;
-	uint32	copper_bank;
 };
 
 struct LeadershipExpUpdate_Struct {

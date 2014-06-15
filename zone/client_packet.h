@@ -200,11 +200,8 @@
 	void Handle_OP_Heartbeat(const EQApplicationPacket *app);
 	void Handle_OP_SafePoint(const EQApplicationPacket *app);
 	void Handle_OP_FindPersonRequest(const EQApplicationPacket *app);
-	void Handle_OP_BankerChange(const EQApplicationPacket *app);
-	void Handle_OP_LeadershipExpToggle(const EQApplicationPacket *app);
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
-	void Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
 	void Handle_OP_LoadSpellSet(const EQApplicationPacket *app);
 	void Handle_OP_Rewind(const EQApplicationPacket *app);
@@ -236,10 +233,6 @@
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
-	void Handle_OP_BlockedBuffs(const EQApplicationPacket *app);
-	void Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app);
-	void Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app);
-	void Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrop(const EQApplicationPacket *app);
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);

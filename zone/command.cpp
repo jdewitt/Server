@@ -5848,9 +5848,6 @@ void command_setaaxp(Client *c, const Seperator *sep){
 
 	if (sep->IsNumber(1)) {
 		t->SetEXP(t->GetEXP(), atoi(sep->arg[1]), false);
-		if(sep->IsNumber(2) && sep->IsNumber(3)) {
-			t->SetLeadershipEXP(atoi(sep->arg[2]), atoi(sep->arg[3]));
-		}
 	} else
 		c->Message(0, "Usage: #setaaxp <new AA XP value> (<new Group AA XP value> <new Raid XP value>)");
 }
@@ -5865,11 +5862,7 @@ void command_setaapts(Client *c, const Seperator *sep){
 		c->Message(0, "Usage: #setaapts <AA|group|raid> <new AA points value>");
 	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 200)
 		c->Message(0, "You must have a number greater than 0 for points and no more than 200.");
-	else if(!strcasecmp(sep->arg[1], "group")) {
-		t->SetLeadershipEXP(atoi(sep->arg[2])*GROUP_EXP_PER_POINT, t->GetRaidEXP());
-	} else if(!strcasecmp(sep->arg[1], "raid")) {
-		t->SetLeadershipEXP(t->GetGroupEXP(), atoi(sep->arg[2])*RAID_EXP_PER_POINT);
-	} else {
+	else {
 		t->SetEXP(t->GetEXP(),t->GetMaxAAXP()*atoi(sep->arg[2]),false);
 		t->SendAAStats();
 		t->SendAATable();

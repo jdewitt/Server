@@ -218,7 +218,7 @@ int32 Client::LevelRegen()
 int32 Client::CalcHPRegen() {
 	int32 regen = LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen;
 
-	regen += aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration();
+	regen += aabonuses.HPRegen;
 
 	return (regen * RuleI(Character, HPRegenMultiplier) / 100);
 }
@@ -244,8 +244,6 @@ int32 Client::CalcMaxHP() {
 
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.HP + aabonuses.HP;
-
-	max_hp += GroupLeadershipAAHealthEnhancement();
 
 	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 
@@ -910,7 +908,7 @@ int32 Client::CalcMaxMana()
 	{
 		case 'I':
 		case 'W': {
-			max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+			max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana);
 			break;
 		}
 		case 'N': {
@@ -1727,7 +1725,7 @@ int16	Client::CalcCorrup()
 }
 
 int16 Client::CalcATK() {
-	ATK = itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
+	ATK = itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK;
 	return(ATK);
 }
 

@@ -3537,8 +3537,6 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 					gj->action = groupActLeave;
 					strcpy(gj->yourname, c->GetName());
 					Mob *Leader = g->GetLeader();
-					if (Leader)
-						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
 					c->QueuePacket(outapp);
 					safe_delete(outapp);
 					g->DelMemberOOZ(name);
@@ -3566,9 +3564,6 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name)
 					gj->action = groupActJoin;
 					strcpy(gj->yourname, it->second->GetName());
 					Mob *Leader = g->GetLeader();
-					if (Leader)
-						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
-
 					it->second->QueuePacket(outapp);
 					safe_delete(outapp);
 				}

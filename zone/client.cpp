@@ -3428,10 +3428,6 @@ void Client::LogSQL(const char *fmt, ...) {
 	va_end(argptr);
 }
 
-void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
-	memcpy(into, &m_pp.leader_abilities, sizeof(GroupLeadershipAA_Struct));
-}
-
 void Client::EnteringMessages(Client* client)
 {
 	//server rules
@@ -3919,7 +3915,7 @@ uint16 Client::GetTotalATK()
 
 	if(IsClient()) {
 		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
-		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
+		AttackRating += aabonuses.ATK;
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -3977,57 +3973,6 @@ void Client::VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber) {
 
 	if(!worldserver.SendVoiceMacro(this, Type, Target, MacroNumber, GroupOrRaidID))
 		Message(0, "Error: World server disconnected");
-}
-
-void Client::ClearGroupAAs() {
-
-	for(unsigned int i = 0; i < MAX_GROUP_LEADERSHIP_AA_ARRAY; i++)
-		m_pp.leader_abilities.ranks[i] = 0;
-
-	m_pp.group_leadership_points = 0;
-	m_pp.raid_leadership_points = 0;
-	m_pp.group_leadership_exp = 0;
-	m_pp.raid_leadership_exp = 0;
-
-	Save();
-}
-
-void Client::UpdateGroupAAs(int32 points, uint32 type) {
-
-	switch(type)
-	{
-	case 0:
-		{
-		m_pp.group_leadership_points += points;
-		break;
-		}
-	case 1:
-		{
-		m_pp.raid_leadership_points += points;
-		break;
-		}
-	}
-	SendLeadershipEXPUpdate();
-}
-
-bool Client::IsLeadershipEXPOn()
-{
-
-	if(!m_pp.leadAAActive)
-		return false;
-
-	Group *g = GetGroup();
-
-	if(g && g->IsLeader(this) && (g->GroupCount() > 2))
-		return true;
-
-	Raid *r = GetRaid();
-
-	if(r && r->IsLeader(this) && (r->RaidCount() > 17))
-		return true;
-
-	return false;
-
 }
 
 int Client::GetAggroCount() {
