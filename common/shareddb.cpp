@@ -233,8 +233,6 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
 					account_id, base_slot_id, (base_slot_id+10)), errbuf);
 			}
-
-			// @merth: need to delete augments here
 		}
 		else {
 			// Update/Insert item
@@ -247,13 +245,10 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 
 			uint32 len_query = MakeAnyLenString(&query,
 				"REPLACE INTO sharedbank "
-				"	(acctid,slotid,itemid,charges,custom_data,"
-				"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-				" VALUES(%lu,%lu,%lu,%lu,'%s',"
-				"	%lu,%lu,%lu,%lu,%lu)",
+				"	(acctid,slotid,itemid,charges,custom_data)"
+				" VALUES(%lu,%lu,%lu,%lu,'%s')",
 				(unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				inst->GetCustomDataString().c_str(),
-				(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
+				inst->GetCustomDataString().c_str());
 
 
 			ret = RunQuery(query, len_query, errbuf);
@@ -272,8 +267,6 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
 					char_id, base_slot_id, (base_slot_id+10)), errbuf);
 			}
-
-			// @merth: need to delete augments here
 		}
 		else {
 			uint16 charges = 0;
@@ -284,13 +277,10 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 			// Update/Insert item
 			uint32 len_query = MakeAnyLenString(&query,
 				"REPLACE INTO inventory "
-				"	(charid,slotid,itemid,charges,instnodrop,custom_data,color,"
-				"	augslot1,augslot2,augslot3,augslot4,augslot5)"
-				" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu,"
-				"	%lu,%lu,%lu,%lu,%lu)",
+				"	(charid,slotid,itemid,charges,instnodrop,custom_data,color)"
+				" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu)",
 				(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor(),
-				(unsigned long)augslot[0],(unsigned long)augslot[1],(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4] );
+				(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor());
 
 			ret = RunQuery(query, len_query, errbuf);
 		}
@@ -307,8 +297,6 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
 	}
-
-	// @merth: need to save augments here
 
 	return ret;
 }

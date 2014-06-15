@@ -4312,8 +4312,6 @@ void Client::ShowSkillsWindow()
 		if(GetSkill(it->second) > 0 || MaxSkill(it->second) > 0) {
 			WindowText += it->first;
 			// line up the values
-			for (int j = 0; j < MAX_AUGMENT_SLOTS; j++)
-				WindowText += "&nbsp;";
 			WindowText += itoa(this->GetSkill(it->second));
 			if (MaxSkill(it->second) > 0) {
 				WindowText += "/";
@@ -6474,7 +6472,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if(itemid > 0)
-		SummonItem(itemid,1,0,0,0,0,0,false,SLOT_POWER_SOURCE);
+		SummonItem(itemid,1,0,0,0,0,0,false,SLOT_QUEST);
 
 	if(faction)
 	{

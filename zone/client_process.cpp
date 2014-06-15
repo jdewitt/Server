@@ -775,19 +775,6 @@ void Client::BulkSendInventoryItems() {
 		}	
 	}
 
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		// Shared Bank items
-		for(slot_id = 2500; slot_id <= 2501; slot_id++) {
-			const ItemInst* inst = m_inv[slot_id];
-			if(inst) {
-				std::string packet = inst->Serialize(slot_id);
-				ser_items[i++] = packet;
-				size += packet.length();
-			}
-		}
-	}
-
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, size);
 	uchar* ptr = outapp->pBuffer;
 	for(itr = ser_items.begin(); itr != ser_items.end(); ++itr){

@@ -655,30 +655,12 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		if(IsInAGuild()) {
-			SendGuildMembers();
-			SendGuildURL();
-			SendGuildChannel();
-			SendGuildLFGuildStatus();
-		}
-		SendLFGuildStatus();
-		SendGuildMOTD();
+	SendLFGuildStatus();
+	SendGuildMOTD();
 
-		conn_state = ClientReadyReceived;
-		CompleteConnect();
-		SendHPUpdate();
-	}
-	else
-	{
-		SendLFGuildStatus();
-		SendGuildMOTD();
-
-		const ItemInst* inst = m_inv[SLOT_CURSOR];
-		if (inst){
-			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
-		}
+	const ItemInst* inst = m_inv[SLOT_CURSOR];
+	if (inst){
+		SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 	}
 
 	return;
@@ -7951,12 +7933,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	}
 	*/
 
-	if(eqs->ClientVersion() > EQClientMac)
-	{
-		if(GetSkill(SkillSwimming) < 100)
-			SetSkill(SkillSwimming,100);
-	}
-
 	//pull AAs from the PP
 	for(uint32 a=0; a < MAX_PP_AA_ARRAY; a++){
 		//set up our AA pointer
@@ -8023,9 +7999,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 	}
-
-	if(eqs->ClientVersion() > EQClientMac)
-		KeyRingLoad();
 
 	uint32 groupid = database.GetGroupID(GetName());
 	Group* group = nullptr;
@@ -8106,11 +8079,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		m_pp.z = zone->newzone_data.safe_z;
 	}
 
-	char val[20] = {0};
-	if (database.GetVariable("Expansions", val, 20))
-		m_pp.expansions = atoi(val);
-	else
-		m_pp.expansions = 0x3FF;
+	m_pp.expansions = RuleI(World, ExpansionSettings);
 
 	p_timers.SetCharID(CharacterID());
 	if(!p_timers.Load(&database)) {
@@ -8159,49 +8128,49 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
 
-		PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
-		memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
+	PlayerProfile_Struct* pps = (PlayerProfile_Struct*) new uchar[sizeof(PlayerProfile_Struct)-4];
+	memcpy(pps,&m_pp,sizeof(PlayerProfile_Struct)-4);
 
-		pps->perAA = m_epp.perAA;
-		int r = 0;
-		for(r = 0; r < MAX_PP_AA_ARRAY; r++) 
+	pps->perAA = m_epp.perAA;
+	int r = 0;
+	for(r = 0; r < MAX_PP_AA_ARRAY; r++) 
+	{
+		if(pps->aa_array[r].AA > 0)
 		{
-			if(pps->aa_array[r].AA > 0)
-			{
-				pps->aa_array[r].AA = zone->EmuToEQMacAA(pps->aa_array[r].AA);
-				pps->aa_array[r].value = pps->aa_array[r].value*16;
-			}
+			pps->aa_array[r].AA = zone->EmuToEQMacAA(pps->aa_array[r].AA);
+			pps->aa_array[r].value = pps->aa_array[r].value*16;
 		}
-		int s = 0;
-		for(r = 0; s < HIGHEST_SKILL; s++)
+	}
+	int s = 0;
+	for(r = 0; s < HIGHEST_SKILL; s++)
+	{
+		SkillUseTypes currentskill = (SkillUseTypes) s;
+		if(pps->skills[s] > 0)
+			continue;
+		else
 		{
-			SkillUseTypes currentskill = (SkillUseTypes) s;
-			if(pps->skills[s] > 0)
-				continue;
-			else
+			int haveskill = GetMaxSkillAfterSpecializationRules(currentskill, MaxSkill(currentskill, GetClass(), RuleI(Character, MaxLevel)));
+			if(haveskill > 0)
 			{
-				int haveskill = GetMaxSkillAfterSpecializationRules(currentskill, MaxSkill(currentskill, GetClass(), RuleI(Character, MaxLevel)));
-				if(haveskill > 0)
+				pps->skills[s] = 254;
+				//If we never get the skill, value is 255. If we qualify for it AND do not need to train it it's 0, if we get it but don't yet qualify or it needs to be trained it's 254.
+				uint16 t_level = SkillTrainLevel(currentskill, GetClass());
+				if(t_level <= GetLevel())
 				{
-					pps->skills[s] = 254;
-					//If we never get the skill, value is 255. If we qualify for it AND do not need to train it it's 0, if we get it but don't yet qualify or it needs to be trained it's 254.
-					uint16 t_level = SkillTrainLevel(currentskill, GetClass());
-					if(t_level <= GetLevel())
-					{
-						//Meditate does not need to be trained.
-						if(t_level == 1 || currentskill == SkillMeditate)
-							pps->skills[s] = 0;
-					}
+					//Meditate does not need to be trained.
+					if(t_level == 1 || currentskill == SkillMeditate)
+						pps->skills[s] = 0;
 				}
-				else
-					pps->skills[s] = 255;
 			}
+			else
+				pps->skills[s] = 255;
 		}
-		// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
-		m_pp.entityid = GetID();
-		memcpy(outapp->pBuffer,pps,outapp->size);
-		outapp->priority = 6;
-		FastQueuePacket(&outapp);
+	}
+	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA
+	m_pp.entityid = GetID();
+	memcpy(outapp->pBuffer,pps,outapp->size);
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
 
 	if(m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
@@ -8311,7 +8280,6 @@ void Client::CompleteConnect()
 		if (m_pp.spell_book[spellInt] < 3 || m_pp.spell_book[spellInt] > 50000)
 			m_pp.spell_book[spellInt] = 0xFFFFFFFF;
 	}
-	SendAATable();
 
 	if (GetHideMe()) Message(13, "[GM] You are currently hidden to all clients");
 
@@ -8540,38 +8508,6 @@ void Client::CompleteConnect()
 	//This sub event is for if a player logs in for the first time since entering world.
 	if(firstlogon == 1)
 		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
-
-	if(zone && GetClientVersion() > EQClientMac)
-	{
-		if(zone->GetInstanceTimer())
-		{
-			uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
-			uint32 day = (ttime/86400000);
-			uint32 hour = (ttime/3600000)%24;
-			uint32 minute = (ttime/60000)%60;
-			uint32 second = (ttime/1000)%60;
-			if(day)
-			{
-				Message(15, "%s(%u) will expire in %u days, %u hours, %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), day, hour, minute, second);
-			}
-			else if(hour)
-			{
-				Message(15, "%s(%u) will expire in %u hours, %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), hour, minute, second);
-			}
-			else if(minute)
-			{
-				Message(15, "%s(%u) will expire in %u minutes, and %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), minute, second);
-			}
-			else
-			{
-				Message(15, "%s(%u) will expire in in %u seconds.",
-					zone->GetLongName(), zone->GetInstanceID(), second);
-			}
-		}
-	}
 
 	CalcItemScale();
 	DoItemEnterZone();

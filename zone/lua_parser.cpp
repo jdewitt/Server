@@ -101,10 +101,6 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_weapon_proc",
 	"event_equip_item",
 	"event_unequip_item",
-	"event_augment_item",
-	"event_unaugment_item",
-	"event_augment_insert",
-	"event_augment_remove",
 	"event_enter_area",
 	"event_leave_area",
 	"event_respawn",
@@ -194,10 +190,6 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_LOOT] = handle_item_loot;
 	ItemArgumentDispatch[EVENT_EQUIP_ITEM] = handle_item_equip;
 	ItemArgumentDispatch[EVENT_UNEQUIP_ITEM] = handle_item_equip;
-	ItemArgumentDispatch[EVENT_AUGMENT_ITEM] = handle_item_augment;
-	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM] = handle_item_augment;
-	ItemArgumentDispatch[EVENT_AUGMENT_INSERT] = handle_item_augment_insert;
-	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE] = handle_item_augment_remove;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_effect;
 	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_tic;

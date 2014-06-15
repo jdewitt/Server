@@ -591,20 +591,52 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
 	return ret;
 }
 
-luabind::object lua_get_qglobals(lua_State *L, Lua_Client client, Lua_NPC npc) {
-	return lua_get_qglobals(L, npc, client);
-}
-
 luabind::object lua_get_qglobals(lua_State *L, Lua_Client client) {
-	return lua_get_qglobals(L, Lua_NPC(nullptr), client);
+	luabind::object ret = luabind::newtable(L);
+
+	NPC *n = nullptr;
+	Client *c = client;
+
+	std::list<QGlobal> global_map;
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
+	auto iter = global_map.begin();
+	while (iter != global_map.end()) {
+		ret[(*iter).name] = (*iter).value;
+		++iter;
+	}
+	return ret;
 }
 
 luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
-	return lua_get_qglobals(L, npc, Lua_Client(nullptr));
+	luabind::object ret = luabind::newtable(L);
+
+	NPC *n = npc;
+	Client *c = nullptr;
+
+	std::list<QGlobal> global_map;
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
+	auto iter = global_map.begin();
+	while (iter != global_map.end()) {
+		ret[(*iter).name] = (*iter).value;
+		++iter;
+	}
+	return ret;
 }
 
 luabind::object lua_get_qglobals(lua_State *L) {
-	return lua_get_qglobals(L, Lua_NPC(nullptr), Lua_Client(nullptr));
+	luabind::object ret = luabind::newtable(L);
+
+	NPC *n = nullptr;
+	Client *c = nullptr;
+
+	std::list<QGlobal> global_map;
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
+	auto iter = global_map.begin();
+	while (iter != global_map.end()) {
+		ret[(*iter).name] = (*iter).value;
+		++iter;
+	}
+	return ret;
 }
 
 Lua_EntityList lua_get_entity_list() {
@@ -1056,7 +1088,6 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*))&lua_get_qglobals),
@@ -1155,10 +1186,6 @@ luabind::scope lua_register_events() {
 			luabind::value("weapon_proc", static_cast<int>(EVENT_WEAPON_PROC)),
 			luabind::value("equip_item", static_cast<int>(EVENT_EQUIP_ITEM)),
 			luabind::value("unequip_item", static_cast<int>(EVENT_UNEQUIP_ITEM)),
-			luabind::value("augment_item", static_cast<int>(EVENT_AUGMENT_ITEM)),
-			luabind::value("unaugment_item", static_cast<int>(EVENT_UNAUGMENT_ITEM)),
-			luabind::value("augment_insert", static_cast<int>(EVENT_AUGMENT_INSERT)),
-			luabind::value("augment_remove", static_cast<int>(EVENT_AUGMENT_REMOVE)),
 			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
 			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
 			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE)),
@@ -1215,8 +1242,7 @@ luabind::scope lua_register_slot() {
 			luabind::value("Cursor", static_cast<int>(SLOT_CURSOR)),
 			luabind::value("CursorEnd", 0xFFFE),
 			luabind::value("Tradeskill", static_cast<int>(SLOT_TRADESKILL)),
-			luabind::value("Augment", static_cast<int>(SLOT_AUGMENT)),
-			luabind::value("PowerSource", static_cast<int>(SLOT_POWER_SOURCE)),
+			luabind::value("PowerSource", static_cast<int>(SLOT_QUEST)),
 			luabind::value("Invalid", 0xFFFF)
 		];
 }

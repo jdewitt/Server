@@ -216,14 +216,6 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		return false;
 	}
-	// check to make sure we are augmenting an augmentable item
-	else if(((item->ItemClass != ItemClassCommon) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5)) {
-		Message(13, "You can not augment an augment or a non-common class item.");
-		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an augment or a non-common class item.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
-
-		return false;
-	}
 
 	// This code is ready to implement once the item load code is changed to process the 'minstatus' field.
 	// Checking #iteminfo in-game verfies that item->MinStatus is set to '0' regardless of field value.
@@ -240,284 +232,9 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	}
 	*/
 
-	uint32 augments[MAX_AUGMENT_SLOTS] = { aug1, aug2, aug3, aug4, aug5 };
-
 	uint32 classes	= item->Classes;
 	uint32 races	= item->Races;
 	uint32 slots	= item->Slots;
-
-	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
-	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
-	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-	
-	for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
-		const Item_Struct* augtest = database.GetItem(augments[iter]);
-
-		if(augtest == nullptr) {
-			if(augments[iter]) {
-				Message(13, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
-				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an augment (Aug%i) with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-				return false;
-			}
-		}
-		else {
-			// check that there is not a lore conflict between augment and existing inventory
-			if(CheckLoreConflict(augtest)) {
-				// DuplicateLoreMessage(augtest->ID);
-				Message(13, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
-				
-				return false;
-			}
-			// check that augment is an actual augment
-			else if(augtest->AugType == 0) {
-				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
-				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5);
-				
-				return false;
-			}
-
-			// Same as GM check above
-
-			// check to make sure we are a GM if the augment is GM-only
-			/*
-			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
-				Message(13, "You are not a GM or do not have the status to summon this augment.");
-				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only augment (Aug%i) with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, MinStatus: %u)\n",
-					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, item->MinStatus);
-
-				return false;
-			}
-			*/
-
-			// check for augment type allowance
-			if(enforcewear) {
-				if((item->AugSlotType[iter] == AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(13, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an item with an unacceptable augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-
-				if(item->AugSlotVisible[iter] == 0) {
-					Message(13, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an unevolved item with augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-			}
-
-			// check for augment to item restriction
-			if(enforcerestr) {
-				bool restrictfail = false;
-				uint8 it = item->ItemType;
-
-				switch(augtest->AugRestrict) {
-				case AugRestrAny:
-					break;
-				case AugRestrArmor:
-					switch(it) {
-					case ItemTypeArmor:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestrWeapons:
-					switch(it) {
-					case ItemType1HSlash:
-					case ItemType1HBlunt:
-					case ItemType1HPiercing:
-					case ItemTypeMartial:
-					case ItemType2HSlash:
-					case ItemType2HBlunt:
-					case ItemType2HPiercing:
-					case ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr1HWeapons:
-					switch(it) {
-					case ItemType1HSlash:
-					case ItemType1HBlunt:
-					case ItemType1HPiercing:
-					case ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr2HWeapons:
-					switch(it) {
-					case ItemType2HSlash:
-					case ItemType2HBlunt:
-					case ItemType2HPiercing:
-					case ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr1HSlash:
-					switch(it) {
-					case ItemType1HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr1HBlunt:
-					switch(it) {
-					case ItemType1HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestrPiercing:
-					switch(it) {
-					case ItemType1HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestrHandToHand:
-					switch(it) {
-					case ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr2HSlash:
-					switch(it) {
-					case ItemType2HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr2HBlunt:
-					switch(it) {
-					case ItemType2HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr2HPierce:
-					switch(it) {
-					case ItemType2HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestrBows:
-					switch(it) {
-					case ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestrShields:
-					switch(it) {
-					case ItemTypeShield:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr1HSlash1HBluntOrHandToHand:
-					switch(it) {
-					case ItemType1HSlash:
-					case ItemType1HBlunt:
-					case ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case AugRestr1HBluntOrHandToHand:
-					switch(it) {
-					case ItemType1HBlunt:
-					case ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				// These 3 are in-work
-				case AugRestrUnknown1:
-				case AugRestrUnknown2:
-				case AugRestrUnknown3:
-				default:
-					restrictfail = true;
-					break;
-				}
-
-				if(restrictfail) {
-					Message(13, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an item with a restricted augment (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-			}
-
-			if(enforceusable) {
-				// check for class usability
-				if(item->Classes && !(classes &= augtest->Classes)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable by any class.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-
-				// check for race usability
-				if(item->Races && !(races &= augtest->Races)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable by any race.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-
-				// check for slot usability
-				if(item->Slots && !(slots &= augtest->Slots)) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
-					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable in any slot.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-			}
-		}
-	}
 
 	// validation passed..so, set the charges and create the actual item
 
@@ -561,7 +278,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		inst->SetInstNoDrop(true);
 
 	// check to see if item is usable in requested slot
-	if(to_slot != SLOT_POWER_SOURCE && enforceusable && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
+	if(to_slot != SLOT_QUEST && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
 		uint32 slottest = (to_slot == 9999) ? 22 : to_slot;
 
 		if(!(slots & ((uint32)1 << slottest))) {
@@ -573,8 +290,8 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		}
 	}
 
-	//We use Power Source to know when we're coming from a quest method.
-	if(to_slot == SLOT_POWER_SOURCE)
+	//We're coming from a quest method.
+	if(to_slot == SLOT_QUEST)
 	{
 		bool stacking = TryStacking(inst);
 		//If we were able to stack, there is no need to continue on as we're set.
@@ -613,15 +330,10 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	safe_delete(inst);
 
-	// discover item and any augments
+	// discover item
 	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
 		if(!IsDiscovered(item_id))
 			DiscoverItem(item_id);
-
-		for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
-			if(augments[iter] && !IsDiscovered(augments[iter]))
-				DiscoverItem(augments[iter]);
-		}
 	}
 
 	return true;
@@ -927,7 +639,7 @@ bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cur
 bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_cursor, ServerLootItem_Struct** bag_item_data)
 {
 	// #1: Try to auto equip
-	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && !inst.GetItem()->Attuneable && inst.GetItem()->ItemType != ItemTypeAugmentation)
+	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && !inst.GetItem()->Attuneable)
 	{
 		for (int16 i = 0; i < 9999; i++) // originally (i < 22)
 		{
@@ -2169,7 +1881,7 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 	// Construct packet
 	if(packet_type==ItemPacketViewLink)
 		opcode = OP_ItemLinkResponse;
-	else if(packet_type==ItemPacketTradeView && GetClientVersion() == EQClientMac)
+	else if(packet_type==ItemPacketTradeView)
 		opcode = OP_TradeItemPacket;
 	else
 		opcode = OP_ItemPacket;

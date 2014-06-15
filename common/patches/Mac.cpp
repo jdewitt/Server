@@ -299,6 +299,10 @@ ENCODE(OP_PlayerProfile) {
 	OUT(aapoints);
 	OUT(expAA);
 	OUT(perAA);
+	if(emu->expansions > 15)
+		eq->expansions = 15;
+	else
+		OUT(expansions);
 	for(r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
 		OUT(aa_array[r].AA);
 		OUT(aa_array[r].value);
@@ -309,6 +313,7 @@ ENCODE(OP_PlayerProfile) {
 	for(r = 0; r < 9; r++) {
 		OUT(item_material[r]);
 	}
+
 	//_log(NET__STRUCTS, "Player Profile Packet is %i bytes uncompressed", sizeof(structs::PlayerProfile_Struct));
 
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);

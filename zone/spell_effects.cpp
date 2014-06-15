@@ -1964,13 +1964,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 
 				spu->spawn_id	= GetID();
-				spu->x_pos		= FloatToEQ19(GetX());
-				spu->y_pos		= FloatToEQ19(GetY());
-				spu->z_pos		= FloatToEQ19(GetZ());
+				spu->x_pos		= GetX();
+				spu->y_pos		= GetY();
+				spu->z_pos		= GetZ();
 				spu->delta_x	= NewFloatToEQ13(new_x);
 				spu->delta_y	= NewFloatToEQ13(new_y);
 				spu->delta_z	= NewFloatToEQ13(toss_amt);
-				spu->heading	= FloatToEQ19(GetHeading());
+				spu->heading	= GetHeading();
 				spu->padding0002	=0;
 				spu->padding0006	=7;
 				spu->padding0014	=0x7f;
@@ -3722,6 +3722,13 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_SetBodyType:
 			{
 				SetBodyType(GetOrigBodyType(), false);
+				break;
+			}
+
+			case SE_AlterNPCLevel:
+			{
+				if (IsNPC())
+					SetLevel(GetOrigLevel());
 				break;
 			}
 
