@@ -2135,12 +2135,12 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 }
 
 bool Client::HasSkill(SkillUseTypes skill_id) const {
-	if(skill_id == SkillMeditate)
+	/*if(skill_id == SkillMeditate)
 	{
 		if(SkillTrainLvl(skill_id, GetClass()) >= GetLevel())
 			return true;
 	}
-	else
+	else*/
 		return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 

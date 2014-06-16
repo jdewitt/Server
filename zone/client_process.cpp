@@ -1607,7 +1607,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
 			if (t_level == 0)
 			{
-				mlog(CLIENT__ERROR, "Tried to train a new skill %d, which is not allowed at this level %i.", skill, t_level);
+				mlog(CLIENT__ERROR, "Tried to train a new skill %d which is invalid for this race/class.", skill);
 				return;
 			}
 			SetSkill(skill, t_level);

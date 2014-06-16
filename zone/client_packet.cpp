@@ -8158,7 +8158,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 				if(t_level <= GetLevel())
 				{
 					//Meditate does not need to be trained.
-					if(t_level == 1 || currentskill == SkillMeditate)
+					if(t_level == 1)	// || currentskill == SkillMeditate)
 						pps->skills[s] = 0;
 				}
 			}
