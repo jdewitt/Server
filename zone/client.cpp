@@ -286,14 +286,6 @@ Client::Client(EQStreamInterface* ieqs)
 
 	InitializeBuffSlots();
 
-	for(int i = 0; i < XTARGET_HARDCAP; ++i)
-	{
-		XTargets[i].Type = Auto;
-		XTargets[i].ID = 0;
-		XTargets[i].Name[0] = 0;
-	}
-	MaxXTargets = 5;
-	XTargetAutoAddHaters = true;
 	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
@@ -536,7 +528,7 @@ bool Client::Save(uint8 iCommitNow) {
 		workpt.w2_3() = GetID();
 		workpt.b1() = DBA_b1_Entity_Client_Save;
 		DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
-		dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
+		dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0), false);
 		if (iCommitNow == 0){
 			pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
 		}
@@ -547,7 +539,7 @@ bool Client::Save(uint8 iCommitNow) {
 		safe_delete_array(query);
 		return true;
 	}
-	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
+	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp,0,0)) {
 		SaveBackup();
 	}
 	else {

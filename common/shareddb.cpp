@@ -1184,13 +1184,13 @@ bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfi
 	return ret;
 }
 
-bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
+bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 affected_rows = 0;
 	bool ret = false;
 
-	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance, MaxXTargets), errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, SetPlayerProfile_MQ(&query, account_id, charid, pp, inv, ext, current_zone, current_instance), errbuf, 0, &affected_rows)) {
 		ret = (affected_rows != 0);
 	}
 
@@ -1203,7 +1203,7 @@ bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerPr
 }
 
 // Generate SQL for updating player profile
-uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
+uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance) {
 	*query = new char[396 + sizeof(PlayerProfile_Struct)*2 + sizeof(ExtendedProfile_Struct)*2 + 4];
 	char* end = *query;
 	if (!current_zone)
@@ -1219,7 +1219,7 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint
 	end += DoEscapeString(end, (char*)pp, sizeof(PlayerProfile_Struct));
 	end += sprintf(end,"\', extprofile=\'");
 	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
-	end += sprintf(end,"\',class=%d,level=%d,xtargets=%u WHERE id=%u", pp->class_, pp->level, MaxXTargets, charid);
+	end += sprintf(end,"\',class=%d,level=%d WHERE id=%u", pp->class_, pp->level, charid);
 
 	return (uint32) (end - (*query));
 }

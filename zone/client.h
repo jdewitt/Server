@@ -62,7 +62,6 @@ class Client;
 #define CLIENT_TIMEOUT		90000
 #define CLIENT_LD_TIMEOUT	30000 // length of time client stays in zone after LDing
 #define TARGETING_RANGE		200	// range for /assist and /target
-#define XTARGET_HARDCAP		20
 
 extern Zone* zone;
 
@@ -135,42 +134,6 @@ enum {
 	HideCorpseAllButGroup = 2,
 	HideCorpseLooted = 3,
 	HideCorpseNPC = 5
-};
-
-typedef enum
-{
-	Empty = 0,
-	Auto = 1,
-	CurrentTargetPC = 2,
-	CurrentTargetNPC = 3,
-	TargetsTarget = 4,
-	GroupTank = 5,
-	GroupTankTarget = 6,
-	GroupAssist = 7,
-	GroupAssistTarget = 8,
-	Puller = 9,
-	PullerTarget = 10,
-	GroupMarkTarget1 = 11,
-	GroupMarkTarget2 = 12,
-	GroupMarkTarget3 = 13,
-	RaidAssist1 = 14,
-	RaidAssist2 = 15,
-	RaidAssist3 = 16,
-	RaidAssist1Target = 17,
-	RaidAssist2Target = 18,
-	RaidAssist3Target = 19,
-	RaidMarkTarget1 = 20,
-	RaidMarkTarget2 = 21,
-	RaidMarkTarget3 = 22,
-	MyPet = 23,
-	MyPetTarget = 24,
-} XTargetType;
-
-struct XTarget_Struct
-{
-	XTargetType Type;
-	uint16 ID;
-	char Name[65];
 };
 
 struct RespawnOption
@@ -1247,11 +1210,6 @@ private:
 	std::string PendingRezzCorpseName;	// Only used for resurrect while hovering.
 
 	std::list<std::pair<std::string, uint16> > DraggedCorpses;
-
-	uint8 MaxXTargets;
-	bool XTargetAutoAddHaters;
-
-	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 
 	Timer ItemTickTimer;
 	Timer ItemQuestTimer;

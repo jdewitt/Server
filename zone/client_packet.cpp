@@ -300,8 +300,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_LFPCommand] = &Client::Handle_OP_LFPCommand;
 	ConnectedOpcodes[OP_LFPGetMatchesRequest] = &Client::Handle_OP_LFPGetMatchesRequest;
 	ConnectedOpcodes[OP_Barter] = &Client::Handle_OP_Barter;
-	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
-	ConnectedOpcodes[OP_DoGroupLeadershipAbility] = &Client::Handle_OP_DoGroupLeadershipAbility;
 	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
 	ConnectedOpcodes[OP_DelegateAbility] = &Client::Handle_OP_DelegateAbility;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
@@ -497,7 +495,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		account_id));
 	//DO NOT FORGET TO EDIT ZoneDatabase::GetCharacterInfoForLogin if you change this
 	dbaw->AddQuery(2, &query, MakeAnyLenString(&query,
-		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon"
+		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,firstlogon"
 		" FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i",
 		character_id));
 	dbaw->AddQuery(3, &query, MakeAnyLenString(&query,
@@ -7736,7 +7734,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 		else if (dbaq->QPT() == 2) {
-			loaditems = database.GetCharacterInfoForLogin_result(result, 0, 0, &m_pp, &m_inv, &m_epp, &pplen, &guild_id, &guildrank, &class_, &level, &LFP, &LFG, &MaxXTargets, &firstlogon);
+			loaditems = database.GetCharacterInfoForLogin_result(result, 0, 0, &m_pp, &m_inv, &m_epp, &pplen, &guild_id, &guildrank, &class_, &level, &LFP, &LFG, &firstlogon);
 		}
 		else if (dbaq->QPT() == 3) {
 			database.RemoveTempFactions(this);
@@ -9542,58 +9540,6 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			Message(13, "Unrecognised Barter action.");
 			_log(TRADING__BARTER, "Unrecognised Barter Action %i", Action);
 
-	}
-}
-
-void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(VoiceMacroIn_Struct)) {
-
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_VoiceMacroIn expected %i got %i",
-					sizeof(VoiceMacroIn_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	if(!RuleB(Chat, EnableVoiceMacros)) return;
-
-	VoiceMacroIn_Struct* vmi = (VoiceMacroIn_Struct*)app->pBuffer;
-
-	VoiceMacroReceived(vmi->Type, vmi->Target, vmi->MacroNumber);
-
-}
-
-void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(DoGroupLeadershipAbility_Struct)) {
-
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DoGroupLeadershipAbility expected %i got %i",
-					sizeof(DoGroupLeadershipAbility_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	DoGroupLeadershipAbility_Struct* dglas = (DoGroupLeadershipAbility_Struct*)app->pBuffer;
-
-	switch(dglas->Ability)
-	{
-		case GroupLeadershipAbility_MarkNPC:
-		{
-			if(GetTarget())
-			{
-				Group* g = GetGroup();
-				if(g)
-					g->MarkNPC(GetTarget(), dglas->Parameter);
-			}
-			break;
-		}
-
-		default:
-			break;
 	}
 }
 

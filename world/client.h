@@ -99,7 +99,6 @@ private:
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
 	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
 	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
-	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreatePacket(const EQApplicationPacket *app);
 	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
@@ -107,7 +106,6 @@ private:
 	EQStreamInterface* const eqs;
 };
 
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
-bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc);
+bool CheckCharCreateInfo(CharCreate_Struct *cc);
 
 #endif
