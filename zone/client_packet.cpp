@@ -139,7 +139,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_DuelResponse2] = &Client::Handle_OP_DuelResponse2;
 	ConnectedOpcodes[OP_RequestDuel] = &Client::Handle_OP_RequestDuel;
 	ConnectedOpcodes[OP_SpawnAppearance] = &Client::Handle_OP_SpawnAppearance;
-	ConnectedOpcodes[OP_BazaarInspect] = &Client::Handle_OP_BazaarInspect;
 	ConnectedOpcodes[OP_Death] = &Client::Handle_OP_Death;
 	ConnectedOpcodes[OP_MoveCoin] = &Client::Handle_OP_MoveCoin;
 	ConnectedOpcodes[OP_ItemLinkClick] = &Client::Handle_OP_ItemLinkClick;
@@ -299,7 +298,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_LFGGetMatchesRequest] = &Client::Handle_OP_LFGGetMatchesRequest;
 	ConnectedOpcodes[OP_LFPCommand] = &Client::Handle_OP_LFPCommand;
 	ConnectedOpcodes[OP_LFPGetMatchesRequest] = &Client::Handle_OP_LFPGetMatchesRequest;
-	ConnectedOpcodes[OP_Barter] = &Client::Handle_OP_Barter;
 	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
 	ConnectedOpcodes[OP_DelegateAbility] = &Client::Handle_OP_DelegateAbility;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
@@ -2323,33 +2321,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
 			<< " value: 0x" << std::hex << std::setw(8) << std::setfill('0') << sa->parameter << std::dec << std::endl;
 	}
-	return;
-}
-
-void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(BazaarInspect_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for BazaarInspect_Struct: Expected %i, Got %i",
-			sizeof(BazaarInspect_Struct), app->size);
-		return;
-	}
-
-	BazaarInspect_Struct* bis = (BazaarInspect_Struct*)app->pBuffer;
-
-	const Item_Struct* item = database.GetItem(bis->ItemID);
-
-	if (!item) {
-		Message(13, "Error: This item does not exist!");
-		return;
-	}
-
-	ItemInst* inst = database.CreateItem(item);
-
-	if (inst) {
-		SendItemPacket(0, inst, ItemPacketViewLink);
-		safe_delete(inst);
-	}
-
 	return;
 }
 
@@ -9383,164 +9354,6 @@ void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app) {
 	}
 
 	return;
-}
-
-void Client::Handle_OP_Barter(const EQApplicationPacket *app)
-{
-
-	if(app->size < 4)
-	{
-		LogFile->write(EQEMuLog::Debug, "OP_Barter packet below minimum expected size. The packet was %i bytes.", app->size);
-		DumpPacket(app);
-		return;
-	}
-
-	char* Buf = (char *)app->pBuffer;
-
-	// The first 4 bytes of the packet determine the action. A lot of Barter packets require the
-	// packet the client sent, sent back to it as an acknowledgement.
-	//
-	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buf);
-
-	_pkt(TRADING__BARTER, app);
-
-	switch(Action)
-	{
-
-		case Barter_BuyerSearch:
-		{
-			BuyerItemSearch(app);
-			break;
-		}
-
-		case Barter_SellerSearch:
-		{
-			BarterSearchRequest_Struct *bsr = (BarterSearchRequest_Struct*)app->pBuffer;
-			SendBuyerResults(bsr->SearchString, bsr->SearchID);
-			break;
-		}
-
-		case Barter_BuyerModeOn:
-		{
-			if(!Trader) {
-				ToggleBuyerMode(true);
-			}
-			else {
-				Buf = (char *)app->pBuffer;
-				VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerModeOff);
-				Message(13, "You cannot be a Trader and Buyer at the same time.");
-			}
-			QueuePacket(app);
-			break;
-		}
-
-		case Barter_BuyerModeOff:
-		{
-			QueuePacket(app);
-			ToggleBuyerMode(false);
-			break;
-		}
-
-		case Barter_BuyerItemUpdate:
-		{
-			UpdateBuyLine(app);
-			break;
-		}
-
-		case Barter_BuyerItemRemove:
-		{
-			BuyerRemoveItem_Struct* bris = (BuyerRemoveItem_Struct*)app->pBuffer;
-			database.RemoveBuyLine(CharacterID(), bris->BuySlot);
-			QueuePacket(app);
-			break;
-		}
-
-		case Barter_SellItem:
-		{
-			SellToBuyer(app);
-			break;
-		}
-
-		case Barter_BuyerInspectBegin:
-		{
-			ShowBuyLines(app);
-			break;
-		}
-
-		case Barter_BuyerInspectEnd:
-		{
-			BuyerInspectRequest_Struct* bir = ( BuyerInspectRequest_Struct*)app->pBuffer;
-			Client *Buyer = entity_list.GetClientByID(bir->BuyerID);
-			if(Buyer)
-				Buyer->WithCustomer(0);
-
-			break;
-		}
-
-		case Barter_BarterItemInspect:
-		{
-			BarterItemSearchLinkRequest_Struct* bislr = (BarterItemSearchLinkRequest_Struct*)app->pBuffer;
-
-			const Item_Struct* item = database.GetItem(bislr->ItemID);
-
-			if (!item)
-				Message(13, "Error: This item does not exist!");
-			else
-			{
-				ItemInst* inst = database.CreateItem(item);
-				if (inst)
-				{
-					SendItemPacket(0, inst, ItemPacketViewLink);
-					safe_delete(inst);
-				}
-			}
-			break;
-		}
-
-		case Barter_Welcome:
-		{
-			SendBazaarWelcome();
-			break;
-		}
-
-		case Barter_WelcomeMessageUpdate:
-		{
-			BuyerWelcomeMessageUpdate_Struct* bwmu = (BuyerWelcomeMessageUpdate_Struct*)app->pBuffer;
-			SetBuyerWelcomeMessage(bwmu->WelcomeMessage);
-			break;
-		}
-
-		case Barter_BuyerItemInspect:
-		{
-			BuyerItemSearchLinkRequest_Struct* bislr = (BuyerItemSearchLinkRequest_Struct*)app->pBuffer;
-
-			const Item_Struct* item = database.GetItem(bislr->ItemID);
-
-			if (!item)
-				Message(13, "Error: This item does not exist!");
-			else
-			{
-				ItemInst* inst = database.CreateItem(item);
-				if (inst)
-				{
-					SendItemPacket(0, inst, ItemPacketViewLink);
-					safe_delete(inst);
-				}
-			}
-			break;
-		}
-
-		case Barter_Unknown23:
-		{
-				// Sent by SoD client for no discernible reason.
-				break;
-		}
-
-		default:
-			Message(13, "Unrecognised Barter action.");
-			_log(TRADING__BARTER, "Unrecognised Barter Action %i", Action);
-
-	}
 }
 
 void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app) {

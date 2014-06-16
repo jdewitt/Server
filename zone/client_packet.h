@@ -43,7 +43,6 @@
 	void Handle_OP_DuelResponse2(const EQApplicationPacket *app);
 	void Handle_OP_RequestDuel(const EQApplicationPacket *app);
 	void Handle_OP_SpawnAppearance(const EQApplicationPacket *app);
-	void Handle_OP_BazaarInspect(const EQApplicationPacket *app);
 	void Handle_OP_Death(const EQApplicationPacket *app);
 	void Handle_OP_MoveCoin(const EQApplicationPacket *app);
 	void Handle_OP_ItemLinkClick(const EQApplicationPacket *app);
@@ -215,7 +214,6 @@
 	void Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app);
 	void Handle_OP_LFPCommand(const EQApplicationPacket *app);
 	void Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app);
-	void Handle_OP_Barter(const EQApplicationPacket *app);
 	void Handle_OP_ClearNPCMarks(const EQApplicationPacket *app);
 	void Handle_OP_DelegateAbility(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);

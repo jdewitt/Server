@@ -196,7 +196,6 @@ public:
 	void	CompleteConnect();
 	bool	TryStacking(ItemInst* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
 	void	SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
-	void	SendBuyerPacket(Client* Buyer);
 	GetItems_Struct* GetTraderItems();
 	void	SendBazaarWelcome();
 	void	DyeArmor(DyeStruct* dye);
@@ -224,15 +223,6 @@ public:
 	void	TraderUpdate(uint16 slot_id,uint32 trader_id);
 	void	FinishTrade(Mob* with, ServerPacket* qspack = nullptr, bool finalizer = false);
 	void	SendZonePoints();
-
-	void	SendBuyerResults(char *SearchQuery, uint32 SearchID);
-	void	ShowBuyLines(const EQApplicationPacket *app);
-	void	SellToBuyer(const EQApplicationPacket *app);
-	void	ToggleBuyerMode(bool TurnOn);
-	void	UpdateBuyLine(const EQApplicationPacket *app);
-	void	BuyerItemSearch(const EQApplicationPacket *app);
-	void	SetBuyerWelcomeMessage(const char* WelcomeMessage) { BuyerWelcomeMessage = WelcomeMessage; }
-	const	char* GetBuyerWelcomeMessage() { return BuyerWelcomeMessage.c_str(); }
 
 	void	FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	virtual bool Process();

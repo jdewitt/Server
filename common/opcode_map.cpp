@@ -58,9 +58,7 @@ void load_opcode_names()
 	opcode_map[0x022d]="LiveOP_GuildManageAdd";
 	opcode_map[0x0039]="LiveOP_GuildManageStatus";
 	opcode_map[0x01e8]="LiveOP_Trader";
-	opcode_map[0x01e7]="LiveOP_Bazaar";
 	opcode_map[0x01c4]="LiveOP_BecomeTrader";
-	opcode_map[0x01f4]="LiveOP_BazaarInspect";
 	opcode_map[0x006e]="LiveOP_TraderItemUpdate";
 	opcode_map[0x017c]="LiveOP_TraderDelItem";
 	opcode_map[0x01eb]="LiveOP_TraderShop";
