@@ -110,7 +110,6 @@ IN(OP_RequestDuel, Duel_Struct);
 IN(OP_DuelResponse, DuelResponse_Struct);
 IN(OP_DuelResponse2, Duel_Struct);
 IN(OP_SpawnAppearance, SpawnAppearance_Struct);
-IN(OP_BazaarInspect, BazaarInspect_Struct);
 IN(OP_Death, Death_Struct);
 IN(OP_MoveCoin, MoveCoin_Struct);
 IN(OP_ItemLinkClick, ItemViewRequest_Struct);
@@ -174,8 +173,6 @@ IN(OP_LFGCommand, LFG_Struct);
 IN(OP_GMGoto, GMSummon_Struct);
 IN(OP_TraderShop, TraderClick_Struct);
 IN(OP_ShopRequest, Merchant_Click_Struct);
-IN(OP_Bazaar, BazaarSearch_Struct);
-//alt:IN(OP_Bazaar, BazaarWelcome_Struct);		//alternate structure for OP_Bazaar
 IN(OP_ShopPlayerBuy, Merchant_Sell_Struct);
 IN(OP_ShopPlayerSell, Merchant_Purchase_Struct);
 INr(OP_ShopEnd);		//?
@@ -379,8 +376,6 @@ OUTv(OP_ReadBook, BookText_Struct);
 OUTv(OP_SendAATable, SendAA_Struct);
 
 OUT(OP_AAAction, UseAA_Struct);
-OUT(OP_Bazaar, BazaarReturnDone_Struct);
-//alt:OUT(OP_Bazaar, BazaarWelcome_Struct);
 OUT(OP_Buff, SpellBuffFade_Struct);
 OUT(OP_ClickObject, ClickObject_Struct);
 OUT(OP_ClientUpdate, PlayerPositionUpdateServer_Struct);

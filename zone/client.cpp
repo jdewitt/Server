@@ -302,9 +302,6 @@ Client::~Client() {
 	if(Trader)
 		database.DeleteTraderItem(this->CharacterID());
 
-	if(Buyer)
-		ToggleBuyerMode(false);
-
 	if(conn_state != ClientConnectFinished) {
 		LogFile->write(EQEMuLog::Debug, "Client '%s' was destroyed before reaching the connected state:", GetName());
 		ReportConnectingState();

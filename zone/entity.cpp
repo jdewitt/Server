@@ -2269,9 +2269,6 @@ void EntityList::SendTraders(Client *client)
 		if (trader->IsTrader())
 			client->SendTraderPacket(trader);
 
-		if (trader->IsBuyer())
-			client->SendBuyerPacket(trader);
-
 		++it;
 	}
 }

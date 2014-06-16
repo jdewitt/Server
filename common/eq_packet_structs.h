@@ -2666,31 +2666,6 @@ struct OldBazaarSearchResults_Struct {
 /*076*/
 
 };
-// Barter/Buyer
-//
-//
-enum {
-	Barter_BuyerSearch = 0,
-	Barter_SellerSearch = 1,
-	Barter_BuyerModeOn = 2,
-	Barter_BuyerModeOff = 3,
-	Barter_BuyerItemUpdate = 5,
-	Barter_BuyerItemRemove = 6,
-	Barter_SellItem = 7,
-	Barter_SellerTransactionComplete = 8,
-	Barter_BuyerTransactionComplete = 9,
-	Barter_BuyerInspectBegin = 10,
-	Barter_BuyerInspectEnd = 11,
-	Barter_BuyerAppearance = 12,
-	Barter_BuyerInspectWindow = 13,
-	Barter_BarterItemInspect = 14,
-	Barter_SellerBrowsing = 15,
-	Barter_BuyerSearchResults = 16,
-	Barter_Welcome = 17,
-	Barter_WelcomeMessageUpdate = 19,
-	Barter_BuyerItemInspect = 21,
-	Barter_Unknown23 = 23
-};
 
 struct BuyerWelcomeMessageUpdate_Struct {
 /*000*/	uint32	Action;
@@ -2717,26 +2692,11 @@ struct	BuyerItemSearchResults_Struct {
 	BuyerItemSearchResultEntry_Struct	Results[MAX_BUYER_ITEMSEARCH_RESULTS];
 };
 
-struct BarterSearchRequest_Struct {
-	uint32	Action;
-	char	SearchString[64];
-	uint32	SearchID;
-};
-
 struct BuyerItemSearchLinkRequest_Struct {
 /*000*/	uint32	Action;	// 0x00000015
 /*004*/	uint32	ItemID;
 /*008*/	uint32	Unknown008;
 /*012*/	uint32	Unknown012;
-};
-
-struct BarterItemSearchLinkRequest_Struct {
-/*000*/	uint32	Action;	// 0x0000000E
-/*004*/	uint32	SearcherID;
-/*008*/	uint32	Unknown008;
-/*012*/	uint32	Unknown012;
-/*016*/	uint32	ItemID;
-/*020*/	uint32	Unknown020;
 };
 
 struct BuyerInspectRequest_Struct {

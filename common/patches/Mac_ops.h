@@ -127,9 +127,6 @@ E(OP_Assist);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
-E(OP_Barter);
-E(OP_Bazaar);
-E(OP_BazaarInspect);
 E(OP_BecomeCorpse);
 E(OP_BuffCreate);
 E(OP_BuffFadeMsg);
