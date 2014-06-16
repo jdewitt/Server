@@ -2326,7 +2326,6 @@ ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_QueryResponseThing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RandomReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
