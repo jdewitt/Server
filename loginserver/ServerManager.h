@@ -59,12 +59,10 @@ public:
 	*/
 	void SendOldUserToWorldRequest(const char* ServerIP, unsigned int client_account_id);
 
-
 	/**
 	* Creates a server list packet for the client.
 	*/
 	EQApplicationPacket *CreateServerListPacket(Client *c);
-
 	
 	/**
 	* Creates a server list packet for the older client.
@@ -98,4 +96,3 @@ private:
 };
 
 #endif
-
