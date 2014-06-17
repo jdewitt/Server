@@ -290,6 +290,7 @@ public:
 	void	HPTick();
 	void	SetGM(bool toggle);
 	void	SetPVP(bool toggle);
+	void	SetAnon(bool toogle);
 
 	inline bool	GetPVP()	const { return zone->GetZoneID() == 77 ? true : (m_pp.pvp != 0); }
 	inline bool	GetGM()		const { return m_pp.gm != 0; }

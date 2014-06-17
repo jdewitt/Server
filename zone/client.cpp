@@ -1778,6 +1778,13 @@ void Client::SetGM(bool toggle) {
 	UpdateWho();
 }
 
+void Client::SetAnon(bool toggle) {
+	m_pp.anon = toggle ? 1 : 0;
+	SendAppearancePacket(AT_Anon, m_pp.anon);
+	Save();
+	UpdateWho();
+}
+
 void Client::ReadBook(BookRequest_Struct *book) {
 	char *txtfile = book->txtfile;
 
@@ -2891,6 +2898,10 @@ void Client::SetHideMe(bool flag)
 
 	if(gmhideme)
 	{
+		if(!GetGM())
+			SetGM(true);
+		if(!GetAnon())
+			SetAnon(true);
 		database.SetHideMe(AccountID(),true);
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
@@ -2898,6 +2909,7 @@ void Client::SetHideMe(bool flag)
 	}
 	else
 	{
+		SetAnon(false);
 		database.SetHideMe(AccountID(),false);
 		CreateSpawnPacket(&app);
 		trackable = true;
