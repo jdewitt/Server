@@ -127,10 +127,6 @@ E(OP_Assist);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
-E(OP_BecomeCorpse);
-E(OP_BuffCreate);
-E(OP_BuffFadeMsg);
-E(OP_CameraEffect);
 E(OP_ChangeSize);
 E(OP_ClearNPCMarks);
 E(OP_ClearSurname);

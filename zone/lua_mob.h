@@ -295,9 +295,6 @@ public:
 	void SetRace(int in);
 	void SetGender(int in);
 	void SendIllusionPacket(luabind::object illusion);
-	void CameraEffect(uint32 duration, uint32 intensity);
-	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c);
-	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global);
 	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,
 		uint32 unk020);
 	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,

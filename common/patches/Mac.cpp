@@ -2193,10 +2193,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
-ENCODE(OP_BecomeCorpse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_BuffCreate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_BuffFadeMsg) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CameraEffect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearNPCMarks) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }

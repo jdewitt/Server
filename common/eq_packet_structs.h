@@ -1266,13 +1266,6 @@ struct Death_Struct
 /*015*/ uint8   unknown015[3];
 };
 
-struct BecomeCorpse_Struct {
-	uint32	spawn_id;
-	float y;
-	float x;
-	float z;
-};
-
 /*
 **  Emu Spawn position update
 **	Struct sent from server->client to update position of
@@ -2692,29 +2685,6 @@ struct	BuyerItemSearchResults_Struct {
 	BuyerItemSearchResultEntry_Struct	Results[MAX_BUYER_ITEMSEARCH_RESULTS];
 };
 
-struct BuyerItemSearchLinkRequest_Struct {
-/*000*/	uint32	Action;	// 0x00000015
-/*004*/	uint32	ItemID;
-/*008*/	uint32	Unknown008;
-/*012*/	uint32	Unknown012;
-};
-
-struct BuyerInspectRequest_Struct {
-	uint32	Action;
-	uint32	BuyerID;
-	uint32	Approval;
-};
-
-struct BuyerBrowsing_Struct {
-	uint32	Action;
-	char	PlayerName[64];
-};
-
-struct BuyerRemoveItem_Struct {
-	uint32	Action;
-	uint32	BuySlot;
-};
-
 struct ServerSideFilters_Struct {
 uint8	clientattackfilters;	// 0) No, 1) All (players) but self, 2) All (players) but group
 uint8	npcattackfilters;		// 0) No, 1) Ignore NPC misses (all), 2) Ignore NPC Misses + Attacks (all but self), 3) Ignores NPC Misses + Attacks (all but group)
@@ -3566,26 +3536,6 @@ enum {	//bandolier actions
 	BandolierSet = 2
 };
 
-struct BandolierCreate_Struct {
-/*00*/	uint32	action;	//0 for create
-/*04*/	uint8	number;
-/*05*/	char	name[32];
-/*37*/	uint16	unknown37;	//seen 0x93FD
-/*39*/	uint8	unknown39;	//0
-};
-
-struct BandolierDelete_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
-};
-
-struct BandolierSet_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
-};
-
 struct Arrow_Struct {
 /*000*/	uint32	type;		//unsure on name, seems to be 0x1, dosent matter
 /*005*/	uint8	unknown004[12];
@@ -3634,11 +3584,6 @@ struct GroupInvite_Struct {
 	char invitee_name[64];
 	char inviter_name[64];
 //	uint8	unknown128[65];
-};
-
-struct BuffFadeMsg_Struct {
-	uint32 color;
-	char msg[1];
 };
 
 struct UseAA_Struct {
