@@ -6854,12 +6854,6 @@ void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 {
-	mlog(AA__IN, "Received OP_AAAction");
-	mpkt(AA__IN, app);
-
-		char* packet_dump = "AAAction_IN.txt";
-		FileDumpPacketHex(packet_dump, app);
-
 		if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
 		{
 			if(m_epp.perAA == 0)
@@ -6906,6 +6900,12 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		}
 		else if(strncmp((char *)app->pBuffer,"activate ",9) == 0)
 		{
+			if(GetBoatNPCID() > 0)
+			{
+				Message(15, "You are too distracted to cast a spell now!");
+				return;
+			}
+
 			int aa = atoi((char *)&app->pBuffer[9]);
 			AA_Action *action = (AA_Action *)app->pBuffer;
 

@@ -1290,8 +1290,8 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			SetMaterial(dst_slot_id,src_inst->GetItem()->ID);
 		}
 		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) {
-			mlog(INVENTORY__ERROR, "Could not move entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
-			return 0; 
+			mlog(INVENTORY__ERROR, "Destination slot is not valid for item %s from slot %d to slot %d", src_inst->GetItem()->Name, src_slot_id, dst_slot_id);
+			return 0;
 		}
 		mlog(INVENTORY__SLOTS, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
