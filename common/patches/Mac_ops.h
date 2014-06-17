@@ -246,7 +246,6 @@ E(OP_PVPLeaderBoardRequest);
 E(OP_PVPStats);
 E(OP_QueryResponseThing);
 E(OP_RaidJoin);
-E(OP_RandomReply);
 E(OP_RecipeAutoCombine);
 E(OP_RecipeDetails);
 E(OP_RecipeReply);

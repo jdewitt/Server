@@ -204,7 +204,5 @@ void ErrorLog::LogPacket(eqLogType type, const char *data, size_t size)
 		fprintf(error_log, " | %s\n", ascii);
 		fflush(error_log);
 	}
-
 	log_mutex->unlock();
 }
-

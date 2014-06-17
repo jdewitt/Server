@@ -65,7 +65,6 @@ bool Client::Process()
 				Handle_SessionReady((const char*)app->pBuffer, app->Size());
 				break;
 			}
-
 		case OP_SessionLogin:
 			{
 				if(server.options.IsTraceOn())
@@ -82,15 +81,10 @@ bool Client::Process()
 					server_log->Log(log_network_error, "Login received but it is too small, discarding.");
 					break;
 				}
-
 				if(server.options.IsTraceOn())
 				{
 					server_log->Log(log_network, "Login received from client.");
 				}
-
-				if(version != cv_old)
-					Handle_Login((const char*)app->pBuffer, app->Size());
-				else
 					Handle_OldLogin((const char*)app->pBuffer, app->Size());
 				break;
 			}
@@ -111,7 +105,6 @@ bool Client::Process()
 				{
 					server_log->Log(log_network, "Server list request received from client.");
 				}
-
 				SendServerListPacket();
 				break;
 			}
@@ -122,7 +115,6 @@ bool Client::Process()
 					server_log->Log(log_network_error, "Play received but it is too small, discarding.");
 					break;
 				}
-
 				Handle_Play((const char*)app->pBuffer);
 				break;
 			}
@@ -133,11 +125,9 @@ bool Client::Process()
 				server_log->Log(log_network_error, "Recieved unhandled application packet from the client: %s.", dump);
 			}
 		}
-
 		delete app;
 		app = connection->PopPacket();
 	}
-
 	return true;
 }
 
@@ -168,42 +158,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 	status = cs_waiting_for_login;
 
-	/**
-	* The packets are mostly the same but slightly different between the two versions.
-	*/
-	if(version == cv_sod)
-	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
-		outapp->pBuffer[0] = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
-
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
-	}
-	else if (version == cv_titanium)
-	{
-		const char *msg = "ChatMessage";
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
-		outapp->pBuffer[0] = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
-		strcpy((char*)(outapp->pBuffer + 15), msg);
-
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
-	}
-	else if(version == cv_old)
+	if (version == cv_old)
 	{
 		//Special logic for old streams.
 		char buf[20];
@@ -215,10 +170,8 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 	}
 }
 
-
 void Client::Handle_SessionLogin(const char* data, unsigned int size)
 {
-
 	if(version != cv_old)
 	{
 		//Not old client, gtfo haxxor!
@@ -294,9 +247,12 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 
 	if(result)
 	{
-
 		if(!sentsessioninfo)
 		{
+			if (server.options.IsLoggedOn())
+			{
+				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "OSX Logged in Success");
+			}
 			server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 			GenerateKey();
 			account_id = d_account_id;
@@ -317,20 +273,11 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 			delete outapp2;
 			sentsessioninfo = true;
 		}
-
 	}
 	else
 	{
 		//FatalError("Invalid username or password.");
 	}
-
-	return;
-
-}
-
-void Client::Handle_Login(const char* data, unsigned int size)
-{
-	//Login method not supported in PEQMac.
 	return;
 }
 
@@ -430,6 +377,10 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 
 	if(result)
 	{
+		if (server.options.IsLoggedOn())
+		{
+			server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "PC Logged in Success");
+		}
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
@@ -456,58 +407,23 @@ void Client::Handle_Play(const char* data)
 		server_log->Log(log_client_error, "Client sent a play request when they either were not logged in, discarding.");
 		return;
 	}
-
-	if(version == cv_old)
+	if(data)
 	{
-		if(data)
-		{
 		server.SM->SendOldUserToWorldRequest(data, account_id);
-		}
-	}
-	else
-	{
-		const PlayEverquestRequest_Struct *play = (const PlayEverquestRequest_Struct*)data;
-		unsigned int server_id_in = (unsigned int)play->ServerNumber;
-		unsigned int sequence_in = (unsigned int)play->Sequence;
-
-		if(server.options.IsTraceOn())
-		{
-			server_log->Log(log_network, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
-		}
-
-		this->play_server_id = (unsigned int)play->ServerNumber;
-		play_sequence_id = sequence_in;
-		play_server_id = server_id_in;
-		server.SM->SendUserToWorldRequest(server_id_in, account_id);
 	}
 }
 
 void Client::SendServerListPacket()
 {
-	if(version == cv_old)
+	EQApplicationPacket *outapp = server.SM->CreateOldServerListPacket(this);
+
+	if(server.options.IsDumpOutPacketsOn())
 	{
-		EQApplicationPacket *outapp = server.SM->CreateOldServerListPacket(this);
-
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
+		DumpPacket(outapp);
 	}
-	else
-	{
-		EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
 
-		if(server.options.IsDumpOutPacketsOn())
-		{
-			DumpPacket(outapp);
-		}
-
-		connection->QueuePacket(outapp);
-		delete outapp;
-	}
+	connection->QueuePacket(outapp);
+	delete outapp;
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
@@ -540,4 +456,3 @@ void Client::GenerateKey()
 		count++;
 	}
 }
-

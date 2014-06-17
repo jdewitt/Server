@@ -87,7 +87,6 @@ bool WorldServer::Process()
 				{
 					server_log->Log(log_network_trace, "New Login Info Recieved.");
 				}
-
 				ServerNewLSInfo_Struct *info = (ServerNewLSInfo_Struct*)app->pBuffer;
 				Handle_NewLSInfo(info);
 				break;
@@ -105,7 +104,6 @@ bool WorldServer::Process()
 				{
 					server_log->Log(log_network_trace, "World Server Status Recieved.");
 				}
-
 				ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct*)app->pBuffer;
 				Handle_LSStatus(ls_status);
 				break;
@@ -167,7 +165,6 @@ bool WorldServer::Process()
 								c->FatalError("That server is full.");
 								break;
 						}
-
 						server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
 						EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestRequest, 17);
 						strncpy((char*) &outapp->pBuffer[1], c->GetKey().c_str(), c->GetKey().size());
@@ -220,7 +217,6 @@ bool WorldServer::Process()
 					{
 						DumpPacket(outapp);
 					}
-
 					c->SendPlayResponse(outapp);
 					delete outapp;
 				}
@@ -259,7 +255,6 @@ bool WorldServer::Process()
 				server_log->Log(log_network_error, "Recieved application packet from server that had an unknown operation code 0x%.4X.", app->opcode);
 			}
 		}
-
 		delete app;
 		app = nullptr;
 	}
@@ -576,4 +571,3 @@ void WorldServer::SendClientAuth(unsigned int ip, string account, string key, un
 	}
 	delete outapp;
 }
-

@@ -98,6 +98,12 @@ int main()
 		server.options.LoginFails(true);
 	}
 
+	//Parse IP login access log option. For cross checking account/IP "anti cheat/box record"
+	if (server.config->GetVariable("options", "good_loginIP_log").compare("TRUE") == 0)
+	{
+		server.options.LoginGood(true);
+	}
+
 	//Parse unregistered allowed option.
 	if(server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
 	{
@@ -284,7 +290,6 @@ int main()
 		server.SM->Process();
 		Sleep(100);
 	}
-
 	server_log->Log(log_debug, "Server Shutdown.");
 	server_log->Log(log_debug, "Client Manager Shutdown.");
 	delete server.CM;
@@ -298,4 +303,3 @@ int main()
 	delete server_log;
 	return 0;
 }
-

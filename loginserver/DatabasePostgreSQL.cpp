@@ -231,4 +231,3 @@ void DatabasePostgreSQL::UpdateWorldRegistration(unsigned int id, string long_na
 }
 
 #endif
-

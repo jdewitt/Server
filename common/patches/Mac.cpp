@@ -1953,7 +1953,10 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   	}
   	else
   	{ 
-  		thejuice->Charges = 1;
+		if(inst->GetMerchantCount() > 1)
+			thejuice->Charges = 0;
+		else
+  			thejuice->Charges = 1;
   
   		thejuice->equipSlot = inst->GetMerchantSlot();
 		thejuice->Price = inst->GetPrice();  
@@ -2312,7 +2315,6 @@ ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_QueryResponseThing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RandomReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }

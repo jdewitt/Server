@@ -134,7 +134,6 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 			return true;
 		}
 	}
-
 	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
@@ -203,14 +202,12 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 						return true;
 					}
 				}
-
 				server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
-
 	server_log->Log(log_database, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
@@ -367,4 +364,3 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 }
 
 #endif
-
