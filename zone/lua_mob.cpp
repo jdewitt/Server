@@ -1589,21 +1589,6 @@ void Lua_Mob::SendIllusionPacket(luabind::object illusion) {
 		beard, aa_title, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
-	Lua_Safe_Call_Void();
-	self->CameraEffect(duration, intensity);
-}
-
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c) {
-	Lua_Safe_Call_Void();
-	self->CameraEffect(duration, intensity, c);
-}
-
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global) {
-	Lua_Safe_Call_Void();
-	self->CameraEffect(duration, intensity, c, global);
-}
-
 void Lua_Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020) {
 	Lua_Safe_Call_Void();
 	self->SendSpellEffect(effect_id, duration, finish_delay, zone_wide, unk020);
@@ -2105,9 +2090,6 @@ luabind::scope lua_register_mob() {
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
 		.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
 		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::object))&Lua_Mob::SendIllusionPacket)
-		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
-		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
-		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool))&Lua_Mob::SendSpellEffect)
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)

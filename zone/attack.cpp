@@ -1433,15 +1433,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	
 	SendLogoutPackets();
 
-	//make our become corpse packet, and queue to ourself before OP_Death.
-	EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
-	BecomeCorpse_Struct* bc = (BecomeCorpse_Struct*)app2.pBuffer;
-	bc->spawn_id = GetID();
-	bc->x = GetX();
-	bc->y = GetY();
-	bc->z = GetZ();
-	QueuePacket(&app2);
-
 	// make death packet
 	EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app.pBuffer;
@@ -1616,9 +1607,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 			entity_list.AddCorpse(new_corpse, GetID());
 			SetID(0);
-
-			//send the become corpse packet to everybody else in the zone.
-			entity_list.QueueClients(this, &app2, true);
 
 			LeftCorpse = true;
 		}

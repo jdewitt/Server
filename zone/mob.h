@@ -453,7 +453,6 @@ public:
 	inline const uint32 LastChange() const { return pLastChange; }
 
 	//Quest
-	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
 	//Other Packet

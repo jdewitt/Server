@@ -3516,15 +3516,6 @@ void Client::Sacrifice(Client *caster)
 						SetEXP(GetEXP()-exploss, GetAAXP());
 						SendLogoutPackets();
 
-						//make our become corpse packet, and queue to ourself before OP_Death.
-						EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
-						BecomeCorpse_Struct* bc = (BecomeCorpse_Struct*)app2.pBuffer;
-						bc->spawn_id = GetID();
-						bc->x = GetX();
-						bc->y = GetY();
-						bc->z = GetZ();
-						QueuePacket(&app2);
-
 						// make death packet
 						EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
 						Death_Struct* d = (Death_Struct*)app.pBuffer;
@@ -3552,7 +3543,6 @@ void Client::Sacrifice(Client *caster)
 							Corpse *new_corpse = new Corpse(this, 0);
 							entity_list.AddCorpse(new_corpse, GetID());
 							SetID(0);
-							entity_list.QueueClients(this, &app2, true);
 						}
 						Save();
 						GoToDeath();

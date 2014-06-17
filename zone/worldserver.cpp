@@ -1497,15 +1497,6 @@ void WorldServer::Process() {
 			RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
 			break;
 		}
-		case ServerOP_CameraShake:
-		{
-			if(zone)
-			{
-					ServerCameraShake_Struct *scss = (ServerCameraShake_Struct*)pack->pBuffer;
-					entity_list.CameraEffect(scss->duration, scss->intensity);
-			}
-			break;
-		}
 		case ServerOP_QueryServGeneric:
 		{
 			pack->SetReadPosition(8);

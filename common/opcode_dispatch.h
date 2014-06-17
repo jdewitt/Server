@@ -278,7 +278,6 @@ OUTz(OP_FinishWindow2);
 //OUTz(OP_TradeSkillCombine);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
-OUTv(OP_BuffFadeMsg, BuffFadeMsg_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
 OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);
@@ -302,7 +301,6 @@ OUT(OP_Animation, Animation_Struct);
 OUT(OP_BecomeTrader, BecomeTrader_Struct);
 OUT(OP_BeginCast, BeginCast_Struct);
 OUT(OP_Charm, Charm_Struct);
-OUT(OP_CameraEffect, Camera_Struct);
 OUT(OP_ClickObjectAction, ClickObjectAction_Struct);
 OUT(OP_ConsentResponse, ConsentResponse_Struct);
 //OUT(OP_ConsumeAmmo, MoveItem_Struct);

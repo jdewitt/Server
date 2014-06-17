@@ -4562,12 +4562,6 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 	if(send_message)
 	{
 		const char *fadetext = spells[spell_id].spell_fades;
-		outapp = new EQApplicationPacket(OP_BuffFadeMsg, sizeof(BuffFadeMsg_Struct) + strlen(fadetext));
-		BuffFadeMsg_Struct *bfm = (BuffFadeMsg_Struct *) outapp->pBuffer;
-		bfm->color = MT_Spells;
-		memcpy(bfm->msg, fadetext, strlen(fadetext));
-		QueuePacket(outapp);
-		safe_delete(outapp);
 	}
 
 }
@@ -5104,10 +5098,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	{
 		outapp = new EQApplicationPacket(OP_TargetBuffs, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
 	}
-	else
-	{
-		outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
-	}
+
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
 	buff->entity_id = GetID();
 	buff->count = count;

@@ -1634,35 +1634,6 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 	safe_delete(outapp);
 }
 
-void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global) {
-
-
-	if(global == true)
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
-		memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
-		ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
-		scss->duration = duration;
-		scss->intensity = intensity;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-		return;
-	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
-	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
-	cs->duration = duration;	// Duration in milliseconds
-	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
-
-	if(c)
-		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	else
-		entity_list.QueueClients(this, outapp);
-
-	safe_delete(outapp);
-}
-
 void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, Client *c) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpellEffect, sizeof(SpellEffect_Struct));
