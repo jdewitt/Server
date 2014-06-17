@@ -125,7 +125,6 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 		}
 		++iter;
 	}
-
 	return nullptr;
 }
 
@@ -163,7 +162,6 @@ EQApplicationPacket* ServerManager::CreateOldServerListPacket(Client* c)
 		{
 			packet_size += servername.size() + 1 + (*iter)->GetRemoteIP().size() + 1 + sizeof(ServerListServerFlags_Struct);
 		}
-
 		server_count++;
 		++iter;
 	}
@@ -231,7 +229,6 @@ EQApplicationPacket* ServerManager::CreateOldServerListPacket(Client* c)
 				slsf->greenname = 0;
 			}
 		}
-
 		slsf->usercount = (*iter)->GetPlayersOnline();
 		data_ptr += sizeof(ServerListServerFlags_Struct);
 		++iter;
@@ -272,7 +269,6 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 		{
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetRemoteIP().size() + 24;
 		}
-
 		server_count++;
 		++iter;
 	}
@@ -373,7 +369,6 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 
 		++iter;
 	}
-
 	return outapp;
 }
 
@@ -453,7 +448,6 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 		{
 			return true;
 		}
-
 		++iter;
 	}
 	return false;
@@ -480,8 +474,6 @@ void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServe
 			delete (*iter);
 			iter = world_servers.erase(iter);
 		}
-
 		++iter;
 	}
 }
-

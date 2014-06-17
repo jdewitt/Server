@@ -105,7 +105,6 @@ bool Encryption::Load(const char *name)
 	{
 		SetLastError(0);
 	}
-
 	return true;
 }
 
@@ -142,4 +141,3 @@ void *Encryption::GetSym(const char *name)
 		return nullptr;
 	}
 }
-

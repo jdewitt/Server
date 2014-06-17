@@ -23,4 +23,3 @@ char* Encrypt(const char* buffer, unsigned int bufferSize, unsigned int &outSize
 void _HeapDeleteCharBuffer(char *buffer);
 
 #endif
-

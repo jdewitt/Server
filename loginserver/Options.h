@@ -31,6 +31,7 @@ public:
 	Options() :
 		auto_account_create(false),
 		Login_Fails(false),
+		Login_Good(false),
 		allow_unregistered(true),
 		trace(false),
 		dump_in_packets(false),
@@ -57,9 +58,19 @@ public:
 	inline void LoginFails(bool b) { Login_Fails = b; }
 
 	/**
+	* Sets logging of failed logins.
+	*/
+	inline void LoginGood(bool b) { Login_Good = b; }
+
+	/**
 	* Logs failed logins and reason.
 	*/
 	inline bool IsLoginFailsOn() const { return Login_Fails; }
+
+	/**
+	* Logs successful logins.
+	*/
+	inline bool IsLoggedOn() const { return Login_Good; }
 
 	/**
 	* Sets allow_unregistered.
@@ -167,11 +178,6 @@ public:
 	inline void AccountAccessLogTable(std::string t) { access_log_table = t; }
 
 	/**
-	* Sets world account table.
-	*/
-	//inline void WorldAccountTable(std::string t) { world_account_table = t; }
-
-	/**
 	* Return the value of local_network.
 	*/
 	inline std::string GetAccountTable() const { return account_table; }
@@ -219,6 +225,7 @@ public:
 private:
 	bool auto_account_create;
 	bool Login_Fails;
+	bool Login_Good;
 	bool allow_unregistered;
 	bool trace;
 	bool world_trace;
@@ -238,4 +245,3 @@ private:
 };
 
 #endif
-

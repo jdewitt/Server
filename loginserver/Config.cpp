@@ -36,7 +36,6 @@ std::string Config::GetVariable(std::string title, std::string parameter)
 			return arg_iter->second;
 		}
 	}
-
 	return std::string("");
 }
 
@@ -51,7 +50,6 @@ void Config::Parse(const char *file_name)
 		server_log->Log(log_error, "Config::Parse(), file_name passed was null.");
 		return;
 	}
-
 	vars.clear();
 	FILE *input = fopen(file_name, "r");
 	if(input)
@@ -87,7 +85,6 @@ void Config::Parse(const char *file_name)
 					{
 						first = false;
 					}
-
 					title += (*iter);
 					++iter;
 				}
@@ -192,7 +189,6 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 					tokens.push_back(lexeme);
 					lexeme.clear();
 				}
-
 				lexeme.append((const char *)&c, 1);
 				tokens.push_back(lexeme);
 				lexeme.clear();
@@ -203,7 +199,6 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 				lexeme.append((const char *)&c, 1);
 			}
 		}
-
 		c = fgetc(input);
 	}
 
@@ -212,4 +207,3 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 		tokens.push_back(lexeme);
 	}
 }
-

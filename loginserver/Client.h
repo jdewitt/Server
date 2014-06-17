@@ -31,8 +31,6 @@ using namespace std;
 
 enum ClientVersion
 {
-	cv_titanium,
-	cv_sod,
 	cv_old
 };
 
@@ -75,11 +73,6 @@ public:
 	* Sends our reply to session ready packet.
 	*/
 	void Handle_SessionReady(const char* data, unsigned int size);
-
-	/**
-	* Verifies login and send a reply.
-	*/
-	void Handle_Login(const char* data, unsigned int size);
 
 		/**
 	* Verifies login and send a reply for Mac clients.
@@ -169,4 +162,3 @@ private:
 };
 
 #endif
-
