@@ -969,13 +969,14 @@ bool ZoneDatabase::NoRentExpired(const char* name){
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "Select (UNIX_TIMESTAMP(NOW())-timelaston) from character_ where name='%s'", name), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT (UNIX_TIMESTAMP(NOW())-timelaston) from character_ where name='%s'", name), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 seconds = atoi(row[0]);
 			mysql_free_result(result);
-			return (seconds>1800);
+			if(seconds>1800)
+				return true;
 		}
 	}
 	return false;

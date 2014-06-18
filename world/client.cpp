@@ -150,7 +150,7 @@ char char_name[32]= { 0 };
 void Client::SendExpansionInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	eis->Expansions = (RuleI(World, ExpansionSettings));
+	eis->Expansions = GetExpansion();
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -265,6 +265,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			safe_delete(pack);
 		}
 
+		expansion = database.GetExpansion(cle->AccountID());
 
 		if(ClientVersionBit == 1)
 		{		

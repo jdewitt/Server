@@ -68,6 +68,8 @@ public:
 	inline const char*	GetCharName()		{ return char_name; }
 	inline ClientListEntry* GetCLE()		{ return cle; }
 	inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
+	inline uint16		GetExpansion()		{ return expansion; }
+
 private:
 
 	uint32	ip;
@@ -104,6 +106,8 @@ private:
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
+
+	uint16	expansion;
 };
 
 bool CheckCharCreateInfo(CharCreate_Struct *cc);

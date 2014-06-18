@@ -2078,6 +2078,30 @@ bool retval=false;
 	return retval;
 }
 
+uint16 Database::GetExpansion(uint32 acctid)
+{
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT expansion FROM account WHERE id=%i",acctid), errbuf, &result)) {
+		safe_delete_array(query);
+		if (mysql_num_rows(result) == 1)
+		{
+			row = mysql_fetch_row(result);
+			uint16 expansion = atoi(row[0]);
+			mysql_free_result(result);
+			return expansion;
+		}
+	}
+	else
+	{
+		safe_delete_array(query);
+	}
+	return 0;
+}
+
 uint8 Database::GetAgreementFlag(uint32 acctid)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];

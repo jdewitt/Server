@@ -604,7 +604,7 @@ void SpawnConditionManager::Process() {
 				if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
 					//this event has been triggered.
 					//execute the event
-					uint8 min = cevent.next.minute + 3; // Need to add a buffer, this is 9 real time seconds.
+					uint8 min = cevent.next.minute + RuleI(Zone, SpawnEventMin);
 					if(!cevent.strict || (cevent.strict && tod.minute < min && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
 						ExecEvent(cevent, true);
 					else

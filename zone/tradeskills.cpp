@@ -633,7 +633,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	uint16 user_skill = GetSkill(spec->tradeskill);
 	float chance = 0.0;
-	float skillup_modifier = 0.0;
+	float skillup_modifier = RuleR(Skill, TradeskillSkillUpModifier);
 	int16 thirdstat = 0;
 	int16 stat_modifier = 15;
 	uint16 success_modifier = 0;
@@ -655,17 +655,17 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	case SkillAlchemy:
 	case SkillJewelryMaking:
 	case SkillPottery:
-		skillup_modifier = 4;
+		skillup_modifier += 3;
 		break;
 	case SkillBaking:
 	case SkillBrewing:
-		skillup_modifier = 3;
+		skillup_modifier += 2;
 		break;
 	case SkillResearch:
-		skillup_modifier = 1;
+		skillup_modifier += 0.01;
 		break;
 	default:
-		skillup_modifier = 2;
+		skillup_modifier += 1;
 		break;
 	}
 
