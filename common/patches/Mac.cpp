@@ -2198,7 +2198,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 
 ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ClientReady) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CloseContainer) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Command) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ConfirmDelete) { ENCODE_FORWARD(OP_Unknown); }
@@ -2274,9 +2273,6 @@ ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LockoutTimerInfo) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LoginComplete) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LoginUnknown1) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LoginUnknown2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobEnduranceUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobManaUpdate) { ENCODE_FORWARD(OP_Unknown); }
@@ -2354,13 +2350,7 @@ ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponUnequip2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Weblink) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_World_Client_CRC1) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_World_Client_CRC2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WorldClientReady) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WorldComplete) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WorldLogout) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WorldObjectsSent) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WorldUnknown001) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZoneComplete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZonePlayerToBind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ZoneServerReady) { ENCODE_FORWARD(OP_Unknown); }

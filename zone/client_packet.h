@@ -14,7 +14,6 @@
 	void Handle_Connect_OP_WearChange(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientError(const EQApplicationPacket *app);
-	void Handle_Connect_OP_ClientReady(const EQApplicationPacket *app);
 	void Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app);
 	void Handle_Connect_OP_TGB(const EQApplicationPacket *app);
 	void Handle_OP_ClientUpdate(const EQApplicationPacket *app);

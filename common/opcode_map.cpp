@@ -257,9 +257,7 @@ void load_opcode_names()
 	opcode_map[0x00eb]="LiveOP_NewZone";
 	opcode_map[0x00fd]="LiveOP_ReqClientSpawn";
 	opcode_map[0x012F]="LiveOP_SpawnAppearance";
-	opcode_map[0x0086]="LiveOP_ClientReady";
 	opcode_map[0x0086]="LiveOP_ZoneComplete";
-	opcode_map[0x02db]="LiveOP_LoginComplete";
 	opcode_map[0x0195]="LiveOP_ApproveWorld";
 	opcode_map[0x035f]="LiveOP_LogServer";
 	opcode_map[0x01b2]="LiveOP_MOTD";
@@ -272,8 +270,6 @@ void load_opcode_names()
 	opcode_map[0x005d]="LiveOP_GuildsList";
 	opcode_map[0x0125]="LiveOP_ApproveName";
 	opcode_map[0x0261]="LiveOP_EnterWorld";
-	opcode_map[0x015a]="LiveOP_World_Client_CRC1";
-	opcode_map[0x015e]="LiveOP_World_Client_CRC2";
 	opcode_map[0x0269]="LiveOP_SetChatServer";
 	opcode_map[0x0264]="LiveOP_ZoneServerInfo";
 	opcode_map[0x012c]="LiveOP_WearChange";
