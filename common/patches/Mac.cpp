@@ -2197,7 +2197,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 }
 
 ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ClearNPCMarks) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ClientReady) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CloseContainer) { ENCODE_FORWARD(OP_Unknown); }
@@ -2207,7 +2206,6 @@ ENCODE(OP_ConsentDeny) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CorpseDrop) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CrashDump) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_CustomTitles) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_DelegateAbility) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DenyResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
@@ -2238,7 +2236,6 @@ ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupRoles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildBank) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
@@ -2280,7 +2277,6 @@ ENCODE(OP_LockoutTimerInfo) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoginComplete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoginUnknown1) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoginUnknown2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MarkNPC) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobEnduranceUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobManaUpdate) { ENCODE_FORWARD(OP_Unknown); }

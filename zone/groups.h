@@ -54,7 +54,6 @@ public:
 	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
 	void	AddMember(const char* NewMemberName);
 	void	SendUpdate(uint32 type,Mob* member);
-	void	SendLeadershipAAUpdate();
 	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
 	bool	DelMemberOOZ(const char *Name);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
@@ -89,35 +88,7 @@ public:
 	void	BalanceHP(int32 penalty, int32 range = 0, Mob* caster = nullptr);
 	void	BalanceMana(int32 penalty, int32 range = 0, Mob* caster = nullptr);
 	void	HealGroup(uint32 heal_amt, Mob* caster, int32 range = 0);
-	void	MarkNPC(Mob* Target, int Number);
 	int8	GetNumberNeedingHealedInGroup(int8 hpr, bool includePets);
-	void	DelegateMainTank(const char *NewMainAssistName, uint8 toggle = 0);
-	void	DelegateMainAssist(const char *NewMainAssistName, uint8 toggle = 0);
-	void	DelegatePuller(const char *NewMainAssistName, uint8 toggle = 0);
-	void	UnDelegateMainTank(const char *OldMainAssistName, uint8 toggle = 0);
-	void	UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle = 0);
-	void	UnDelegatePuller(const char *OldMainAssistName, uint8 toggle = 0);
-	bool	IsNPCMarker(Client *c);
-	bool	HasRole(Mob *m, uint8 Role);
-	void	DelegateMarkNPC(const char *NewNPCMarkerName);
-	void	UnDelegateMarkNPC(const char *OldNPCMarkerName);
-	void	NotifyMainTank(Client *c, uint8 toggle = 0);
-	void	NotifyMainAssist(Client *c, uint8 toggle = 0);
-	void	NotifyPuller(Client *c, uint8 toggle = 0);
-	void	NotifyMarkNPC(Client *c);
-	inline	uint32 GetNPCMarkerID() { return NPCMarkerID; }
-	void	SetMainTank(const char *NewMainTankName);
-	void	SetMainAssist(const char *NewMainAssistName);
-	void	SetPuller(const char *NewPullerName);
-	const char *GetMainTankName() { return MainTankName.c_str(); }
-	const char *GetMainAssistName() { return MainAssistName.c_str(); }
-	const char *GetPullerName() { return PullerName.c_str(); }
-	void	SetNPCMarker(const char *NewNPCMarkerName);
-	void	UnMarkNPC(uint16 ID);
-	void	SendMarkedNPCsToMember(Client *c, bool Clear = false);
-	inline int GetLeadershipAA(int AAID) { return LeaderAbilities.ranks[AAID]; }
-	void	ClearAllNPCMarks();
-	void	QueueHPPacketsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
 
@@ -129,17 +100,6 @@ public:
 
 private:
 	Mob*	leader;
-	GroupLeadershipAA_Struct LeaderAbilities;
-	std::string	MainTankName;
-	std::string	MainAssistName;
-	std::string	PullerName;
-	std::string	NPCMarkerName;
-	uint16	NPCMarkerID;
-	uint16	AssistTargetID;
-	uint16	TankTargetID;
-	uint16	PullerTargetID;
-	uint16	MarkedNPCs[MAX_MARKED_NPCS];
-
 };
 
 #endif

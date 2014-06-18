@@ -3433,26 +3433,6 @@ struct VoiceMacroOut_Struct {
 /*080*/	char	Unknown080[60];
 };
 
-struct DelegateAbility_Struct
-{
-/*000*/	uint32	DelegateAbility;
-/*004*/	uint32	MemberNumber;
-/*008*/	uint32	Action;
-/*012*/	uint32	Unknown012;
-/*016*/	uint32	Unknown016;
-/*020*/	uint32	EntityID;
-/*024*/	uint32	Unknown024;
-/*028*/	char	Name[64];
-};
-
-struct MarkNPC_Struct
-{
-/*00*/	uint32	TargetID;	// Target EntityID
-/*04*/	uint32	Number;		// Number to mark them with (1, 2 or 3)
-	// The following field is for SoD+
-/*08**/	char	Name[64];
-};
-
 struct RaidGeneral_Struct {
 /*00*/	uint32		action;	//=10
 /*04*/	char		player_name[64];	//should both be the player's name
