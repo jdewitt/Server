@@ -2168,13 +2168,13 @@ void EQOldStream::MakeEQPacket(EQProtocolPacket* app, bool ack_req)
 
 void EQOldStream::CheckTimers(void)
 {
+	//This is to avoid recursive locking.
 	bool setClosing = false;
-	/************ When did we last get a packet? ************/
-
 
 	/************ Should packets be resent? ************/
 	if (no_ack_received_timer->Check())
 	{
+		MOutboundQueue.lock();
 		EQOldPacket* pack;
 		MyQueue<EQOldPacket> q;
 		while(pack = ResendQueue.pop())
@@ -2185,32 +2185,34 @@ void EQOldStream::CheckTimers(void)
 			pack->dwSEQ = SACK.dwGSQ++;
 			if(pack->dwSEQ == 0xFFFF)
 			{
-			SACK.dwGSQ = 1;
-			pack->dwSEQ = 1;
+				SACK.dwGSQ = 1;
+				pack->dwSEQ = 1;
 			}
 			p->buffer = pack->ReturnPacket(&p->size);
-			MOutboundQueue.lock();
 			SendQueue.push(p);
-			MOutboundQueue.unlock();
 		}
 		while(pack = q.pop())
 		{
-			MOutboundQueue.lock();
 			ResendQueue.push(pack);
-			MOutboundQueue.unlock();
 			packetspending++;
 			if(++pack->resend_count > 15) {
-				_SendDisconnect();
-				return;
+				setClosing = true;
+				break;
 			}
 		}
 		no_ack_received_timer->Start(1000);
+		MOutboundQueue.unlock();
 	}
 	/************ Should a pure ack be sent? ************/
 	if (no_ack_sent_timer->Check() || keep_alive_timer->Check())
 	{
 		EQProtocolPacket app(0xFFFF, nullptr, 0);
 		MakeEQPacket(&app);
+	}
+
+	if(setClosing)
+	{
+		_SendDisconnect();
 	}
 }
 
