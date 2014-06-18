@@ -1564,7 +1564,6 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 
 	strcpy(gu->yourname, c->GetName());
 	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
-	gu->NPCMarkerID = g->GetNPCMarkerID();
 
 	int index = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name from group_id where groupid=%d", g->GetID()), errbuf, &result)) {
@@ -1586,12 +1585,6 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
-
-	g->NotifyMainAssist(c, 1);
-
-	g->NotifyMarkNPC(c);
-	g->SendMarkedNPCsToMember(c);
-
 }
 
 uint8 ZoneDatabase::GroupCount(uint32 groupid){

@@ -417,7 +417,6 @@ Mob::~Mob()
 	if(HadTempPets()){
 		entity_list.DestroyTempPets(this);
 	}
-	entity_list.UnMarkNPC(GetID());
 	safe_delete(PathingLOSCheckTimer);
 	safe_delete(PathingRouteUpdateTimerShort);
 	safe_delete(PathingRouteUpdateTimerLong);
@@ -1037,7 +1036,6 @@ void Mob::SendHPUpdate()
 
 	// send to people who have us targeted
 	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, BIT_AllClients);
-	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
 
 	// send to group
 	if(IsGrouped())

@@ -214,8 +214,6 @@
 	void Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app);
 	void Handle_OP_LFPCommand(const EQApplicationPacket *app);
 	void Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app);
-	void Handle_OP_ClearNPCMarks(const EQApplicationPacket *app);
-	void Handle_OP_DelegateAbility(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
@@ -224,7 +222,6 @@
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
 	void Handle_OP_GuildBank(const EQApplicationPacket *app);
-	void Handle_OP_GroupRoles(const EQApplicationPacket *app);
 	void Handle_OP_HideCorpse(const EQApplicationPacket *app);
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);

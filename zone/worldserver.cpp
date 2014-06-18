@@ -921,11 +921,6 @@ void WorldServer::Process() {
 					if(lc)
 						group->SetLeader(lc);
 
-					group->SetMainTank(MainTankName);
-					group->SetMainAssist(AssistName);
-					group->SetPuller(PullerName);
-					group->SetNPCMarker(NPCMarkerName);
-
 				}
 			}
 			break;

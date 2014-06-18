@@ -361,14 +361,6 @@ void EntityList::GroupProcess()
 #endif
 }
 
-void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPacket *app)
-{
-	auto it = group_list.begin();
-	while (it != group_list.end()) {
-		(*it)->QueueHPPacketsForNPCHealthAA(sender, app);
-		++it;
-	}
-}
 
 void EntityList::RaidProcess()
 {
@@ -3922,25 +3914,6 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 	c->QueuePacket(outapp);
 
 	safe_delete(outapp);
-}
-
-void EntityList::UnMarkNPC(uint16 ID)
-{
-	// Designed to be called from the Mob destructor, this method calls Group::UnMarkNPC for
-	// each group to remove the dead mobs entity ID from the groups list of NPCs marked via the
-	// Group Leadership AA Mark NPC ability.
-	//
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second) {
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-
-			if (g)
-				g->UnMarkNPC(ID);
-		}
-		++it;
-	}
 }
 
 uint32 EntityList::CheckNPCsClose(Mob *center)

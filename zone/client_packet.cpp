@@ -298,8 +298,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_LFGGetMatchesRequest] = &Client::Handle_OP_LFGGetMatchesRequest;
 	ConnectedOpcodes[OP_LFPCommand] = &Client::Handle_OP_LFPCommand;
 	ConnectedOpcodes[OP_LFPGetMatchesRequest] = &Client::Handle_OP_LFPGetMatchesRequest;
-	ConnectedOpcodes[OP_ClearNPCMarks] = &Client::Handle_OP_ClearNPCMarks;
-	ConnectedOpcodes[OP_DelegateAbility] = &Client::Handle_OP_DelegateAbility;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
@@ -309,7 +307,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
 	ConnectedOpcodes[OP_GuildBank] = &Client::Handle_OP_GuildBank;
-	ConnectedOpcodes[OP_GroupRoles] = &Client::Handle_OP_GroupRoles;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
@@ -8011,19 +8008,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			if(c)
 				group->SetLeader(c);
 
-			group->SetMainTank(MainTankName);
-			group->SetMainAssist(AssistName);
-			group->SetPuller(PullerName);
-			group->SetNPCMarker(NPCMarkerName);
-
 			//group->NotifyMainTank(this, 1);
 			//group->NotifyMainAssist(this, 1);
 			//group->NotifyPuller(this, 1);
-
-			// If we are the leader, force an update of our group AAs to other members in the zone, in case
-			// we purchased a new one while out-of-zone.
-			if(group->IsLeader(this))
-				group->SendLeadershipAAUpdate();
 
 		}
 		LFG = false;
@@ -9356,69 +9343,6 @@ void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app) {
 	return;
 }
 
-void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app) {
-
-	if(app->size != 0)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_ClearNPCMarks expected 0 got %i",
-					app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	Group *g = GetGroup();
-
-	if(g)
-		g->ClearAllNPCMarks();
-}
-
-void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(DelegateAbility_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DelegateAbility expected %i got %i",
-					sizeof(DelegateAbility_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	DelegateAbility_Struct* das = (DelegateAbility_Struct*)app->pBuffer;
-
-	Group *g = GetGroup();
-
-	if(!g) return;
-
-	switch(das->DelegateAbility)
-	{
-		case 0:
-		{
-			g->DelegateMainAssist(das->Name);
-			break;
-		}
-		case 1:
-		{
-			g->DelegateMarkNPC(das->Name);
-			break;
-		}
-		case 2:
-		{
-			g->DelegateMainTank(das->Name);
-			break;
-		}
-		case 3:
-		{
-			g->DelegatePuller(das->Name);
-			break;
-		}
-		default:
-			break;
-	}
-}
-
 void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	if (app->size != sizeof(ApplyPoison_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_ApplyPoison, size=%i, expected %i", app->size, sizeof(ApplyPoison_Struct));
@@ -10085,51 +10009,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 			_log(GUILDS__BANK_ERROR, "Received unexpected guild bank action code %i from %s", Action, GetName());
 		}
-	}
-}
-
-void Client::Handle_OP_GroupRoles(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(GroupRole_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_GroupRoles, size=%i, expected %i", app->size, sizeof(GroupRole_Struct));
-		DumpPacket(app);
-		return;
-	}
-	GroupRole_Struct *grs = (GroupRole_Struct*)app->pBuffer;
-
-	Group *g = GetGroup();
-
-	if(!g)
-		return;
-
-	switch(grs->RoleNumber)
-	{
-		case 1: //Main Tank
-		{
-			if(grs->Toggle)
-				g->DelegateMainTank(grs->Name1, grs->Toggle);
-			else
-				g->UnDelegateMainTank(grs->Name1, grs->Toggle);
-			break;
-		}
-		case 2: //Main Assist
-		{
-			if(grs->Toggle)
-				g->DelegateMainAssist(grs->Name1, grs->Toggle);
-			else
-				g->UnDelegateMainAssist(grs->Name1, grs->Toggle);
-			break;
-		}
-		case 3: //Puller
-		{
-			if(grs->Toggle)
-				g->DelegatePuller(grs->Name1, grs->Toggle);
-			else
-				g->UnDelegatePuller(grs->Name1, grs->Toggle);
-			break;
-		}
-		default:
-			break;
 	}
 }
 
