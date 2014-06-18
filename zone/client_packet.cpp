@@ -8035,7 +8035,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		m_pp.z = zone->newzone_data.safe_z;
 	}
 
-	m_pp.expansions = RuleI(World, ExpansionSettings);
+	m_pp.expansions = database.GetExpansion(AccountID());
 
 	p_timers.SetCharID(CharacterID());
 	if(!p_timers.Load(&database)) {
@@ -8164,7 +8164,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	////////////////////////////////////////////////////////////
 	// Character Inventory Packet
-	if (loaditems) {//dont load if a length error occurs
+	//dont load if a length error occurs
+	if (loaditems) 
+	{
 		BulkSendItems();
 		BulkSendInventoryItems();
 
@@ -8191,16 +8193,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
-	//////////////////////////////////////
-	// Group Roles
-	//
-	//////////////////////////////////////
-	/*if(group){
-			group->NotifyMainTank(this, 1);
-			group->NotifyMainAssist(this, 1);
-			group->NotifyPuller(this, 1);
-	}*/
 
 	SetAttackTimer();
 

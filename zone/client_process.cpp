@@ -680,50 +680,8 @@ void Client::OnDisconnect(bool hard_disconnect) {
 //#ifdef ITEMCOMBINED
 void Client::BulkSendInventoryItems() {
 	// For future reference: Only the parent item needs to be sent..the ItemInst already contains child ItemInst information
+
 	int16 slot_id = 0;
-
-	// LINKDEAD TRADE ITEMS
-	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks -U
-	for(slot_id = 3000; slot_id <= 3007; slot_id++) {
-		ItemInst* inst = m_inv.PopItem(slot_id);
-		if(inst) {
-			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
-			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-			mlog(INVENTORY__ERROR, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
-			PutItemInInventory(free_slot_id, *inst, false);
-			database.SaveInventory(character_id, nullptr, slot_id);
-			safe_delete(inst);
-		}
-	}
-
-	// Where are cursor buffer items processed? They need to be validated as well... -U
-
-	bool deletenorent = database.NoRentExpired(GetName());
-	if(deletenorent){ RemoveNoRent(false); } //client was offline for more than 30 minutes, delete no rent items
-
-	RemoveDuplicateLore(false);
-	MoveSlotNotAllowed(false);
-
-	// The previous three method calls took care of moving/removing expired/illegal item placements -U
-
-	//TODO: this function is just retarded... it re-allocates the buffer for every
-	//new item. It should be changed to loop through once, gather the
-	//lengths, and item packet pointers into an array (fixed length), and
-	//then loop again to build the packet.
-	//EQApplicationPacket *packets[50];
-	//unsigned long buflen = 0;
-	//unsigned long pos = 0;
-	//memset(packets, 0, sizeof(packets));
-	//foreach item in the invendor sections
-	//	packets[pos++] = ReturnItemPacket(...)
-	//	buflen += temp->size
-	//...
-	//allocat the buffer
-	//for r from 0 to pos
-	//	put pos[r]->pBuffer into the buffer
-	//for r from 0 to pos
-	//	safe_delete(pos[r]);
-
 	uint32 size = 0;
 	uint16 i = 0;
 	std::map<uint16, std::string> ser_items;
@@ -739,18 +697,15 @@ void Client::BulkSendInventoryItems() {
 		}
 	}
 
-	if(eqs->ClientVersion() == EQClientMac)
-	{
-		//Items in containers
-		for (slot_id=251; slot_id<=330; slot_id++) {
-			const ItemInst* inst = m_inv[slot_id];
-			if(inst) {
-				std::string packet = inst->Serialize(slot_id);
-				ser_items[i++] = packet;
-				size += packet.length();
-			}
-		}	
-	}
+	//Items in containers
+	for (slot_id=251; slot_id<=330; slot_id++) {
+		const ItemInst* inst = m_inv[slot_id];
+		if(inst) {
+			std::string packet = inst->Serialize(slot_id);
+			ser_items[i++] = packet;
+			size += packet.length();
+		}
+	}	
 
 	// Bank items
 	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
@@ -762,18 +717,15 @@ void Client::BulkSendInventoryItems() {
 		}
 	}
 
-	if(eqs->ClientVersion() == EQClientMac)
-	{
-		//Items in containers
-		for (slot_id=2031; slot_id<=2110; slot_id++) {
-			const ItemInst* inst = m_inv[slot_id];
-			if(inst) {
-				std::string packet = inst->Serialize(slot_id);
-				ser_items[i++] = packet;
-				size += packet.length();
-			}
-		}	
-	}
+	//Items in containers
+	for (slot_id=2031; slot_id<=2110; slot_id++) {
+		const ItemInst* inst = m_inv[slot_id];
+		if(inst) {
+			std::string packet = inst->Serialize(slot_id);
+			ser_items[i++] = packet;
+			size += packet.length();
+		}
+	}	
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, size);
 	uchar* ptr = outapp->pBuffer;
@@ -791,6 +743,27 @@ void Client::BulkSendInventoryItems() {
 void Client::BulkSendItems()
 {
 	int16 slot_id = 0;
+
+	// LINKDEAD TRADE ITEMS
+	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks -U
+	for(slot_id = 3000; slot_id <= 3007; slot_id++) {
+		ItemInst* inst = m_inv.PopItem(slot_id);
+		if(inst) {
+			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
+			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
+			mlog(INVENTORY__ERROR, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
+			PutItemInInventory(free_slot_id, *inst, false);
+			database.SaveInventory(character_id, nullptr, slot_id);
+			safe_delete(inst);
+		}
+	}
+
+	bool deletenorent = database.NoRentExpired(GetName());
+	if(deletenorent)
+		RemoveNoRent(false); //client was offline for more than 30 minutes, delete no rent items
+
+	RemoveDuplicateLore(false);
+	MoveSlotNotAllowed(false);
 
 	for (slot_id=0; slot_id<=29; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];

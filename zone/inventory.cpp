@@ -1542,57 +1542,6 @@ void Client::DyeArmor(DyeStruct* dye){
 	Save();
 }
 
-/*bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
-	const Item_Struct* TempItem = 0;
-	ItemInst* ins;
-	int x;
-	for(x=0; x <= 30; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	for(x=251; x < 331; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	return false;
-}*/
-
 bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	const Item_Struct* TempItem = 0;
 	ItemInst* ins;
@@ -1681,24 +1630,6 @@ void Client::RemoveNoRent(bool client_update) {
 			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Bank Container slots
 		}
 	}
-
-	// shared bank
-	for(slot_id = 2500; slot_id <= 2501; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
-			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank slots
-		}
-	}
-
-	// shared bank containers
-	for(slot_id = 2531; slot_id <= 2550; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if(inst && !inst->GetItem()->NoRent) {
-			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank Container slots
-		}
-	}
 }
 
 // Two new methods to alleviate perpetual login desyncs
@@ -1778,8 +1709,6 @@ void Client::RemoveDuplicateLore(bool client_update) {
 			safe_delete(inst);
 		}
 	}
-
-	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items -U
 }
 
 void Client::MoveSlotNotAllowed(bool client_update) {
@@ -1829,21 +1758,6 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 
 	return 0;
 }
-
-/*
-int32 Client::GetEquipmentMaterial(uint8 material_slot)
-{
-	const Item_Struct *item;
-
-	item = database.GetItem(GetEquipment(material_slot));
-	if(item != 0)
-	{
-		return item->Material;
-	}
-
-	return 0;
-}
-*/
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const
 {

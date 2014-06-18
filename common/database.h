@@ -186,6 +186,7 @@ public:
 	bool	GetLiveChar(uint32 account_id, char* cname);
 	uint8	GetAgreementFlag(uint32 acctid);
 	void	SetAgreementFlag(uint32 acctid);
+	uint16	GetExpansion(uint32 acctid);
 
 	/*
 	* Groups

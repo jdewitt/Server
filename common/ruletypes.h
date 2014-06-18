@@ -74,6 +74,7 @@ RULE_INT ( Character, ItemEnduranceRegenCap, 15)
 RULE_INT ( Character, ItemExtraDmgCap, 150) // Cap for bonuses to melee skills like Bash, Frenzy, etc
 RULE_INT ( Character, HasteCap, 100) // Haste cap for non-v3(overhaste) haste.
 RULE_INT ( Character, SkillUpModifier, 60) //skill ups are at 100%
+RULE_REAL ( Character, TradeskillSkillUpModifier, 1.0) //1.0 is stock EQEmu lower is more skillups.
 RULE_BOOL ( Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL ( Character, BindAnywhere, false)
 RULE_INT ( Character, RestRegenPercent, 0) // Set to >0 to enable rest state bonus HP and mana regen.
@@ -186,6 +187,7 @@ RULE_REAL ( Zone, HotZoneBonus, 0.75 )
 RULE_INT ( Zone, ReservedInstances, 30 ) //Will reserve this many instance ids for globals... probably not a good idea to change this while a server is running.
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
+RULE_INT (Zone, SpawnEventMin, 3) // When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
@@ -478,7 +480,6 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY ( AA )
 RULE_INT ( AA, ExpPerPoint, 23976503)	//Amount of exp per AA. Is the same as the amount of exp to go from level 51 to level 52.
-RULE_BOOL ( AA, Stacking, false) //Allow AA that belong to the same group to stack on SOF+ clients.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Console )
