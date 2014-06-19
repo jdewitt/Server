@@ -656,10 +656,7 @@ public:
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//AA Methods
-	void SendAAList();
 	void ResetAA();
-	void SendAA(uint32 id, int seq=1);
-	void SendPreviousAA(uint32 id, int seq=1);
 	void BuyAA(AA_Action* action);
 	//this function is used by some AA stuff
 	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);

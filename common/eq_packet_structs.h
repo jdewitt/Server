@@ -2335,12 +2335,8 @@ struct BookRequest_Struct {
 
 /*
 ** Object/Ground Spawn struct
-** Used for Forges, Ovens, ground spawns, items dropped to ground, etc
-** Size: 92 bytes
-** OpCodes: OP_CreateObject
-** Last Updated: Oct-17-2003
-**
-*/
+	We rely on the encode/decode to send the proper packet, this is just an internal data struct like PP.
+	*/
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// <Zaphod> They are, get this, prev and next, ala linked list
 /*08*/	uint16	unknown008;			//
@@ -2359,6 +2355,9 @@ struct Object_Struct {
 /*80*/	uint32	object_type;		// Type of object, not directly translated to OP_OpenObject
 /*84*/	uint32	unknown084;			//set to 0xFF
 /*88*/	uint32	spawn_id;			// Spawn Id of client interacting with object
+		uint16	itemsinbag[10];
+		uint8	charges;
+		uint8	maxcharges;
 /*92*/
 };
 //<Zaphod> 01 = generic drop, 02 = armor, 19 = weapon

@@ -1,7 +1,6 @@
 	void Handle_Connect_OP_SetDataRate(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app);
-	void Handle_Connect_OP_SendAATable(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SendTributes(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SendGuildTributes(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app);

@@ -255,6 +255,23 @@ int16 Inventory::PutItem(int16 slot_id, const ItemInst& inst)
 	return _PutItem(slot_id, inst.Clone());
 }
 
+// Put an item snto specified slot
+int16 Inventory::RefPutItem(int16 slot_id, ItemInst* inst)
+{
+	// Clean up item already in slot (if exists)
+	DeleteItem(slot_id);
+
+	if (!inst) {
+		// User is effectively deleting the item
+		// in the slot, why hold a null ptr in map<>?
+		return slot_id;
+	}
+
+	// Delegate to internal method
+	return _PutItem(slot_id, inst);
+}
+
+
 int16 Inventory::PushCursor(const ItemInst& inst)
 {
 	m_cursor.push(inst.Clone());
@@ -1457,12 +1474,6 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 				m_contents.erase(del->first);
 				continue;
 			}
-		case byFlagNotSet:
-			if (item->NoDrop != 0) {
-				safe_delete(inst);
-				m_contents.erase(del->first);
-				continue;
-			}
 		default:
 			break;
 		}
@@ -1470,12 +1481,6 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 		switch (is_norent) {
 		case byFlagSet:
 			if (item->NoRent == 0) {
-				safe_delete(inst);
-				m_contents.erase(del->first);
-				continue;
-			}
-		case byFlagNotSet:
-			if (item->NoRent != 0) {
 				safe_delete(inst);
 				m_contents.erase(del->first);
 				continue;

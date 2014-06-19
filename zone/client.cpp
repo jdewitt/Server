@@ -5732,8 +5732,6 @@ const char* Client::GetRacePlural(Client* client) {
 			return "Vah Shir"; break;
 		case FROGLOK:
 			return "Frogloks"; break;
-		case DRAKKIN:
-			return "Drakkin"; break;
 		default:
 			return "Races"; break;
 	}
@@ -6268,7 +6266,6 @@ void Client::IncrementAA(int aa_id) {
 
 	Save();
 
-	SendAA(aa_id);
 	SendAATable();
 	SendAAStats();
 	CalcBonuses();

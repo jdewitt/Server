@@ -1573,7 +1573,7 @@ struct WhoAllPlayer
 	/*000*/	uint16	level;
 	/*000*/	uint16	race;
 	/*000*/	char*	account;
-	/*000*/	uint16	unknown100;
+	/*000*/	uint16	ending;
 };
 
 struct WhoAllReturnStruct 

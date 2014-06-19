@@ -50,7 +50,6 @@
 #define IKSAR_SKELETON	161
 #define FROGLOK			330
 #define FROGLOK2		74	// Not sure why /who all reports race as 74 for frogloks
-#define DRAKKIN			522 // 32768
 #define EMU_RACE_NPC	131069 // was 65533
 #define EMU_RACE_PET	131070 // was 65534
 #define EMU_RACE_UNKNOWN 131071 // was 65535

@@ -1375,9 +1375,6 @@ int16	Client::CalcMR()
 		case FROGLOK:
 			MR = 30;
 			break;
-		case DRAKKIN:
-			MR = 35;
-			break;
 		default:
 			MR = 20;
 	}
@@ -1443,9 +1440,6 @@ int16	Client::CalcFR()
 			FR = 25;
 			break;
 		case FROGLOK:
-			FR = 25;
-			break;
-		case DRAKKIN:
 			FR = 25;
 			break;
 		default:
@@ -1519,9 +1513,6 @@ int16	Client::CalcDR()
 			DR = 15;
 			break;
 		case FROGLOK:
-			DR = 15;
-			break;
-		case DRAKKIN:
 			DR = 15;
 			break;
 		default:
@@ -1604,9 +1595,6 @@ int16	Client::CalcPR()
 		case FROGLOK:
 			PR = 30;
 			break;
-		case DRAKKIN:
-			PR = 15;
-			break;
 		default:
 			PR = 15;
 	}
@@ -1685,9 +1673,6 @@ int16	Client::CalcCR()
 			CR = 25;
 			break;
 		case FROGLOK:
-			CR = 25;
-			break;
-		case DRAKKIN:
 			CR = 25;
 			break;
 		default:

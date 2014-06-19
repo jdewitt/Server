@@ -1510,7 +1510,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 //std::cout << "Gender in: " << (int)in_gender << std::endl; // undefined cout [CODEBUG]
 	if ((in_race > 0 && in_race <= GNOME )
-		|| in_race == IKSAR || in_race == VAHSHIR || in_race == FROGLOK || in_race == DRAKKIN
+		|| in_race == IKSAR || in_race == VAHSHIR || in_race == FROGLOK
 		|| in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
 		if (in_gender >= 2) {
 			// Female default for PC Races

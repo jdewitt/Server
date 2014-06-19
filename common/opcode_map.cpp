@@ -35,7 +35,6 @@ void load_opcode_names()
 	opcode_map[0x027d]="LiveOP_DumpName";
 	opcode_map[0x01ea]="LiveOP_RespondAA";
 	opcode_map[0x01c9]="LiveOP_SendAAStats";
-	opcode_map[0x0366]="LiveOP_SendAATable";
 	opcode_map[0x01e9]="LiveOP_AAAction";
 	opcode_map[0x00bb]="LiveOP_BoardBoat";
 	opcode_map[0x00bc]="LiveOP_LeaveBoat";

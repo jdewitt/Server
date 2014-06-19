@@ -295,7 +295,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("RespondAA", static_cast<int>(OP_RespondAA)),
 			luabind::value("UpdateAA", static_cast<int>(OP_UpdateAA)),
 			luabind::value("SendAAStats", static_cast<int>(OP_SendAAStats)),
-			luabind::value("SendAATable", static_cast<int>(OP_SendAATable)),
 			luabind::value("AAAction", static_cast<int>(OP_AAAction)),
 			luabind::value("BoardBoat", static_cast<int>(OP_BoardBoat)),
 			luabind::value("LeaveBoat", static_cast<int>(OP_LeaveBoat)),

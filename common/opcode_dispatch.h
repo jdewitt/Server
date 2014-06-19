@@ -67,7 +67,6 @@ structures for an opcode, mainly used by opcode finder
 //IN_C(OP_SetDataRate, float);
 IN_C(OP_ZoneEntry, ClientZoneEntry_Struct);
 IN_C(OP_SetServerFilter, SetServerFilter_Struct);
-IN_Cz(OP_SendAATable);
 IN_Cz(OP_SendTributes);
 IN_Cz(OP_SendGuildTributes);
 IN_Cz(OP_SendAAStats);
@@ -371,7 +370,6 @@ OUTz(OP_SendAAStats);		//follows OP_ReqNewZone
 OUTz(OP_SendExpZonein);		//follows OP_SendZonepoints
 
 OUTv(OP_ReadBook, BookText_Struct);
-OUTv(OP_SendAATable, SendAA_Struct);
 
 OUT(OP_AAAction, UseAA_Struct);
 OUT(OP_Buff, SpellBuffFade_Struct);

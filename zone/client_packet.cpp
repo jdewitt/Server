@@ -93,7 +93,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_DataRate] = &Client::Handle_Connect_OP_SetDataRate;
 	ConnectingOpcodes[OP_ZoneEntry] = &Client::Handle_Connect_OP_ZoneEntry;
 	ConnectingOpcodes[OP_SetServerFilter] = &Client::Handle_Connect_OP_SetServerFilter;
-	ConnectingOpcodes[OP_SendAATable] = &Client::Handle_Connect_OP_SendAATable;
 	ConnectingOpcodes[OP_ReqClientSpawn] = &Client::Handle_Connect_OP_ReqClientSpawn;
 	ConnectingOpcodes[OP_SendExpZonein] = &Client::Handle_Connect_OP_SendExpZonein;
 	ConnectingOpcodes[OP_WorldObjectsSent] = &Client::Handle_Connect_OP_WorldObjectsSent;
@@ -514,12 +513,6 @@ void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app)
 	}
 	SetServerFilter_Struct* filter=(SetServerFilter_Struct*)app->pBuffer;
 	ServerFilter(filter);
-	return;
-}
-
-void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
-{
-	SendAAList();
 	return;
 }
 
@@ -3712,7 +3705,7 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 	{			// with a length, just the 0 len ones for stopping songs
 		//ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
 		printf("OP_ManaChange from client:\n");
-		DumpPacket(app);
+		//DumpPacket(app);
 	}
 	return;
 }
@@ -7861,7 +7854,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		case HIGH_ELF:
 		case ERUDITE:
 		case IKSAR:
-		case DRAKKIN:
 			size = 6;
 			break;
 		case HALF_ELF:
