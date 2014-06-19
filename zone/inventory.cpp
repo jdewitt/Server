@@ -1049,6 +1049,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 	}
 
+	bool recursive_si = false;
 	// Step 2: Validate item in from_slot
 	// After this, we can assume src_inst is a valid ptr
 	if (!src_inst && (src_slot_id<4000 || src_slot_id>4009)) {
@@ -1059,14 +1060,20 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			move_in->from_slot = dst_slot_check;
 			move_in->to_slot = src_slot_check;
 			move_in->number_in_stack = dst_inst->GetCharges();
-			if(!SwapItem(move_in)) { _log(INVENTORY__ERROR, "Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
+			if(!SwapItem(move_in)) { 
+				_log(INVENTORY__ERROR, "Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
 				//Intel EQMac sends 2 SwapItem packets when moving things to the cursor. Handle this here, and figure out a better way in the future. 
 				if(GetClientVersion() == EQClientMac)
 					return 2;
 			}
+			else
+				recursive_si = true;
 		}
-		_log(INVENTORY__ERROR, "dst_inst IS FALSE: Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
-		return 0;
+		if(!recursive_si)
+		{
+			_log(INVENTORY__ERROR, "From slot is invalid and Recursive SwapItem call failed. (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
+			return 0;
+		}
 	}
 	//verify shared bank transactions in the database
 	if(src_inst && src_slot_id >= 2500 && src_slot_id <= 2550) {

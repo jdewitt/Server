@@ -93,7 +93,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_DataRate] = &Client::Handle_Connect_OP_SetDataRate;
 	ConnectingOpcodes[OP_ZoneEntry] = &Client::Handle_Connect_OP_ZoneEntry;
 	ConnectingOpcodes[OP_SetServerFilter] = &Client::Handle_Connect_OP_SetServerFilter;
-	ConnectingOpcodes[OP_SendAATable] = &Client::Handle_Connect_OP_SendAATable;
 	ConnectingOpcodes[OP_ReqClientSpawn] = &Client::Handle_Connect_OP_ReqClientSpawn;
 	ConnectingOpcodes[OP_SendExpZonein] = &Client::Handle_Connect_OP_SendExpZonein;
 	ConnectingOpcodes[OP_WorldObjectsSent] = &Client::Handle_Connect_OP_WorldObjectsSent;
@@ -104,6 +103,7 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
 	ConnectingOpcodes[OP_TGB] = &Client::Handle_Connect_OP_TGB;
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
+	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_UpdateAA] = &Client::Handle_Connect_OP_UpdateAA;
 	ConnectingOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectingOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTDCon;
@@ -284,6 +284,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
+	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
@@ -515,12 +516,6 @@ void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
-{
-	SendAAList();
-	return;
-}
-
 void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app)
 {
 	SendAATimers();
@@ -745,6 +740,12 @@ void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)
 {
 	//Once we get this, the client thinks it is connected
 	//So give it the benefit of the doubt and move to connected
+
+	Handle_Connect_OP_ClientReady(app);
+}
+
+void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
+{
 	conn_state = ClientReadyReceived;
 
 	CompleteConnect();
@@ -3704,7 +3705,7 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 	{			// with a length, just the 0 len ones for stopping songs
 		//ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
 		printf("OP_ManaChange from client:\n");
-		DumpPacket(app);
+		//DumpPacket(app);
 	}
 	return;
 }
@@ -7853,7 +7854,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		case HIGH_ELF:
 		case ERUDITE:
 		case IKSAR:
-		case DRAKKIN:
 			size = 6;
 			break;
 		case HALF_ELF:

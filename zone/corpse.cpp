@@ -105,9 +105,6 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charna
 		uint16 RealRace;
 
 		switch(dbpcs->race) {
-			case 254:
-				RealRace = DRAKKIN;
-				break;
 			case 255:
 				RealRace = FROGLOK;
 				break;
@@ -155,9 +152,6 @@ Corpse* Corpse::LoadFromDBData(uint32 in_dbid, uint32 in_charid, char* in_charna
 		uint16 RealRace;
 
 		switch(dbpc->race) {
-			case 254:
-				RealRace = DRAKKIN;
-				break;
 			case 255:
 				RealRace = FROGLOK;
 				break;
@@ -548,9 +542,6 @@ bool Corpse::Save() {
 	uint16 CorpseRace;
 
 	switch(race) {
-		case DRAKKIN:
-			CorpseRace = 254;
-			break;
 		case FROGLOK:
 			CorpseRace = 255;
 			break;

@@ -700,6 +700,16 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	switch(opcode)
 	{
+		case OP_World_Client_CRC1:
+		case OP_World_Client_CRC2:
+		{
+			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
+			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
+			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
+			// then 'Start Tutorial' was not chosen.
+			StartInTutorial = false;
+			return true;
+		}
 		case OP_SendLoginInfo:
 		{
 			return HandleSendLoginInfoPacket(app);
@@ -724,16 +734,26 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleDeleteCharacterPacket(app);
 		}
+		case OP_WorldComplete:
+		{
+			eqs->Close();
+			return true;
+		}
 		case OP_GuildsList:
 		{
-			SendGuildList();
-			return true;
+			if(ClientVersionBit == 1)
+				SendGuildList();
+				return true;
 		}
 		
 		case OP_ZoneChange:
+		case OP_LoginUnknown1:
+		case OP_LoginUnknown2:
 		case OP_CrashDump:
 		case OP_WearChange:
+		case OP_LoginComplete:
 		case OP_ApproveWorld:
+		case OP_WorldClientReady:
 		{
 			// Essentially we are just 'eating' these packets, indicating
 			// they are handled.
@@ -1168,14 +1188,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	// FIXME: FV roleplay, database goodness...
 
 	// Racial Languages
-	SetRacialLanguages( &pp ); // bUsh
-	SetRaceStartingSkills( &pp ); // bUsh
-	SetClassStartingSkills( &pp ); // bUsh
-	//pp.skills[SkillSenseHeading] = 200;
-	// Some one fucking fix this to use a field name. -Doodman
-	//pp.unknown3596[28] = 15; // @bp: This is to enable disc usage
-//	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
-
+	SetRacialLanguages( &pp );
+	SetRaceStartingSkills( &pp );
+	SetClassStartingSkills( &pp );
 
 	for(i = 0; i < MAX_PP_SPELLBOOK; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
@@ -1185,11 +1200,6 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;
-
-
-	//was memset(pp.unknown3704, 0xffffffff, 8);
-	//but I dont think thats what you really wanted to do...
-	//memset is byte based
 
 	//If server is PVP by default, make all character set to it.
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
@@ -1208,7 +1218,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	{
 		bool ValidStartZone = false;
 
-		ValidStartZone = database.GetStartZoneSoF(&pp, cc);
+		ValidStartZone = database.GetStartZone(&pp, cc);
 
 		if(!ValidStartZone)
 			return false;
@@ -1399,16 +1409,19 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	switch( pp->race )
 	{
 	case BARBARIAN:
-	case DWARF:
 	case ERUDITE:
 	case HALF_ELF:
 	case HIGH_ELF:
 	case HUMAN:
 	case OGRE:
 	case TROLL:
-	case DRAKKIN:	//Drakkin are supposed to get a starting AA Skill
 		{
 			// No Race Specific Skills
+			break;
+		}
+	case DWARF:
+		{
+			pp->skills[SkillSenseHeading] = 50; //Even if we set this to 0, Intel client sets this to 50 anyway. Confirmed this is correct for era.
 			break;
 		}
 	case DARK_ELF:
@@ -1557,13 +1570,6 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[LANG_COMBINE_TONGUE] = 100;
 			pp->languages[LANG_ERUDIAN] = 25;
 			pp->languages[LANG_VAH_SHIR] = 100;
-			break;
-		}
-	case DRAKKIN:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_ELDER_DRAGON] = 100;
-			pp->languages[LANG_DRAGON] = 100;
 			break;
 		}
 	}

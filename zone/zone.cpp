@@ -237,12 +237,10 @@ bool Zone::LoadZoneObjects() {
 			data.object_type			= type;
 			data.linked_list_addr[0]	= 0;
 			data.linked_list_addr[1]	= 0;
-			data.unknown008				= (uint32)atoi(row[11]);
 			data.unknown010				= (uint32)atoi(row[12]);
-			data.unknown020				= (uint32)atoi(row[13]);
-			data.unknown024				= (uint32)atoi(row[14]);
-			data.unknown076				= (uint32)atoi(row[15]);
-			data.unknown084				= 0;
+			data.charges				= charges;
+			data.maxcharges				= charges;
+			
 
 			ItemInst* inst = nullptr;
 			//FatherNitwit: this dosent seem to work...
@@ -264,6 +262,12 @@ bool Zone::LoadZoneObjects() {
 			// Load child objects if container
 			if (inst && inst->IsType(ItemClassContainer)) {
 				database.LoadWorldContainer(id, inst);
+				for (uint8 i=0; i<10; i++) {
+					const ItemInst* b_inst = inst->GetItem(i);
+					if (b_inst) {
+						data.itemsinbag[i] = b_inst->GetID();
+					}
+				}
 			}
 
 			Object* object = new Object(id, type, icon, data, inst);

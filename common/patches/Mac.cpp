@@ -1415,9 +1415,6 @@ ENCODE(OP_AAAction){
 	OUT(begin);
 	eq->unknown_void=2154;
 
-	char* packet_dump = "AAAction_OUT.txt";
-	FileDumpPacketHex(packet_dump, __packet);
-
 	FINISH_ENCODE();
 }
 
@@ -1433,8 +1430,14 @@ ENCODE(OP_GroundSpawn) {
 	OUT(x);
 	strncpy(eq->object_name,emu->object_name,16);
 	OUT(object_type);
-	eq->charges=1;
-	eq->maxcharges=1;
+	OUT(charges);
+	OUT(maxcharges);
+	int g;
+	for(g=0; g<10; g++)
+	{
+		eq->itemsinbag[g] = emu->itemsinbag[g];
+		_log(EQMAC__LOG, "Found a container item %i in slot: %i", emu->itemsinbag[g], g);
+	}
 	FINISH_ENCODE();
 }
 
@@ -2222,7 +2225,6 @@ ENCODE(OP_FinishWindow) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FinishWindow2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FloatListThing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FriendsWho) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
@@ -2319,7 +2321,6 @@ ENCODE(OP_RespawnWindow) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RestState) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SendAATable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }

@@ -154,6 +154,7 @@ public:
 
 	// Add item to inventory
 	int16 PutItem(int16 slot_id, const ItemInst& inst);
+	int16 RefPutItem(int16 slot_id, ItemInst* inst);
 
 	// Add item to cursor queue
 	int16 PushCursor(const ItemInst& inst);

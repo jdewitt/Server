@@ -64,8 +64,6 @@ const char* GetRaceName(uint16 race) {
 		case FROGLOK:
 		case FROGLOK2:
 			return "Froglok";
-		case DRAKKIN:
-			return "Drakkin";
 		default:
 			return "Unknown";
 	}
@@ -104,8 +102,6 @@ uint32 GetArrayRace(uint16 race) {
 		case FROGLOK:
 		case FROGLOK2:
 			return Array_Race_FROGLOK;
-		case DRAKKIN:
-			return Array_Race_DRAKKIN;
 		default:
 			return Array_Race_UNKNOWN;
 	}

@@ -64,7 +64,6 @@ D(OP_Illusion)
 E(OP_ShopRequest)
 D(OP_ShopRequest)
 E(OP_ShopInventoryPacket)
-//E(OP_FormattedMessage)
 D(OP_ShopPlayerBuy)
 E(OP_ShopPlayerBuy)
 E(OP_ShopDelItem)
@@ -75,7 +74,6 @@ D(OP_Animation)
 E(OP_LootItem)
 D(OP_LootItem)
 E(OP_AAExpUpdate)
-//E(OP_RespondAA)
 E(OP_AAAction)
 E(OP_GroundSpawn)
 D(OP_GroundSpawn)
@@ -153,7 +151,6 @@ E(OP_FinishWindow);
 E(OP_FinishWindow2);
 E(OP_FloatListThing);
 E(OP_ForceFindPerson);
-E(OP_FriendsWho);
 E(OP_GetGuildMOTD);
 E(OP_GetGuildMOTDReply);
 E(OP_GiveMoney);
@@ -250,7 +247,6 @@ E(OP_RespawnWindow);
 E(OP_RestState);
 E(OP_Rewind);
 E(OP_SendAAStats);
-E(OP_SendAATable);
 E(OP_SendFindableNPCs);
 E(OP_SendSystemStats);
 E(OP_SendTitleList);

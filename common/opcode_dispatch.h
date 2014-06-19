@@ -67,7 +67,6 @@ structures for an opcode, mainly used by opcode finder
 //IN_C(OP_SetDataRate, float);
 IN_C(OP_ZoneEntry, ClientZoneEntry_Struct);
 IN_C(OP_SetServerFilter, SetServerFilter_Struct);
-IN_Cz(OP_SendAATable);
 IN_Cz(OP_SendTributes);
 IN_Cz(OP_SendGuildTributes);
 IN_Cz(OP_SendAAStats);
@@ -82,6 +81,7 @@ IN_Cr(OP_SpawnAppearance);
 IN_Cr(OP_WearChange);
 IN_Cr(OP_ClientUpdate);
 
+IN_Cz(OP_ClientReady);
 IN_C(OP_ClientError, ClientError_Struct);
 IN_Cr(OP_TGB);
 
@@ -363,13 +363,13 @@ OUT(OP_ZoneInAvatarSet, ZoneInUnknown_Struct);
 //this is the set of opcodes which are allready listed
 //in the IN section above, but are also sent OUT
 #ifdef DISJOINT_DIRECTIONS
+OUTz(OP_ClientReady);		//follows OP_SetServerFilter
 OUTz(OP_Dye);
 OUTz(OP_GMKick);
 OUTz(OP_SendAAStats);		//follows OP_ReqNewZone
 OUTz(OP_SendExpZonein);		//follows OP_SendZonepoints
 
 OUTv(OP_ReadBook, BookText_Struct);
-OUTv(OP_SendAATable, SendAA_Struct);
 
 OUT(OP_AAAction, UseAA_Struct);
 OUT(OP_Buff, SpellBuffFade_Struct);
