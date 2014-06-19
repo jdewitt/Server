@@ -88,17 +88,6 @@ bool Client::Process()
 					Handle_OldLogin((const char*)app->pBuffer, app->Size());
 				break;
 			}
-		case OP_LoginComplete:
-			{
-				Handle_LoginComplete((const char*)app->pBuffer, app->Size());
-				break;
-			}
-		case OP_LoginUnknown1: //Seems to be related to world status in older clients; we use our own logic for that though.
-			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginUnknown2, 0);
-				connection->QueuePacket(outapp);
-				break;
-			}
 		case OP_ServerListRequest:
 			{
 				if(server.options.IsTraceOn())
@@ -286,14 +275,6 @@ void Client::FatalError(const char* message) {
 	if (strlen(message) > 1) {
 		strcpy((char*)outapp->pBuffer, message);
 	}
-	connection->QueuePacket(outapp);
-	delete outapp;
-	return;
-}
-
-void Client::Handle_LoginComplete(const char* data, unsigned int size) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginComplete, 20);
-	outapp->pBuffer[0] = 1;
 	connection->QueuePacket(outapp);
 	delete outapp;
 	return;
