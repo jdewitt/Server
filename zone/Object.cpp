@@ -95,11 +95,6 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
 	respawn_timer.Disable();
 	strcpy(m_data.object_name, name);
 	RandomSpawn(false);
-
-	// Hardcoded portion for unknown members
-	m_data.unknown024	= 0x7f001194;
-	m_data.unknown076	= 0x0000d5fe;
-	m_data.unknown084	= 0xFFFFFFFF;
 }
 
 // Loading object from client dropping item on ground
@@ -126,11 +121,6 @@ Object::Object(Client* client, const ItemInst* inst)
 
 	decay_timer.Start();
 	respawn_timer.Disable();
-
-	// Hardcoded portion for unknown members
-	m_data.unknown024	= 0x7f001194;
-	m_data.unknown076	= 0x0000d5fe;
-	m_data.unknown084	= 0xFFFFFFFF;
 
 	// Set object name
 	if (inst) {
@@ -182,11 +172,6 @@ Object::Object(const ItemInst *inst, float x, float y, float z, float heading, u
 		decay_timer.Start();
 
 	respawn_timer.Disable();
-
-	// Hardcoded portion for unknown members
-	m_data.unknown024	= 0x7f001194;
-	m_data.unknown076	= 0x0000d5fe;
-	m_data.unknown084	= 0xFFFFFFFF;
 
 	// Set object name
 	if (inst) {
@@ -240,11 +225,6 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 		decay_timer.Start();
 
 	respawn_timer.Disable();
-
-	//Hardcoded portion for unknown members
-	m_data.unknown024	= 0x7f001194;
-	m_data.unknown076	= 0x0000d5fe;
-	m_data.unknown084	= 0xFFFFFFFF;
 
 	if(model)
 		strcpy(m_data.object_name, model);
@@ -544,10 +524,10 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				m_inst->ClearByFlags(byFlagSet, byFlagSet);
 
 			for (uint8 i=0; i<10; i++) {
-				const ItemInst* inst = m_inst->GetItem(i);
+				ItemInst* inst = m_inst->GetItem(i);
 				if (inst) {
-					//sender->GetInv().PutItem(i+4000,inst);
-					sender->SendItemPacket(i, inst, ItemPacketWorldContainer);
+					//sender->GetInv().RefPutItem(i+4000,inst);
+					//sender->SendItemPacket(i+4000, inst, ItemPacketCharInventory);
 				}
 			}
 		}

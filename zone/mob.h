@@ -659,6 +659,7 @@ public:
 	bool qglobal;
 
 	virtual void SetAttackTimer();
+	int32 GetAttackSpeedTimer();
 	inline void SetInvul(bool invul) { invulnerable=invul; }
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }

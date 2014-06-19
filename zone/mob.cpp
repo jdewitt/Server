@@ -1236,6 +1236,7 @@ void Mob::ShowStats(Client* client)
 				spawngroupid = n->respawn2->SpawnGroupID();
 			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
 			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %f Walkspeed: %f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
+			client->Message(0, "  Attack Speed: %i", n->GetAttackSpeedTimer());
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
@@ -2011,6 +2012,39 @@ void Mob::SetAttackTimer() {
 			PrimaryWeapon = ItemToUse;
 	}
 
+}
+
+int32 Mob::GetAttackSpeedTimer() {
+	int speed = 4000;
+	float PermaHaste;
+	if(GetHaste() > 0)
+		PermaHaste = 1 / (1 + (float)GetHaste()/100);
+	else if(GetHaste() < 0)
+		PermaHaste = 1 * (1 - (float)GetHaste()/100);
+	else
+		PermaHaste = 1.0f;
+
+	int16 DelayMod = itembonuses.HundredHands + spellbonuses.HundredHands;
+	if (DelayMod < -99)
+		DelayMod = -99;
+	//above checks ensure ranged weapons do not fall into here
+	// Work out if we're a monk
+	if ((GetClass() == MONK) || (GetClass() == BEASTLORD)) {
+		//we are a monk, use special delay
+		speed = (int)( (GetMonkHandToHandDelay()*(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
+		// 1200 seemed too much, with delay 10 weapons available
+		if(speed < RuleI(Combat, MinHastedDelay))	//lower bound
+			speed = RuleI(Combat, MinHastedDelay);
+		return speed;	// Hand to hand, delay based on level or epic
+	} 
+	else 
+	{
+		//not a monk... using fist, regular delay
+		speed = (int)((36 *(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
+		if(speed < RuleI(Combat, MinHastedDelay) && IsClient())	//lower bound
+			speed = RuleI(Combat, MinHastedDelay);
+		return speed;	// Hand to hand, non-monk 2/36
+	}
 }
 
 bool Mob::CanThisClassDualWield(void) const {
