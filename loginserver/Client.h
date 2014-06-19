@@ -85,6 +85,11 @@ public:
 	void Handle_OldLogin(const char* data, unsigned int size);
 
 	/**
+	* Not sure what this is, old clients need it to continue.
+	*/
+	void Handle_LoginComplete(const char* data, unsigned int size);
+
+	/**
 	* For all old clients, this disconnects them.
 	*/
 	void FatalError(const char* message);

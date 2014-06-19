@@ -81,6 +81,7 @@ IN_Cr(OP_SpawnAppearance);
 IN_Cr(OP_WearChange);
 IN_Cr(OP_ClientUpdate);
 
+IN_Cz(OP_ClientReady);
 IN_C(OP_ClientError, ClientError_Struct);
 IN_Cr(OP_TGB);
 
@@ -362,6 +363,7 @@ OUT(OP_ZoneInAvatarSet, ZoneInUnknown_Struct);
 //this is the set of opcodes which are allready listed
 //in the IN section above, but are also sent OUT
 #ifdef DISJOINT_DIRECTIONS
+OUTz(OP_ClientReady);		//follows OP_SetServerFilter
 OUTz(OP_Dye);
 OUTz(OP_GMKick);
 OUTz(OP_SendAAStats);		//follows OP_ReqNewZone

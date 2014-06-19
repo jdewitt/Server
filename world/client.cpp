@@ -700,6 +700,16 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	switch(opcode)
 	{
+		case OP_World_Client_CRC1:
+		case OP_World_Client_CRC2:
+		{
+			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
+			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
+			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
+			// then 'Start Tutorial' was not chosen.
+			StartInTutorial = false;
+			return true;
+		}
 		case OP_SendLoginInfo:
 		{
 			return HandleSendLoginInfoPacket(app);
@@ -724,16 +734,26 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleDeleteCharacterPacket(app);
 		}
+		case OP_WorldComplete:
+		{
+			eqs->Close();
+			return true;
+		}
 		case OP_GuildsList:
 		{
-			SendGuildList();
-			return true;
+			if(ClientVersionBit == 1)
+				SendGuildList();
+				return true;
 		}
 		
 		case OP_ZoneChange:
+		case OP_LoginUnknown1:
+		case OP_LoginUnknown2:
 		case OP_CrashDump:
 		case OP_WearChange:
+		case OP_LoginComplete:
 		case OP_ApproveWorld:
+		case OP_WorldClientReady:
 		{
 			// Essentially we are just 'eating' these packets, indicating
 			// they are handled.
