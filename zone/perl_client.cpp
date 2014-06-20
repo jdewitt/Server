@@ -4970,32 +4970,6 @@ XS(XS_Client_SignalClient)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendWebLink)
-{
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, website)");
-	{
-		Client *	THIS;
-		char *		website = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 1)	{	website = (char *)SvPV_nolen(ST(1));	}
-
-		THIS->SendWebLink(website);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_GetInstanceID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstanceID)
 {
@@ -5595,7 +5569,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetCustomItemData"), XS_Client_GetCustomItemData, file, "$$$");
 		newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
 		newXSproto(strcpy(buf, "SignalClient"), XS_Client_SignalClient, file, "$");
-		newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 		newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
         newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
         newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");

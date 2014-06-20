@@ -19,7 +19,6 @@
 	void Handle_OP_AutoAttack(const EQApplicationPacket *app);
 	void Handle_OP_AutoAttack2(const EQApplicationPacket *app);
 	void Handle_OP_Consent(const EQApplicationPacket *app);
-	void Handle_OP_ConsentDeny(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_Shielding(const EQApplicationPacket *app);
@@ -31,7 +30,6 @@
 	void Handle_OP_Begging(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_Surname(const EQApplicationPacket *app);
-	void Handle_OP_ClearSurname(const EQApplicationPacket *app);
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_Assist(const EQApplicationPacket *app);
 	void Handle_OP_GMTraining(const EQApplicationPacket *app);
@@ -112,7 +110,6 @@
 	void Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app);
 	void Handle_OP_ShopPlayerSell(const EQApplicationPacket *app);
 	void Handle_OP_ShopEnd(const EQApplicationPacket *app);
-//	void Handle_OP_CloseContainer(const EQApplicationPacket *app);
 	void Handle_OP_ClickObjectAction(const EQApplicationPacket *app);
 	void Handle_OP_ClickObject(const EQApplicationPacket *app);
 	void Handle_OP_RecipesFavorite(const EQApplicationPacket *app);
@@ -188,8 +185,6 @@
 	void Handle_OP_TributeUpdate(const EQApplicationPacket *app);
 	void Handle_OP_TributeToggle(const EQApplicationPacket *app);
 	void Handle_OP_TributeNPC(const EQApplicationPacket *app);
-	void Handle_OP_ConfirmDelete(const EQApplicationPacket *app);
-	void Handle_OP_CrashDump(const EQApplicationPacket *app);
 	void Handle_OP_ControlBoat(const EQApplicationPacket *app);
 	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_SetRunMode(const EQApplicationPacket *app);
@@ -225,7 +220,6 @@
 	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
-	void Handle_OP_CorpseDrop(const EQApplicationPacket *app);
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
 	void Handle_OP_LFGuild(const EQApplicationPacket *app);

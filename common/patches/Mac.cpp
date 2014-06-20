@@ -2199,19 +2199,9 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
-ENCODE(OP_ChangeSize) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ClearSurname) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CloseContainer) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Command) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ConfirmDelete) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ConsentDeny) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CorpseDrop) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CrashDump) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_CustomTitles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DenyResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_DiscordMerchantInventory) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DumpName) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DynamicWall) { ENCODE_FORWARD(OP_Unknown); }
@@ -2284,7 +2274,6 @@ ENCODE(OP_MoveLogRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OpenContainer) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OpenDiscordMerchant) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OpenInventory) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetBuffWindow) { ENCODE_FORWARD(OP_Unknown); }
@@ -2324,8 +2313,6 @@ ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ServerName) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SessionLogin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetChatServer2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetGroupTarget) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
@@ -2350,11 +2337,7 @@ ENCODE(OP_UpdateAA) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponEquip2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WeaponUnequip2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Weblink) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_WorldObjectsSent) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ZoneComplete) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ZonePlayerToBind) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ZoneServerReady) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Unknown){
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
