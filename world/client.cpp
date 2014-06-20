@@ -733,7 +733,6 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_ZoneChange:
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
-		case OP_CrashDump:
 		case OP_WearChange:
 		case OP_LoginComplete:
 		case OP_ApproveWorld:

@@ -73,7 +73,6 @@ IN_Cz(OP_SendAAStats);
 IN_Cz(OP_ReqClientSpawn);
 IN_Cz(OP_ReqNewZone);
 IN_Cz(OP_SendExpZonein);
-//IN_Cr(OP_ZoneComplete);
 
 //these three should stay raw, since we ignore their contents and
 //they overlap with the connected opcodes
@@ -88,7 +87,6 @@ IN(OP_ClientUpdate, PlayerPositionUpdateClient_Struct);
 IN(OP_AutoAttack, uint32);
 IN(OP_AutoAttack2, uint32);
 INv(OP_Consent, Consent_Struct);
-INv(OP_ConsentDeny, Consent_Struct);
 IN(OP_TargetMouse, ClientTarget_Struct);
 IN(OP_TargetCommand, ClientTarget_Struct);
 IN(OP_Shielding, Shielding_Struct);
@@ -129,7 +127,6 @@ IN(OP_GMZoneRequest2, uint32);
 IN(OP_EndLootRequest, EntityId_Struct);	//follows OP_LootRequest
 IN(OP_LootRequest, EntityId_Struct);	//entity must be a corpse
 IN(OP_Dye, DyeStruct);
-INr(OP_ConfirmDelete);	//?
 IN(OP_LootItem, LootingItem_Struct);
 INr(OP_GuildDelete);	//?
 IN(OP_GuildPublicNote, GuildUpdate_PublicNote);
@@ -174,7 +171,6 @@ IN(OP_ShopRequest, Merchant_Click_Struct);
 IN(OP_ShopPlayerBuy, Merchant_Sell_Struct);
 IN(OP_ShopPlayerSell, Merchant_Purchase_Struct);
 INr(OP_ShopEnd);		//?
-IN(OP_CloseContainer, ClickObjectAction_Struct);
 IN(OP_ClickObjectAction, ClickObjectAction_Struct);
 IN(OP_ClickObject, ClickObject_Struct);
 IN(OP_RecipesFavorite, TradeskillFavorites_Struct);
@@ -247,7 +243,6 @@ INr(OP_TGB);		//4 bytes, value is 0, 1, or 2
 IN(OP_Split, Split_Struct);
 INz(OP_SenseTraps);		//?
 INz(OP_DisarmTraps);	//?
-INr(OP_CrashDump);
 INr(OP_ControlBoat);
 INr(OP_DumpName);
 INr(OP_SetRunMode);
@@ -282,7 +277,6 @@ OUTv(OP_InterruptCast, InterruptCast_Struct);
 OUTv(OP_ItemLinkResponse, ItemPacket_Struct);
 OUTv(OP_ZoneSpawns, Spawn_Struct);
 OUTv(OP_CharInventory, ItemPacket_Struct);
-OUTv(OP_CustomTitles, Titles_Struct);
 OUTv(OP_SpawnDoor, Door_Struct);
 OUTv(OP_SendZonepoints, ZonePoints);
 OUTv(OP_TributeInfo, TributeAbility_Struct);

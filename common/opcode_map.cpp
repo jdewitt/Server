@@ -193,7 +193,6 @@ void load_opcode_names()
 	opcode_map[0x0140]="LiveOP_Animation";
 	opcode_map[0x0142]="LiveOP_ZoneChange";
 	opcode_map[0x00f3]="LiveOP_DeleteSpawn";
-	opcode_map[0x0265]="LiveOP_CrashDump";
 	opcode_map[0x00e8]="LiveOP_EnvDamage";
 	opcode_map[0x0101]="LiveOP_Action";
 	opcode_map[0x00e2]="LiveOP_Damage";
@@ -204,7 +203,6 @@ void load_opcode_names()
 	opcode_map[0x0188]="LiveOP_Surname";
 	opcode_map[0x018f]="LiveOP_SwapSpell";
 	opcode_map[0x01db]="LiveOP_DeleteSpell";
-	opcode_map[0x029f]="LiveOP_CloseContainer";
 	opcode_map[0x029f]="LiveOP_ClickObjectAck";
 	opcode_map[0x00fa]="LiveOP_CreateObject";
 	opcode_map[0x00f9]="LiveOP_ClickObject";
@@ -256,7 +254,6 @@ void load_opcode_names()
 	opcode_map[0x00eb]="LiveOP_NewZone";
 	opcode_map[0x00fd]="LiveOP_ReqClientSpawn";
 	opcode_map[0x012F]="LiveOP_SpawnAppearance";
-	opcode_map[0x0086]="LiveOP_ZoneComplete";
 	opcode_map[0x02db]="LiveOP_LoginComplete";
 	opcode_map[0x0195]="LiveOP_ApproveWorld";
 	opcode_map[0x035f]="LiveOP_LogServer";

@@ -115,7 +115,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_AutoAttack] = &Client::Handle_OP_AutoAttack;
 	ConnectedOpcodes[OP_AutoAttack2] = &Client::Handle_OP_AutoAttack2;
 	ConnectedOpcodes[OP_Consent] = &Client::Handle_OP_Consent;
-	ConnectedOpcodes[OP_ConsentDeny] = &Client::Handle_OP_ConsentDeny;
 	ConnectedOpcodes[OP_TargetMouse] = &Client::Handle_OP_TargetMouse;
 	ConnectedOpcodes[OP_TargetCommand] = &Client::Handle_OP_TargetCommand;
 	ConnectedOpcodes[OP_Shielding] = &Client::Handle_OP_Shielding;
@@ -127,7 +126,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Begging] = &Client::Handle_OP_Begging;
 	ConnectedOpcodes[OP_TestBuff] = &Client::Handle_OP_TestBuff;
 	ConnectedOpcodes[OP_Surname] = &Client::Handle_OP_Surname;
-	ConnectedOpcodes[OP_ClearSurname] = &Client::Handle_OP_ClearSurname;
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_Assist] = &Client::Handle_OP_Assist;
 	ConnectedOpcodes[OP_GMTraining] = &Client::Handle_OP_GMTraining;
@@ -270,8 +268,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Split] = &Client::Handle_OP_Split;
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
-	ConnectedOpcodes[OP_ConfirmDelete] = &Client::Handle_OP_ConfirmDelete;
-	ConnectedOpcodes[OP_CrashDump] = &Client::Handle_OP_CrashDump;
 	ConnectedOpcodes[OP_ControlBoat] = &Client::Handle_OP_ControlBoat;
 	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
@@ -309,7 +305,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
-	ConnectedOpcodes[OP_CorpseDrop] = &Client::Handle_OP_CorpseDrop;
 	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
 	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
 	ConnectedOpcodes[OP_LFGuild] = &Client::Handle_OP_LFGuild;
@@ -1250,25 +1245,6 @@ void Client::Handle_OP_Consent(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ConsentDeny(const EQApplicationPacket *app)
-{
-	if(app->size<64){
-		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
-		ServerPacket* pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
-		ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)pack->pBuffer;
-		strcpy(scs->grantname, c->name);
-		strcpy(scs->ownername, GetName());
-		scs->message_string_id = 0;
-		scs->permission = 0;
-		scs->zone_id = zone->GetZoneID();
-		scs->instance_id = zone->GetInstanceID();
-		//consent_list.remove(scs->grantname);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	return;
-}
-
 void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 {
 	Handle_OP_TargetCommand(app);
@@ -1983,11 +1959,6 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 	surname->unknown0064=1;
 	FastQueuePacket(&outapp);
 	return;
-}
-
-void Client::Handle_OP_ClearSurname(const EQApplicationPacket *app)
-{
-	ChangeLastName("");
 }
 
 void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
@@ -3057,10 +3028,6 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 		DyeStruct* dye = (DyeStruct*)app->pBuffer;
 		DyeArmor(dye);
 	}
-	return;
-}
-
-void Client::Handle_OP_ConfirmDelete(const EQApplicationPacket* app){
 	return;
 }
 
@@ -7414,10 +7381,6 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
-{
-}
-
 void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 {
 		if (app->size != sizeof(OldControlBoat_Struct)) {
@@ -10135,26 +10098,6 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
-}
-
-void Client::Handle_OP_CorpseDrop(const EQApplicationPacket *app)
-{
-	if(app->size == 1)
-	{
-		Message_StringID(MT_DefaultText, CORPSEDRAG_STOPALL);
-		ClearDraggedCorpses();
-		return;
-	}
-
-	for (auto Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
-	{
-		if(!strcasecmp(Iterator->first.c_str(), (const char *)app->pBuffer))
-		{
-			Message_StringID(MT_DefaultText, CORPSEDRAG_STOP);
-			Iterator = DraggedCorpses.erase(Iterator);
-			return;
-		}
-	}
 }
 
 void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket *app)
