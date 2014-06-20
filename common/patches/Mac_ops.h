@@ -39,7 +39,6 @@ D(OP_Damage)
 E(OP_Action)
 E(OP_Action2)
 D(OP_EnvDamage)
-//D(OP_EnvDamage2)
 D(OP_ClickDoor)
 E(OP_InterruptCast)
 //D(OP_GMTraining)
@@ -130,16 +129,11 @@ E(OP_DenyResponse);
 E(OP_DisciplineUpdate);
 E(OP_DumpName);
 E(OP_Dye);
-E(OP_DynamicWall);
-E(OP_EnduranceUpdate);
-E(OP_EnvDamage);
-E(OP_EnvDamage2);
 E(OP_Feedback);
 E(OP_FindPersonReply);
 E(OP_FindPersonRequest);
 E(OP_FinishWindow);
 E(OP_FinishWindow2);
-E(OP_FloatListThing);
 E(OP_ForceFindPerson);
 E(OP_GetGuildMOTD);
 E(OP_GetGuildMOTDReply);
@@ -180,7 +174,6 @@ E(OP_ItemVerifyReply);
 E(OP_ItemVerifyRequest);
 E(OP_ItemViewUnknown);
 E(OP_KeyRing);
-E(OP_LevelAppearance);
 E(OP_LFGAppearance);
 E(OP_LFGGetMatchesRequest);
 E(OP_LFGGetMatchesResponse);
@@ -192,8 +185,6 @@ E(OP_LFPGetMatchesResponse);
 E(OP_LoadSpellSet);
 E(OP_LockoutTimerInfo);
 E(OP_MendHPUpdate);
-E(OP_MobEnduranceUpdate);
-E(OP_MobManaUpdate);
 E(OP_MobRename);
 E(OP_MoveLogDisregard);
 E(OP_MoveLogRequest);
@@ -202,7 +193,6 @@ E(OP_OnLevelMessage);
 E(OP_OpenContainer);
 E(OP_OpenInventory);
 E(OP_PDeletePetition);
-E(OP_PetBuffWindow);
 E(OP_PetitionBug);
 E(OP_PetitionCheckout2);
 E(OP_PetitionQue);
@@ -250,7 +240,6 @@ E(OP_Some6ByteHPUpdate);
 E(OP_SpawnPositionUpdate);
 E(OP_SpellEffect);
 E(OP_TargetBuffs);
-E(OP_TargetHoTT);
 E(OP_TargetReject);
 E(OP_TestBuff);
 E(OP_TrackTarget);

@@ -317,7 +317,6 @@ void Group::SendHPPacketsTo(Mob *member)
 	if(member && member->IsClient())
 	{
 		EQApplicationPacket hpapp;
-		EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
 		{
@@ -337,7 +336,6 @@ void Group::SendHPPacketsFrom(Mob *member)
 		return;
 
 	member->CreateHPPacket(&hp_app);
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	uint32 i;
 	for(i = 0; i < MAX_GROUP_MEMBERS; i++) {

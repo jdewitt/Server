@@ -553,7 +553,6 @@ public:
 
 	void	SendManaUpdatePacket();
 	void	SendManaUpdate();
-	void	SendEnduranceUpdate();
 	uint8	GetFace()		const { return m_pp.face; }
 	void	WhoAll(Who_All_Struct* whom);
 	void	FriendsWho(char *FriendsString);

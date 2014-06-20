@@ -1403,16 +1403,6 @@ bool Lua_Mob::HasNPCSpecialAtk(const char *parse) {
 	return self->HasNPCSpecialAtk(parse);
 }
 
-void Lua_Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5) {
-	Lua_Safe_Call_Void();
-	self->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5);
-}
-
-void Lua_Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Lua_Client specific_target) {
-	Lua_Safe_Call_Void();
-	self->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5, specific_target);
-}
-
 void Lua_Mob::SetFlyMode(int in) {
 	Lua_Safe_Call_Void();
 	self->SetFlyMode(in);
@@ -2083,8 +2073,6 @@ luabind::scope lua_register_mob() {
 		.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double))&Lua_Mob::ProjectileAnimation)
 		.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double,double))&Lua_Mob::ProjectileAnimation)
 		.def("HasNPCSpecialAtk", (bool(Lua_Mob::*)(const char*))&Lua_Mob::HasNPCSpecialAtk)
-		.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32))&Lua_Mob::SendAppearanceEffect)
-		.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32,Lua_Client))&Lua_Mob::SendAppearanceEffect)
 		.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)
 		.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)

@@ -2878,8 +2878,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	}
 
 	mlog(SPELLS__BUFFS, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
-	if (IsPet() && GetOwner() && GetOwner()->IsClient())
-		SendPetBuffsToClient();
 
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
@@ -4456,7 +4454,6 @@ void Mob::Stun(int duration)
 	{
 		stunned = true;
 		stunned_timer.Start(duration);
-		SendStunAppearance();
 	}
 }
 
@@ -5038,39 +5035,6 @@ void Client::SendBuffDurationPacket(uint16 spell_id, int duration, int inlevel)
 	sbf->bufffade = 0;
 	sbf->duration = duration;
 	FastQueuePacket(&outapp);
-}
-
-void Mob::SendPetBuffsToClient()
-{
-	// Don't really need this check, as it should be checked before this method is called, but it doesn't hurt
-	// too much to check again.
-	if(!(GetOwner() && GetOwner()->IsClient()))
-		return;
-
-	int PetBuffCount = 0;
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetBuffWindow,sizeof(PetBuff_Struct));
-	PetBuff_Struct* pbs=(PetBuff_Struct*)outapp->pBuffer;
-	memset(outapp->pBuffer,0,outapp->size);
-	pbs->petid=GetID();
-
-	int MaxSlots = GetMaxTotalSlots();
-
-	if(MaxSlots > BUFF_COUNT)
-		MaxSlots = BUFF_COUNT;
-
-	for(int buffslot = 0; buffslot < MaxSlots; buffslot++)
-	{
-		if(buffs[buffslot].spellid != SPELL_UNKNOWN) {
-			pbs->spellid[buffslot] = buffs[buffslot].spellid;
-			pbs->ticsremaining[buffslot] = buffs[buffslot].ticsremaining;
-			PetBuffCount++;
-		}
-	}
-
-	pbs->buffcount=PetBuffCount;
-	GetOwner()->CastToClient()->QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Mob::SendBuffsToClient(Client *c)
