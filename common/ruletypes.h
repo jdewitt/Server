@@ -187,7 +187,7 @@ RULE_REAL ( Zone, HotZoneBonus, 0.75 )
 RULE_INT ( Zone, ReservedInstances, 30 ) //Will reserve this many instance ids for globals... probably not a good idea to change this while a server is running.
 RULE_BOOL ( Zone, LevelBasedEXPMods, false) // Allows you to use the level_exp_mods table in consideration to your players EXP hits
 RULE_INT ( Zone, WeatherTimer, 600) // Weather timer when no duration is available
-RULE_INT (Zone, SpawnEventMin, 3) // When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.
+RULE_INT (Zone, SpawnEventMin, 5) // When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Map )
