@@ -1032,11 +1032,6 @@ void Lua_Client::Signal(uint32 id) {
 	self->Signal(id);
 }
 
-void Lua_Client::SendWebLink(const char *site) {
-	Lua_Safe_Call_Void();
-	self->SendWebLink(site);
-}
-
 bool Lua_Client::HasSpellScribed(int spell_id) {
 	Lua_Safe_Call_Bool();
 	return self->HasSpellScribed(spell_id);
@@ -1410,7 +1405,6 @@ luabind::scope lua_register_client() {
 		.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
-		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 		.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)

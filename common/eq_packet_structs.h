@@ -1911,11 +1911,6 @@ struct Merchant_DelItem_Struct{
 /*012*/	uint32	type;
 };
 
-struct Weblink_Struct{
-/*000*/ char weblink[1];
-/*004*/
-};
-
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
@@ -2396,17 +2391,6 @@ struct ClickObjectAction_Struct {
 /*24*/	uint32	unknown24;	//
 /*28*/	char	object_name[64]; // Object name to display
 /*92*/
-};
-
-/*
-** This is different now, mostly unknown
-**
-*/
-struct CloseContainer_Struct {
-/*00*/	uint32	player_id;	// Entity Id of player who clicked object
-/*04*/	uint32	drop_id;	// Zone-specified unique object identifier
-/*08*/	uint32	open;		// 1=opening, 0=closing
-/*12*/	uint32	unknown12[12];
 };
 
 /*
@@ -3548,8 +3532,6 @@ struct Consent_Struct {
 	char name[1];	//always at least a null
 };
 
-enum { LDoNMerchant = 1, DiscordMerchant = 2, NorrathsKeepersMerchant = 4, DarkReignMerchant = 5 };
-
 struct Save_Struct {
 	uint8	unknown00[192];
 };
@@ -4059,15 +4041,6 @@ struct CorpseDrag_Struct
 /*064*/ char DraggerName[64];
 /*128*/ uint8 Unknown128[24];
 /*152*/
-};
-
-struct ChangeSize_Struct
-{
-/*00*/ uint32 EntityID;
-/*04*/ float Size;
-/*08*/ uint32 Unknown08;	// Observed 0
-/*12*/ float Unknown12;		// Observed 1.0f
-/*16*/
 };
 
 // New OpCode/Struct for SoD+

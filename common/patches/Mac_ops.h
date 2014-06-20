@@ -125,19 +125,9 @@ E(OP_Assist);
 
 //Below are invalid opcodes ONLY
 E(OP_Unknown);
-E(OP_ChangeSize);
-E(OP_ClearSurname);
-E(OP_CloseContainer);
-E(OP_Command);
-E(OP_ConfirmDelete);
-E(OP_ConsentDeny);
-E(OP_CorpseDrop);
-E(OP_CrashDump);
-E(OP_CustomTitles);
 E(OP_DeleteItem);
 E(OP_DenyResponse);
 E(OP_DisciplineUpdate);
-E(OP_DiscordMerchantInventory);
 E(OP_DumpName);
 E(OP_Dye);
 E(OP_DynamicWall);
@@ -210,7 +200,6 @@ E(OP_MoveLogRequest);
 E(OP_NewTitlesAvailable);
 E(OP_OnLevelMessage);
 E(OP_OpenContainer);
-E(OP_OpenDiscordMerchant);
 E(OP_OpenInventory);
 E(OP_PDeletePetition);
 E(OP_PetBuffWindow);
@@ -250,8 +239,6 @@ E(OP_SendAAStats);
 E(OP_SendFindableNPCs);
 E(OP_SendSystemStats);
 E(OP_SendTitleList);
-E(OP_ServerName);
-E(OP_SessionLogin);
 E(OP_SetChatServer2);
 E(OP_SetGroupTarget);
 E(OP_SetStartCity);
@@ -276,10 +263,6 @@ E(OP_UpdateAA);
 E(OP_WeaponEquip1);
 E(OP_WeaponEquip2);
 E(OP_WeaponUnequip2);
-E(OP_Weblink);
 E(OP_WorldObjectsSent);
-E(OP_ZoneComplete);
-E(OP_ZonePlayerToBind);
-E(OP_ZoneServerReady);
 #undef E
 #undef D

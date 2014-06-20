@@ -881,7 +881,6 @@ public:
 	void SendNewZone(NewZone_Struct newzone_data, char* name);
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
-	void SendWebLink(const char* website);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
 
 	void DuplicateLoreMessage(uint32 ItemID);

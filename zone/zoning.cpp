@@ -548,39 +548,20 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		zone_mode = zm;
 		if(zm == ZoneToBindPoint) {
 			//TODO: Find a better packet that works with EQMac on death.
-			if(eqs->ClientVersion() == EQClientMac)
-			{
-				_log(EQMAC__LOG, "Zoning packet about to be sent (ZTB). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
-				GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
+			_log(EQMAC__LOG, "Zoning packet about to be sent (ZTB). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMGoto, sizeof(GMGoto_Struct));
+			GMGoto_Struct* gmg = (GMGoto_Struct*) outapp->pBuffer;
 
-				strcpy(gmg->charname,this->name);
-				strcpy(gmg->gmname,this->name);
-				gmg->zoneID = zoneID;
-				gmg->x = x;
-				gmg->y = y;
-				gmg->z = z;
+			strcpy(gmg->charname,this->name);
+			strcpy(gmg->gmname,this->name);
+			gmg->zoneID = zoneID;
+			gmg->x = x;
+			gmg->y = y;
+			gmg->z = z;
 
-				outapp->priority = 6;
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-			}
-			else
-			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
-				ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
-
-				gmg->bind_zone_id = zoneID;
-				gmg->x = x;
-				gmg->y = y;
-				gmg->z = z;
-				gmg->heading = heading;
-				strcpy(gmg->zone_name, pZoneName);
-
-				outapp->priority = 6;
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-			}
+			outapp->priority = 6;
+			FastQueuePacket(&outapp);
+			safe_delete(outapp);
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
 			_log(EQMAC__LOG, "Zoning packet about to be sent (ZS/ZTSC). We are headed to zone: %i, at %f, %f, %f", zoneID, x, y, z);

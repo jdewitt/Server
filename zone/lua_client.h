@@ -234,7 +234,6 @@ public:
 	uint64 GetAllMoney();
 	void OpenLFGuildWindow();
 	void Signal(uint32 id);
-	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);

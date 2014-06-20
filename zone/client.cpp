@@ -5777,21 +5777,6 @@ const char* Client::GetClassPlural(Client* client) {
 	}
 }
 
-
-void Client::SendWebLink(const char *website)
-{
-	size_t len = strlen(website) + 1;
-	if(website != 0 && len > 1)
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
-		Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
-		memcpy(wl->weblink, website, len);
-		wl->weblink[len] = '\0';
-
-		FastQueuePacket(&outapp);
-	}
-}
-
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
 	Message_StringID(0, PICK_LORE);
