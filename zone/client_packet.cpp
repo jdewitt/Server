@@ -281,7 +281,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
-	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
+	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
 	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
@@ -10426,6 +10426,7 @@ void Client::Handle_OP_Action(const EQApplicationPacket *app) {
 
 void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 {
+	//Don't change this yet, I'll need the EQEmu code to implement /disc on TAK
 	char* packet_dump = "Disc.txt";
 	FileDumpPacketHex(packet_dump, app);
 
@@ -10461,5 +10462,11 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)
 {
 	//EQMac doesn't reply to this according to ShowEQ captures.
+	return;
+}
+
+void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
+{
+	CheckIncreaseSkill(SkillSenseHeading, nullptr, -15);
 	return;
 }
