@@ -3527,7 +3527,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			}
 			char_id = client->CharacterID();
 
-			if(client->GuildRank() >= remover->GuildRank() && client->GetName() != gc->othername){
+			if(client->GuildRank() >= remover->GuildRank() && strcmp(client->GetName(),remover->GetName()) != 0){
 				Message(0, "You can't remove a player from the guild with an equal or higher rank to you!");
 				return;
 			}
@@ -3558,14 +3558,14 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			char_id = gci.char_id;
 
 			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)",
-				gci.char_name.c_str(), gci.char_id,
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+				gci.char_name.c_str(), gci.char_id, guild_mgr.GetGuildName(GuildID()), GuildID());
 		}
 
+		uint32 guid = client->GuildID();
 		if(!guild_mgr.SetGuild(char_id, GUILD_NONE, 0)) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageRemove, sizeof(GuildManageRemove_Struct));
 			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
-			gm->guildeqid = GuildID();
+			gm->guildeqid = guid;
 			strcpy(gm->member, gc->othername);
 			Message(0,"%s successfully removed from your guild.",gc->othername);
 			entity_list.QueueClientsGuild(this, outapp, false, GuildID());
