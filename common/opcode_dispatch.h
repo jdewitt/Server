@@ -129,7 +129,6 @@ IN(OP_LootRequest, EntityId_Struct);	//entity must be a corpse
 IN(OP_Dye, DyeStruct);
 IN(OP_LootItem, LootingItem_Struct);
 INr(OP_GuildDelete);	//?
-IN(OP_GuildPublicNote, GuildUpdate_PublicNote);
 INz(OP_GetGuildsList);	//?
 IN(OP_SetGuildMOTD, GuildMOTD_Struct);
 INz(OP_GuildPeace);		//?
@@ -266,8 +265,6 @@ OUTz(OP_FinishTrade);		//follows OP_TradeAcceptClick
 OUTz(OP_GMEndTrainingResponse);	//follows OP_GMTraining
 OUTz(OP_LootComplete);		//follows OP_LootItem
 OUTz(OP_WorldObjectsSent);
-OUTz(OP_FinishWindow);
-OUTz(OP_FinishWindow2);
 //OUTz(OP_TradeSkillCombine);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
@@ -305,7 +302,6 @@ OUT(OP_GuildMOTD, GuildMOTD_Struct);
 OUT(OP_GuildManageAdd, GuildJoin_Struct);
 OUT(OP_GuildManageRemove, GuildManageRemove_Struct);
 OUT(OP_GuildManageStatus, GuildManageStatus_Struct);
-OUT(OP_GuildMemberUpdate, GuildMemberUpdate_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
 OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);

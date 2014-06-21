@@ -19,34 +19,6 @@ extern PetitionList petition_list;
 class Client;
 class ServerPacket;
 
-struct GuildBankItem
-{
-	uint32	ItemID;
-	uint32	Quantity;
-	char	Donator[64];
-	uint8	Permissions;
-	char	WhoFor[64];
-};
-
-struct GuildBankItems
-{
-	GuildBankItem	MainArea[GUILD_BANK_MAIN_AREA_SIZE];
-	GuildBankItem	DepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
-};
-
-struct GuildBank
-{
-	uint32	GuildID;
-	GuildBankItems	Items;
-};
-
-enum {	GuildBankBulkItems = 0, GuildBankItemUpdate = 1, GuildBankPromote = 3, GuildBankViewItem = 4, GuildBankDeposit = 5,
-	GuildBankPermissions = 6, GuildBankWithdraw = 7, GuildBankSplitStacks = 8, GuildBankMergeStacks = 9, GuildBankAcknowledge = 10 };
-
-enum {	GuildBankDepositArea = 0, GuildBankMainArea = 1 };
-
-enum {	GuildBankBankerOnly = 0, GuildBankSingleMember = 1, GuildBankPublicIfUsable = 2, GuildBankPublic = 3 };
-
 class GuildApproval
 {
 public:
@@ -91,7 +63,6 @@ public:
 
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
-	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);
 	void RequestOnlineGuildMembers(uint32 FromID, uint32 GuildID);
 
 protected:
@@ -108,36 +79,7 @@ private:
 
 };
 
-
-class GuildBankManager
-{
-
-public:
-	~GuildBankManager();
-	void SendGuildBank(Client *c);
-	bool AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 QtyOrCharges, const char *Donator, uint8 Permissions, const char *WhoFor);
-	int Promote(uint32 GuildID, int SlotID);
-	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName);
-	ItemInst* GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-	bool HasItem(uint32 GuildID, uint32 ItemID);
-	bool IsAreaFull(uint32 GuildID, uint16 Area);
-	bool MergeStacks(uint32 GuildID, uint16 SlotID);
-	bool SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity);
-	bool AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name);
-
-private:
-	bool IsLoaded(uint32 GuildID);
-	bool Load(uint32 GuildID);
-	std::list<GuildBank*>::iterator GetGuildBank(uint32 GuildID);
-	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-
-	std::list<GuildBank*> Banks;
-
-};
-
 extern ZoneGuildManager guild_mgr;
-extern GuildBankManager *GuildBanks;
 
 
 #endif /*GUILD_MGR_H_*/

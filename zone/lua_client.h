@@ -232,7 +232,6 @@ public:
 	int GetAggroCount();
 	uint64 GetCarriedMoney();
 	uint64 GetAllMoney();
-	void OpenLFGuildWindow();
 	void Signal(uint32 id);
 	bool HasSpellScribed(int spell_id);
 	void SetAccountFlag(std::string flag, std::string val);

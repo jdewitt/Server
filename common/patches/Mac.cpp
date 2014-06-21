@@ -2207,8 +2207,6 @@ ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Feedback) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FindPersonReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FindPersonRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FinishWindow) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FinishWindow2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
@@ -2223,19 +2221,14 @@ ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildBank) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildManageAdd) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageBanker) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildManageRemove) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildManageStatus) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildMemberLevelUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildPublicNote) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildUpdateURLAndChannel) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Heartbeat) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
@@ -2253,7 +2246,6 @@ ENCODE(OP_LFGAppearance) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFGGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFGGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFGResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGuild) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
@@ -2279,9 +2271,6 @@ ENCODE(OP_PetitionUnCheckout) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PostEnterWorld) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PotionBelt) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PreLogoutReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardDetailsReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
@@ -2314,7 +2303,6 @@ ENCODE(OP_Some3ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Some6ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpawnPositionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TargetBuffs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TargetReject) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TestBuff) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TrackTarget) { ENCODE_FORWARD(OP_Unknown); }

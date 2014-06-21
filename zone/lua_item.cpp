@@ -596,11 +596,6 @@ bool Lua_Item::GetNoPet() {
 	return self->NoPet;
 }
 
-bool Lua_Item::GetPotionBelt() {
-	Lua_Safe_Call_Bool();
-	return self->PotionBelt;
-}
-
 bool Lua_Item::GetStackable() {
 	Lua_Safe_Call_Bool();
 	return self->Stackable;
@@ -619,11 +614,6 @@ bool Lua_Item::GetQuestItemFlag() {
 int Lua_Item::GetStackSize() {
 	Lua_Safe_Call_Int();
 	return self->StackSize;
-}
-
-int Lua_Item::GetPotionBeltSlots() {
-	Lua_Safe_Call_Int();
-	return self->PotionBeltSlots;
 }
 
 int Lua_Item::GetClick_Effect() {
@@ -1021,12 +1011,10 @@ luabind::scope lua_register_item() {
 		.def("AugDistiller", &Lua_Item::GetAugDistiller)
 		.def("Attuneable", &Lua_Item::GetAttuneable)
 		.def("NoPet", &Lua_Item::GetNoPet)
-		.def("PotionBelt", &Lua_Item::GetPotionBelt)
 		.def("Stackable", &Lua_Item::GetStackable)
 		.def("NoTransfer", &Lua_Item::GetNoTransfer)
 		.def("QuestItemFlag", &Lua_Item::GetQuestItemFlag)
 		.def("StackSize", &Lua_Item::GetStackSize)
-		.def("PotionBeltSlots", &Lua_Item::GetPotionBeltSlots)
 		.def("Click_Effect", &Lua_Item::GetClick_Effect)
 		.def("Click_Type", &Lua_Item::GetClick_Type)
 		.def("Click_Level", &Lua_Item::GetClick_Level)

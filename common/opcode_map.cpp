@@ -44,10 +44,8 @@ void load_opcode_names()
 	opcode_map[0x009a]="LiveOP_GuildPeace";
 	opcode_map[0x0132]="LiveOP_GuildRemove";
 	opcode_map[0x0059]="LiveOP_GuildMemberList";
-	opcode_map[0x026e]="LiveOP_GuildMemberUpdate";
 	opcode_map[0x0130]="LiveOP_GuildInvite";
 	opcode_map[0x01c0]="LiveOP_GuildMOTD";
-	opcode_map[0x003c]="LiveOP_GuildPublicNote";
 	opcode_map[0x027e]="LiveOP_GetGuildMOTD";
 	opcode_map[0x0277]="LiveOP_GuildDemote";
 	opcode_map[0x0131]="LiveOP_GuildInviteAccept";

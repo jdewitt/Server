@@ -180,7 +180,6 @@ Client::Client(EQStreamInterface* ieqs)
 	SQL_log = nullptr;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
-	GuildBanker = false;
 	memset(lskey, 0, sizeof(lskey));
 	strcpy(account_name, "");
 	tellsoff = false;
@@ -292,9 +291,6 @@ Client::Client(EQStreamInterface* ieqs)
 }
 
 Client::~Client() {
-	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
-
 	Mob* horse = entity_list.GetMob(this->CastToClient()->GetHorseId());
 	if (horse)
 		horse->Depop();
@@ -372,14 +368,6 @@ void Client::SendLogoutPackets() {
 	ct->fromid = GetID();
 	ct->action = groupActUpdate;
 	FastQueuePacket(&outapp);
-
-	//Don't send for now until we can figure out what the Mac equivelent is.
-	if(eqs->ClientVersion() != EQClientMac)
-	{
-		outapp = new EQApplicationPacket(OP_PreLogoutReply); 
-		FastQueuePacket(&outapp);
-	}
-
 }
 
 void Client::ReportConnectingState() {
@@ -4782,44 +4770,6 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	}
 }
 
-void Client::GuildBankAck()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankAck_Struct));
-
-	GuildBankAck_Struct *gbas = (GuildBankAck_Struct*) outapp->pBuffer;
-
-	gbas->Action = GuildBankAcknowledge;
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::GuildBankDepositAck(bool Fail)
-{
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankDepositAck_Struct));
-
-	GuildBankDepositAck_Struct *gbdas = (GuildBankDepositAck_Struct*) outapp->pBuffer;
-
-	gbdas->Action = GuildBankDeposit;
-
-	gbdas->Fail = Fail ? 1 : 0;
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::ClearGuildBank()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankClear_Struct));
-
-	GuildBankClear_Struct *gbcs = (GuildBankClear_Struct*) outapp->pBuffer;
-
-	gbcs->Action = GuildBankBulkItems;
-	gbcs->DepositAreaCount = 0;
-	gbcs->MainAreaCount = 0;
-
-	FastQueuePacket(&outapp);
-}
-
 void Client::SendGroupCreatePacket()
 {
 	// For SoD and later clients, this is sent the Group Leader upon initial creation of the group
@@ -5655,15 +5605,6 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	if (client->Admin() >= 100) {
 		client->Message(0, "  CharID: %i  EntityID: %i  PetID: %i  OwnerID: %i  AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 	}
-}
-
-void Client::OpenLFGuildWindow()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, 8);
-
-	outapp->WriteUInt32(6);
-
-	FastQueuePacket(&outapp);
 }
 
 const char* Client::GetRacePlural(Client* client) {

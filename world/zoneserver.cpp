@@ -852,8 +852,7 @@ bool ZoneServer::Process() {
 			//these opcodes get processed by the guild manager.
 			case ServerOP_RefreshGuild:
 			case ServerOP_DeleteGuild:
-			case ServerOP_GuildCharRefresh:
-			case ServerOP_GuildMemberUpdate: {
+			case ServerOP_GuildCharRefresh:{
 				guild_mgr.ProcessZonePacket(pack);
 				break;
 			}

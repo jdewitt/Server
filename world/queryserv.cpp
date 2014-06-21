@@ -106,11 +106,6 @@ bool QueryServConnection::Process()
 				zoneserver_list.SendPacket(ZoneID, InstanceID, pack);
 				break;
 			}
-			case ServerOP_LFGuildUpdate:
-			{
-				zoneserver_list.SendPacket(pack);
-				break;
-			}
 			default:
 			{
 				_log(QUERYSERV__ERROR, "Unknown ServerOPcode from QueryServ 0x%04x, size %d", pack->opcode, pack->size);

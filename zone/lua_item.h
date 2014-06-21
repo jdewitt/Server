@@ -139,12 +139,10 @@ public:
 	uint32 GetAugDistiller();
 	bool GetAttuneable();
 	bool GetNoPet();
-	bool GetPotionBelt();
 	bool GetStackable();
 	bool GetNoTransfer();
 	bool GetQuestItemFlag();
 	int GetStackSize();
-	int GetPotionBeltSlots();
 	int GetClick_Effect();
 	int GetClick_Type();
 	int GetClick_Level();

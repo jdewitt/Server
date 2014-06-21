@@ -1616,13 +1616,6 @@ struct PopupResponse_Struct {
 /*0004*/	uint32	popupid;
 };
 
-struct GuildManageBanker_Struct {
-	uint32 unknown0;
-	char myname[64];
-	char member[64];
-	uint32	enabled;
-};
-
 // Server -> Client
 // Update a guild members rank and banker status
 struct GuildSetRank_Struct
@@ -2945,15 +2938,6 @@ struct SimpleMessage_Struct{
 	uint32	unknown8;
 };
 
-struct GuildMemberUpdate_Struct {
-/*00*/	uint32	GuildID;
-/*04*/	char	MemberName[64];
-/*68*/	uint16	ZoneID;
-/*70*/	uint16	InstanceID;	//speculated
-/*72*/	uint32	LastSeen;	//unix timestamp
-/*76*/
-};
-
 struct GuildMemberLevelUpdate_Struct {
 /*00*/	uint32 guild_id;
 /*04*/	char	member_name[64];
@@ -3000,15 +2984,6 @@ struct GuildUpdate_PublicNote{
 	char	name[64];
 	char	target[64];
 	char	note[1]; //variable length.
-};
-
-struct GuildUpdateURLAndChannel_Struct
-{
-/*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel
-/*0004*/	char	Unknown0004[76];
-/*0080*/	char	Text[512];	// URL can be up to 512, SoD client caps the Channel at 128;
-/*0592*/	char	Unknown0592[3584];
-/*4176*/
 };
 
 struct GuildStatus_Struct
@@ -3814,105 +3789,6 @@ struct BeggingResponse_Struct
 /*08*/	uint32	Unknown08;
 /*12*/	uint32	Result;	// 0 = Fail, 1 = Plat, 2 = Gold, 3 = Silver, 4 = Copper
 /*16*/	uint32	Amount;
-};
-
-struct GuildBankAck_Struct
-{
-/*00*/	uint32	Action;	//	10
-/*04*/	uint32	Unknown04;
-};
-
-struct GuildBankDepositAck_Struct
-{
-/*00*/	uint32	Action;	//	10
-/*04*/	uint32	Unknown04;
-/*08*/	uint32	Fail;	//1 = Fail, 0 = Success
-};
-
-struct GuildBankPromote_Struct
-{
-/*00*/	uint32	Action;	// 3
-/*04*/	uint32	Unknown04;
-/*08*/	uint32	Slot;
-/*12*/	uint32	Slot2;	// Always appears to be the same as Slot for Action code 3
-};
-
-struct GuildBankPermissions_Struct
-{
-/*00*/	uint32	Action;	// 6
-/*04*/	uint32	Unknown04;
-/*08*/	uint16	SlotID;
-/*10*/	uint16	Unknown10; // Saw 1, probably indicating it is the main area rather than deposits
-/*12*/	uint32	ItemID;
-/*16*/	uint32	Permissions;
-/*20*/	char	MemberName[64];
-};
-
-struct GuildBankViewItem_Struct
-{
-/*00*/	uint32	Action;
-/*04*/	uint32	Unknown04;
-/*08*/	uint16	SlotID;	// 0 = Deposit area, 1 = Main area
-/*10*/	uint16	Area;
-/*12*/	uint32	Unknown12;
-/*16*/	uint32	Unknown16;
-};
-
-struct GuildBankWithdrawItem_Struct
-{
-/*00*/	uint32	Action;
-/*04*/	uint32	Unknown04;
-/*08*/	uint16	SlotID;
-/*10*/	uint16	Area;
-/*12*/	uint32	Unknown12;
-/*16*/	uint32	Quantity;
-/*20*/
-};
-
-struct GuildBankItemUpdate_Struct
-{
-	void Init(uint32 inAction, uint32 inUnknown004, uint16 inSlotID, uint16 inArea, uint16 inUnknown012, uint32 inItemID, uint32 inIcon, uint32 inQuantity,
-			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
-	{
-		Action = inAction;
-		Unknown004 = inUnknown004;
-		SlotID = inSlotID;
-		Area = inArea;
-		Unknown012 = inUnknown012;
-		ItemID = inItemID;
-		Icon = inIcon;
-		Quantity = inQuantity;
-		Permissions = inPermissions;
-		AllowMerge = inAllowMerge;
-		Useable = inUseable;
-		ItemName[0] = '\0';
-		Donator[0] = '\0';
-		WhoFor[0] = '\0';
-	};
-
-/*000*/	uint32	Action;
-/*004*/	uint32	Unknown004;
-/*008*/	uint16	SlotID;
-/*010*/	uint16	Area;
-/*012*/	uint32	Unknown012;
-/*016*/	uint32	ItemID;
-/*020*/	uint32	Icon;
-/*024*/	uint32	Quantity;
-/*028*/	uint32	Permissions;
-/*032*/	uint8	AllowMerge;
-/*033*/	uint8	Useable;	// Used in conjunction with the Public-if-useable permission.
-/*034*/	char	ItemName[64];
-/*098*/	char	Donator[64];
-/*162*/ char	WhoFor[64];
-/*226*/	uint16	Unknown226;
-};
-
-struct GuildBankClear_Struct
-{
-/*00*/	uint32	Action;
-/*04*/	uint32	Unknown04;
-/*08*/	uint32	DepositAreaCount;
-/*12*/	uint32	MainAreaCount;
 };
 
 struct FindableNPC_Struct

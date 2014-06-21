@@ -173,13 +173,6 @@ void Client::SendCharInfo() {
 	safe_delete(outapp);
 }
 
-void Client::SendPostEnterWorld() {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
-	outapp->size=0;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	if (app->size != sizeof(LoginInfo_Struct)) {
 		return false;
@@ -281,7 +274,6 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 				SendLogServer();
 				SendApproveWorld();
 				SendEnterWorld(cle->name());
-				SendPostEnterWorld();
 			if (!pZoning) {
 				SendExpansionInfo();
 				SendCharInfo();

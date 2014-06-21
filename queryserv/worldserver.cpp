@@ -36,7 +36,6 @@
 extern WorldServer worldserver;
 extern const queryservconfig *Config;
 extern Database database;
-extern LFGuildManager lfguildmanager;
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeQueryServ, Config->SharedKey.c_str())
@@ -154,11 +153,6 @@ void WorldServer::Process()
 
 				switch(Type)
 				{
-					case QSG_LFGuild:
-					{
-						lfguildmanager.HandlePacket(pack);
-						break;
-					}
 
 					default:
 						_log(QUERYSERV__ERROR, "Received unhandled ServerOP_QueryServGeneric", Type);

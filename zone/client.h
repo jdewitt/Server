@@ -852,10 +852,6 @@ public:
 	void SetBoatName(const char* boatname);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
-	void GuildBankAck();
-	void GuildBankDepositAck(bool Fail);
-	inline bool IsGuildBanker() { return GuildBanker; }
-	void ClearGuildBank();
 	void SendGroupCreatePacket();
 	void SendGroupLeaderChangePacket(const char *LeaderName);
 	void SendGroupJoinAcknowledge();
@@ -873,10 +869,6 @@ public:
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
-	void OpenLFGuildWindow();
-	void HandleLFGuildResponse(ServerPacket *pack);
-	void SendLFGuildStatus();
-	void SendGuildLFGuildStatus();
 	void SendNewZone(NewZone_Struct newzone_data, char* name);
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
@@ -1019,7 +1011,6 @@ private:
 	int16				admin;
 	uint32				guild_id;
 	uint8				guildrank; // player's rank in the guild, 0-GUILD_MAX_RANK
-	bool				GuildBanker;
 	uint16				duel_target;
 	bool				duelaccepted;
 	std::list<uint32> keyring;

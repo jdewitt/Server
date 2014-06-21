@@ -160,7 +160,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Dye] = &Client::Handle_OP_Dye;
 	ConnectedOpcodes[OP_LootItem] = &Client::Handle_OP_LootItem;
 	ConnectedOpcodes[OP_GuildDelete] = &Client::Handle_OP_GuildDelete;
-	ConnectedOpcodes[OP_GuildPublicNote] = &Client::Handle_OP_GuildPublicNote;
 	ConnectedOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList;
 	ConnectedOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTD;
 	ConnectedOpcodes[OP_GuildPeace] = &Client::Handle_OP_GuildPeace;
@@ -170,7 +169,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildInvite] = &Client::Handle_OP_GuildInvite;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
-	ConnectedOpcodes[OP_GuildManageBanker] = &Client::Handle_OP_GuildManageBanker;
 	ConnectedOpcodes[OP_GuildInviteAccept] = &Client::Handle_OP_GuildInviteAccept;
 	ConnectedOpcodes[OP_ManaChange] = &Client::Handle_OP_ManaChange;
 	ConnectedOpcodes[OP_MemorizeSpell] = &Client::Handle_OP_MemorizeSpell;
@@ -286,7 +284,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
-	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
 	ConnectedOpcodes[OP_LFGGetMatchesRequest] = &Client::Handle_OP_LFGGetMatchesRequest;
 	ConnectedOpcodes[OP_LFPCommand] = &Client::Handle_OP_LFPCommand;
 	ConnectedOpcodes[OP_LFPGetMatchesRequest] = &Client::Handle_OP_LFPGetMatchesRequest;
@@ -298,15 +295,12 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
-	ConnectedOpcodes[OP_GuildBank] = &Client::Handle_OP_GuildBank;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
-	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
 	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
 	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
-	ConnectedOpcodes[OP_LFGuild] = &Client::Handle_OP_LFGuild;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -633,7 +627,6 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	SendLFGuildStatus();
 	SendGuildMOTD();
 
 	const ItemInst* inst = m_inv[SLOT_CURSOR];
@@ -707,9 +700,7 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 		SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
-		SendGuildLFGuildStatus();
 	}
-	SendLFGuildStatus();
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
@@ -1634,7 +1625,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
 
-	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) // sanity check
+	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && (item->ItemType == ItemTypePotion))) // sanity check
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 
@@ -3082,42 +3073,6 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
-{
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildPublicNote");
-	mpkt(GUILDS__IN_PACKET_TRACE, app);
-
-	if (app->size < sizeof(GuildUpdate_PublicNote)) {
-		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i < size of OP_GuildPublicNote of %zu\n",app->size,sizeof(GuildUpdate_PublicNote));
-		return;
-	}
-	GuildUpdate_PublicNote* gpn=(GuildUpdate_PublicNote*)app->pBuffer;
-
-	CharGuildInfo gci;
-	if(!guild_mgr.GetCharInfo(gpn->target, gci)) {
-		Message(0, "Unable to find '%s'", gpn->target);
-		return;
-	}
-	if(gci.guild_id != GuildID()) {
-		Message(0, "You aren't in the same guild, what do you think you are doing?");
-		return;
-	}
-
-	mlog(GUILDS__ACTIONS, "Setting public note on %s (%d) in guild %s (%d) to: %s",
-		gpn->target, gci.char_id,
-		guild_mgr.GetGuildName(GuildID()), GuildID(),
-		gpn->note);
-
-	if(!guild_mgr.SetPublicNote(gci.char_id, gpn->note)) {
-		Message(13, "Failed to set public note on %s", gpn->target);
-	} else {
-		Message(0, "Successfully changed public note on %s", gpn->target);
-	}
-//	SendGuildMembers(GuildID(), true);
-	return;
-}
-
 void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
 {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildMOTD");
@@ -3184,85 +3139,6 @@ void Client::Handle_OP_BazaarSearchCon(const EQApplicationPacket *app)
 {
 	SendBazaarWelcome();
 	return;
-}
-
-void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
-{
-
-	mlog(GUILDS__IN_PACKETS, "Got OP_GuildManageBanker of len %d", app->size);
-	mpkt(GUILDS__IN_PACKET_TRACE, app);
-	if(app->size != sizeof(GuildManageBanker_Struct)) {
-		mlog(GUILDS__ERROR, "Error: app size of %i != size of OP_GuildManageBanker of %i\n", app->size, sizeof(GuildManageBanker_Struct));
-		return;
-	}
-	GuildManageBanker_Struct* gmb = (GuildManageBanker_Struct*) app->pBuffer;
-
-	if(!IsInAGuild()) {
-		Message(13, "Your not in a guild!");
-		return;
-	}
-
-	CharGuildInfo gci;
-
-	if(!guild_mgr.GetCharInfo(gmb->member, gci))
-	{
-		Message(0, "Unable to find '%s'", gmb->member);
-		return;
-	}
-	bool IsCurrentlyABanker = guild_mgr.GetBankerFlag(gci.char_id);
-
-	bool IsCurrentlyAnAlt = guild_mgr.GetAltFlag(gci.char_id);
-
-	bool NewBankerStatus = gmb->enabled & 0x01;
-
-	bool NewAltStatus = gmb->enabled & 0x02;
-
-	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
-	{
-		Message(13, "Only the guild leader can assign guild bankers!");
-		return;
-	}
-
-	if(IsCurrentlyAnAlt != NewAltStatus)
-	{
-		bool IsAllowed = !strncasecmp(GetName(), gmb->member, strlen(GetName())) || (GuildRank() >= GUILD_OFFICER);
-
-		if(!IsAllowed)
-		{
-			Message(13, "You are not allowed to change the alt status of %s", gmb->member);
-			return;
-		}
-	}
-
-	if(gci.guild_id != GuildID()) {
-		Message(0, "You aren't in the same guild, what do you think you are doing?");
-		return;
-	}
-
-	if(IsCurrentlyABanker != NewBankerStatus)
-	{
-		if(!guild_mgr.SetBankerFlag(gci.char_id, NewBankerStatus)) {
-			Message(13, "Error setting guild banker flag.");
-			return;
-		}
-
-		if(NewBankerStatus)
-			Message(0, "%s has been made a guild banker.", gmb->member);
-		else
-			Message(0, "%s is no longer a guild banker.", gmb->member);
-	}
-	if(IsCurrentlyAnAlt != NewAltStatus)
-	{
-		if(!guild_mgr.SetAltFlag(gci.char_id, NewAltStatus)) {
-			Message(13, "Error setting guild alt flag.");
-			return;
-		}
-
-		if(NewAltStatus)
-			Message(0, "%s has been marked as an alt.", gmb->member);
-		else
-			Message(0, "%s is no longer marked as an alt.", gmb->member);
-	}
 }
 
 void Client::Handle_OP_GuildPeace(const EQApplicationPacket *app)
@@ -3639,9 +3515,6 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 				Message(13, "There was an error during the invite, DB may now be inconsistent.");
 				return;
 			}
-			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
-				GuildBanks->SendGuildBank(this);
-
 		}
 	}
 }
@@ -5133,46 +5006,26 @@ void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 {
-	if (app->size == 0) {
-		// RoF sends this packet 0 sized when switching from auto-combine to experiment windows.
-		// Not completely sure if 0 sized is for this or for closing objects as commented out below
-		EQApplicationPacket end_trade1(OP_FinishWindow, 0);
-		QueuePacket(&end_trade1);
 
-		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-		QueuePacket(&end_trade2);
-
+	if (app->size != sizeof(ClickObjectAction_Struct)) {
+		LogFile->write(EQEMuLog::Error, "Invalid size on OP_ClickObjectAction: Expected %i, Got %i",
+			sizeof(ClickObjectAction_Struct), app->size);
 		return;
-
-		// RoF sends a 0 sized packet for closing objects
-		/*
-		Object* object = GetTradeskillObject();
-		if (object) {
-			object->CastToObject()->Close();
-		}
-		*/
 	}
-	else
-	{
-		if (app->size != sizeof(ClickObjectAction_Struct)) {
-			LogFile->write(EQEMuLog::Error, "Invalid size on OP_ClickObjectAction: Expected %i, Got %i",
-				sizeof(ClickObjectAction_Struct), app->size);
-			return;
-		}
 
-		ClickObjectAction_Struct* oos = (ClickObjectAction_Struct*)app->pBuffer;
-		Entity* entity = entity_list.GetEntityObject(oos->drop_id);
-		if (entity && entity->IsObject()) {
-			Object* object = entity->CastToObject();
-			if(oos->open == 0) {
-				object->Close();
-			} else {
-				LogFile->write(EQEMuLog::Error, "Unsupported action %d in OP_ClickObjectAction", oos->open);
-			}
+	ClickObjectAction_Struct* oos = (ClickObjectAction_Struct*)app->pBuffer;
+	Entity* entity = entity_list.GetEntityObject(oos->drop_id);
+	if (entity && entity->IsObject()) {
+		Object* object = entity->CastToObject();
+		if(oos->open == 0) {
+			object->Close();
 		} else {
-			LogFile->write(EQEMuLog::Error, "Invalid object %d in OP_ClickObjectAction", oos->drop_id);
+			LogFile->write(EQEMuLog::Error, "Unsupported action %d in OP_ClickObjectAction", oos->open);
 		}
+	} else {
+		LogFile->write(EQEMuLog::Error, "Invalid object %d in OP_ClickObjectAction", oos->drop_id);
 	}
+
 
 	SetTradeskillObject(nullptr);
 
@@ -5206,9 +5059,6 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
 	}
 
-	// Observed in RoF after OP_ClickObjectAction:
-	//EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
-	//QueuePacket(&end_trade2);
 	return;
 }
 
@@ -7781,14 +7631,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		m_pp.guild_id = GUILD_NONE;
 	}
 	else
-	{
 		m_pp.guild_id = GuildID();
-
-		if(zone->GetZoneID() == RuleI(World, GuildBankZoneID))
-			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
-	}
-
-	m_pp.guildbanker = GuildBanker;
 
 	switch (race)
 	{
@@ -8406,7 +8249,6 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 }
@@ -9138,33 +8980,6 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	}
 }
 
-void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(MovePotionToBelt_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PotionBelt expected %i got %i",
-					sizeof(MovePotionToBelt_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	MovePotionToBelt_Struct *mptbs = (MovePotionToBelt_Struct*)app->pBuffer;
-	if(mptbs->Action == 0) {
-		const Item_Struct *BaseItem = database.GetItem(mptbs->ItemID);
-		if(BaseItem) {
-			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
-			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
-			strn0cpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, BaseItem->Name, sizeof(BaseItem->Name));
-		}
-	}
-	else {
-		m_pp.potionbelt.items[mptbs->SlotNumber].item_id = 0;
-		m_pp.potionbelt.items[mptbs->SlotNumber].icon = 0;
-		strncpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, "\0", 1);
-	}
-
-	Save();
-
-}
-
 void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {
 
 	if (app->size != sizeof(LFGGetMatchesRequest_Struct)) {
@@ -9670,284 +9485,6 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	safe_delete_array(EscSearchString);
 }
 
-void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
-{
-	if(!GuildBanks)
-		return;
-
-	if((int)zone->GetZoneID() != RuleI(World, GuildBankZoneID))
-	{
-		Message(13, "The Guild Bank is not available in this zone.");
-
-		return;
-	}
-
-	if (app->size < sizeof(uint32)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_GuildBank, size=%i, expected %i", app->size, sizeof(uint32));
-		DumpPacket(app);
-		return;
-	}
-
-	char *Buffer = (char *)app->pBuffer;
-
-	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-
-	if(!IsInAGuild())
-	{
-		Message(13, "You must be in a Guild to use the Guild Bank.");
-
-		if(Action == GuildBankDeposit)
-			GuildBankDepositAck(true);
-		else
-			GuildBankAck();
-
-		return;
-	}
-
-	if(!IsGuildBanker())
-	{
-		if((Action != GuildBankDeposit) && (Action != GuildBankViewItem) && (Action != GuildBankWithdraw))
-		{
-			_log(GUILDS__BANK_ERROR, "Suspected hacking attempt on guild bank from %s", GetName());
-
-			GuildBankAck();
-
-			return;
-		}
-	}
-
-	switch(Action)
-	{
-		case GuildBankPromote:
-		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea))
-			{
-				Message_StringID(13, GUILD_BANK_FULL);
-
-				GuildBankDepositAck(true);
-
-				return;
-			}
-
-			GuildBankPromote_Struct *gbps = (GuildBankPromote_Struct*)app->pBuffer;
-
-			int Slot = GuildBanks->Promote(GuildID(), gbps->Slot);
-
-			if(Slot >= 0)
-			{
-				ItemInst* inst = GuildBanks->GetItem(GuildID(), GuildBankMainArea, Slot, 1);
-
-				if(inst)
-				{
-					Message_StringID(clientMessageWhite, GUILD_BANK_TRANSFERRED, inst->GetItem()->Name);
-					safe_delete(inst);
-				}
-			}
-			else
-				Message(13, "Unexpected error while moving item into Guild Bank.");
-
-			GuildBankAck();
-
-			break;
-		}
-
-		case GuildBankViewItem:
-		{
-			GuildBankViewItem_Struct *gbvis = (GuildBankViewItem_Struct*)app->pBuffer;
-
-			ItemInst* inst = GuildBanks->GetItem(GuildID(), gbvis->Area, gbvis->SlotID, 1);
-
-			if(!inst)
-				break;
-
-			SendItemPacket(0, inst, ItemPacketViewLink);
-
-			safe_delete(inst);
-
-			break;
-		}
-
-		case GuildBankDeposit:	// Deposit Item
-		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankDepositArea))
-			{
-				Message_StringID(13, GUILD_BANK_FULL);
-
-				GuildBankDepositAck(true);
-
-				return;
-			}
-
-			ItemInst *CursorItemInst = GetInv().GetItem(SLOT_CURSOR);
-
-			bool Allowed = true;
-
-			if(!CursorItemInst)
-			{
-				Message(13, "No Item on the cursor.");
-
-				GuildBankDepositAck(true);
-
-				return;
-			}
-
-			const Item_Struct* CursorItem = CursorItemInst->GetItem();
-
-			if(!CursorItem->NoDrop || CursorItemInst->IsInstNoDrop())
-			{
-				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
-				Allowed = false;
-			}
-			else if(CursorItemInst->IsNoneEmptyContainer())
-			{
-				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
-				Allowed = false;
-			}
-			else if(CursorItem->NoRent == 0)
-			{
-				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
-				Allowed = false;
-			}
-			else if(CursorItem->LoreFlag && GuildBanks->HasItem(GuildID(), CursorItem->ID))
-			{
-				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
-
-				Allowed = false;
-			}
-
-			if(!Allowed)
-			{
-				GuildBankDepositAck(true);
-
-				return;
-			}
-
-			if(GuildBanks->AddItem(GuildID(), GuildBankDepositArea, CursorItem->ID, CursorItemInst->GetCharges(), GetName(), GuildBankBankerOnly, ""))
-			{
-				GuildBankDepositAck(false);
-
-				DeleteItemInInventory(SLOT_CURSOR, 0, false);
-			}
-
-			break;
-		}
-
-		case GuildBankPermissions:
-		{
-			GuildBankPermissions_Struct *gbps = (GuildBankPermissions_Struct*)app->pBuffer;
-
-			if(gbps->Permissions == 1)
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName);
-			else
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, "");
-
-			GuildBankAck();
-			break;
-		}
-
-		case GuildBankWithdraw:
-		{
-			if(GetInv()[SLOT_CURSOR])
-			{
-				Message_StringID(13, GUILD_BANK_EMPTY_HANDS);
-
-				GuildBankAck();
-
-				break;
-			}
-
-			GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
-
-			ItemInst* inst = GuildBanks->GetItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
-
-			if(!inst)
-			{
-				GuildBankAck();
-
-				break;
-			}
-
-			if(!IsGuildBanker() && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
-			{
-				_log(GUILDS__BANK_ERROR, "Suspected attempted hack on the guild bank from %s", GetName());
-
-				GuildBankAck();
-
-				safe_delete(inst);
-
-				break;
-			}
-
-			if(CheckLoreConflict(inst->GetItem()))
-			{
-				Message_StringID(13, DUP_LORE);
-
-				GuildBankAck();
-
-				safe_delete(inst);
-
-				break;
-			}
-
-			if (gbwis->Quantity > 0)
-			{
-				PushItemOnCursor(*inst);
-
-				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
-
-				GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
-			}
-			else
-			{
-				Message(0, "Unable to withdraw 0 quantity of %s", inst->GetItem()->Name);
-			}
-
-			safe_delete(inst);
-
-			GuildBankAck();
-
-			break;
-		}
-
-		case GuildBankSplitStacks:
-		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea))
-				Message_StringID(13, GUILD_BANK_FULL);
-			else
-			{
-				GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
-
-				GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity);
-			}
-
-			GuildBankAck();
-
-			break;
-		}
-
-		case GuildBankMergeStacks:
-		{
-			GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
-
-			GuildBanks->MergeStacks(GuildID(), gbwis->SlotID);
-
-			GuildBankAck();
-
-			break;
-		}
-
-		default:
-		{
-			Message(13, "Unexpected GuildBank action.");
-
-			_log(GUILDS__BANK_ERROR, "Received unexpected guild bank action code %i from %s", Action, GetName());
-		}
-	}
-}
-
 void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 {
 	// New OPCode for SOD+ as /hidecorpse is handled serverside now.
@@ -9973,36 +9510,6 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 	entity_list.HideCorpses(this, HideCorpseMode, hcs->Action);
 
 	HideCorpseMode = hcs->Action;
-}
-
-void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(GuildUpdateURLAndChannel_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GuildUpdateURLAndChannel expected %i got %i",
-					sizeof(GuildUpdateURLAndChannel_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*)app->pBuffer;
-
-	if(!IsInAGuild())
-		return;
-
-	if(!guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
-	{
-		Message(13, "Only the guild leader can change the Channel or URL.!");
-		return;
-	}
-
-	if(guuacs->Action == 0)
-		guild_mgr.SetGuildURL(GuildID(), guuacs->Text);
-	else
-		guild_mgr.SetGuildChannel(GuildID(), guuacs->Text);
-
 }
 
 void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
@@ -10199,143 +9706,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 		{
 			Message(clientMessageYellow, "You are now the leader of %s", GuildName);
 
-			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
-				GuildBanks->SendGuildBank(this);
 		}
-	}
-}
-
-void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
-{
-	if(app->size < 4)
-		return;
-
-	uint32 Command = *((uint32 *) app->pBuffer);
-
-	switch(Command)
-	{
-		case 0:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
-			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
-
-#ifdef DARWIN
-#if __DARWIN_C_LEVEL < 200809L
-			if (strlen(pts->Comment) > 256)
-#else
-			if(strnlen(pts->Comment, 256) > 256)
-#endif // __DARWIN_C_LEVEL
-#else
-			if(strnlen(pts->Comment, 256) > 256)
-#endif // DARWIN
-				return;
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(pts->Comment) + 38);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(GetName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_UpdatePlayerInfo);
-			pack->WriteUInt32(GetBaseClass());
-			pack->WriteUInt32(GetLevel());
-			pack->WriteUInt32(GetAAPointsSpent());
-			pack->WriteString(pts->Comment);
-			pack->WriteUInt32(pts->Toggle);
-			pack->WriteUInt32(pts->TimeZone);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 1:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_GuildToggle_Struct);
-			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)app->pBuffer;
-
-#ifdef DARWIN
-#if __DARWIN_C_LEVEL < 200809L
-                        if (strlen(gts->Comment) > 256)
-#else
-                        if(strnlen(gts->Comment, 256) > 256)
-#endif // __DARWIN_C_LEVEL
-#else
-                        if(strnlen(gts->Comment, 256) > 256)
-#endif // __DARWIN
-				return;
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(gts->Comment) + strlen(guild_mgr.GetGuildName(GuildID())) + 43);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(GetName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_UpdateGuildInfo);
-			pack->WriteString(guild_mgr.GetGuildName(GuildID()));
-			pack->WriteString(gts->Comment);
-			pack->WriteUInt32(gts->FromLevel);
-			pack->WriteUInt32(gts->ToLevel);
-			pack->WriteUInt32(gts->Classes);
-			pack->WriteUInt32(gts->AACount);
-			pack->WriteUInt32(gts->Toggle);
-			pack->WriteUInt32(gts->TimeZone);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 3:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_SearchPlayer_Struct);
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + 37);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(GetName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_PlayerMatches);
-
-			LFGuild_SearchPlayer_Struct *sps = (LFGuild_SearchPlayer_Struct *)app->pBuffer;
-			pack->WriteUInt32(sps->FromLevel);
-			pack->WriteUInt32(sps->ToLevel);
-			pack->WriteUInt32(sps->MinAA);
-			pack->WriteUInt32(sps->TimeZone);
-			pack->WriteUInt32(sps->Classes);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 4:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_SearchGuild_Struct);
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + 33);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(GetName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_GuildMatches);
-
-			LFGuild_SearchGuild_Struct *sgs = (LFGuild_SearchGuild_Struct *)app->pBuffer;
-
-			pack->WriteUInt32(sgs->Level);
-			pack->WriteUInt32(sgs->AAPoints);
-			pack->WriteUInt32(sgs->TimeZone);
-			pack->WriteUInt32(sgs->Class);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		default:
-			break;
 	}
 }
 
