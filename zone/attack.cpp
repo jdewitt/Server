@@ -1673,7 +1673,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {   
 	if(IsPet() && GetOwner()->IsClient() && other->IsMezzed()) {
-        RemoveFromHateList(other);
+		RemoveFromHateList(other);
 		GetOwner()->Message_StringID(15, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
 		return false;
 	}
