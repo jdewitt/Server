@@ -2303,6 +2303,7 @@ ENCODE(OP_Some3ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Some6ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpawnPositionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
+ENCODE(OP_TargetBuffs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TargetReject) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TestBuff) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TrackTarget) { ENCODE_FORWARD(OP_Unknown); }

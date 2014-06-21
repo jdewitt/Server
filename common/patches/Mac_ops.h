@@ -228,6 +228,7 @@ E(OP_Some3ByteHPUpdate);
 E(OP_Some6ByteHPUpdate);
 E(OP_SpawnPositionUpdate);
 E(OP_SpellEffect);
+E(OP_TargetBuffs);
 E(OP_TargetReject);
 E(OP_TestBuff);
 E(OP_TrackTarget);
