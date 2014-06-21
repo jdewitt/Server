@@ -1359,11 +1359,13 @@ void Mob::Heal()
 
 void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
 {
-	if(dead || IsCorpse())
+	if(dead || IsCorpse()) {
 		return;
+    }
 
-	if(spell_id==0)
+	if(spell_id==0) {
 		spell_id = SPELL_UNKNOWN;
+    }
 
 	if(spell_id!=0 && spell_id != SPELL_UNKNOWN && other && damage > 0)
 	{
@@ -1393,9 +1395,29 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
 
 	if (damage > 0) {
-
-		if (spell_id == SPELL_UNKNOWN)
+		if (spell_id == SPELL_UNKNOWN) {
 			CheckIncreaseSkill(SkillDefense, other, -20);
+        }
+	}
+}
+
+void Mob::AggroPet(Mob* attacker)
+{
+	/**
+	 * Pets should always assist if someone is trying to attack the master
+	 * Uneless Pet hold is activated
+	 */
+	if(attacker) {
+		Mob *pet = GetPet();
+		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse())
+		{
+			if (!pet->IsHeld()) {
+				mlog(PETS__AGGRO, "Sending pet %s into battle due to attack.", pet->GetName());
+				pet->AddToHateList(attacker, 1);
+				pet->SetTarget(attacker);
+				Message_StringID(10, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
+			}
+		}
 	}
 }
 
@@ -3305,6 +3327,10 @@ bool Client::CheckDoubleRangedAttack() {
 }
 
 void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
+
+	// Agro pet someone tried to damage me
+	AggroPet(attacker);
+
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
 	bool FromDamageShield = (skill_used == SkillAbjuration);
 
@@ -3373,16 +3399,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			}
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
-		Mob *pet = GetPet();
-		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse())
-		{
-			if (!pet->IsHeld()) {
-				mlog(PETS__AGGRO, "Sending pet %s into battle due to attack.", pet->GetName());
-				pet->AddToHateList(attacker, 1);
-				pet->SetTarget(attacker);
-				Message_StringID(10, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
-			}
-		}
 
 		//see if any runes want to reduce this damage
 		if(spell_id == SPELL_UNKNOWN) {
