@@ -3018,7 +3018,6 @@ void Client::Escape()
 {
 	entity_list.RemoveFromTargets(this);
 	SetInvisible(GO_INVISIBLE);
-
 	Message_StringID(MT_Skills, ESCAPE);
 }
 
