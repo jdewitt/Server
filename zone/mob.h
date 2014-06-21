@@ -151,10 +151,6 @@ public:
 	void RogueEvade(Mob *other);
 
 	//Appearance
-	void SendLevelAppearance();
-	void SendStunAppearance();
-	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
-		Client *specific_target=nullptr);
 	void SendTargetable(bool on, Client *specific_target = nullptr);
 	virtual void SendWearChange(uint8 material_slot);
 	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
@@ -244,7 +240,6 @@ public:
 	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1);
 	int CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite = false);
 	int CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caster_level_override = -1);
-	void SendPetBuffsToClient();
 	virtual int GetCurrentBuffSlots() const { return 0; }
 	virtual int GetCurrentSongSlots() const { return 0; }
 	virtual int GetCurrentDiscSlots() const { return 0; }

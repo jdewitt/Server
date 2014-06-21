@@ -296,7 +296,6 @@ OUT(OP_Charm, Charm_Struct);
 OUT(OP_ClickObjectAction, ClickObjectAction_Struct);
 OUT(OP_ConsentResponse, ConsentResponse_Struct);
 //OUT(OP_ConsumeAmmo, MoveItem_Struct);
-OUT(OP_EnduranceUpdate, EnduranceUpdate_Struct);
 OUT(OP_ExpUpdate, ExpUpdate_Struct);
 OUT(OP_GroundSpawn, Object_Struct);
 OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
@@ -311,12 +310,9 @@ OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
 OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);
 OUT(OP_LFGAppearance, LFG_Appearance_Struct);
-OUT(OP_LevelAppearance, LevelAppearance_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
-OUT(OP_MobEnduranceUpdate, MobEnduranceUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);
-OUT(OP_MobManaUpdate, MobManaUpdate_Struct);
 OUT(OP_MobRename, MobRename_Struct);
 OUT(OP_MoneyOnCorpse, moneyOnCorpseStruct);	//follows OP_LootRequest
 OUT(OP_MoneyUpdate, MoneyUpdate_Struct);

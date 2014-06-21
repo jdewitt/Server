@@ -2546,9 +2546,6 @@ void command_level(Client *c, const Seperator *sep){
 		}
 		else {
 			c->GetTarget()->SetLevel(level, true);
-			if(c->GetTarget()->IsClient()) {
-				c->GetTarget()->CastToClient()->SendLevelAppearance();
-			}
 		}
 	}
 }

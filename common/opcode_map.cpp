@@ -155,7 +155,6 @@ void load_opcode_names()
 	opcode_map[0x023f]="LiveOP_FeignDeath";
 	opcode_map[0x012b]="LiveOP_Illusion";
 	opcode_map[0x0078]="LiveOP_LevelUpdate";
-	opcode_map[0x0371]="LiveOP_LevelAppearance";
 	opcode_map[0x00c2]="LiveOP_MemorizeSpell";
 	opcode_map[0x0244]="LiveOP_HPUpdate";
 	opcode_map[0x022e]="LiveOP_SendHPTarget";
@@ -273,8 +272,5 @@ void load_opcode_names()
 	opcode_map[0x1FA1]="LiveOP_WorldObjectsSent";
 	opcode_map[0x4656]="LiveOP_SpawnPositionUpdate";
 	opcode_map[0x4b61]="LiveOP_ManaUpdate";
-	opcode_map[0x02d6]="LiveOP_EnduranceUpdate";
-	opcode_map[0x2ac1]="LiveOP_MobManaUpdate";
-	opcode_map[0x6c5f]="LiveOP_MobEnduranceUpdate";
 	opcode_map[0x73a8]="LiveOP_SendMaxCharacters";
 }

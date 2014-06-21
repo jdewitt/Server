@@ -518,19 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct PetBuff_Struct {
-/*000*/ uint32 petid;
-/*004*/ uint32 spellid[BUFF_COUNT];
-/*104*/ uint32 unknown700;
-/*108*/ uint32 unknown701;
-/*112*/ uint32 unknown702;
-/*116*/ uint32 unknown703;
-/*120*/ uint32 unknown704;
-/*124*/ uint32 ticsremaining[BUFF_COUNT];
-/*224*/ uchar unknown705[20];
-/*244*/ uint32 buffcount;
-};
-
 struct RemoveNimbusEffect_Struct
 {
 /*00*/ uint32 spawnid;			// Spawn ID
@@ -1347,32 +1334,10 @@ struct ManaUpdate_Struct
 /*10*/
 };
 
-struct EnduranceUpdate_Struct
-{
-/*00*/ uint32	cur_end;
-/*04*/ uint32	max_end;
-/*08*/ uint16	spawn_id;
-/*10*/
-};
-
 struct SpawnHPUpdate_Struct2
 {
 /*00*/ int16	spawn_id;
 /*02*/ uint8		hp;			//HP Percentage
-/*03*/
-};
-
-struct MobManaUpdate_Struct
-{
-/*00*/ uint16	spawn_id;
-/*02*/ uint8		mana;		//Mana Percentage
-/*03*/
-};
-
-struct MobEnduranceUpdate_Struct
-{
-/*00*/ uint16	spawn_id;
-/*02*/ uint8		endurance;	//Endurance Percentage
 /*03*/
 };
 
@@ -3291,26 +3256,6 @@ struct RecipeAutoCombine_Struct {
 								// f5 ff ff ff in 'you dont have all the stuff' reply
 };
 
-struct LevelAppearance_Struct { //Sends a little graphic on level up
-	uint32	spawn_id;
-	uint32	parm1;
-	uint32	value1a;
-	uint32	value1b;
-	uint32	parm2;
-	uint32	value2a;
-	uint32	value2b;
-	uint32	parm3;
-	uint32	value3a;
-	uint32	value3b;
-	uint32	parm4;
-	uint32	value4a;
-	uint32	value4b;
-	uint32	parm5;
-	uint32	value5a;
-	uint32	value5b;
-/*64*/
-};
-
 struct MerchantList {
 	uint32	id;
 	uint32	slot;
@@ -3474,23 +3419,6 @@ struct RaidMembers_Struct {
 /*358*/	uint32					member_count;		//including leader
 /*362*/	RaidMemberInfo_Struct	members[1];
 /*...*/	RaidMemberInfo_Struct	empty;	//seem to have an extra member with a 0 length name on the end
-};
-
-struct DynamicWall_Struct {
-/*00*/ char		name[32];
-/*32*/ float	y;
-/*36*/ float	x;
-/*40*/ float	z;
-/*44*/ uint32	something;
-/*48*/ uint32	unknown48;		//0
-/*52*/ uint32	one_hundred;	//0x64
-/*56*/ uint32	unknown56;		//0
-/*60*/ uint32	something2;
-/*64*/ int32	unknown64;		//-1
-/*68*/ uint32	unknown68;		//0
-/*72*/ uint32	unknown72;		//0
-/*76*/ uint32	unknown76;		//0x100
-/*80*/
 };
 
 enum {	//bandolier actions

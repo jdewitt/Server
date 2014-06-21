@@ -6936,50 +6936,6 @@ XS(XS_Mob_HasNPCSpecialAtk)
 	XSRETURN(1);
 }
 
-XS(XS_Mob_SendAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SendAppearanceEffect)
-{
-	dXSARGS;
-	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, parm1, parm2, parm3, parm4, parm5, singleclient)");
-	{
-		Mob *		THIS;
-		int32		parm1 = (int32)SvIV(ST(1));
-		int32		parm2 = 0;
-		int32		parm3 = 0;
-		int32		parm4 = 0;
-		int32		parm5 = 0;
-		Client*		client = nullptr;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 2)	{	parm2 = (int32)SvIV(ST(2));	}
-		if (items > 3)	{	parm3 = (int32)SvIV(ST(3));	}
-		if (items > 4)	{	parm4 = (int32)SvIV(ST(4));	}
-		if (items > 5)	{	parm5 = (int32)SvIV(ST(5));	}
-		if (items > 6)	{
-			if (sv_derived_from(ST(6), "Client")) {
-				IV tmp = SvIV((SV*)SvRV(ST(6)));
-				client = INT2PTR(Client *,tmp);
-			}
-			else
-				Perl_croak(aTHX_ "client is not of type Client");
-			if(client == nullptr)
-				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
-		}
-
-		THIS->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5, client);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_SetFlyMode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlyMode)
 {
@@ -8281,7 +8237,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "FindGroundZ"), XS_Mob_FindGroundZ, file, "$$$;$");
 		newXSproto(strcpy(buf, "ProjectileAnim"), XS_Mob_ProjectileAnim, file, "$$$;$$$$$$");
 		newXSproto(strcpy(buf, "HasNPCSpecialAtk"), XS_Mob_HasNPCSpecialAtk, file, "$$");
-		newXSproto(strcpy(buf, "SendAppearanceEffect"), XS_Mob_SendAppearanceEffect, file, "$$;$$$$");
 		newXSproto(strcpy(buf, "SetFlyMode"), XS_Mob_SetFlyMode, file, "$$");
 		newXSproto(strcpy(buf, "SetTexture"), XS_Mob_SetTexture, file, "$$");
 		newXSproto(strcpy(buf, "SetRace"), XS_Mob_SetRace, file, "$$");

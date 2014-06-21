@@ -1546,26 +1546,6 @@ void Client::SendManaUpdatePacket() {
 		QueuePacket(outapp);
 		safe_delete(outapp);
 
-		Group *g = GetGroup();
-
-		if(g)
-		{
-			outapp = new EQApplicationPacket(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-			EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_MobEnduranceUpdate, sizeof(MobEnduranceUpdate_Struct));
-
-			MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp->pBuffer;
-			MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp2->pBuffer;
-
-			mmus->spawn_id = meus->spawn_id = GetID();
-
-			mmus->mana = GetManaPercent();
-			meus->endurance = GetEndurancePercent();
-
-			safe_delete(outapp);
-			safe_delete(outapp2);
-		}
-
-
 		last_reported_mana = cur_mana;
 		last_reported_endur = cur_end;
 	}
@@ -1581,18 +1561,6 @@ void Client::SendManaUpdate()
 	mus->spawn_id = GetID();
 	QueuePacket(mana_app);
 	safe_delete(mana_app);
-}
-
-// sends endurance update to self
-void Client::SendEnduranceUpdate()
-{
-	EQApplicationPacket* end_app = new EQApplicationPacket(OP_EnduranceUpdate,sizeof(EnduranceUpdate_Struct));
-	EnduranceUpdate_Struct* eus = (EnduranceUpdate_Struct*)end_app->pBuffer;
-	eus->cur_end = GetEndurance();
-	eus->max_end = GetMaxEndurance();
-	eus->spawn_id = GetID();
-	QueuePacket(end_app);
-	safe_delete(end_app);
 }
 
 void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
@@ -4677,7 +4645,6 @@ void Client::SuspendMinion()
 			{
 				CurrentPet->SetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items);
 
-				CurrentPet->SendPetBuffsToClient();
 			}
 			CurrentPet->CalcBonuses();
 

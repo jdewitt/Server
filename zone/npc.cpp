@@ -1650,8 +1650,6 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 void NPC::SetLevel(uint8 in_level, bool command)
 {
-	if(in_level > level)
-		SendLevelAppearance();
 	level = in_level;
 	SendAppearancePacket(AT_WhoLevel, in_level);
 }

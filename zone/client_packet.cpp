@@ -278,7 +278,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
-	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;

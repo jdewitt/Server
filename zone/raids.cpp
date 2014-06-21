@@ -1410,7 +1410,6 @@ void Raid::SendHPPacketsTo(Client *c)
 
 	uint32 gid = this->GetGroup(c);
 	EQApplicationPacket hpapp;
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(members[x].member)
@@ -1433,7 +1432,6 @@ void Raid::SendHPPacketsFrom(Mob *m)
 	if(m->IsClient())
 		gid = this->GetGroup(m->CastToClient());
 	EQApplicationPacket hpapp;
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	m->CreateHPPacket(&hpapp);
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)

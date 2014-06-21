@@ -765,7 +765,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					ps->command = 1;
 					entity_list.QueueClients(this, app);
 					safe_delete(app);
-					SendPetBuffsToClient();
 					SendAppearancePacket(AT_Pet, caster->GetID(), true, true);
 				}
 
@@ -3822,9 +3821,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	}
 
 	buffs[slot].spellid = SPELL_UNKNOWN;
-	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
-		SendPetBuffsToClient();
-	}
+
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
