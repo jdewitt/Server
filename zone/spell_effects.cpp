@@ -2086,7 +2086,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				else
 				{
 					entity_list.RemoveFromTargets(caster);
-					SetInvisible(1);
+					SetInvisible(GO_INVISIBLE);
 				}
 				break;
 			}
