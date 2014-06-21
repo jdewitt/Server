@@ -3328,7 +3328,7 @@ bool Client::CheckDoubleRangedAttack() {
 
 void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
 
-	// Agro pet someone tried ot damage me
+	// Agro pet someone tried to damage me
 	AggroPet(attacker);
 
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
