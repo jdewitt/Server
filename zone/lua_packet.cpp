@@ -615,6 +615,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("GroupLeaderChange", static_cast<int>(OP_GroupLeaderChange)),
 			luabind::value("SendFindableNPCs", static_cast<int>(OP_SendFindableNPCs)),
 			luabind::value("HideCorpse", static_cast<int>(OP_HideCorpse)),
+			luabind::value("TargetBuffs", static_cast<int>(OP_TargetBuffs)),
 			luabind::value("TradeBusy", static_cast<int>(OP_TradeBusy)),
 			luabind::value("SpellEffect", static_cast<int>(OP_SpellEffect)),
 			luabind::value("GuildStatus", static_cast<int>(OP_GuildStatus)),
