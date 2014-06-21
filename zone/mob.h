@@ -27,6 +27,9 @@
 #include <vector>
 #include <string>
 
+#define GO_INVISIBLE 1
+#define DROP_INVISIBLE 0
+
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
 #define MAX_SPECIAL_ATTACK_PARAMS 8
@@ -166,7 +169,7 @@ public:
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	bool IsInvisible(Mob* other = 0) const;
-	void SetInvisible(uint8 state);
+	void SetInvisible(uint8 state, bool showInvis = true);
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
 	
 	//Song
@@ -875,6 +878,7 @@ public:
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
+	void AggroPet(Mob* attacker);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
 	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool checkZ);

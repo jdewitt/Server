@@ -448,18 +448,21 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
-void Mob::SetInvisible(uint8 state)
+void Mob::SetInvisible(uint8 state, bool showInvis)
 {
-	invisible = state;
-	SendAppearancePacket(AT_Invis, invisible);
+	bool invisible = (bool) state;
+	if(showInvis) {
+		SendAppearancePacket(AT_Invis, invisible);
+	}
 	// Invis and hide breaks charms
 
 	if ((this->GetPetType() == petCharmed) && (invisible || hidden || improved_hidden))
 	{
 		Mob* formerpet = this->GetPet();
 
-		if(formerpet)
+		if(formerpet) {
 			formerpet->BuffFadeByEffect(SE_Charm);
+        }
 	}
 }
 
