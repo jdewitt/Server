@@ -6168,17 +6168,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		break;
 	}
 	case PET_GETLOST: {
-		if (mypet->Charmed())
-			break;
-		if (mypet->GetPetType() == petCharmed || !mypet->IsNPC()) {
-			// eqlive ignores this command
-			// we could just remove the charm
-			// and continue
-			mypet->BuffFadeByEffect(SE_Charm);
-			break;
-		} else {
-			SetPet(nullptr);
-		}
+        // Cant tell a charmed pet to get lost
+		if (mypet->GetPetType() == PetType::petCharmed) {
+            break;
+        }
 
 		mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
