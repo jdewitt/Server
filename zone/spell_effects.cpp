@@ -120,7 +120,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 		Message(0, "You are affected by spell '%s' (id %d)", spell.name, spell_id);
 		if(buffslot >= 0)
 		{
-			Message(0, "Buff slot:	%d	Duration:  %d tics", buffslot, buffs[buffslot].ticsremaining);
+			Message(0, "Buff slot:  %d  Duration:  %d tics", buffslot, buffs[buffslot].ticsremaining);
 		}
 #endif
 
@@ -565,7 +565,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				SetInvisible(spell.base[i], false);
+                SetInvisible(spell.base[i], false);
 				break;
 			}
 
@@ -576,7 +576,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				SetInvisible(spell.base[i], false);
+                SetInvisible(spell.base[i], false);
 				break;
 			}
 			case SE_SeeInvis:
@@ -1015,7 +1015,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if( buffs[slot].spellid != SPELL_UNKNOWN &&
+					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
@@ -1217,7 +1217,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Shadow Step: %d", effect_value);
 #endif
-				if(IsNPC()) // see Song of Highsun - sends mob home
+				if(IsNPC())	// see Song of Highsun - sends mob home
 				{
 					Gate();
 				}
@@ -1302,9 +1302,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_DistanceRemoval:
 			{
-				buffs[buffslot].caston_x = int(GetX()); 
-				buffs[buffslot].caston_y = int(GetY()); 
-				buffs[buffslot].caston_z = int(GetZ()); 
+				buffs[buffslot].caston_x = int(GetX());	
+				buffs[buffslot].caston_y = int(GetY());	
+				buffs[buffslot].caston_z = int(GetZ());	
 				break;
 			}
 			
@@ -1328,10 +1328,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							caster->itembonuses.UnfailingDivinity +
 							caster->spellbonuses.UnfailingDivinity;
 				}
-				
+ 				
 				buffs[buffslot].ExtraDIChance = mod;
-				break;
-			}
+  				break;
+ 			}
 
 			case SE_Illusion:
 			{
@@ -1520,15 +1520,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					IsNPC() &&
 					GetOwnerID() &&		// I'm a pet
 					caster &&					// there's a caster
-					caster->GetID() == GetOwnerID() && // and it's my master
+					caster->GetID() == GetOwnerID()	&& // and it's my master
 					GetPetType() != petCharmed
 				)
 				{
 					int lvlmod = 4;
 					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy))
-						lvlmod = 8; //this is an unconfirmed number, I made it up
+						lvlmod = 8;	//this is an unconfirmed number, I made it up
 					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy2))
-						lvlmod = 8; //this is an unconfirmed number, I made it up
+						lvlmod = 8;	//this is an unconfirmed number, I made it up
 					caster->SetMana(caster->GetMana()+(GetLevel()*lvlmod));
 
 					if(caster->IsClient())
@@ -2422,7 +2422,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int mana_damage = 0;
 				int32 mana_to_use = GetMana() - spell.base[i];
 				if(mana_to_use > -1) {
-					SetMana(GetMana() - spell.base[i]); 
+					SetMana(GetMana() - spell.base[i]);	
 					TryTriggerOnValueAmount(false, true);
 					// we take full dmg(-10 to make the damage the right sign)
 					mana_damage = spell.base[i] / -10 * spell.base2[i];
@@ -2775,7 +2775,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_TriggerOnReqTarget:
 			case SE_LimitRace:
 			case SE_FcLimitUse:
-			case SE_FcMute: 
+			case SE_FcMute:	
 			case SE_LimitUseType:
 			case SE_FcStunTimeMod:
 			case SE_StunBashChance:
@@ -2947,23 +2947,23 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 5); break;
 
 		case 111:
-			result = updownsign * (ubase + 6 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 6 * (caster_level - GetMinLevel(spell_id))); break;
 		case 112:
-			result = updownsign * (ubase + 8 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 8 * (caster_level - GetMinLevel(spell_id))); break;
 		case 113:
-			result = updownsign * (ubase + 10 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 10 * (caster_level - GetMinLevel(spell_id))); break;
 		case 114:
-			result = updownsign * (ubase + 15 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 15 * (caster_level - GetMinLevel(spell_id))); break;
 
 		//these formula were updated according to lucy 10/16/04
 		case 115:	// this is only in symbol of transal
 			result = ubase + 6 * (caster_level - GetMinLevel(spell_id)); break;
 		case 116:	// this is only in symbol of ryltan
-			result = ubase + 8 * (caster_level - GetMinLevel(spell_id)); break;
+            result = ubase + 8 * (caster_level - GetMinLevel(spell_id)); break;
 		case 117:	// this is only in symbol of pinzarn
-			result = ubase + 12 * (caster_level - GetMinLevel(spell_id)); break;
+            result = ubase + 12 * (caster_level - GetMinLevel(spell_id)); break;
 		case 118:	// used in naltron and a few others
-			result = ubase + 20 * (caster_level - GetMinLevel(spell_id)); break;
+            result = ubase + 20 * (caster_level - GetMinLevel(spell_id)); break;
 
 		case 119:	// confirmed 2/6/04
 			result = ubase + (caster_level / 8); break;
@@ -3252,7 +3252,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				int bonus = 0;
 				
 				if (caster){
-					bonus = caster->spellbonuses.IncreaseChanceMemwipe + 
+					bonus =	caster->spellbonuses.IncreaseChanceMemwipe + 
 							caster->itembonuses.IncreaseChanceMemwipe + 
 							caster->aabonuses.IncreaseChanceMemwipe;
 				}
@@ -4007,7 +4007,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitSpell:
-				if(base1 < 0) { //Exclude
+				if(base1 < 0) {	//Exclude
 					if (spell_id == -base1)
 						LimitFailure = true;
 				} 
@@ -5038,15 +5038,15 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 {
 	/*
 	Field 175 = numhits type
-	1:	[Incoming Hit Attempts] (323=SE_DefensiveProc, 172=SE_AvoidMeleeChance, 1=SE_ArmorClass, 40=SE_DivineAura)
-	2:	[Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
-	3:	[Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_FcSpellVulnerability) //Note: Determinetal spells only unless proven otherwise
-	4:	NONE
-	5:	[Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
-	6:	[Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
-	7:	[Matching Spells] *When focus is triggered (focus effects)
-	8:	[Incoming Hits or Spells] (329=SE_ManaAbsorbPercentDamage)
-	9:	[Reflected Spells] If successful
+	1:  [Incoming Hit Attempts] (323=SE_DefensiveProc, 172=SE_AvoidMeleeChance, 1=SE_ArmorClass, 40=SE_DivineAura)
+	2:  [Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
+	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_FcSpellVulnerability) //Note: Determinetal spells only unless proven otherwise
+	4:  NONE
+	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
+	6:  [Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
+	7:  [Matching Spells] *When focus is triggered (focus effects)
+	8:  [Incoming Hits or Spells] (329=SE_ManaAbsorbPercentDamage)
+	9:  [Reflected Spells] If successful
 	10: [Defensive Procs] Only count down buff of the proc that executed
 	11: [Melee Procs] Only count down the buff of the proc that executed
 	*/
@@ -5561,7 +5561,7 @@ bool Mob::ImprovedTaunt(){
 }
 
 
-bool Mob::PassCastRestriction(bool UseCastRestriction,	int16 value, bool IsDamage)
+bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDamage)
 {
 	/*If return TRUE spell met all restrictions and can continue (this = target).
 	This check is used when the spell_new field CastRestriction is defined OR spell effect '0'(DD/Heal) has a defined limit
@@ -5599,25 +5599,25 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,	int16 value, bool IsDamag
 	Range 201		: Damage if HP > 75%
 	Range 203		: Damage if HP < 20%
 	Range 216		: TARGET NOT IN COMBAT
-	Range 221 - 249 : Causing damage dependent on how many pets/swarmpets are attacking your target.
+	Range 221 - 249	: Causing damage dependent on how many pets/swarmpets are attacking your target.
 	Range 250		: Damage if HP < 35%
-	Range 300 - 303 : UNKOWN *not implemented
+	Range 300 - 303	: UNKOWN *not implemented
 	Range 304		: Chain + Plate class (buffs)
-	Range 399 - 409 : Heal if HP within a specified range (400 = 0-25% 401 = 25 - 35% 402 = 35-45% ect)
+	Range 399 - 409	: Heal if HP within a specified range (400 = 0-25% 401 = 25 - 35% 402 = 35-45% ect)
 	Range 410 - 411 : UNKOWN
-	Range 500 - 599 : Heal if HP less than a specified value
-	Range 600 - 699 : Limit to Body Type [base2 - 600 = Body]
+	Range 500 - 599	: Heal if HP less than a specified value
+	Range 600 - 699	: Limit to Body Type [base2 - 600 = Body]
 	Range 700		: UNKNOWN
 	Range 701		: NOT PET
 	Range 800		: UKNOWN
 	Range 818 - 819 : If Undead/If Not Undead
-	Range 820 - 822 : UKNOWN
-	Range 835		: Unknown *not implemented
-	Range 836 - 837 : Progression Server / Live Server *not implemented
-	Range 839		: Unknown *not implemented
+	Range 820 - 822	: UKNOWN
+	Range 835 		: Unknown *not implemented
+	Range 836 -	837	: Progression Server / Live Server *not implemented
+	Range 839 		: Unknown *not implemented
 	Range 842 - 844 : Humaniod lv MAX ((842 - 800) * 2)
-	Range 845 - 847 : UNKNOWN
-	Range 10000 - 11000 : Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
+	Range 845 - 847	: UNKNOWN
+	Range 10000 - 11000	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
 	THIS IS A WORK IN PROGRESS
 	*/ 
 
@@ -5720,7 +5720,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,	int16 value, bool IsDamag
 
 			case 122:	
 				if ((GetRace() == 473) || (GetRace() == 425))
-					return	true;
+					return  true;
 				break;
 
 			case 123:	
