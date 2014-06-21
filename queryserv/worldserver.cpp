@@ -28,7 +28,6 @@
 #include "worldserver.h"
 #include "queryservconfig.h"
 #include "database.h"
-#include "lfguild.h"
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"

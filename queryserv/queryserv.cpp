@@ -27,7 +27,6 @@
 #include "database.h"
 #include "queryservconfig.h"
 #include "worldserver.h"
-#include "lfguild.h"
 #include <list>
 #include <signal.h>
 
