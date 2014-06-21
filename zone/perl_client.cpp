@@ -4923,29 +4923,6 @@ XS(XS_Client_GetCustomItemData)
 	XSRETURN(1);
 }
 
-XS(XS_Client_OpenLFGuildWindow); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_OpenLFGuildWindow)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)");
-	{
-		Client *		THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->OpenLFGuildWindow();
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_SignalClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SignalClient)
 {
@@ -5567,7 +5544,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
 		newXSproto(strcpy(buf, "SetCustomItemData"), XS_Client_SetCustomItemData, file, "$$$$");
 		newXSproto(strcpy(buf, "GetCustomItemData"), XS_Client_GetCustomItemData, file, "$$$");
-		newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
 		newXSproto(strcpy(buf, "SignalClient"), XS_Client_SignalClient, file, "$");
 		newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
         newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");

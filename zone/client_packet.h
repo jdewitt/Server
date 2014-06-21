@@ -65,7 +65,6 @@
 	void Handle_OP_Dye(const EQApplicationPacket *app);
 	void Handle_OP_LootItem(const EQApplicationPacket *app);
 	void Handle_OP_GuildDelete(const EQApplicationPacket *app);
-	void Handle_OP_GuildPublicNote(const EQApplicationPacket *app);
 	void Handle_OP_GetGuildsList(const EQApplicationPacket *app);
 	void Handle_OP_SetGuildMOTD(const EQApplicationPacket *app);
 	void Handle_OP_SetGuildMOTDCon(const EQApplicationPacket *app);
@@ -77,7 +76,6 @@
 	void Handle_OP_GuildInvite(const EQApplicationPacket *app);
 	void Handle_OP_GuildRemove(const EQApplicationPacket *app);
 	void Handle_OP_GetGuildMOTD(const EQApplicationPacket *app);
-	void Handle_OP_GuildManageBanker(const EQApplicationPacket *app);
 	void Handle_OP_GuildInviteAccept(const EQApplicationPacket *app);
 	void Handle_OP_ManaChange(const EQApplicationPacket *app);
 	void Handle_OP_MemorizeSpell(const EQApplicationPacket *app);
@@ -203,7 +201,6 @@
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
-	void Handle_OP_PotionBelt(const EQApplicationPacket *app);
 	void Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app);
 	void Handle_OP_LFPCommand(const EQApplicationPacket *app);
 	void Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app);
@@ -214,15 +211,12 @@
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
-	void Handle_OP_GuildBank(const EQApplicationPacket *app);
 	void Handle_OP_HideCorpse(const EQApplicationPacket *app);
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
-	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
 	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
-	void Handle_OP_LFGuild(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);

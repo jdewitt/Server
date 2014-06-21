@@ -39,7 +39,6 @@ uint32 ChatMessagesSent = 0;
 TimeoutManager timeout_manager;
 
 Database database;
-LFGuildManager lfguildmanager;
 std::string WorldShortName;
 
 const queryservconfig *Config;
@@ -112,14 +111,9 @@ int main() {
 
 	worldserver->Connect();
 
-	lfguildmanager.LoadDatabase();
-
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
-
-		if(LFGuildExpireTimer.Check())
-			lfguildmanager.ExpireEntries();
 
 		if (InterserverTimer.Check()) {
 			if (worldserver->TryReconnect() && (!worldserver->Connected()))

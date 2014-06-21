@@ -508,9 +508,7 @@ void WorldServer::Process() {
 //		case ServerOP_GuildInvite:
 		case ServerOP_DeleteGuild:
 		case ServerOP_GuildCharRefresh:
-		case ServerOP_GuildMemberUpdate:
 		case ServerOP_GuildRankUpdate:
-		case ServerOP_LFGuildUpdate:
 //		case ServerOP_GuildGMSet:
 //		case ServerOP_GuildGMSetRank:
 //		case ServerOP_GuildJoin:
@@ -1507,12 +1505,6 @@ void WorldServer::Process() {
 
 			switch(Type)
 			{
-				case QSG_LFGuild:
-				{
-					c->HandleLFGuildResponse(pack);
-					break;
-				}
-
 				default:
 					break;
 			}

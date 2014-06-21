@@ -50,7 +50,6 @@ public:
 	void	SendExpansionInfo();
 	void	SendLogServer();
 	void	SendApproveWorld();
-	void	SendPostEnterWorld();
 	bool	GenPassKey(char* key);
 
 	inline uint32		GetIP()				{ return ip; }

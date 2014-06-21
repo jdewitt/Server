@@ -1022,11 +1022,6 @@ uint64 Lua_Client::GetAllMoney() {
 	return self->GetAllMoney();
 }
 
-void Lua_Client::OpenLFGuildWindow() {
-	Lua_Safe_Call_Void();
-	self->OpenLFGuildWindow();
-}
-
 void Lua_Client::Signal(uint32 id) {
 	Lua_Safe_Call_Void();
 	self->Signal(id);
@@ -1403,7 +1398,6 @@ luabind::scope lua_register_client() {
 		.def("GetAggroCount", (int(Lua_Client::*)(void))&Lua_Client::GetAggroCount)
 		.def("GetCarriedMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetCarriedMoney)
 		.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
-		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)

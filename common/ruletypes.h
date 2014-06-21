@@ -140,7 +140,6 @@ RULE_BOOL ( World, EnableTutorialButton, false)
 RULE_BOOL ( World, EnableReturnHomeButton, false)
 RULE_INT ( World, MaxLevelForTutorial, 10)
 RULE_INT ( World, TutorialZoneID, 189)
-RULE_INT ( World, GuildBankZoneID, 345)
 RULE_INT ( World, MinOfflineTimeToReturnHome, 21600) // 21600 seconds is 6 Hours
 RULE_INT ( World, MaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < AddMaxClientsStatus. Default value: -1 (feature disabled)
 RULE_INT ( World, ExemptMaxClientsStatus, -1 ) // Exempt accounts from the MaxClientsPerIP and AddMaxClientsStatus rules, if their status is >= this value. Default value: -1 (feature disabled)

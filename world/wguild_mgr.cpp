@@ -126,18 +126,6 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		break;
 	}
 
-	case ServerOP_GuildMemberUpdate: {
-		if(pack->size != sizeof(ServerGuildMemberUpdate_Struct))
-		{
-			_log(GUILDS__ERROR, "Received ServerOP_GuildMemberUpdate of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildMemberUpdate_Struct));
-			return;
-		}
-
-		zoneserver_list.SendPacket(pack);
-
-		break;
-	}
-
 	default:
 		_log(GUILDS__ERROR, "Unknown packet 0x%x received from zone??", pack->opcode);
 		break;

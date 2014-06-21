@@ -5057,12 +5057,6 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 	EQApplicationPacket* outapp = nullptr;
 
-	//Create it for a targeting window, else create it for a create buff packet.
-	if(for_target)
-	{
-		outapp = new EQApplicationPacket(OP_TargetBuffs, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
-	}
-
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
 	buff->entity_id = GetID();
 	buff->count = count;

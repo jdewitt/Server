@@ -779,10 +779,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	Instance_Warning_timer = nullptr;
 	database.QGlobalPurge();
 
-	if(zoneid == RuleI(World, GuildBankZoneID))
-		GuildBanks = new GuildBankManager;
-	else
-		GuildBanks = nullptr;
 }
 
 Zone::~Zone() {
@@ -821,7 +817,6 @@ Zone::~Zone() {
 	client_logs.clear();
 #endif
 
-	safe_delete(GuildBanks);
 }
 
 //Modified for timezones.
