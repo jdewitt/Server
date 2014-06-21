@@ -1238,7 +1238,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			return 0;
 		}
 
-		if (dst_inst) {
+		if (src_inst && dst_inst) {
 			if(src_inst->GetID() != dst_inst->GetID()) {
 				_log(INVENTORY__ERROR, "Move from %d to %d with stack size %d. Incompatible item types: %d != %d", src_slot_id, dst_slot_id, move_in->number_in_stack, src_inst->GetID(), dst_inst->GetID());
 				return 0;
@@ -1267,6 +1267,12 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 				_log(INVENTORY__ERROR, "Move from %d to %d with stack size %d. Exceeds dest maximum stack size: %d/%d", src_slot_id, dst_slot_id, move_in->number_in_stack, (src_inst->GetCharges()+dst_inst->GetCharges()), dst_inst->GetItem()->StackSize);
 				return 0;
 			}
+		
+		}
+		else if(!src_inst)
+		{
+			_log(INVENTORY__ERROR, "src_inst has become invalid somewhere.");
+			return 0;
 		}
 		else {
 			// Nothing in destination slot: split stack into two
