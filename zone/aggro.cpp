@@ -504,6 +504,10 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
 		return false;
 	}
+    // Pets cant attack mezed mobs
+    if(IsPet() && GetOwner()->IsClient() && target->IsMezzed()) {
+        return false;
+    }
 
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
