@@ -6170,8 +6170,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_GETLOST: {
         // Cant tell a charmed pet to get lost
 		if (mypet->GetPetType() == PetType::petCharmed) {
-            break;
-        }
+			break;
+		}
 
 		mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
