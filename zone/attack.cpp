@@ -1359,13 +1359,11 @@ void Mob::Heal()
 
 void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
 {
-	if(dead || IsCorpse()) {
+	if(dead || IsCorpse())
 		return;
-    }
 
-	if(spell_id==0) {
+	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
-    }
 
 	if(spell_id!=0 && spell_id != SPELL_UNKNOWN && other && damage > 0)
 	{
@@ -1673,7 +1671,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 }
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
-{
+{   
+	if(IsPet() && GetOwner()->IsClient() && other->IsMezzed()) {
+		RemoveFromHateList(other);
+		GetOwner()->Message_StringID(15, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
+		return false;
+	}
 	int damage = 0;
 
 	if (!other) {
@@ -1683,7 +1686,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	if(DivineAura())
-		return(false);
+		return false;
 
 	if(!GetTarget())
 		SetTarget(other);
