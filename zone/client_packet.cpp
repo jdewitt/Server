@@ -1646,7 +1646,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			return;
 		}
 
- 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
+		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
 		{
 			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
 		}
@@ -5779,7 +5779,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 					{
 						group->DelMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
-						if(memberClient &&  group)
+						if(memberClient &&	group)
 						{
 							if(!memberClient->IsGrouped()) {
 								Group *g = new Group(memberClient);
@@ -6169,10 +6169,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		break;
 	}
 	case PET_GETLOST: {
-        // Cant tell a charmed pet to get lost
+		// Cant tell a charmed pet to get lost
 		if (mypet->GetPetType() == PetType::petCharmed) {
-            break;
-        }
+			break;
+		}
 
 		mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
@@ -9638,7 +9638,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 			bool CorpseRezzed = atoi(Row[6]);
 			bool CorpseBuried = atoi(Row[7]);
 
-			sprintf(Buffer, "Name: %s  Zone: %s  Loc: %8.0f, %8.0f, %8.0f,  Date: %s  Rezzed: %s  Buried: %s",
+			sprintf(Buffer, "Name: %s  Zone: %s  Loc: %8.0f, %8.0f, %8.0f,	Date: %s  Rezzed: %s  Buried: %s",
 				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
 				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
 
@@ -10250,12 +10250,12 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 
 #ifdef DARWIN
 #if __DARWIN_C_LEVEL < 200809L
-                        if (strlen(gts->Comment) > 256)
+						if (strlen(gts->Comment) > 256)
 #else
-                        if(strnlen(gts->Comment, 256) > 256)
+						if(strnlen(gts->Comment, 256) > 256)
 #endif // __DARWIN_C_LEVEL
 #else
-                        if(strnlen(gts->Comment, 256) > 256)
+						if(strnlen(gts->Comment, 256) > 256)
 #endif // __DARWIN
 				return;
 

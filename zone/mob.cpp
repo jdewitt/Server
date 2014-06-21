@@ -451,9 +451,9 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 void Mob::SetInvisible(uint8 state, bool showInvis)
 {
 	bool invisible = (bool) state;
-    if(showInvis) {
-	    SendAppearancePacket(AT_Invis, invisible);
-    }
+		if(showInvis) {
+			SendAppearancePacket(AT_Invis, invisible);
+		}
 	// Invis and hide breaks charms
 
 	if ((this->GetPetType() == petCharmed) && (invisible || hidden || improved_hidden))
@@ -462,7 +462,7 @@ void Mob::SetInvisible(uint8 state, bool showInvis)
 
 		if(formerpet) {
 			formerpet->BuffFadeByEffect(SE_Charm);
-        }
+				}
 	}
 }
 
@@ -1214,36 +1214,36 @@ void Mob::ShowStats(Client* client)
 	}
 	else if (IsCorpse()) {
 		if (IsPlayerCorpse()) {
-			client->Message(0, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetDBID());
+			client->Message(0, "	CharID: %i	PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetDBID());
 		}
 		else {
-			client->Message(0, "  NPCCorpse", GetID());
+			client->Message(0, "	NPCCorpse", GetID());
 		}
 	}
 	else {
-		client->Message(0, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), GetAC(), GetClass(), GetSize(), GetHaste());
-		client->Message(0, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
-		client->Message(0, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
-		client->Message(0, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
-		client->Message(0, "  STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-		client->Message(0, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
-		client->Message(0, "  Race: %i  BaseRace: %i  Texture: %i  HelmTexture: %i  Gender: %i  BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
-		client->Message(0, "  Face: % i Beard: %i  BeardColor: %i  Hair: %i  HairColor: %i", GetLuclinFace(), GetBeard(), GetBeardColor(), GetHairStyle(), GetHairColor());
+		client->Message(0, "	Level: %i  AC: %i  Class: %i	Size: %1.1f  Haste: %i", GetLevel(), GetAC(), GetClass(), GetSize(), GetHaste());
+		client->Message(0, "	HP: %i	Max HP: %i",GetHP(), GetMaxHP());
+		client->Message(0, "	Mana: %i	Max Mana: %i", GetMana(), GetMaxMana());
+		client->Message(0, "	Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
+		client->Message(0, "	STR: %i  STA: %i	DEX: %i  AGI: %i	INT: %i  WIS: %i	CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
+		client->Message(0, "	MR: %i	PR: %i	FR: %i	CR: %i	DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
+		client->Message(0, "	Race: %i	BaseRace: %i	Texture: %i  HelmTexture: %i	Gender: %i	BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
+		client->Message(0, "	Face: % i Beard: %i  BeardColor: %i  Hair: %i  HairColor: %i", GetLuclinFace(), GetBeard(), GetBeardColor(), GetHairStyle(), GetHairColor());
 		if (client->Admin() >= 100)
-			client->Message(0, "  EntityID: %i  PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
+			client->Message(0, "	EntityID: %i	PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 
 		if (IsNPC()) {
 			NPC *n = CastToNPC();
 			uint32 spawngroupid = 0;
 			if(n->respawn2 != 0)
 				spawngroupid = n->respawn2->SpawnGroupID();
-			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
-			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %f Walkspeed: %f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
-			client->Message(0, "  Attack Speed: %i", n->GetAttackSpeedTimer());
+			client->Message(0, "	NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
+			client->Message(0, "	Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %f Walkspeed: %f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
+			client->Message(0, "	Attack Speed: %i", n->GetAttackSpeedTimer());
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
-			client->Message(0, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
+			client->Message(0, "	AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
 		}
 	}
 }
@@ -1274,9 +1274,9 @@ void Mob::ShowBuffs(Client* client) {
 	for (i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
+				client->Message(0, "	%i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
-				client->Message(0, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+				client->Message(0, "	%i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
 
 		}
 	}
@@ -1308,9 +1308,9 @@ void Mob::ShowBuffList(Client* client) {
 	for (i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
+				client->Message(0, "	%i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
-				client->Message(0, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+				client->Message(0, "	%i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
 		}
 	}
 }
@@ -4296,10 +4296,10 @@ void Mob::MeleeLifeTap(int32 damage) {
 bool Mob::TryReflectSpell(uint32 spell_id)
 {
 	if (!spells[spell_id].reflectable)
- 		return false;
+		return false;
 	
 	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
- 	
+	
 	if(chance && MakeRandomInt(0, 99) < chance)
 		return true;
 
@@ -4321,7 +4321,7 @@ void Mob::SpellProjectileEffect()
 		float dist = 0;
 		
 		if (target) 
-				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
+				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],	projectile_z[i]);
 	
 		int increment_end = 0;
 		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
@@ -4853,19 +4853,19 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effectid)
 {
-    int i;
+		int i;
 
-    uint32 buff_count = GetMaxTotalSlots();
-    for(i = 0; i < buff_count; i++)
-    {
-        if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
+		uint32 buff_count = GetMaxTotalSlots();
+		for(i = 0; i < buff_count; i++)
+		{
+				if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
 
-        if(IsEffectInSpell(buffs[i].spellid, effectid))
-        {
-            return(1);
-        }
-    }
-    return(0);
+				if(IsEffectInSpell(buffs[i].spellid, effectid))
+				{
+						return(1);
+				}
+		}
+		return(0);
 }
 
 int Mob::GetSpecialAbility(int ability) {

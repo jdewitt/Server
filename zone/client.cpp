@@ -2724,9 +2724,9 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	message_arg[i++] = message9;
 
 	for(argcount = length = 0; message_arg[argcount]; argcount++)
-    {
+	{
 		length += strlen(message_arg[argcount]) + 1;
-    }
+	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 	OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
@@ -2735,18 +2735,18 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	bufptr = fm->message;
 
 
-    for(i = 0; i < argcount; i++)
-    {
-        strcpy(bufptr, message_arg[i]);
-        bufptr += strlen(message_arg[i]) + 1;
-    }
+	for(i = 0; i < argcount; i++)
+	{
+		strcpy(bufptr, message_arg[i]);
+		bufptr += strlen(message_arg[i]) + 1;
+	}
 
 
-    if(distance>0)
-        entity_list.QueueCloseClients(this,outapp,false,distance);
-    else
-        QueuePacket(outapp);
-    safe_delete(outapp);
+	if(distance>0)
+		entity_list.QueueCloseClients(this,outapp,false,distance);
+	else
+		QueuePacket(outapp);
+	safe_delete(outapp);
 
 }
 
@@ -2840,11 +2840,11 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 	message_arg[i++] = message9;
 
 	for (argcount = length = 0; message_arg[argcount]; argcount++)
-    {
+	{
 		length += strlen(message_arg[argcount]) + 1;
-    }
+	}
 
-    EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
 	OldFormattedMessage_Struct *fm = (OldFormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
@@ -5666,19 +5666,19 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	client->Message(15, "~~~~~ %s %s ~~~~~", GetCleanName(), GetLastName());
 	client->Message(0, " Level: %i Class: %i Race: %i DS: %i/%i Size: %1.1f  Weight: %.1f/%d  ", GetLevel(), GetClass(), GetRace(), GetDS(), RuleI(Character, ItemDamageShieldCap), GetSize(), (float)CalcCurrentWeight() / 10.0f, GetSTR());
-	client->Message(0, " HP: %i/%i  HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
+	client->Message(0, " HP: %i/%i	HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
 	client->Message(0, " AC: %i ( Mit.: %i + Avoid.: %i + Spell: %i ) | Shield AC: %i", CalcAC(), GetACMit(), GetACAvoid(), spellbonuses.AC, shield_ac);
 	if(CalcMaxMana() > 0)
 		client->Message(0, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
 	client->Message(0, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());
-	client->Message(0, " ATK: %i  Worn/Spell ATK %i/%i  Server Side ATK: %i", GetTotalATK(), RuleI(Character, ItemATKCap), GetATKBonus(), GetATK());
+	client->Message(0, " ATK: %i  Worn/Spell ATK %i/%i	Server Side ATK: %i", GetTotalATK(), RuleI(Character, ItemATKCap), GetATKBonus(), GetATK());
 	client->Message(0, " Haste: %i / %i (Item: %i + Spell: %i + Over: %i)", GetHaste(), RuleI(Character, HasteCap), itembonuses.haste, spellbonuses.haste + spellbonuses.hastetype2, spellbonuses.hastetype3 + ExtraHaste);
-	client->Message(0, " STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
+	client->Message(0, " STR: %i  STA: %i  DEX: %i	AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 	client->Message(0, " hSTR: %i  hSTA: %i  hDEX: %i  hAGI: %i  hINT: %i  hWIS: %i  hCHA: %i", GetHeroicSTR(), GetHeroicSTA(), GetHeroicDEX(), GetHeroicAGI(), GetHeroicINT(), GetHeroicWIS(), GetHeroicCHA());
 	client->Message(0, " MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup());
-	client->Message(0, " hMR: %i  hPR: %i  hFR: %i  hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
-	client->Message(0, " Shielding: %i  Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i  Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
-	client->Message(0, " Heal Amt.: %i  Spell Dmg.: %i  Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());
+	client->Message(0, " hMR: %i  hPR: %i  hFR: %i	hCR: %i  hDR: %i hCorruption: %i", GetHeroicMR(), GetHeroicPR(), GetHeroicFR(), GetHeroicCR(), GetHeroicDR(), GetHeroicCorrup());
+	client->Message(0, " Shielding: %i	Spell Shield: %i  DoT Shielding: %i Stun Resist: %i  Strikethrough: %i	Avoidance: %i  Accuracy: %i  Combat Effects: %i", GetShielding(), GetSpellShield(), GetDoTShield(), GetStunResist(), GetStrikeThrough(), GetAvoidance(), GetAccuracy(), GetCombatEffects());
+	client->Message(0, " Heal Amt.: %i	Spell Dmg.: %i	Clairvoyance: %i DS Mitigation: %i", GetHealAmt(), GetSpellDmg(), GetClair(), GetDSMit());
 	if(GetClass() == BARD)
 		client->Message(0, " Singing: %i  Brass: %i  String: %i Percussion: %i Wind: %i", GetSingMod(), GetBrassMod(), GetStringMod(), GetPercMod(), GetWindMod());
 
@@ -5686,7 +5686,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	client->Message(0, " BaseRace: %i  Gender: %i  BaseGender: %i Texture: %i  HelmTexture: %i", GetBaseRace(), GetGender(), GetBaseGender(), GetTexture(), GetHelmTexture());
 	if (client->Admin() >= 100) {
-		client->Message(0, "  CharID: %i  EntityID: %i  PetID: %i  OwnerID: %i  AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
+		client->Message(0, "  CharID: %i  EntityID: %i	PetID: %i  OwnerID: %i	AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 	}
 }
 
@@ -6316,58 +6316,58 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 {
    if(!item) { return; }
 
-    float cons_mod = 0.0f;
+	float cons_mod = 0.0f;
 
-    switch(GetAA(aaInnateMetabolism)){
-        case 1:
-            cons_mod = .10;
-            break;
-        case 2:
-            cons_mod = .25;
-            break;
-        case 3:
-            cons_mod = .50;
-            break;
-        default:
-            cons_mod = 0;
-            break;
-    }
+	switch(GetAA(aaInnateMetabolism)){
+		case 1:
+			cons_mod = .10;
+			break;
+		case 2:
+			cons_mod = .25;
+			break;
+		case 3:
+			cons_mod = .50;
+			break;
+		default:
+			cons_mod = 0;
+			break;
+	}
 
    int value = RuleI(Character,ConsumptionValue);
    if(type == ItemTypeFood)
    {
 	   float percent = (float)item->CastTime/100.0f;
-       float hchange = (cons_mod+percent) * value;
-      // hchange = mod_food_value(item, hchange);
+	   float hchange = (cons_mod+percent) * value;
+	  // hchange = mod_food_value(item, hchange);
 
-       if(hchange < 0) { return; }
+	   if(hchange < 0) { return; }
 
-       m_pp.hunger_level += (int)(hchange + 0.5);
-       DeleteItemInInventory(slot, 1, false);
+	   m_pp.hunger_level += (int)(hchange + 0.5);
+	   DeleteItemInInventory(slot, 1, false);
 
-       if(!auto_consume) //no message if the client consumed for us
-           entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+	   if(!auto_consume) //no message if the client consumed for us
+		   entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
-       LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
+	   LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
 #endif
    }
    else
    {
-       float percent = (float)item->CastTime/100.0f;
-       float tchange = (cons_mod+percent) * value;
-     //  tchange = mod_drink_value(item, tchange);
+	   float percent = (float)item->CastTime/100.0f;
+	   float tchange = (cons_mod+percent) * value;
+	 //  tchange = mod_drink_value(item, tchange);
 
-       if(tchange < 0) { return; }
+	   if(tchange < 0) { return; }
 
-        m_pp.thirst_level += (int)(tchange + 0.5);
-        DeleteItemInInventory(slot, 1, false);
+		m_pp.thirst_level += (int)(tchange + 0.5);
+		DeleteItemInInventory(slot, 1, false);
 
-        if(!auto_consume) //no message if the client consumed for us
-            entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+		if(!auto_consume) //no message if the client consumed for us
+			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 5
-        LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
+		LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
 #endif
    }
 }
