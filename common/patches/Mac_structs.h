@@ -869,7 +869,8 @@ struct Item_Struct
 	/*0340*/ uint16	  FactionAmt2;
 	/*0342*/ uint16   FactionAmt3;
 	/*0344*/ uint16	  FactionAmt4;
-	/*0346*/ uint32	  Deity;
+	/*0346*/ uint16	  Void346;
+	/*0348*/ uint16	  Deity;
 	/*0350*/ uint16	  unknown350;
 	/*0352*/ uint16   ReqLevel; // Required level
 	/*0354*/ uint16   BardType;
