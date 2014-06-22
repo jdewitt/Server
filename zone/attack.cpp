@@ -1394,7 +1394,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	if (damage > 0) {
 		if (spell_id == SPELL_UNKNOWN) {
-			CheckIncreaseSkill(SkillDefense, other, -20);
+			CheckIncreaseSkill(SkillDefense, other, -17);
         }
 	}
 }
@@ -1564,6 +1564,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 			}
 		}
 	}
+	SetMana(GetMaxMana());
 
 	bool LeftCorpse = false;
 
