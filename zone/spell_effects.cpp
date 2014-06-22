@@ -3824,17 +3824,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	buffs[slot].spellid = SPELL_UNKNOWN;
 
-	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
-	{
-		EQApplicationPacket *outapp = MakeBuffsPacket();
-
-		if(GetTarget() == this) {
-			CastToClient()->QueuePacket(outapp);
-		}
-
-		safe_delete(outapp);
-	}
-
 	if (iRecalcBonuses)
 		CalcBonuses();
 }

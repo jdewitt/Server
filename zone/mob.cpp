@@ -99,7 +99,7 @@ Mob::Mob(const char* in_name,
 		gravity_timer(1000),
 		viral_timer(0),
 		flee_timer(FLEE_CHECK_TIMER),
-		eqmac_timer(200)
+		eqmac_timer(250) //Hack timer to prevent Intel's duplicate packets from being processed. This should be handled at the netcode level, methinks.
 
 {
 	targeted = 0;

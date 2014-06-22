@@ -2879,16 +2879,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	mlog(SPELLS__BUFFS, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
 
-	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
-	{
-		EQApplicationPacket *outapp = MakeBuffsPacket();
-
-		if(GetTarget() == this)
-			CastToClient()->QueuePacket(outapp);
-
-		safe_delete(outapp);
-	}
-
 	// recalculate bonuses since we stripped/added buffs
 	CalcBonuses();
 
@@ -5041,45 +5031,6 @@ void Mob::SendBuffsToClient(Client *c)
 {
 	if(!c)
 		return;
-}
-
-EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
-{
-	uint32 count = 0;
-	uint32 buff_count = GetMaxTotalSlots();
-	for(unsigned int i = 0; i < buff_count; ++i)
-	{
-		if(buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			++count;
-		}
-	}
-
-	EQApplicationPacket* outapp = nullptr;
-
-	//Create it for a targeting window, else create it for a create buff packet.
-	if(for_target)
-	{
-		outapp = new EQApplicationPacket(OP_TargetBuffs, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
-	}
-
-	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
-	buff->entity_id = GetID();
-	buff->count = count;
-
-	uint32 index = 0;
-	for(unsigned int i = 0; i < buff_count; ++i)
-	{
-		if(buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			buff->entries[index].buff_slot = i;
-			buff->entries[index].spell_id = buffs[i].spellid;
-			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
-			++index;
-		}
-	}
-
-	return outapp;
 }
 
 void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)

@@ -861,7 +861,17 @@ struct Item_Struct
 	/*0326*/ uint16   ProcRate; 
 	/*0328*/ uint8    ElemDmgType; 
 	/*0329*/ uint8    ElemDmgAmt;
-	/*0330*/ uint8    unknown0330[22]; //Faction Mods and Deity
+	/*0330*/ uint16   FactionMod1;
+	/*0332*/ uint16	  FactionMod2;
+	/*0334*/ uint16   FactionMod3;
+	/*0336*/ uint16	  FactionMod4;
+	/*0338*/ uint16   FactionAmt1;
+	/*0340*/ uint16	  FactionAmt2;
+	/*0342*/ uint16   FactionAmt3;
+	/*0344*/ uint16	  FactionAmt4;
+	/*0346*/ uint16	  Void346;
+	/*0348*/ uint16	  Deity;
+	/*0350*/ uint16	  unknown350;
 	/*0352*/ uint16   ReqLevel; // Required level
 	/*0354*/ uint16   BardType;
 	/*0356*/ uint16	  BardValue;

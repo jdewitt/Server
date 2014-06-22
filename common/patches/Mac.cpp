@@ -1988,6 +1988,15 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ProcRate = item->ProcRate; 
 		thejuice->ElemDmgType = item->ElemDmgType; 
 		thejuice->ElemDmgAmt = item->ElemDmgAmt;
+		thejuice->FactionMod1 = item->FactionMod1;
+		thejuice->FactionMod2 = item->FactionMod2;
+		thejuice->FactionMod3 = item->FactionMod3;
+		thejuice->FactionMod4 = item->FactionMod4;
+		thejuice->FactionAmt1 = item->FactionAmt1;
+		thejuice->FactionAmt2 = item->FactionAmt2;
+		thejuice->FactionAmt3 = item->FactionAmt3;
+		thejuice->FactionAmt4 = item->FactionAmt4;
+		thejuice->Deity = item->Deity;
 		thejuice->ReqLevel = item->ReqLevel; 
 		thejuice->BardType = item->BardType;
 		thejuice->BardValue = item->BardValue;

@@ -524,7 +524,7 @@ bool NPC::Process()
 			if(!IsEngaged()) //pet
 				SetHP(GetHP()+hp_regen+bonus+(GetLevel()/5));
 			else
-				SetHP(GetHP()+hp_regen+bonus);
+				SetHP(GetHP()+(GetLevel()/5)+bonus);
 		} else
 			SetHP(GetHP()+hp_regen);
 

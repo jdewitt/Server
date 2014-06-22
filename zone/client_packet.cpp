@@ -1135,9 +1135,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(zone->watermap)
 	{
-		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos))
+		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos) && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos)))
 		{
-			CheckIncreaseSkill(SkillSwimming, nullptr, -17);
+			CheckIncreaseSkill(SkillSwimming, nullptr, -10);
 		}
 	}
 
@@ -2309,7 +2309,12 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
+	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		return;
+
 	OPMoveCoin(app);
+	eqmac_timer.Start(250, true);
 	return;
 }
 
@@ -2510,7 +2515,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	eqmac_timer.Start(200, true);
+	eqmac_timer.Start(250, true);
 	return;
 }
 
@@ -2629,7 +2634,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 	}
 	else {
 		SetFeigned(true);
-		eqmac_timer.Start(200, true);
+		eqmac_timer.Start(250, true);
 	}
 
 	CheckIncreaseSkill(SkillFeignDeath, nullptr, 5);
@@ -2750,7 +2755,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		}
 		FastQueuePacket(&outapp);
 	}
-	eqmac_timer.Start(200, true);
+	eqmac_timer.Start(250, true);
 	return;
 }
 
@@ -2842,7 +2847,7 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 	{
 		WhoAll(whoall);
 		Message(0, "Whoall request recieved. If you do not see who displayed, please inform the server admins of the time this occured and relog as you are bugged");
-		eqmac_timer.Start(200, true);
+		eqmac_timer.Start(250, true);
 	}
 	return;
 }
@@ -5727,7 +5732,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app) {
 
 	if(tmp != 0 && tmp->IsClient()) {
 		tmp->CastToClient()->QueuePacket(app); 
-		eqmac_timer.Start(200, true);
+		eqmac_timer.Start(250, true);
 	} // Send request to target
 
 	return;
