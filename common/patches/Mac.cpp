@@ -2209,21 +2209,14 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 }
 
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_DenyResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_DumpName) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Feedback) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FindPersonReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_FindPersonRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GiveMoney) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GMApproval) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupAcknowledge) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupDelete) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
@@ -2238,7 +2231,6 @@ ENCODE(OP_GuildManageStatus) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildMemberLevelUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Heartbeat) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_InitialHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
@@ -2259,7 +2251,6 @@ ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LockoutTimerInfo) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }
@@ -2285,18 +2276,13 @@ ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_QueryResponseThing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RecipesFavorite) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RecipesSearch) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ReloadUI) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RespawnWindow) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RestState) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
@@ -2308,11 +2294,8 @@ ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetTitleReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ShopItem) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Some3ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Some6ByteHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpawnPositionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TargetBuffs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TargetReject) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TestBuff) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TrackTarget) { ENCODE_FORWARD(OP_Unknown); }
