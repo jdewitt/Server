@@ -4011,78 +4011,6 @@ void Client::SendDisciplineTimers()
 	safe_delete(outapp);
 }
 
-void Client::SendRespawnBinds()
-{
-	// This sends the data to the client to populate the Respawn from Death Window.
-	//
-	// This should be sent after OP_Death for SoF clients
-	// Client will respond with a 4 byte packet that includes the number of the selection made
-	//
-
-		//If no options have been given, default to Bind + Rez
-	if (respawn_options.empty())
-	{
-		BindStruct* b = &m_pp.binds[0];
-		RespawnOption opt;
-		opt.name = "Bind Location";
-		opt.zoneid = b->zoneId;
-		opt.x = b->x;
-		opt.y = b->y;
-		opt.z = b->z;
-		opt.heading = b->heading;
-		respawn_options.push_front(opt);
-	}
-	//Rez is always added at the end
-	RespawnOption rez;
-	rez.name = "Resurrect";
-	rez.zoneid = zone->GetZoneID();
-	rez.x = GetX();
-	rez.y = GetY();
-	rez.z = GetZ();
-	rez.heading = GetHeading();
-	respawn_options.push_back(rez);
-
-	int num_options = respawn_options.size();
-	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
-	
-	std::list<RespawnOption>::iterator itr;
-	RespawnOption* opt;
-
-	//Find string size for each option
-	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-	{
-		opt = &(*itr);
-		PacketLength += opt->name.size() + 1; //+1 for cstring
-	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespawnWindow, PacketLength);
-	char* buffer = (char*)outapp->pBuffer;
-
-	//Packet header
-	VARSTRUCT_ENCODE_TYPE(uint32, buffer, initial_respawn_selection); //initial selection (from 0)
-	VARSTRUCT_ENCODE_TYPE(uint32, buffer, 0); //unknown
-	VARSTRUCT_ENCODE_TYPE(uint32, buffer, num_options); //number of options to display
-
-	//Individual options
-	int count = 0;
-	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
-	{
-		opt = &(*itr);
-		VARSTRUCT_ENCODE_TYPE(uint32, buffer, count++); //option num (from 0)
-		VARSTRUCT_ENCODE_TYPE(uint32, buffer, opt->zoneid);
-		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->x);
-		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->y);
-		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->z);
-		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->heading);
-		VARSTRUCT_ENCODE_STRING(buffer, opt->name.c_str());
-		VARSTRUCT_ENCODE_TYPE(uint8, buffer, (count == num_options)); //is this one Rez (the last option)?
-	}
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	return;
-}
-
 void Client::SummonAndRezzAllCorpses()
 {
 	PendingRezzXP = -1;
@@ -4805,13 +4733,6 @@ void Client::SendGroupLeaderChangePacket(const char *LeaderName)
 
 	strn0cpy(glcs->LeaderName, LeaderName, sizeof(glcs->LeaderName));
 
-	FastQueuePacket(&outapp);
-}
-
-void Client::SendGroupJoinAcknowledge()
-{
-	// For SoD and later, This produces the 'You have joined the group' message.
-	EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupAcknowledge, 4);
 	FastQueuePacket(&outapp);
 }
 

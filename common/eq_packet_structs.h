@@ -3197,18 +3197,6 @@ struct TradeskillFavorites_Struct {
 	uint32 favorite_recipes[500];
 };
 
-//search request
-struct RecipesSearch_Struct {
-	uint32 object_type;	//same as in favorites
-	uint32 some_id;			//same as in favorites
-	uint32 mintrivial;
-	uint32 maxtrivial;
-	char query[56];
-	uint32 unknown4;	//is set to 00 03 00 00
-	uint32 unknown5; //is set to 4C DD 12 00
-/*80*/
-};
-
 //one sent for each item, from server in reply to favorites or search
 struct RecipeReply_Struct {
 	uint32 object_type;

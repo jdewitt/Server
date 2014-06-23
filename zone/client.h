@@ -823,7 +823,6 @@ public:
 	void DecrementAggroCount();
 	void SendPVPStats();
 	void SendDisciplineTimers();
-	void SendRespawnBinds();
 
 	void CheckEmoteHail(Mob *target, const char* message);
 
@@ -854,7 +853,6 @@ public:
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 	void SendGroupCreatePacket();
 	void SendGroupLeaderChangePacket(const char *LeaderName);
-	void SendGroupJoinAcknowledge();
 	void DoTracking();
 	inline bool IsTracking() { return (TrackingID > 0); }
 	inline void SetPendingGuildInvitation(bool inPendingGuildInvitation) { PendingGuildInvitation = inPendingGuildInvitation; }

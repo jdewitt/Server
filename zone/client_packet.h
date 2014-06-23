@@ -110,8 +110,6 @@
 	void Handle_OP_ShopEnd(const EQApplicationPacket *app);
 	void Handle_OP_ClickObjectAction(const EQApplicationPacket *app);
 	void Handle_OP_ClickObject(const EQApplicationPacket *app);
-	void Handle_OP_RecipesFavorite(const EQApplicationPacket *app);
-	void Handle_OP_RecipesSearch(const EQApplicationPacket *app);
 	void Handle_OP_RecipeDetails(const EQApplicationPacket *app);
 	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_TradeSkillCombine(const EQApplicationPacket *app);
@@ -121,12 +119,10 @@
 	void Handle_OP_FaceChange(const EQApplicationPacket *app);
 	void Handle_OP_GroupInvite(const EQApplicationPacket *app);
 	void Handle_OP_GroupInvite2(const EQApplicationPacket *app);
-	void Handle_OP_GroupAcknowledge(const EQApplicationPacket *app);
 	void Handle_OP_GroupCancelInvite(const EQApplicationPacket *app);
 	void Handle_OP_GroupFollow(const EQApplicationPacket *app);
 	void Handle_OP_GroupFollow2(const EQApplicationPacket *app);
 	void Handle_OP_GroupDisband(const EQApplicationPacket *app);
-	void Handle_OP_GroupDelete(const EQApplicationPacket *app);
 	void Handle_OP_GMEmoteZone(const EQApplicationPacket *app);
 	void Handle_OP_InspectRequest(const EQApplicationPacket *app);
 	void Handle_OP_InspectAnswer(const EQApplicationPacket *app);
@@ -184,10 +180,8 @@
 	void Handle_OP_TributeToggle(const EQApplicationPacket *app);
 	void Handle_OP_TributeNPC(const EQApplicationPacket *app);
 	void Handle_OP_ControlBoat(const EQApplicationPacket *app);
-	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_SetRunMode(const EQApplicationPacket *app);
 	void Handle_OP_SafeFallSuccess(const EQApplicationPacket *app);
-	void Handle_OP_Heartbeat(const EQApplicationPacket *app);
 	void Handle_OP_SafePoint(const EQApplicationPacket *app);
 	void Handle_OP_FindPersonRequest(const EQApplicationPacket *app);
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);

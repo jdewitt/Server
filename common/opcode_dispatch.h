@@ -172,8 +172,6 @@ IN(OP_ShopPlayerSell, Merchant_Purchase_Struct);
 INr(OP_ShopEnd);		//?
 IN(OP_ClickObjectAction, ClickObjectAction_Struct);
 IN(OP_ClickObject, ClickObject_Struct);
-IN(OP_RecipesFavorite, TradeskillFavorites_Struct);
-IN(OP_RecipesSearch, RecipesSearch_Struct);
 IN(OP_RecipeDetails, uint32);
 //there is also a complicated OP_RecipeDetails reply struct OUT
 IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
@@ -186,10 +184,8 @@ IN(OP_GroupInvite, GroupInvite_Struct);
 IN(OP_GroupInvite2, GroupInvite_Struct);	//will generally follow OP_GroupInvite for next invite
 IN(OP_GroupFollow, GroupGeneric_Struct);	//will follow invite
 IN(OP_GroupFollow2, GroupGeneric_Struct);	//will follow invite2
-INr(OP_GroupAcknowledge);	//?
 IN(OP_GroupCancelInvite, GroupGeneric_Struct);	//follows invite or invite2
 IN(OP_GroupDisband, GroupGeneric_Struct);
-INr(OP_GroupDelete);	//?
 IN(OP_GMEmoteZone, GMEmoteZone_Struct);
 IN(OP_InspectRequest, Inspect_Struct);
 IN(OP_InspectAnswer, Inspect_Struct);	//follows request
@@ -243,10 +239,8 @@ IN(OP_Split, Split_Struct);
 INz(OP_SenseTraps);		//?
 INz(OP_DisarmTraps);	//?
 INr(OP_ControlBoat);
-INr(OP_DumpName);
 INr(OP_SetRunMode);
 INr(OP_SafeFallSuccess);
-INr(OP_Heartbeat);
 INr(OP_SafePoint);
 INr(OP_Ignore);
 IN(OP_FindPersonRequest, FindPersonRequest_Struct);
