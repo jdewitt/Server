@@ -7717,40 +7717,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			aa_points[id] = aa[a]->value;
 	}
 
-
-	if(SPDAT_RECORDS > 0)
-	{
-		for(uint32 z=0;z<MAX_PP_MEMSPELL;z++)
-		{
-			if(m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
-				UnmemSpell(z, false);
-		}
-
-		database.LoadBuffs(this);
-		uint32 max_slots = GetMaxBuffSlots();
-		for(int i = 0; i < max_slots; i++) {
-			if(buffs[i].spellid != SPELL_UNKNOWN) {
-				m_pp.buffs[i].spellid = buffs[i].spellid;
-				m_pp.buffs[i].bard_modifier = 10;
-				m_pp.buffs[i].slotid = 2;
-				m_pp.buffs[i].player_id = 0x2211;
-				m_pp.buffs[i].level = buffs[i].casterlevel;
-				m_pp.buffs[i].effect = 0;
-				m_pp.buffs[i].duration = buffs[i].ticsremaining;
-				m_pp.buffs[i].counters = buffs[i].counters;
-			} else {
-				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
-				m_pp.buffs[i].bard_modifier = 10;
-				m_pp.buffs[i].slotid = 0;
-				m_pp.buffs[i].player_id = 0;
-				m_pp.buffs[i].level = 0;
-				m_pp.buffs[i].effect = 0;
-				m_pp.buffs[i].duration = 0;
-				m_pp.buffs[i].counters = 0;
-			}
-		}
-	}
-
 	uint32 groupid = database.GetGroupID(GetName());
 	Group* group = nullptr;
 	if(groupid > 0){
@@ -7801,6 +7767,17 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		LFG = false;
 	}
 
+	if(SPDAT_RECORDS > 0)
+	{
+		database.LoadBuffs(this);
+		for(uint32 z=0;z<MAX_PP_MEMSPELL;z++)
+		{
+			if(m_pp.mem_spells[z] >= (uint32)SPDAT_RECORDS)
+				UnmemSpell(z, false);
+		}
+
+	}
+
 	CalcBonuses();
 	if (m_pp.cur_hp <= 0)
 		m_pp.cur_hp = GetMaxHP();
@@ -7808,6 +7785,38 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	SetHP(m_pp.cur_hp);
 	Mob::SetMana(m_pp.mana);
 	SetEndurance(m_pp.endurance);
+
+	CalcSpellBonuses(&spellbonuses);
+	uint32 max_slots = GetMaxBuffSlots();
+	for(int i = 0; i < max_slots; i++) {
+		if(buffs[i].spellid != SPELL_UNKNOWN) {
+			if(!RuleB(Character,StripBuffsOnLowHP) || GetHP() > spellbonuses.HP || IsDebuffSpell(buffs[i].spellid))
+			{
+				m_pp.buffs[i].spellid = buffs[i].spellid;
+				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].slotid = 2;
+				m_pp.buffs[i].player_id = 0x2211;
+				m_pp.buffs[i].level = buffs[i].casterlevel;
+				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].duration = buffs[i].ticsremaining;
+				m_pp.buffs[i].counters = buffs[i].counters;
+			}
+			else
+			{
+				_log(EQMAC__LOG, "Removing buff: %i HP is: %i MaxHP is: %i BaseHP is: %i HP from spells is: %i", buffs[i].spellid, GetHP(), GetMaxHP(), GetBaseHP(), spellbonuses.HP);
+				BuffFadeBySpellID(buffs[i].spellid);
+			}
+		} else {
+			m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
+			m_pp.buffs[i].bard_modifier = 10;
+			m_pp.buffs[i].slotid = 0;
+			m_pp.buffs[i].player_id = 0;
+			m_pp.buffs[i].level = 0;
+			m_pp.buffs[i].effect = 0;
+			m_pp.buffs[i].duration = 0;
+			m_pp.buffs[i].counters = 0;
+		}
+	}
 
 	if(IsLFP()) {
 		// Update LFP in case any (or all) of our group disbanded while we were zoning.

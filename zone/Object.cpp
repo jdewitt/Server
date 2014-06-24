@@ -523,11 +523,14 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			if(user != last_user)
 				m_inst->ClearByFlags(byFlagSet, byFlagSet);
 
-			for (uint8 i=0; i<10; i++) {
-				ItemInst* inst = m_inst->GetItem(i);
+			uint8 i = 0;
+			int trade_slot = i + IDX_TRADESKILL;
+			for (i=0; i<10; i++) {
+				const ItemInst* inst = m_inst->GetItem(i);
 				if (inst) {
 					//sender->GetInv().RefPutItem(i+4000,inst);
-					//sender->SendItemPacket(i+4000, inst, ItemPacketCharInventory);
+					//sender->SendItemPacket(i+4000, inst, ItemPacketLoot);
+					//sender->PutItemInInventory(trade_slot, *inst, true);
 				}
 			}
 		}

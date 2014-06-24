@@ -1662,7 +1662,7 @@ EQOldStream::EQOldStream()
 		short version: This timer is not needed, it just keeps
 		the green bar green.
 	*/
-	keep_alive_timer = new Timer(1000);
+	keep_alive_timer = new Timer(400);
 
 	no_ack_received_timer->Disable();
 	no_ack_sent_timer->Disable();

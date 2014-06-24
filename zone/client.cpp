@@ -4673,7 +4673,7 @@ void Client::SuspendMinion()
 			{
 				m_suspendedminion.SpellID = SpellID;
 
-				m_suspendedminion.HP = CurrentPet->GetHP();;
+				m_suspendedminion.HP = CurrentPet->GetHP();
 
 				m_suspendedminion.Mana = CurrentPet->GetMana();
 				m_suspendedminion.petpower = CurrentPet->GetPetPower();

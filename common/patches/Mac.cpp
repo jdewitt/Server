@@ -1436,7 +1436,8 @@ ENCODE(OP_GroundSpawn) {
 	for(g=0; g<10; g++)
 	{
 		eq->itemsinbag[g] = emu->itemsinbag[g];
-		_log(EQMAC__LOG, "Found a container item %i in slot: %i", emu->itemsinbag[g], g);
+		if(eq->itemsinbag[g] > 0)
+			_log(EQMAC__LOG, "Found a container item %i in slot: %i", emu->itemsinbag[g], g);
 	}
 	FINISH_ENCODE();
 }
@@ -1953,6 +1954,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 
 		thejuice->Charges = inst->GetCharges(); 
 		thejuice->Price = item->Price;
+		thejuice->SellRate = item->SellRate;
   	}
   	else
   	{ 
@@ -1963,6 +1965,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   
   		thejuice->equipSlot = inst->GetMerchantSlot();
 		thejuice->Price = inst->GetPrice();  
+		thejuice->SellRate = 1;
     }
   
 		thejuice->ItemClass = item->ItemClass;
@@ -1976,7 +1979,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ID = item->ID;        
 		thejuice->Icon = item->Icon;       
 		thejuice->Slots = item->Slots;  
-		thejuice->SellRate = item->SellRate;
+		//thejuice->SellRate = item->SellRate;
 		thejuice->CastTime = item->CastTime;  
 		thejuice->SkillModType = item->SkillModType;
 		thejuice->SkillModValue = item->SkillModValue;
