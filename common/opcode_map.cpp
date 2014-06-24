@@ -12,7 +12,6 @@ std::map<unsigned long, std::string>::iterator itr;;
 }
 void load_opcode_names()
 {
-	opcode_map[0x0176]="LiveOP_Heartbeat";
 	opcode_map[0x02d7]="LiveOP_ReloadUI";
 	opcode_map[0x01eb]="LiveOP_IncreaseStats";
 	opcode_map[0x01d5]="LiveOP_Dye";
@@ -32,7 +31,6 @@ void load_opcode_names()
 	opcode_map[0x0292]="LiveOP_SpawnDoor";
 	opcode_map[0x009d]="LiveOP_Sneak";
 	opcode_map[0x0079]="LiveOP_ExpUpdate";
-	opcode_map[0x027d]="LiveOP_DumpName";
 	opcode_map[0x01ea]="LiveOP_RespondAA";
 	opcode_map[0x01c9]="LiveOP_SendAAStats";
 	opcode_map[0x01e9]="LiveOP_AAAction";
@@ -73,8 +71,6 @@ void load_opcode_names()
 	opcode_map[0x0270]="LiveOP_LFGCommand";
 	opcode_map[0x01d0]="LiveOP_LFGAppearance";
 	opcode_map[0x01b5]="LiveOP_MoneyUpdate";
-	opcode_map[0x0721]="LiveOP_GroupDelete";
-	opcode_map[0x0272]="LiveOP_GroupAcknowledge";
 	opcode_map[0x024a]="LiveOP_GroupUpdate";
 	opcode_map[0x025f]="LiveOP_GroupInvite";
 	opcode_map[0x00ff]="LiveOP_GroupDisband";
@@ -232,8 +228,6 @@ void load_opcode_names()
 	opcode_map[0x02fa]="LiveOP_TributeNPC";
 	opcode_map[0x02fe]="LiveOP_TributeMoney";
 	opcode_map[0x0364]="LiveOP_TributeToggle";
-	opcode_map[0x0322]="LiveOP_RecipesFavorite";
-	opcode_map[0x01f9]="LiveOP_RecipesSearch";
 	opcode_map[0x01fa]="LiveOP_RecipeReply";
 	opcode_map[0x01fb]="LiveOP_RecipeDetails";
 	opcode_map[0x01fc]="LiveOP_RecipeAutoCombine";

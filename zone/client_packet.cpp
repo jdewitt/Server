@@ -204,8 +204,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ShopEnd] = &Client::Handle_OP_ShopEnd;
 	ConnectedOpcodes[OP_ClickObjectAction] = &Client::Handle_OP_ClickObjectAction;
 	ConnectedOpcodes[OP_ClickObject] = &Client::Handle_OP_ClickObject;
-	ConnectedOpcodes[OP_RecipesFavorite] = &Client::Handle_OP_RecipesFavorite;
-	ConnectedOpcodes[OP_RecipesSearch] = &Client::Handle_OP_RecipesSearch;
 	ConnectedOpcodes[OP_RecipeDetails] = &Client::Handle_OP_RecipeDetails;
 	ConnectedOpcodes[OP_RecipeAutoCombine] = &Client::Handle_OP_RecipeAutoCombine;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
@@ -215,12 +213,10 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_FaceChange] = &Client::Handle_OP_FaceChange;
 	ConnectedOpcodes[OP_GroupInvite] = &Client::Handle_OP_GroupInvite;
 	ConnectedOpcodes[OP_GroupInvite2] = &Client::Handle_OP_GroupInvite2;
-	ConnectedOpcodes[OP_GroupAcknowledge] = &Client::Handle_OP_GroupAcknowledge;
 	ConnectedOpcodes[OP_GroupCancelInvite] = &Client::Handle_OP_GroupCancelInvite;
 	ConnectedOpcodes[OP_GroupFollow] = &Client::Handle_OP_GroupFollow;
 	ConnectedOpcodes[OP_GroupFollow2] = &Client::Handle_OP_GroupFollow2;
 	ConnectedOpcodes[OP_GroupDisband] = &Client::Handle_OP_GroupDisband;
-	ConnectedOpcodes[OP_GroupDelete] = &Client::Handle_OP_GroupDelete;
 	ConnectedOpcodes[OP_GMEmoteZone] = &Client::Handle_OP_GMEmoteZone;
 	ConnectedOpcodes[OP_InspectRequest] = &Client::Handle_OP_InspectRequest;
 	ConnectedOpcodes[OP_InspectAnswer] = &Client::Handle_OP_InspectAnswer;
@@ -267,10 +263,8 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
 	ConnectedOpcodes[OP_ControlBoat] = &Client::Handle_OP_ControlBoat;
-	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
 	ConnectedOpcodes[OP_SafeFallSuccess] = &Client::Handle_OP_SafeFallSuccess;
-	ConnectedOpcodes[OP_Heartbeat] = &Client::Handle_OP_Heartbeat;
 	ConnectedOpcodes[OP_SafePoint] = &Client::Handle_OP_SafePoint;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
@@ -5067,129 +5061,6 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(TradeskillFavorites_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for TradeskillFavorites_Struct: Expected: %i, Got: %i",
-			sizeof(TradeskillFavorites_Struct), app->size);
-		return;
-	}
-
-	TradeskillFavorites_Struct* tsf = (TradeskillFavorites_Struct*)app->pBuffer;
-
-	LogFile->write(EQEMuLog::Debug, "Requested Favorites for: %d - %d\n", tsf->object_type, tsf->some_id);
-
-	// results show that object_type is combiner type
-	// some_id = 0 if world combiner, item number otherwise
-
-	// make where clause segment for container(s)
-	char containers[30];
-	if (tsf->some_id == 0) {
-		// world combiner so no item number
-		snprintf(containers,29, "= %u", tsf->object_type);
-	} else {
-		// container in inventory
-		snprintf(containers,29, "in (%u,%u)", tsf->object_type, tsf->some_id);
-	}
-
-	char *query = 0;
-	char buf[5500]; //gotta be big enough for 500 IDs
-
-	bool first = true;
-	uint16 r;
-	char *pos = buf;
-
-	//Assumes item IDs are <10 characters long
-	for(r = 0; r < 500; r++) {
-		if(tsf->favorite_recipes[r] == 0)
-			continue;
-
-		if(first) {
-			pos += snprintf(pos, 10, "%u", tsf->favorite_recipes[r]);
-			first = false;
-		} else {
-			pos += snprintf(pos, 10, ",%u", tsf->favorite_recipes[r]);
-		}
-	}
-
-	if(first)	//no favorites....
-		return;
-
-	//To be a good kid, I should move this SQL somewhere else...
-	//but im lazy right now, so it stays here
-	uint32 qlen = 0;
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		" AND tr.must_learn & 0x20 <> 0x20 AND ((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 100 ", CharacterID(), buf, containers);
-
-	TradeskillSearchResults(query, qlen, tsf->object_type, tsf->some_id);
-
-	safe_delete_array(query);
-	return;
-}
-
-void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(RecipesSearch_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for RecipesSearch_Struct: Expected: %i, Got: %i",
-			sizeof(RecipesSearch_Struct), app->size);
-		return;
-	}
-
-	RecipesSearch_Struct* rss = (RecipesSearch_Struct*)app->pBuffer;
-	rss->query[55] = '\0';	//just to be sure.
-
-
-	LogFile->write(EQEMuLog::Debug, "Requested search recipes for: %d - %d\n", rss->object_type, rss->some_id);
-
-	// make where clause segment for container(s)
-	char containers[30];
-	if (rss->some_id == 0) {
-		// world combiner so no item number
-		snprintf(containers,29, "= %u", rss->object_type);
-	} else {
-		// container in inventory
-		snprintf(containers,29, "in (%u,%u)", rss->object_type, rss->some_id);
-	}
-
-	char *query = 0;
-	char searchclause[140];	//2X rss->query + SQL crap
-
-	//omit the rlike clause if query is empty
-	if(rss->query[0] != 0) {
-		char buf[120];	//larger than 2X rss->query
-		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-
-		snprintf(searchclause, 139, "name rlike '%s' AND", buf);
-	} else {
-		searchclause[0] = '\0';
-	}
-	uint32 qlen = 0;
-
-	//arbitrary limit of 200 recipes, makes sense to me.
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		" AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 200 "
-		, CharacterID(), searchclause, rss->mintrivial, rss->maxtrivial, containers);
-
-	TradeskillSearchResults(query, qlen, rss->object_type, rss->some_id);
-
-	safe_delete_array(query);
-	return;
-}
-
 void Client::Handle_OP_RecipeDetails(const EQApplicationPacket *app)
 {
 	if(app->size < sizeof(uint32)) {
@@ -5369,11 +5240,6 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
-	return;
-}
-
-void Client::Handle_OP_GroupAcknowledge(const EQApplicationPacket *app)
-{
 	return;
 }
 
@@ -5678,19 +5544,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		// If we are looking for players, update to show we are on our own now.
 		UpdateLFP();
 	}
-
-	return;
-}
-
-void Client::Handle_OP_GroupDelete(const EQApplicationPacket *app)
-{
-//should check for leader, only they should be able to do this..
-	Group* group = GetGroup();
-	if (group)
-		group->DisbandGroup();
-
-	if(LFP)
-		UpdateLFP();
 
 	return;
 }
@@ -7283,10 +7136,6 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 	boat->CastToNPC()->SignalNPC(0);
 }
 
-void Client::Handle_OP_DumpName(const EQApplicationPacket *app)
-{
-}
-
 void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 {
 }
@@ -7295,10 +7144,6 @@ void Client::Handle_OP_SafeFallSuccess(const EQApplicationPacket *app)	// bit of
 {
 	if(HasSkill(SkillSafeFall)) //this should only get called if the client has safe fall, but just in case...
 		CheckIncreaseSkill(SkillSafeFall, nullptr); //check for skill up
-}
-
-void Client::Handle_OP_Heartbeat(const EQApplicationPacket *app)
-{
 }
 
 void Client::Handle_OP_SafePoint(const EQApplicationPacket *app)
