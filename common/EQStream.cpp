@@ -2373,14 +2373,14 @@ void EQOldStream::SendPacketQueue(bool Block)
 
 void EQOldStream::FinalizePacketQueue()
 {
-	// Get first send packet on queue and send it!
+	MOutboundQueue.lock();
+	// Send out our existing queue
 	MySendPacketStruct* p = 0;    
 	sockaddr_in to;	
 	memset((char *) &to, 0, sizeof(to));
 	to.sin_family = AF_INET;
 	to.sin_port = remote_port;
 	to.sin_addr.s_addr = remote_ip;
-	MOutboundQueue.lock();
 	while(p = SendQueue.pop())
 	{
 		sendto(listening_socket, (char *) p->buffer, p->size, 0, (sockaddr*)&to, sizeof(to));
@@ -2388,8 +2388,18 @@ void EQOldStream::FinalizePacketQueue()
 		p->size = 0;
 		p = 0;
 	}
-	// ************ Processing finished ************ //
-	pm_state = CLOSED;
+	// Set state to closing, and send off the finalized packet.
+	SetState(CLOSING);
+	MakeEQPacket(0);
+	while(p = SendQueue.pop())
+	{
+		sendto(listening_socket, (char *) p->buffer, p->size, 0, (sockaddr*)&to, sizeof(to));
+		safe_delete_array(p->buffer);
+		p->size = 0;
+		p = 0;
+	}
+	// ************ Connection finished ************ //
+	SetState(CLOSED);
 	MOutboundQueue.unlock();
 }
 
@@ -2483,7 +2493,6 @@ EQStream::MatchState EQOldStream::CheckSignature(const EQStream::Signature *sig)
 
 void EQOldStream::_SendDisconnect()
 {
-	MakeEQPacket(0);
 	FinalizePacketQueue();
 }
 void EQOldStream::Close() {

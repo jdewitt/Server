@@ -2793,21 +2793,8 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 {
 	// The client will send this with his id when he zones, maybe when he disconnects too?
-	//eqs->RemoveData(); // Flushing the queue of packet data to allow for proper zoning
-
-	//just make sure this gets out
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
-	FastQueuePacket(&outapp);
-
-	outapp = new EQApplicationPacket(OP_DeleteSpawn, sizeof(EntityId_Struct));
-	EntityId_Struct* eid = (EntityId_Struct*)outapp->pBuffer;
-	eid->entity_id = GetID();
-
-	entity_list.QueueClients(this, outapp, false);
-	safe_delete(outapp);
-
+	eqs->RemoveData(); // Flushing the queue of packet data to allow for proper zoning
 	hate_list.RemoveEnt(this->CastToMob());
-
 	Disconnect();
 	return;
 }

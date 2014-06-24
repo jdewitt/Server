@@ -119,4 +119,3 @@ bool EQStreamProxy::CheckState(EQStreamState state) {
 
 	return false;
 }
-
