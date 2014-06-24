@@ -7635,7 +7635,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	uint32 max_slots = GetMaxBuffSlots();
 	for(int i = 0; i < max_slots; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN) {
-			if(!RuleB(Character,StripBuffsOnLowHP) || GetHP() > spellbonuses.HP || IsDebuffSpell(buffs[i].spellid))
+			if(!RuleB(Character,StripBuffsOnLowHP) || GetHP() > spellbonuses.HP)
 			{
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = 10;
@@ -7648,8 +7648,16 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 			else
 			{
-				_log(EQMAC__LOG, "Removing buff: %i HP is: %i MaxHP is: %i BaseHP is: %i HP from spells is: %i", buffs[i].spellid, GetHP(), GetMaxHP(), GetBaseHP(), spellbonuses.HP);
-				BuffFadeBySpellID(buffs[i].spellid);
+				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
+				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].slotid = 0;
+				m_pp.buffs[i].player_id = 0;
+				m_pp.buffs[i].level = 0;
+				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].duration = 0;
+				m_pp.buffs[i].counters = 0;
+				_log(EQMAC__LOG, "Removing buffs. HP is: %i MaxHP is: %i BaseHP is: %i HP from spells is: %i", GetHP(), GetMaxHP(), GetBaseHP(), spellbonuses.HP);
+				BuffFadeAll();
 			}
 		} else {
 			m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
