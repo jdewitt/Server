@@ -450,7 +450,7 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 
 void Mob::SetInvisible(uint8 state, bool showInvis)
 {
-	bool invisible = (bool) state;
+	invisible = (bool) state;
 	if(showInvis) {
 		SendAppearancePacket(AT_Invis, invisible);
 	}
