@@ -2361,7 +2361,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 
 			// Send client unlock
 			bind_out->type = 3;
-		//	QueuePacket(outapp);
+			//QueuePacket(outapp);
 			bind_out->type = 0;
 			// Client Unlocked
 			if(!bindmob) {
@@ -2467,8 +2467,8 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
 						else
 							Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						Stand();
 					}
+					Stand();
 				}
 				else {
 					// Send client bind failed
@@ -2495,7 +2495,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 		QueuePacket(outapp);
 	}
 	safe_delete(outapp);
-	Stand();
 	return true;
 }
 
