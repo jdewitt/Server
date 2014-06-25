@@ -578,7 +578,7 @@ void Client::AI_Stop() {
 	if (IsLD())
 	{
 		Save();
-		Disconnect();
+		OnDisconnect(true);
 	}
 }
 
@@ -1538,7 +1538,7 @@ void Mob::AI_Process() {
 					{
 						// LD timer expired, drop out of world
 						if (this->CastToClient()->IsLD())
-							this->CastToClient()->Disconnect();
+							this->CastToClient()->OnDisconnect(true);
 						return;
 					}
 

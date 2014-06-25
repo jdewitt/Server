@@ -721,6 +721,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			SendGuildList();
 			return true;
 		}
+		case OP_WorldLogout:
+		{
+			eqs->Close();
+			return true;
+		}
 		
 		case OP_ZoneChange:
 		case OP_LoginUnknown1:

@@ -1222,8 +1222,7 @@ struct Merchant_Sell_Struct
 	/*007*/	uint8	unknown001;
 	/*008*/	uint8	quantity;	// Qty - when used in Merchant_Purchase_Struct
 	/*009*/	uint8	unknown004[3];
-	/*012*/	uint16  price;
-	/*014*/ uint8	unknown014[2];
+	/*012*/	uint32	price;
 	/*016*/	
 };
 

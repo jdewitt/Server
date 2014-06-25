@@ -2361,7 +2361,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 
 			// Send client unlock
 			bind_out->type = 3;
-			QueuePacket(outapp);
+			//QueuePacket(outapp);
 			bind_out->type = 0;
 			// Client Unlocked
 			if(!bindmob) {
@@ -2463,11 +2463,12 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					}
 					else {
 						//I dont have the real, live
-						Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						if(bindmob->IsClient())
+						if(bindmob->IsClient() && bindmob != this)
 							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
-						// Too many hp message goes here.
+						else
+							Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
 					}
+					Stand();
 				}
 				else {
 					// Send client bind failed
@@ -4601,7 +4602,7 @@ void Client::SuspendMinion()
 			{
 				m_suspendedminion.SpellID = SpellID;
 
-				m_suspendedminion.HP = CurrentPet->GetHP();;
+				m_suspendedminion.HP = CurrentPet->GetHP();
 
 				m_suspendedminion.Mana = CurrentPet->GetMana();
 				m_suspendedminion.petpower = CurrentPet->GetPetPower();

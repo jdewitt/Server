@@ -667,10 +667,14 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	//remove ourself from all proximities
 	ClearAllProximities();
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
-	FastQueuePacket(&outapp);
-
-	Disconnect();
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
+	GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
+	strcpy(gmk->name,GetName());
+	QueuePacket(outapp);
+	safe_delete(outapp);
+	/*EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
+	FastQueuePacket(&outapp);*/
+	//Disconnect();
 }
 
 // Sends the client complete inventory used in character login

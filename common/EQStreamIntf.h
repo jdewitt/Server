@@ -24,6 +24,7 @@ public:
 	virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true) = 0;
 	virtual EQApplicationPacket *PopPacket() = 0;
 	virtual void Close() = 0;
+
 	virtual void ReleaseFromUse() = 0;
 	virtual void RemoveData() = 0;
 	virtual uint32 GetRemoteIP() const = 0;
