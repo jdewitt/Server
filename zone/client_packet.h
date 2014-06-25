@@ -121,7 +121,6 @@
 	void Handle_OP_GroupInvite2(const EQApplicationPacket *app);
 	void Handle_OP_GroupCancelInvite(const EQApplicationPacket *app);
 	void Handle_OP_GroupFollow(const EQApplicationPacket *app);
-	void Handle_OP_GroupFollow2(const EQApplicationPacket *app);
 	void Handle_OP_GroupDisband(const EQApplicationPacket *app);
 	void Handle_OP_GMEmoteZone(const EQApplicationPacket *app);
 	void Handle_OP_InspectRequest(const EQApplicationPacket *app);
@@ -209,7 +208,6 @@
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
-	void Handle_OP_GroupMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);

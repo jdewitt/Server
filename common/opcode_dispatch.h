@@ -183,7 +183,6 @@ IN(OP_FaceChange, FaceChange_Struct);
 IN(OP_GroupInvite, GroupInvite_Struct);
 IN(OP_GroupInvite2, GroupInvite_Struct);	//will generally follow OP_GroupInvite for next invite
 IN(OP_GroupFollow, GroupGeneric_Struct);	//will follow invite
-IN(OP_GroupFollow2, GroupGeneric_Struct);	//will follow invite2
 IN(OP_GroupCancelInvite, GroupGeneric_Struct);	//follows invite or invite2
 IN(OP_GroupDisband, GroupGeneric_Struct);
 IN(OP_GMEmoteZone, GMEmoteZone_Struct);

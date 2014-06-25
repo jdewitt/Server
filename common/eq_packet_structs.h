@@ -2033,13 +2033,6 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0132*/
 };
 
-struct GroupLeaderChange_Struct
-{
-/*000*/		char	Unknown000[64];
-/*064*/		char	LeaderName[64];
-/*128*/		char	Unknown128[20];
-};
-
 struct FaceChange_Struct {
 /*000*/	uint8	haircolor;
 /*001*/	uint8	beardcolor;
@@ -3833,16 +3826,6 @@ struct CorpseDrag_Struct
 /*064*/ char DraggerName[64];
 /*128*/ uint8 Unknown128[24];
 /*152*/
-};
-
-// New OpCode/Struct for SoD+
-struct GroupMakeLeader_Struct
-{
-/*000*/ uint32 Unknown000;
-/*004*/ char CurrentLeader[64];
-/*068*/ char NewLeader[64];
-/*132*/ char Unknown072[324];
-/*456*/
 };
 
 struct Untargetable_Struct {
