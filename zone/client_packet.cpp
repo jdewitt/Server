@@ -215,7 +215,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GroupInvite2] = &Client::Handle_OP_GroupInvite2;
 	ConnectedOpcodes[OP_GroupCancelInvite] = &Client::Handle_OP_GroupCancelInvite;
 	ConnectedOpcodes[OP_GroupFollow] = &Client::Handle_OP_GroupFollow;
-	ConnectedOpcodes[OP_GroupFollow2] = &Client::Handle_OP_GroupFollow2;
 	ConnectedOpcodes[OP_GroupDisband] = &Client::Handle_OP_GroupDisband;
 	ConnectedOpcodes[OP_GMEmoteZone] = &Client::Handle_OP_GMEmoteZone;
 	ConnectedOpcodes[OP_InspectRequest] = &Client::Handle_OP_InspectRequest;
@@ -293,7 +292,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
-	ConnectedOpcodes[OP_GroupMakeLeader] = &Client::Handle_OP_GroupMakeLeader;
 	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
@@ -5260,11 +5258,6 @@ void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GroupFollow(const EQApplicationPacket *app)
 {
-	Handle_OP_GroupFollow2(app);
-}
-
-void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
-{
 	if (app->size != sizeof(GroupGeneric_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Invalid size for OP_GroupFollow: Expected: %i, Got: %i",
 			sizeof(GroupGeneric_Struct), app->size);
@@ -9451,27 +9444,6 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
-}
-
-void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket *app)
-{
-	VERIFY_PACKET_LENGTH(OP_GroupMakeLeader, app, GroupMakeLeader_Struct);
-
-	GroupMakeLeader_Struct *gmls = (GroupMakeLeader_Struct *)app->pBuffer;
-
-	Mob* NewLeader = entity_list.GetClientByName(gmls->NewLeader);
-
-	Group* g = GetGroup();
-
-	if (NewLeader && g)
-	{
-		if(g->IsLeader(this))
-			g->ChangeLeader(NewLeader);
-		else {
-			LogFile->write(EQEMuLog::Debug, "Group /makeleader request originated from non-leader member: %s", GetName());
-			DumpPacket(app);
-		}
-	}
 }
 
 void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)

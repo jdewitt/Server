@@ -2220,12 +2220,6 @@ ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildManageAdd) { ENCODE_FORWARD(OP_Unknown); }
@@ -2236,8 +2230,6 @@ ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InitialHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InitialMobHealth) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemLinkClick) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
@@ -2254,7 +2246,6 @@ ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MoveLogRequest) { ENCODE_FORWARD(OP_Unknown); }

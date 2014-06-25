@@ -4698,45 +4698,6 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	}
 }
 
-void Client::SendGroupCreatePacket()
-{
-	// For SoD and later clients, this is sent the Group Leader upon initial creation of the group
-	//
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupUpdateB, 32 + strlen(GetName()));
-
-	char *Buffer = (char *)outapp->pBuffer;
-	// Header
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0
-	VARSTRUCT_ENCODE_STRING(Buffer, GetName());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::SendGroupLeaderChangePacket(const char *LeaderName)
-{
-	// For SoD and later, send name of Group Leader to this client
-
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
-
-	GroupLeaderChange_Struct *glcs = (GroupLeaderChange_Struct*)outapp->pBuffer;
-
-	strn0cpy(glcs->LeaderName, LeaderName, sizeof(glcs->LeaderName));
-
-	FastQueuePacket(&outapp);
-}
-
 void Client::CheckEmoteHail(Mob *target, const char* message)
 {
 	if(

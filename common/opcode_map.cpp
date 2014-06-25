@@ -76,7 +76,6 @@ void load_opcode_names()
 	opcode_map[0x00ff]="LiveOP_GroupDisband";
 	opcode_map[0x00d5]="LiveOP_GroupInvite2";
 	opcode_map[0x025e]="LiveOP_GroupFollow";
-	opcode_map[0x00d7]="LiveOP_GroupFollow2";
 	opcode_map[0x00d6]="LiveOP_GroupCancelInvite";
 	opcode_map[0x0156]="LiveOP_Split";
 	opcode_map[0x00d8]="LiveOP_Jump";

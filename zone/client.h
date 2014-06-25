@@ -851,8 +851,6 @@ public:
 	void SetBoatName(const char* boatname);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
-	void SendGroupCreatePacket();
-	void SendGroupLeaderChangePacket(const char *LeaderName);
 	void DoTracking();
 	inline bool IsTracking() { return (TrackingID > 0); }
 	inline void SetPendingGuildInvitation(bool inPendingGuildInvitation) { PendingGuildInvitation = inPendingGuildInvitation; }
