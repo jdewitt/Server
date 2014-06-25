@@ -553,19 +553,24 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 
 	switch(spells[spell_id].skill) {
 	case SkillAbjuration:
-		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
+		if(GetRawSkill(SkillSpecializeAbjure) > 0)
+			CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
 		break;
 	case SkillAlteration:
-		CheckIncreaseSkill(SkillSpecializeAlteration, nullptr);
+		if(GetRawSkill(SkillSpecializeAlteration) > 0)
+			CheckIncreaseSkill(SkillSpecializeAlteration, nullptr);
 		break;
 	case SkillConjuration:
-		CheckIncreaseSkill(SkillSpecializeConjuration, nullptr);
+		if(GetRawSkill(SkillSpecializeConjuration) > 0)
+			CheckIncreaseSkill(SkillSpecializeConjuration, nullptr);
 		break;
 	case SkillDivination:
-		CheckIncreaseSkill(SkillSpecializeDivination, nullptr);
+		if(GetRawSkill(SkillSpecializeDivination) > 0)
+			CheckIncreaseSkill(SkillSpecializeDivination, nullptr);
 		break;
 	case SkillEvocation:
-		CheckIncreaseSkill(SkillSpecializeEvocation, nullptr);
+		if(GetRawSkill(SkillSpecializeEvocation) > 0)
+			CheckIncreaseSkill(SkillSpecializeEvocation, nullptr);
 		break;
 	default:
 		//wtf...

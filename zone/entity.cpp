@@ -303,8 +303,11 @@ void EntityList::AddClient(Client *client)
 
 void EntityList::TrapProcess()
 {
+
+#ifdef IDLE_WHEN_EMPTY
 	if (numclients < 1)
 		return;
+#endif
 
 	if (trap_list.empty()) {
 		net.trap_timer.Disable();
