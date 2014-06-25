@@ -9039,20 +9039,20 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 
 void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 {
-	if(app->size != sizeof(GroupUpdate_Struct))
+	if(app->size != sizeof(GroupUpdate2_Struct))
 	{
 		LogFile->write(EQEMuLog::Debug, "Size mismatch on OP_GroupUpdate: got %u expected %u",
-			app->size, sizeof(GroupUpdate_Struct));
+			app->size, sizeof(GroupUpdate2_Struct));
 		DumpPacket(app);
 		return;
 	}
 
-	GroupUpdate_Struct* gu = (GroupUpdate_Struct*)app->pBuffer;
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)app->pBuffer;
 
 	switch(gu->action) {
 		case groupActMakeLeader:
 		{
-			Mob* newleader = entity_list.GetClientByName(gu->membername[0]);
+			Mob* newleader = entity_list.GetClientByName(gu->membername);
 			Group* group = this->GetGroup();
 
 			if (newleader && group) {
