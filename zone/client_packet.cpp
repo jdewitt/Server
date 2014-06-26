@@ -193,7 +193,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GMKill] = &Client::Handle_OP_GMKill;
 	ConnectedOpcodes[OP_GMLastName] = &Client::Handle_OP_GMLastName;
 	ConnectedOpcodes[OP_GMToggle] = &Client::Handle_OP_GMToggle;
-	ConnectedOpcodes[OP_LFGCommand] = &Client::Handle_OP_LFGCommand;
 	ConnectedOpcodes[OP_GMGoto] = &Client::Handle_OP_GMGoto;
 	ConnectedOpcodes[OP_Trader] = &Client::Handle_OP_Trader;
 	ConnectedOpcodes[OP_TraderShop] = &Client::Handle_OP_TraderShop;
@@ -265,7 +264,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
 	ConnectedOpcodes[OP_SafeFallSuccess] = &Client::Handle_OP_SafeFallSuccess;
 	ConnectedOpcodes[OP_SafePoint] = &Client::Handle_OP_SafePoint;
-	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
@@ -277,9 +275,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
-	ConnectedOpcodes[OP_LFGGetMatchesRequest] = &Client::Handle_OP_LFGGetMatchesRequest;
-	ConnectedOpcodes[OP_LFPCommand] = &Client::Handle_OP_LFPCommand;
-	ConnectedOpcodes[OP_LFPGetMatchesRequest] = &Client::Handle_OP_LFPGetMatchesRequest;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
 	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
@@ -467,7 +462,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		account_id));
 	//DO NOT FORGET TO EDIT ZoneDatabase::GetCharacterInfoForLogin if you change this
 	dbaw->AddQuery(2, &query, MakeAnyLenString(&query,
-		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,firstlogon"
+		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,instanceid,firstlogon"
 		" FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i",
 		character_id));
 	dbaw->AddQuery(3, &query, MakeAnyLenString(&query,
@@ -2554,9 +2549,6 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app) {
 		return;
 	}
 
-	if(IsLFP())
-		worldserver.StopLFP(CharacterID());
-
 	if (GetGM())
 	{
 		OnDisconnect(true);
@@ -4306,52 +4298,6 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(LFG_Struct)) {
-		std::cout << "Wrong size on OP_LFGCommand. Got: " << app->size << ", Expected: " << sizeof(LFG_Struct) << std::endl;
-		DumpPacket(app);
-		return;
-	}
-
-	// Process incoming packet
-	LFG_Struct* lfg = (LFG_Struct*) app->pBuffer;
-
-	switch(lfg->value & 0xFF) {
-		case 0:
-			if(LFG) {
-				database.SetLFG(CharacterID(), false);
-				LFG = false;
-				LFGComments[0] = '\0';
-			}
-			break;
-		case 1:
-			if(!LFG) {
-				LFG = true;
-				database.SetLFG(CharacterID(), true);
-			}
-			LFGFromLevel = lfg->FromLevel;
-			LFGToLevel = lfg->ToLevel;
-			LFGMatchFilter = lfg->MatchFilter;
-			strcpy(LFGComments, lfg->Comments);
-			break;
-		default:
-			Message(0, "Error: unknown LFG value %i", lfg->value);
-	}
-
-	UpdateWho();
-
-	// Issue outgoing packet to notify other clients
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LFGAppearance, sizeof(LFG_Appearance_Struct));
-	LFG_Appearance_Struct* lfga = (LFG_Appearance_Struct*)outapp->pBuffer;
-	lfga->spawn_id = this->GetID();
-	lfga->lfg = (uint8)LFG;
-
-	entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	return;
-}
-
 void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSummon_Struct)) {
@@ -5264,13 +5210,6 @@ void Client::Handle_OP_GroupFollow(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(LFP) {
-		// If we were looking for players to start our own group, but we accept an invitation to another
-		// group, turn LFP off.
-		database.SetLFP(CharacterID(), false);
-		worldserver.StopLFP(CharacterID());
-	}
-
 	GroupGeneric_Struct* gf = (GroupGeneric_Struct*) app->pBuffer;
 	Mob* inviter = entity_list.GetClientByName(gf->name1);
 
@@ -5367,12 +5306,6 @@ void Client::Handle_OP_GroupFollow(const EQApplicationPacket *app)
 
 		if(!group->AddMember(this))
 			return;
-
-		if(inviter->CastToClient()->IsLFP()) {
-			// If the player who invited us to a group is LFP, have them update world now that we have joined
-			// their group.
-			inviter->CastToClient()->UpdateLFP();
-		}
 
 		database.RefreshGroupFromDB(this);
 		group->SendHPPacketsTo(this);
@@ -5520,11 +5453,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		else
 			LogFile->write(EQEMuLog::Error, "Failed to remove player from group. Unable to find player named %s in player group", gd->name2);
 	}
-	if(LFP) {
-		// If we are looking for players, update to show we are on our own now.
-		UpdateLFP();
-	}
-
 	return;
 }
 
@@ -7134,132 +7062,6 @@ void Client::Handle_OP_Ignore(const EQApplicationPacket *app)
 {
 }
 
-void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(FindPersonRequest_Struct))
-		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n",sizeof(FindPersonRequest_Struct),app->size);
-	else {
-		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
-
-		std::vector<FindPerson_Point> points;
-		Mob* target = entity_list.GetMob(t->npc_id);
-
-		if(target == nullptr) {
-			//empty length packet == not found.
-			EQApplicationPacket outapp(OP_FindPersonReply, 0);
-			QueuePacket(&outapp);
-			return;
-		}
-
-		if(!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
-					target->CastToClient()->Buyer)) {
-			Message(15, "Moving you to Trader %s", target->GetName());
-			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ() , 0.0f);
-		}
-
-		if(!RuleB(Pathing, Find) || !zone->pathing)
-		{
-			//fill in the path array...
-			//
-			points.resize(2);
-			points[0].x = GetX();
-			points[0].y = GetY();
-			points[0].z = GetZ();
-			points[1].x = target->GetX();
-			points[1].y = target->GetY();
-			points[1].z = target->GetZ();
-		}
-		else
-		{
-			Map::Vertex Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-			Map::Vertex End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-
-			if(!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
-			{
-				points.resize(2);
-				points[0].x = Start.x;
-				points[0].y = Start.y;
-				points[0].z = Start.z;
-
-				points[1].x = End.x;
-				points[1].y = End.y;
-				points[1].z = End.z;
-
-			}
-			else
-			{
-				std::list<int> pathlist = zone->pathing->FindRoute(Start, End);
-
-				if(pathlist.size() == 0)
-				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
-				}
-
-				//the client seems to have issues with packets larger than this
-				if(pathlist.size() > 36)
-				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
-				}
-
-				// Live appears to send the points in this order:
-				// Final destination.
-				// Current Position.
-				// rest of the points.
-				FindPerson_Point p;
-
-				int PointNumber = 0;
-
-				bool LeadsToTeleporter = false;
-
-				Map::Vertex v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
-
-				p.x = v.x;
-				p.y = v.y;
-				p.z = v.z;
-				points.push_back(p);
-
-				p.x = GetX();
-				p.y = GetY();
-				p.z = GetZ();
-				points.push_back(p);
-
-				for(std::list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
-				{
-					if((*Iterator) == -1) // Teleporter
-					{
-						LeadsToTeleporter = true;
-						break;
-					}
-
-					Map::Vertex v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
-					p.x = v.x;
-					p.y = v.y;
-					p.z = v.z;
-					points.push_back(p);
-					++PointNumber;
-				}
-
-				if(!LeadsToTeleporter)
-				{
-					p.x = target->GetX();
-					p.y = target->GetY();
-					p.z = target->GetZ();
-
-					points.push_back(p);
-				}
-
-			}
-		}
-
-		SendPathPacket(points);
-	}
-	return;
-}
-
 void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 	Entity::DBAWComplete(workpt_b1, dbaw);
 	switch (workpt_b1) {
@@ -7320,7 +7122,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			}
 		}
 		else if (dbaq->QPT() == 2) {
-			loaditems = database.GetCharacterInfoForLogin_result(result, 0, 0, &m_pp, &m_inv, &m_epp, &pplen, &guild_id, &guildrank, &class_, &level, &LFP, &LFG, &firstlogon);
+			loaditems = database.GetCharacterInfoForLogin_result(result, 0, 0, &m_pp, &m_inv, &m_epp, &pplen, &guild_id, &guildrank, &class_, &level, &firstlogon);
 		}
 		else if (dbaq->QPT() == 3) {
 			database.RemoveTempFactions(this);
@@ -7589,7 +7391,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			//group->NotifyPuller(this, 1);
 
 		}
-		LFG = false;
 	}
 
 	if(SPDAT_RECORDS > 0)
@@ -7649,11 +7450,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			m_pp.buffs[i].duration = 0;
 			m_pp.buffs[i].counters = 0;
 		}
-	}
-
-	if(IsLFP()) {
-		// Update LFP in case any (or all) of our group disbanded while we were zoning.
-		UpdateLFP();
 	}
 
 	if(m_pp.z <= zone->newzone_data.underworld) {
@@ -8818,120 +8614,6 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	if(Target && Target->IsNPC()) {
 		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}
-}
-
-void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {
-
-	if (app->size != sizeof(LFGGetMatchesRequest_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFGGetMatchesRequest, size=%i, expected %i", app->size, sizeof(LFGGetMatchesRequest_Struct));
-		DumpPacket(app);
-		return;
-	}
-	LFGGetMatchesRequest_Struct* gmrs = (LFGGetMatchesRequest_Struct*)app->pBuffer;
-
-	if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
-	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_LFGMatches, sizeof(ServerLFGMatchesRequest_Struct));
-		ServerLFGMatchesRequest_Struct* smrs = (ServerLFGMatchesRequest_Struct*) pack->pBuffer;
-		smrs->FromID = GetID();
-		smrs->QuerierLevel = GetLevel();
-		strcpy(smrs->FromName, GetName());
-		smrs->FromLevel = gmrs->FromLevel;
-		smrs->ToLevel = gmrs->ToLevel;
-		smrs->Classes = gmrs->Classes;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-
-void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
-
-	if (app->size != sizeof(LFP_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFPCommand, size=%i, expected %i", app->size, sizeof(LFP_Struct));
-		DumpPacket(app);
-		return;
-	}
-	LFP_Struct *lfp = (LFP_Struct*)app->pBuffer;
-
-	LFP = lfp->Action != LFPOff;
-	database.SetLFP(CharacterID(), LFP);
-
-	if(!LFP) {
-		worldserver.StopLFP(CharacterID());
-		return;
-	}
-
-	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
-
-	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		LFPMembers[i].Name[0] = '\0';
-		LFPMembers[i].Class = 0;
-		LFPMembers[i].Level = 0;
-		LFPMembers[i].Zone = 0;
-		LFPMembers[i].GuildID = 0xFFFF;
-	}
-
-	Group *g = GetGroup();
-
-	// Slot 0 is always for the group leader, or the player if not in a group
-	strcpy(LFPMembers[0].Name, GetName());
-	LFPMembers[0].Class = GetClass();
-	LFPMembers[0].Level = GetLevel();
-	LFPMembers[0].Zone = zone->GetZoneID();
-	LFPMembers[0].GuildID = GuildID();
-
-	if(g) {
-		// This should not happen. The client checks if you are in a group and will not let you put LFP on if
-		// you are not the leader.
-		if(!g->IsLeader(this)) {
-			LogFile->write(EQEMuLog::Error,"Client sent LFP on for character %s who is grouped but not leader.", GetName());
-			return;
-		}
-		// Fill the LFPMembers array with the rest of the group members, excluding ourself
-		// We don't fill in the class, level or zone, because we may not be able to determine
-		// them if the other group members are not in this zone. World will fill in this information
-		// for us, if it can.
-		int NextFreeSlot = 1;
-		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if(strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
-		}
-	}
-
-
-	worldserver.UpdateLFP(CharacterID(), lfp->Action, lfp->MatchFilter, lfp->FromLevel, lfp->ToLevel, lfp->Classes,
-					lfp->Comments, LFPMembers);
-
-
-}
-
-void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app) {
-
-	if (app->size != sizeof(LFPGetMatchesRequest_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFPGetMatchesRequest, size=%i, expected %i", app->size, sizeof(LFPGetMatchesRequest_Struct));
-		DumpPacket(app);
-		return;
-	}
-	LFPGetMatchesRequest_Struct* gmrs = (LFPGetMatchesRequest_Struct*)app->pBuffer;
-
-	if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
-	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_LFPMatches, sizeof(ServerLFPMatchesRequest_Struct));
-		ServerLFPMatchesRequest_Struct* smrs = (ServerLFPMatchesRequest_Struct*) pack->pBuffer;
-		smrs->FromID = GetID();
-		smrs->FromLevel = gmrs->FromLevel;
-		smrs->ToLevel = gmrs->ToLevel;
-		smrs->QuerierLevel = GetLevel();
-		smrs->QuerierClass = GetClass();
-		strcpy(smrs->FromName, GetName());
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-
-	return;
 }
 
 void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {

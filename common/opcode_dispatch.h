@@ -242,7 +242,6 @@ INr(OP_SetRunMode);
 INr(OP_SafeFallSuccess);
 INr(OP_SafePoint);
 INr(OP_Ignore);
-IN(OP_FindPersonRequest, FindPersonRequest_Struct);
 INr(OP_ClearTitle);		//follows OP_SendTitleList
 IN(OP_SetTitle, SetTitle_Struct);
 INz(OP_RequestTitles);
@@ -298,7 +297,6 @@ OUT(OP_GuildManageStatus, GuildManageStatus_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
 OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);
-OUT(OP_LFGAppearance, LFG_Appearance_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);

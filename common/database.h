@@ -236,10 +236,7 @@ public:
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 	void	ClearPTimers(uint32 charid);
 	void	ClearMerchantTemp();
-	void	SetLFP(uint32 CharID, bool LFP);
-	void	SetLFG(uint32 CharID, bool LFG);
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
-	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 	void	AddReport(std::string who, std::string against, std::string lines);
 	struct TimeOfDay_Struct		LoadTime(time_t &realtime);
 	bool	SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);

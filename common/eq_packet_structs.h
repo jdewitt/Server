@@ -1720,81 +1720,6 @@ struct RandomReply_Struct {
 /* 76 */
 };
 
-struct LFG_Struct {
-/*
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 00 00 00 00 64 00 00 00  | ............d...
-  16: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 3F 00 00 00 41 00 00 00  | ........?...A...
-  16: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 3F 00 00 00 41 00 00 00  | ........?...A...
-  16: 46 72 75 62 20 66 72 75 - 62 20 66 72 75 62 00 00  | Frub frub frub..
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-*/
-/*000*/	uint32 unknown000;
-/*004*/	uint8 value; // 0x00 = off 0x01 = on
-/*005*/	uint8 MatchFilter;
-/*006*/	uint16 Unknown006;
-/*008*/	uint32 FromLevel;
-/*012*/	uint32 ToLevel;
-/*016*/	char Comments[64];
-};
-
-struct LFGGetMatchesRequest_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint32	FromLevel;
-/*008*/	uint32	ToLevel;
-/*012*/	uint32	Classes;
-};
-
-enum {	LFPOff = 0,
-	LFPOn = 1,
-	LFPMemberUpdate = 255 // Internal use, not sent by client
-};
-
-struct LFP_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint8	Action;
-/*005*/	uint8	MatchFilter;
-/*006*/	uint16	Unknown006;
-/*008*/	uint32	FromLevel;
-/*012*/	uint32	ToLevel;
-/*016*/	uint32	Classes;
-/*020*/	char	Comments[64];
-};
-
-struct LFPGetMatchesRequest_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint32	FromLevel;
-/*008*/	uint32	ToLevel;
-};
-
-/*
-** LFG_Appearance_Struct
-** Packet sent to clients to notify when someone in zone toggles LFG flag
-** Size: 8 bytes
-** Used in: OP_LFGAppearance
-**
-*/
-struct LFG_Appearance_Struct
-{
-/*0000*/ uint32 spawn_id;		// ID of the client
-/*0004*/ uint8 lfg;				// 1=LFG, 0=Not LFG
-/*0005*/ char unknown0005[3];	//
-/*0008*/
-};
-
-
 // EverQuest Time Information:
 // 72 minutes per EQ Day
 // 3 minutes per EQ Hour
@@ -3646,14 +3571,6 @@ struct spawnShroudSelf
 };
 #endif
 
-
-typedef struct {
-	char	Name[64];
-	uint16	Class;
-	uint16	Level;
-	uint16	Zone;
-	uint16	GuildID;
-} GroupLFPMemberEntry;
 
 struct ControlBoat_Struct {
 /*000*/	uint32	boatId;			// entitylist id of the boat

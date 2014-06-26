@@ -1689,7 +1689,6 @@ void QuestManager::showgrid(int grid) {
 		}
 		mysql_free_result(result);
 
-		initiator->SendPathPacket(pts);
 	}
 	else	// DB query error!
 	{

@@ -100,7 +100,6 @@
 	void Handle_OP_GMKill(const EQApplicationPacket *app);
 	void Handle_OP_GMLastName(const EQApplicationPacket *app);
 	void Handle_OP_GMToggle(const EQApplicationPacket *app);
-	void Handle_OP_LFGCommand(const EQApplicationPacket *app);
 	void Handle_OP_GMGoto(const EQApplicationPacket *app);
 	void Handle_OP_TraderShop(const EQApplicationPacket *app);
 	void Handle_OP_ShopRequest(const EQApplicationPacket *app);
@@ -182,7 +181,6 @@
 	void Handle_OP_SetRunMode(const EQApplicationPacket *app);
 	void Handle_OP_SafeFallSuccess(const EQApplicationPacket *app);
 	void Handle_OP_SafePoint(const EQApplicationPacket *app);
-	void Handle_OP_FindPersonRequest(const EQApplicationPacket *app);
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
@@ -194,9 +192,6 @@
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
-	void Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app);
-	void Handle_OP_LFPCommand(const EQApplicationPacket *app);
-	void Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);

@@ -82,7 +82,6 @@
 #include "clientlist.h"
 #include "LauncherList.h"
 #include "wguild_mgr.h"
-#include "lfplist.h"
 #include "ucs.h"
 #include "queryserv.h"
 
@@ -90,7 +89,6 @@ TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
 EmuTCPServer tcps;
 ClientList client_list;
-GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
 LoginServerList loginserverlist;
 EQWHTTPServer http_server;
@@ -458,8 +456,6 @@ int main(int argc, char** argv) {
 		UCSLink.Process();
 
 		QSLink.Process();
-
-		LFPGroupList.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
