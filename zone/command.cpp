@@ -326,6 +326,7 @@ int command_init(void){
 		command_add("profiledump","- Dump profiling info to logs",250,command_profiledump) ||
 		command_add("profilereset","- Reset profiling info",250,command_profilereset) ||
 #endif
+		command_add("ppdump","Dumps player profile to a file",250,command_ppdump) ||
 		command_add("pvp","[on/off] - Set your or your player target's PVP status",100,command_pvp) ||
 		
 		command_add("qglobal","[on/off/view] - Toggles qglobal functionality on an NPC",100,command_qglobal) ||
@@ -10848,4 +10849,18 @@ void command_merchantcloseshop(Client *c, const Seperator *sep){
 	}
 
 	merchant->CastToNPC()->MerchantCloseShop();
+}
+
+void command_ppdump(Client *c, const Seperator *sep){
+
+	Client *t;
+
+	if(c->GetTarget() && c->GetTarget()->IsClient())
+		t = c->GetTarget()->CastToClient();
+	else
+		t = c;
+
+	t->DumpPlayerProfile();
+	c->Message(0, "Player profile dumped.");
+
 }

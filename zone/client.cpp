@@ -62,6 +62,8 @@ extern volatile bool RunLoops;
 #include "client_logs.h"
 #include "guild_mgr.h"
 #include "QuestParserCollection.h"
+#include "../common/crc32.h"
+#include "../common/packet_dump_file.h"
 
 
 extern EntityList entity_list;
@@ -6211,3 +6213,19 @@ void Client::RewindCommand()
 	}
 }
 
+void Client::DumpPlayerProfile()
+{
+	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
+	memcpy(outapp->pBuffer,&m_pp,sizeof(PlayerProfile_Struct)-4);
+
+	char* packet_dump = "PP.txt";
+	FileDumpPacketHex(packet_dump, outapp);
+	safe_delete(outapp);
+
+	EQApplicationPacket* noutapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(ExtendedProfile_Struct));
+	memcpy(noutapp->pBuffer,&m_epp,sizeof(ExtendedProfile_Struct));
+
+	FileDumpPacketHex(packet_dump, noutapp);
+	safe_delete(noutapp);
+}

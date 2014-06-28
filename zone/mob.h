@@ -168,6 +168,7 @@ public:
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline bool GetSeeInvisible(uint8 in_see_invis);
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state, bool showInvis = true);
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
