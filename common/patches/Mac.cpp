@@ -249,12 +249,13 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-	for(r = 0; r < 50; r++) {
-		eq->innate[r] = 255;
-	}
-	OUT(ATR_PET_LOH_timer);
-	OUT(UnknownTimer);
-	OUT(HarmTouchTimer);
+
+	//for(r = 0; r < 50; r++) {
+	//	eq->innate[r] = 255;
+	//}
+	//OUT(ATR_PET_LOH_timer);
+	//OUT(UnknownTimer);
+	//OUT(HarmTouchTimer);
 	int value = RuleI(Character,ConsumptionValue);
 
 	float tpercent = (float)emu->thirst_level/(float)value;
@@ -766,6 +767,11 @@ ENCODE(OP_Buff) {
 	OUT(entityid);
 	OUT(spellid);
 	OUT(slotid);
+	OUT(bufffade);
+	OUT(duration);
+	OUT(slot);
+	OUT(level);
+	OUT(effect);
 	FINISH_ENCODE();	
 }
 
@@ -775,6 +781,11 @@ DECODE(OP_Buff) {
 	IN(entityid);
 	IN(spellid);
 	IN(slotid);
+	IN(bufffade);
+	IN(duration);
+	IN(slot);
+	IN(level);
+	IN(effect);
 	FINISH_DIRECT_DECODE();	
 }
 
