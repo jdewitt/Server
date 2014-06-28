@@ -579,7 +579,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	if(!pZoning) {
 		database.SetGroupID(char_name, 0, charid);
-		database.SetLoginFlags(charid, false, false, 1);
+		database.SetFirstLogon(charid, 1);
 
 		if (RuleB(World, AnnounceJoinQuits) == true) //this is having an issue, its not taking a true false swap, only takes default.
 		{

@@ -2225,9 +2225,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FindPersonReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FindPersonRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
@@ -2249,13 +2246,6 @@ ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGAppearance) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }

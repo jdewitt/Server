@@ -3506,8 +3506,6 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 					c->QueuePacket(outapp);
 					safe_delete(outapp);
 					g->DelMemberOOZ(name);
-					if (g->IsLeader(c) && c->IsLFP())
-						c->UpdateLFP();
 				}
 			}
 		}

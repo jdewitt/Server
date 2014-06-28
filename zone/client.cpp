@@ -189,12 +189,6 @@ Client::Client(EQStreamInterface* ieqs)
 	last_reported_endur = 0;
 	gmhideme = false;
 	AFK = false;
-	LFG = false;
-	LFGFromLevel = 0;
-	LFGToLevel = 0;
-	LFGMatchFilter = false;
-	LFGComments[0] = '\0';
-	LFP = false;
 	gmspeed = 0;
 	playeraction = 0;
 	SetTarget(0);
@@ -1267,13 +1261,6 @@ void Client::UpdateWho(uint8 remove) {
 	scl->ClientVersion = GetClientVersion();
 	scl->tellsoff = tellsoff;
 	scl->guild_id = guild_id;
-	scl->LFG = LFG;
-	if(LFG) {
-		scl->LFGFromLevel = LFGFromLevel;
-		scl->LFGToLevel = LFGToLevel;
-		scl->LFGMatchFilter = LFGMatchFilter;
-		memcpy(scl->LFGComments, LFGComments, sizeof(scl->LFGComments));
-	}
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -1559,7 +1546,6 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	// Populate client-specific spawn information
 	ns->spawn.afk		= AFK;
-	ns->spawn.lfg		= LFG; // afk and lfg are cleared on zoning on live
 	ns->spawn.anon		= m_pp.anon;
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
@@ -3755,46 +3741,6 @@ void Client::DiscoverItem(uint32 itemid) {
 	safe_delete_array(query);
 
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
-}
-
-void Client::UpdateLFP() {
-
-	Group *g = GetGroup();
-
-	if(g && !g->IsLeader(this)) {
-		database.SetLFP(CharacterID(), false);
-		worldserver.StopLFP(CharacterID());
-		LFP = false;
-		return;
-	}
-
-	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
-
-	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		LFPMembers[i].Name[0] = '\0';
-		LFPMembers[i].Class = 0;
-		LFPMembers[i].Level = 0;
-		LFPMembers[i].Zone = 0;
-	}
-
-	// Slot 0 is always for the group leader, or the player if not in a group
-	strcpy(LFPMembers[0].Name, GetName());
-	LFPMembers[0].Class = GetClass();
-	LFPMembers[0].Level = GetLevel();
-	LFPMembers[0].Zone = zone->GetZoneID();
-
-	if(g) {
-		// Fill the LFPMembers array with the rest of the group members, excluding ourself
-		// We don't fill in the class, level or zone, because we may not be able to determine
-		// them if the other group members are not in this zone. World will fill in this information
-		// for us, if it can.
-		int NextFreeSlot = 1;
-		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if((g->membername[i][0] != '\0') && strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
-		}
-	}
-	worldserver.UpdateLFP(CharacterID(), LFPMembers);
 }
 
 uint16 Client::GetPrimarySkillValue()

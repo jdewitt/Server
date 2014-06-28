@@ -48,12 +48,6 @@ public:
 
 	void SetLaunchedName(const char *n) { m_launchedName = n; }
 	void SetLauncherName(const char *n) { m_launcherName = n; }
-	void UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes, const char *Comments,
-				GroupLFPMemberEntry *LFPMembers);
-	void UpdateLFP(uint32 LeaderID, GroupLFPMemberEntry *LFPMembers);
-	void StopLFP(uint32 LeaderID);
-	void HandleLFGMatches(ServerPacket *pack);
-	void HandleLFPMatches(ServerPacket *pack);
 
 private:
 	virtual void OnConnected();

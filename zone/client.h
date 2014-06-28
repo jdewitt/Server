@@ -250,8 +250,6 @@ public:
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
 	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
-	inline bool		IsLFP() { return LFP; }
-	void			UpdateLFP();
 
 	virtual bool	Save() { return Save(0); }
 			bool	Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
@@ -650,8 +648,6 @@ public:
 	bool BindWound(Mob* bindmob, bool start, bool fail = false);
 	void SetTradeskillObject(Object* object) { m_tradeskill_object = object; }
 	Object* GetTradeskillObject() { return m_tradeskill_object; }
-	void	SendPathPacket(std::vector<FindPerson_Point> &path);
-
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//AA Methods
@@ -1013,12 +1009,6 @@ private:
 	std::list<uint32> keyring;
 	bool				tellsoff;	// GM /toggle
 	bool				gmhideme;
-	bool				LFG;
-	bool				LFP;
-	uint8				LFGFromLevel;
-	uint8				LFGToLevel;
-	bool				LFGMatchFilter;
-	char				LFGComments[64];
 	bool				AFK;
 	bool				auto_attack;
 	bool				auto_fire;

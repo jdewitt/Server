@@ -664,10 +664,6 @@ void Group::DisbandGroup() {
 	if(GetID() != 0)
 		database.ClearGroup(GetID());
 
-	if(Leader && (Leader->IsLFP())) {
-		Leader->UpdateLFP();
-	}
-
 	safe_delete(outapp);
 }
 

@@ -69,7 +69,6 @@ void load_opcode_names()
 	opcode_map[0x00f7]="LiveOP_ShopRequest";
 	opcode_map[0x006c]="LiveOP_ShopEnd";
 	opcode_map[0x0270]="LiveOP_LFGCommand";
-	opcode_map[0x01d0]="LiveOP_LFGAppearance";
 	opcode_map[0x01b5]="LiveOP_MoneyUpdate";
 	opcode_map[0x024a]="LiveOP_GroupUpdate";
 	opcode_map[0x025f]="LiveOP_GroupInvite";
@@ -230,8 +229,6 @@ void load_opcode_names()
 	opcode_map[0x01fa]="LiveOP_RecipeReply";
 	opcode_map[0x01fb]="LiveOP_RecipeDetails";
 	opcode_map[0x01fc]="LiveOP_RecipeAutoCombine";
-	opcode_map[0x02db]="LiveOP_FindPersonRequest";
-	opcode_map[0x02dc]="LiveOP_FindPersonReply";
 	opcode_map[0x01dd]="LiveOP_Shielding";
 	opcode_map[0x0198]="LiveOP_SetDataRate";
 	opcode_map[0x023b]="LiveOP_ZoneEntry";
