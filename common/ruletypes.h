@@ -45,7 +45,7 @@ RULE_INT ( Character, BlueModifier, 90 )
 RULE_INT ( Character, WhiteModifier, 100 )
 RULE_INT ( Character, YellowModifier, 125 )
 RULE_INT ( Character, RedModifier, 150 )
-RULE_INT ( Character, AutosaveIntervalS, 300 )	//0=disabled
+RULE_INT ( Character, AutosaveIntervalS, 240 )	//0=disabled
 RULE_INT ( Character, HPRegenMultiplier, 100)
 RULE_INT ( Character, ManaRegenMultiplier, 100)
 RULE_INT ( Character, EnduranceRegenMultiplier, 100)

@@ -351,6 +351,7 @@ int command_init(void){
 		command_add("repop","[delay] - Repop the zone with optional delay",100,command_repop) ||
 		command_add("rewind",nullptr,0,command_rewind) ||
 		command_add("resetaa","- Resets a Player's AA in their profile.",200,command_resetaa) ||
+		command_add("resetboat","- Sets player's boat to 0 in their profile.",100,command_resetboat) ||
 		command_add("revoke","[charname] [1/0] - Makes charname unable to talk on OOC",200,command_revoke) ||
 		command_add("rf",nullptr,80,command_randomfeatures) ||
 		command_add("rules","(subcommand) - Manage server rules", 250, command_rules) ||
@@ -709,6 +710,16 @@ void command_resetaa(Client* c,const Seperator *sep){
 	}
 	else
 		c->Message(0,"Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
+}
+
+void command_resetboat(Client* c,const Seperator *sep){
+	if(c->GetTarget()!=0 && c->GetTarget()->IsClient()){
+		c->GetTarget()->CastToClient()->SetBoatID(0);
+		c->GetTarget()->CastToClient()->SetBoatName("");
+		c->Message(13,"Successfully removed %s from a boat in their PP.",c->GetTarget()->GetName());
+	}
+	else
+		c->Message(0,"Usage: Target a client and use #resetboat to remove any boat in their Profile.");
 }
 
 void command_sendop(Client *c,const Seperator *sep){

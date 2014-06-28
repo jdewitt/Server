@@ -360,15 +360,15 @@ struct SpawnAppearance_Struct
 // Length: 20
 struct SpellBuffFade_Struct
 {
-	/*000*/	uint32	entityid;
-	/*004*/	uint16  unknown1;
+	/*000*/	uint16	entityid;
+	/*002*/	uint8   slot;
+	/*003*/ uint8   level;
+	/*004*/ uint8   effect;
+	/*005*/ uint8   unknown1;
 	/*006*/	uint16  spellid;
-	/*008*/	uint32	unknown2;
-	/*012*/	uint8	slotid;	
-	/*013*/	uint8   unknown3;
-	/*014*/	uint16  unknown4;
-	/*016*/	uint16	unknown5;
-	/*018*/	uint16  unknown6;
+	/*008*/	uint32	duration;
+	/*012*/	uint32	slotid;	
+	/*016*/	uint32	bufffade;
 	/*020*/
 };
 

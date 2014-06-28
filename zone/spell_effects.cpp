@@ -556,6 +556,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
 				SetInvisible(spell.base[i]);
+				
+				if(HasPet())
+				{
+					Mob* mypet = GetPet();
+					SetPet(nullptr);
+					if(!mypet->IsCharmed())
+						mypet->CastToNPC()->Depop();
+				}
 				break;
 			}
 
@@ -566,6 +574,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				invisible_animals = true;
 				SetInvisible(spell.base[i], false);
+
+				if(HasPet())
+				{
+					Mob* mypet = GetPet();
+				 	if(mypet->GetBodyType() == BT_Animal)
+						SetPet(nullptr);
+						if(!mypet->IsCharmed())
+							mypet->CastToNPC()->Depop();
+				}
+
 				break;
 			}
 
@@ -577,6 +595,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				invisible_undead = true;
 				SetInvisible(spell.base[i], false);
+
+				if(HasPet())
+				{
+					Mob* mypet = GetPet();
+				 	if(mypet->GetBodyType() == BT_Undead)
+						SetPet(nullptr);
+						if(!mypet->IsCharmed())
+							mypet->CastToNPC()->Depop();
+				}
+
 				break;
 			}
 			case SE_SeeInvis:
@@ -3326,23 +3354,29 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			case SE_InvisVsAnimals:
 			case SE_InvisVsUndead:
 			{
-				if(ticsremaining > 3)
+				//AA Camo has fixed length.
+				if(spell_id == 2765)
+				{
+					if(ticsremaining <= 3 && ticsremaining > 1)
+						Message_StringID(MT_Spells, INVIS_BEGIN_BREAK);
+				}
+				else if(ticsremaining > 3)
 				{
 					if(!IsBardSong(spell_id))
 					{
-						double break_chance = 2.0;
+						double break_chance = 3.0;
 						if(caster)
 						{
-							break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) + ((double)caster->GetLevel() * 3.0)) / 650.0));
+							break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) + ((double)caster->GetLevel() * 3.0)) / 400.0));
 						}
 						else
 						{
-							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 650.0));
+							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 400.0));
 						}
 
 						if(MakeRandomFloat(0.0, 100.0) < break_chance)
 						{
-							BuffModifyDurationBySpellID(spell_id, 3);
+							BuffModifyDurationBySpellID(spell_id, 10);
 						}
 					}
 				}

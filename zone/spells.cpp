@@ -4524,30 +4524,20 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
 
 	sbf->entityid=GetID();
-	// i dont know why but this works.. for now
 	sbf->slot=2;
-//	sbf->slot=m_pp.buffs[slot_id].slotid;
-//	sbf->level=m_pp.buffs[slot_id].level;
-//	sbf->effect=m_pp.buffs[slot_id].effect;
+	sbf->level=m_pp.buffs[slot_id].level;
+	sbf->effect=m_pp.buffs[slot_id].effect;
 	sbf->spellid=spell_id;
 	sbf->slotid=slot_id;
 	sbf->bufffade = 1;
-#if EQDEBUG >= 11
-	printf("Sending SBF 1 from server:\n");
-	DumpPacket(outapp);
-#endif
+
 	QueuePacket(outapp);
 
-/*
 	sbf->effect=0;
 	sbf->level=0;
 	sbf->slot=0;
-*/
 	sbf->spellid=0xffffffff;
-#if EQDEBUG >= 11
-	printf("Sending SBF 2 from server:\n");
-	DumpPacket(outapp);
-#endif
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 

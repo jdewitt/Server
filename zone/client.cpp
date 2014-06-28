@@ -2369,10 +2369,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->to = 0;
 				}
 				else if (bindmob->IsAIControlled() && bindmob != this ){
-					; // Tell IPC to stand still?
+					// Tell IPC to stand still?
 				}
 				else {
-					; // Binding self
+				   // Binding self
 				}
 			}
 		} else {

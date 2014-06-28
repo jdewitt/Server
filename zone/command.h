@@ -63,6 +63,7 @@ void command_logcommand(Client *c, const char *message);
 
 //commands
 void command_resetaa(Client* c,const Seperator *sep);
+void command_resetboat(Client* c,const Seperator *sep);
 void command_bind(Client* c,const Seperator *sep);
 void command_sendop(Client *c, const Seperator *sep);
 void command_optest(Client *c, const Seperator *sep);
