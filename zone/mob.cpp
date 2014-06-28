@@ -343,10 +343,10 @@ Mob::Mob(const char* in_name,
 	}
 	pStandingPetOrder = SPO_Follow;
 
-	see_invis = in_see_invis;
-	see_invis_undead = in_see_invis_undead != 0;
-	see_hide = in_see_hide != 0;
-	see_improved_hide = in_see_improved_hide != 0;
+	see_invis = GetSeeInvisible(in_see_invis);
+	see_invis_undead = GetSeeInvisible(in_see_invis_undead);
+	see_hide = GetSeeInvisible(in_see_hide);
+	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
 	qglobal = in_qglobal != 0;
 
 	// Bind wound
@@ -4961,5 +4961,20 @@ float Mob::HeadingAngleToMob(Mob *other)
 		return angle * 511.5 * 0.0027777778;
 	else
 		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+}
+
+bool Mob::GetSeeInvisible(uint8 in_see_invis)
+{ 
+	if(in_see_invis > 0)
+	{
+		if(in_see_invis == 1)
+			return true;
+		else
+		{
+			if(MakeRandomInt(0,99) < in_see_invis)
+				return true;
+		}
+	}
+	return false;
 }
 
