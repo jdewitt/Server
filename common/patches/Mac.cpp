@@ -558,13 +558,29 @@ ENCODE(OP_ClientUpdate)
 {
 	SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::SpawnPositionUpdate_Struct);
 	OUT(spawn_id);
-	eq->x_pos = (int16)emu->y_pos;
-	OUT(delta_x);
+	if(emu->y_pos >= 0)
+		eq->x_pos = int16(emu->y_pos + 0.5);
+	else
+		eq->x_pos = int16(emu->y_pos - 0.5);
+	if(emu->x_pos >= 0)
+		eq->y_pos = int16(emu->x_pos + 0.5);
+	else
+		eq->y_pos = int16(emu->x_pos - 0.5);
+	if(emu->z_pos >= 0)
+		eq->z_pos = int16(emu->z_pos + 0.5)*10;
+	else
+		eq->z_pos = int16(emu->z_pos - 0.5)*10;
+	/*OUT(delta_x);
 	OUT(delta_y);
-	eq->z_pos=emu->z_pos*10;
-	eq->delta_heading = (uint8)emu->delta_heading;
-	eq->y_pos = (int16)emu->x_pos;
 	OUT(delta_z);
+	if(emu->delta_heading >= 0)
+		eq->delta_heading = uint8(emu->delta_heading + 0.5);
+	else
+		eq->delta_heading = uint8(emu->delta_heading - 0.5);*/
+	eq->delta_x = 0;
+	eq->delta_y = 0;
+	eq->delta_z = 0;
+	eq->delta_heading = 0;
 	eq->anim_type = (uint8)emu->animation;
 	eq->heading = (uint8)emu->heading;
 	FINISH_ENCODE();
@@ -575,14 +591,30 @@ DECODE(OP_ClientUpdate)
 	SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::SpawnPositionUpdate_Struct);
 	IN(spawn_id);
 //	IN(sequence);
-	emu->x_pos = (int16)eq->y_pos;
-	emu->y_pos = (int16)eq->x_pos;
-	emu->z_pos = (int16)eq->z_pos/10;
+	if(eq->y_pos >= 0)
+		emu->x_pos = int16(eq->y_pos + 0.5);
+	else
+		emu->x_pos = int16(eq->y_pos - 0.5);
+	if(eq->x_pos >= 0)
+		emu->y_pos = int16(eq->x_pos + 0.5);
+	else
+		emu->y_pos = int16(eq->x_pos - 0.5);
+	if(eq->z_pos >= 0)
+		emu->z_pos = int16(eq->z_pos + 0.5)/10;
+	else
+		emu->z_pos = int16(eq->z_pos - 0.5)/10;
 	emu->heading = (uint8)eq->heading;
-	IN(delta_x);
+	emu->delta_x = 0;
+	emu->delta_y = 0;
+	emu->delta_z = 0;
+	emu->delta_heading = 0;
+/*	IN(delta_x);
 	IN(delta_y);
 	IN(delta_z);
-	emu->delta_heading = (uint8)eq->delta_heading;
+	if(eq->delta_heading >= 0)
+		emu->delta_heading = uint8(eq->delta_heading + 0.5);
+	else
+		emu->delta_heading = uint8(eq->delta_heading - 0.5);*/
 	emu->animation = eq->anim_type;
 	FINISH_DIRECT_DECODE();
 }

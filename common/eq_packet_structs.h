@@ -1922,6 +1922,8 @@ struct GroupCancel_Struct {
 	uint8	toggle;
 };
 
+//Group structs are fragile, this works for now until they can be cleaned up.
+
 struct GroupUpdate_Struct {
 /*0000*/	uint32	action;
 /*0004*/	char	yourname[64];
@@ -1932,9 +1934,13 @@ struct GroupUpdate_Struct {
 struct GroupUpdate2_Struct {
 /*0000*/	uint32	action;
 /*0004*/	char	yourname[64];
-/*0068*/	char	membername[64];
-/*0132*/	uint32	unknown132;
-/*0136*/
+/*0068*/	char	membername[5][64];
+/*0388*/	char	leadersname[64];
+/*0452*/	GroupLeadershipAA_Struct leader_aas;
+/*0580*/	uint8	unknown580[196];
+/*0766*/	uint32	NPCMarkerID;	// EntityID of player delegated MarkNPC ability
+/*0780*/	uint8	unknown780[56];
+/*0836*/
 };
 
 struct GroupJoin_Struct {
@@ -1953,6 +1959,14 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0064*/	char	name2[64];	// invitee
 /*0128*/	uint32	unknown0128;
 /*0132*/
+};
+
+struct GroupLeader_Struct
+{
+/*0000*/	uint32	action;
+/*0004*/	char	yourname[64];
+/*0068*/	char	membername[64];
+/*0132*/	uint32	unknown132;
 };
 
 struct FaceChange_Struct {

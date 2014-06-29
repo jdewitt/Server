@@ -1549,8 +1549,8 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 		return;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
-	GroupUpdate_Struct* gu = (GroupUpdate_Struct*)outapp->pBuffer;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -1558,6 +1558,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	MYSQL_ROW row;
 
 	strcpy(gu->yourname, c->GetName());
+	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
 
 	int index = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name from group_id where groupid=%d", g->GetID()), errbuf, &result)) {
