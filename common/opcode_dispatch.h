@@ -288,8 +288,6 @@ OUT(OP_ConsentResponse, ConsentResponse_Struct);
 OUT(OP_ExpUpdate, ExpUpdate_Struct);
 OUT(OP_GroundSpawn, Object_Struct);
 OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
-//alt:OUT(OP_GroupUpdate, GroupUpdate2_Struct);
-//alt:OUT(OP_GroupUpdate, GroupUpdate_Struct);
 OUT(OP_GuildMOTD, GuildMOTD_Struct);
 OUT(OP_GuildManageAdd, GuildJoin_Struct);
 OUT(OP_GuildManageRemove, GuildManageRemove_Struct);

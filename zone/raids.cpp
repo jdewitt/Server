@@ -1121,8 +1121,8 @@ void Raid::SendGroupUpdate(Client *to)
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
-	GroupUpdate_Struct* gu = (GroupUpdate_Struct*)outapp->pBuffer;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	int index = 0;
 	uint32 grp = GetGroup(to->GetName());
