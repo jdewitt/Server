@@ -518,13 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct RemoveNimbusEffect_Struct
-{
-/*00*/ uint32 spawnid;			// Spawn ID
-/*04*/ int32 nimbus_effect;	// Nimbus Effect Number
-/*08*/
-};
-
 struct ItemNamePacket_Struct {
 /*000*/	uint32 item_id;
 /*004*/	uint32 unkown004;
@@ -575,14 +568,6 @@ struct GMSkillChange_Struct {
 /*006*/ uint16		unknown2;
 /*008*/ uint16		skill_id;
 /*010*/ uint16		unknown3;		//probably void
-};
-
-struct GMTrainSkillConfirm_Struct {	// SoF only
-/*000*/	uint32	SkillID;
-/*004*/	uint32	Cost;
-/*008*/	uint8	NewSkill;	// Set to 1 for 'You have learned the basics' message.
-/*009*/	char	TrainerName[64];
-/*073*/
 };
 
 struct ConsentResponse_Struct {
@@ -1599,23 +1584,6 @@ struct GuildCommand_Struct {
 	uint32 officer;
 };
 
-struct OnLevelMessage_Struct
-{
-	char	Title[128];
-	char	Text[4096];
-	uint32	Buttons;
-	uint32	Duration;
-	uint32	PopupID;
-	uint32	NegativeID;
-	char	ButtonName0[25];
-	char	ButtonName1[25];
-};
-
-struct PopupResponse_Struct {
-/*0000*/	uint32	unknown0000;
-/*0004*/	uint32	popupid;
-};
-
 // Server -> Client
 // Update a guild members rank and banker status
 struct GuildSetRank_Struct
@@ -2114,12 +2082,6 @@ struct OldInspectResponse_Struct
 	int16 PlayerID;			// Comment: ?
 	int8  unknown[1740];	// Comment: ?
 }; 
-
-//OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed) -U
-struct InspectMessage_Struct {
-/*000*/ char text[256];
-/*256*/
-};
 
 //OP_SetDataRate
 struct SetDataRate_Struct {
@@ -2867,12 +2829,6 @@ struct SimpleMessage_Struct{
 	uint32	unknown8;
 };
 
-struct GuildMemberLevelUpdate_Struct {
-/*00*/	uint32 guild_id;
-/*04*/	char	member_name[64];
-/*68*/	uint32	level;	//not sure
-};
-
 struct Internal_GuildMemberEntry_Struct {
 //	char	name[64];					//variable length
 	uint32	level;						//network byte order
@@ -2913,17 +2869,6 @@ struct GuildUpdate_PublicNote{
 	char	name[64];
 	char	target[64];
 	char	note[1]; //variable length.
-};
-
-struct GuildStatus_Struct
-{
-/*000*/	char	Name[64];
-/*064*/	uint8	Unknown064[72];
-};
-
-struct GuildDemoteStruct{
-	char	name[64];
-	char	target[64];
 };
 
 struct GuildRemoveStruct{
@@ -3197,10 +3142,6 @@ struct MobRename_Struct {
 /*192*/	uint32	unknown192;		//set to 0
 /*196*/	uint32	unknown196;		//set to 1
 /*200*/
-};
-
-struct PlayMP3_Struct {
-	char filename[0];
 };
 
 //this is for custom title display in the skill window
@@ -3491,11 +3432,6 @@ struct MobHealth_Struct {
 	uint8 hp;
 };
 
-struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
-	uint32 unknown;					//there seems to be an extra field in this packet...
-};
-
 // This is the structure for OP_ZonePlayerToBind opcode. Discovered on Feb 9 2007 by FNW from packet logs for titanium client
 // This field "zone_name" is text the Titanium client will display on player death
 // it appears to be a variable length, null-terminated string
@@ -3549,19 +3485,6 @@ struct spawnShroudOther
 struct ApplyPoison_Struct {
 	uint32 inventorySlot;
 	uint32 success;
-};
-
-struct ItemVerifyRequest_Struct {
-/*000*/	int32	slot;		// Slot being Right Clicked
-/*004*/	uint32	target;		// Target Entity ID
-/*008*/
-};
-
-struct ItemVerifyReply_Struct {
-/*000*/	int32	slot;		// Slot being Right Clicked
-/*004*/	uint32	spell;		// Spell ID to cast if different than item effect
-/*008*/	uint32	target;		// Target Entity ID
-/*012*/
 };
 
 /**
@@ -3621,60 +3544,6 @@ struct PVPStats_Struct
 /*0124*/ PVPStatsEntry_Struct LastKill;
 /*0212*/ PVPStatsEntry_Struct KillsLast24Hours[50];
 /*4612*/
-};
-
-typedef struct
-{
-/*000*/	char Name[64];
-/*064*/	uint32 Kills;
-/*068*/	uint32 Deaths;
-/*072*/	uint32 TotalPoints;
-/*076*/	uint32 Infamy;
-/*080*/
-} PVPLeaderBoardEntry_Struct;
-
-enum { PVPSortByKills = 0, PVPSortByPoints, PVPSortByInfamy };
-
-struct PVPLeaderBoardRequest_Struct
-{
-/*00*/ uint32 SortType;
-/*04*/
-};
-
-struct PVPLeaderBoard_Struct
-{
-/*0000*/ uint32 Unknown0000;
-/*0004*/ uint32 MyKills;
-/*0008*/ uint32 MyTotalPoints;
-/*0012*/ uint32 MyRank;
-/*0016*/ uint32 MyDeaths;
-/*0020*/ uint32 MyInfamy;
-/*0024*/ PVPLeaderBoardEntry_Struct Entries[100];
-/*8024*/
-};
-
-struct PVPLeaderBoardDetailsRequest_Struct
-{
-/*00*/ uint32 Unknown00;
-/*04*/ char Name[64];
-/*68*/
-};
-
-struct PVPLeaderBoardDetailsReply_Struct
-{
-/*000*/ char Name[64];
-/*064*/ uint8 Unknown064[64];
-/*128*/ uint32 Level;
-/*132*/ uint32 Race;
-/*136*/ uint32 Class;
-/*140*/ uint32 GuildID;
-/*144*/ uint32 TotalAA;
-/*148*/ uint32 Unknown148;
-/*152*/ uint32 Kills;
-/*156*/ uint32 Deaths;
-/*160*/ uint32 Infamy;
-/*164*/ uint32 Points;
-/*168*/
 };
 
 struct DisciplineTimer_Struct
