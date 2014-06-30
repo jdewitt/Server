@@ -800,9 +800,17 @@ void Client::AI_Process()
 			RemoveFromHateList(this);
 			return;
 		}
-
-		if(DivineAura())
+		//Todo: Figure out why 'this' can become invalid here. It is related to Fear.
+		if(this)
+		{
+			if(DivineAura())
+				return;
+		}
+		else
+		{
+			LogFile->write(EQEMuLog::Error, "Preventing DivineAura() crash due to null this.");
 			return;
+		}
 
 		bool is_combat_range = CombatRange(GetTarget());
 
