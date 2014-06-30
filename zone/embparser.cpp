@@ -59,6 +59,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_CAST_ON",
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
+	"EVENT_POPUPRESPONSE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_CAST_BEGIN",

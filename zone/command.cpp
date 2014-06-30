@@ -4143,6 +4143,7 @@ void command_setpvppoints(Client *c, const Seperator *sep){
 		{
 			t->SetPVPPoints(atoi(sep->arg[1]));
 			t->Save();
+			t->SendPVPStats();
 		}
 	}
 	else
