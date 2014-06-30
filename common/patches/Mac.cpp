@@ -1983,7 +1983,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 	const Item_Struct *item=inst->GetItem();
 
 	if(item->ID > 32767)
-		return 0 ;
+		return 0;
 
 	structs::Item_Struct *thejuice = new struct structs::Item_Struct;
 	memset(thejuice,0,sizeof(structs::Item_Struct));
@@ -2001,13 +2001,9 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   	}
   	else
   	{ 
-		if(inst->GetMerchantCount() > 1)
-			thejuice->Charges = 0;
-		else
-  			thejuice->Charges = 1;
-  
+  		thejuice->Charges = 1;
   		thejuice->equipSlot = inst->GetMerchantSlot();
-		thejuice->Price = inst->GetPrice();  
+		thejuice->Price = inst->GetPrice();  //This handles sellrate for us. 
 		thejuice->SellRate = 1;
     }
   
@@ -2022,7 +2018,6 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ID = item->ID;        
 		thejuice->Icon = item->Icon;       
 		thejuice->Slots = item->Slots;  
-		//thejuice->SellRate = item->SellRate;
 		thejuice->CastTime = item->CastTime;  
 		thejuice->SkillModType = item->SkillModType;
 		thejuice->SkillModValue = item->SkillModValue;
@@ -2050,11 +2045,6 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 			thejuice->FocusEffect = 0;
 		else
 			thejuice->FocusEffect = item->Focus.Effect;
-	/*	thejuice->unknown0212=0x8a;
-		thejuice->unknown0213=0x26;
-		thejuice->unknown0216=0x01;
-		thejuice->unknown0282=0xFF;
-		thejuice->unknown0283=0xFF;*/
 
 		if(item->ItemClass == 1){
 			thejuice->container.BagType = item->BagType; 
