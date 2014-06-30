@@ -3354,15 +3354,10 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			case SE_InvisVsAnimals:
 			case SE_InvisVsUndead:
 			{
-				//EQMac has no effect for fixed length invis :(
-				if(spell_id == 2765 || spell_id == 1435 || spell_id == 1406  || spell_id == 1411)
+				if(ticsremaining > 3)
 				{
-					if(ticsremaining <= 3 && ticsremaining > 1)
-						Message_StringID(MT_Spells, INVIS_BEGIN_BREAK);
-				}
-				else if(ticsremaining > 3)
-				{
-					if(!IsBardSong(spell_id))
+					//EQMac has no effect for fixed length invis :(
+					if(!IsBardSong(spell_id) && spell_id != 2765 && spell_id != 1435 && spell_id != 1406  && spell_id != 1411)
 					{
 						double break_chance = 2.0;
 						if(caster)

@@ -1089,6 +1089,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		rewind_timer.Start(30000, true);
 	}
 
+	float water_x = x_pos;
+	float water_y = y_pos;
+
 	// Outgoing client packet
 	if (ppu->y_pos != y_pos || ppu->x_pos != x_pos || ppu->heading != heading || ppu->animation != animation || (delta_x != 0 || delta_y != 0 || delta_z != 0) && animation == 0)
 	{
@@ -1109,10 +1112,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(zone->watermap)
 	{
-		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos) && ((x_pos!=ppu->x_pos) || (y_pos!=ppu->y_pos)))
-		{
+		if(zone->watermap->InLiquid(x_pos, y_pos, z_pos) && ((ppu->x_pos != water_x) || (ppu->y_pos != water_y)))
 			CheckIncreaseSkill(SkillSwimming, nullptr, -10);
-		}
 	}
 
 	return;

@@ -604,17 +604,14 @@ DECODE(OP_ClientUpdate)
 	else
 		emu->z_pos = int16(eq->z_pos - 0.5)/10;
 	emu->heading = (uint8)eq->heading;
-	emu->delta_x = 0;
+	/*emu->delta_x = 0;
 	emu->delta_y = 0;
 	emu->delta_z = 0;
-	emu->delta_heading = 0;
-/*	IN(delta_x);
+	emu->delta_heading = 0;*/
+	IN(delta_x);
 	IN(delta_y);
 	IN(delta_z);
-	if(eq->delta_heading >= 0)
-		emu->delta_heading = uint8(eq->delta_heading + 0.5);
-	else
-		emu->delta_heading = uint8(eq->delta_heading - 0.5);*/
+	emu->delta_heading = (uint8)eq->delta_heading;
 	emu->animation = eq->anim_type;
 	FINISH_DIRECT_DECODE();
 }
