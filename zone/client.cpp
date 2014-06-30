@@ -3556,6 +3556,73 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_
 		safe_delete(outapp);
 }
 
+void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...) {
+	va_list argptr;
+	char buffer[4096];
+
+	va_start(argptr, Text);
+	vsnprintf(buffer, sizeof(buffer), Text, argptr);
+	va_end(argptr);
+
+	size_t len = strlen(buffer);
+
+	EQApplicationPacket* app = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	OnLevelMessage_Struct* olms=(OnLevelMessage_Struct*)app->pBuffer;
+
+	if(strlen(Text) > (sizeof(olms->Text)-1))
+		return;
+
+	if(!target)
+		title_type = 0;
+
+	switch (title_type)
+	{
+		case 1: {
+			char name[64] = "";
+			strcpy(name, target->GetName());
+			if(target->GetLastName()) {
+				char last_name[64] = "";
+				strcpy(last_name, target->GetLastName());
+				strcat(name, " ");
+				strcat(name, last_name);
+			}
+			strcpy(olms->Title, name);
+			break;
+		}
+		case 2: {
+			if(target->GuildID()) {
+				char *guild_name = (char*)guild_mgr.GetGuildName(target->GuildID());
+				strcpy(olms->Title, guild_name);
+			}
+			else {
+				strcpy(olms->Title, "No Guild");
+			}
+			break;
+		}
+		default: {
+			strcpy(olms->Title, Title);
+			break;
+		}
+	}
+
+	memcpy(olms->Text, buffer, len+1);
+
+	olms->Buttons = Buttons;
+
+	sprintf(olms->ButtonName0, "%s", ButtonName0);
+	sprintf(olms->ButtonName1, "%s", ButtonName1);
+
+	if(Duration > 0)
+		olms->Duration = Duration * 1000;
+	else
+		olms->Duration = 0xffffffff;
+
+	olms->PopupID = PopupID;
+	olms->NegativeID = NegativeID;
+
+	FastQueuePacket(&app);
+}
+
 void Client::KeyRingLoad()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -3846,6 +3913,30 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 
+}
+
+void Client::SendPVPStats()
+{
+	// This sends the data to the client to populate the PVP Stats Window.
+	//
+	// When the PVP Stats window is opened, no opcode is sent. Therefore this method should be called
+	// from Client::CompleteConnect, and also when the player makes a PVP kill.
+	//
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
+	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
+
+	pvps->Kills = m_pp.PVPKills;
+	pvps->Deaths = m_pp.PVPDeaths;
+	pvps->PVPPointsAvailable = m_pp.PVPCurrentPoints;
+	pvps->TotalPVPPoints = m_pp.PVPCareerPoints;
+	pvps->BestKillStreak = m_pp.PVPBestKillStreak;
+	pvps->WorstDeathStreak = m_pp.PVPWorstDeathStreak;
+	pvps->CurrentKillStreak = m_pp.PVPCurrentKillStreak;
+
+	// TODO: Record and send other PVP Stats
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::SendDisciplineTimers()
@@ -4492,6 +4583,67 @@ void Client::AddPVPPoints(uint32 Points)
 	m_pp.PVPCareerPoints += Points;
 
 	Save();
+
+	SendPVPStats();
+}
+
+// Processes a client request to inspect a SoF client's equipment.
+void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
+	if(requestee && requester) {
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
+		InspectResponse_Struct* insr = (InspectResponse_Struct*) outapp->pBuffer;
+		insr->TargetID = requester->GetID();
+		insr->playerid = requestee->GetID();
+
+		const Item_Struct* item = nullptr;
+		const ItemInst* inst = nullptr;
+
+		for(int16 L = 0; L <= 20; L++) {
+			inst = requestee->GetInv().GetItem(L);
+
+			if(inst) {
+				item = inst->GetItem();
+				if(item) {
+					strcpy(insr->itemnames[L], item->Name);
+					insr->itemicons[L] = item->Icon;
+				}
+				else
+					insr->itemicons[L] = 0xFFFFFFFF;
+			}
+		}
+
+		inst = requestee->GetInv().GetItem(9999);
+
+		if(inst) {
+			item = inst->GetItem();
+			if(item) {
+				strcpy(insr->itemnames[21], item->Name);
+				insr->itemicons[21] = item->Icon;
+			}
+			else
+				insr->itemicons[21] = 0xFFFFFFFF;
+		}
+
+		inst = requestee->GetInv().GetItem(21);
+
+		if(inst) {
+			item = inst->GetItem();
+			if(item) {
+				strcpy(insr->itemnames[22], item->Name);
+				insr->itemicons[22] = item->Icon;
+			}
+			else
+				insr->itemicons[22] = 0xFFFFFFFF;
+		}
+
+		strcpy(insr->text, requestee->GetInspectMessage().text);
+
+		// There could be an OP for this..or not... (Ti clients are not processed here..this message is generated client-side)
+		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(0, "%s is looking at your equipment...", requester->GetName()); }
+
+		requester->QueuePacket(outapp); // Send answer to requester
+		safe_delete(outapp);
+	}
 }
 
 void Client::CheckEmoteHail(Mob *target, const char* message)
@@ -5247,6 +5399,18 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	std::string final_stats = final_string.str();
 
+	if(use_window) {
+		if(final_stats.size() < 4096)
+		{
+			uint32 Buttons = 1;
+			client->SendWindow(0, POPUPID_UPDATE_SHOWSTATSWINDOW, Buttons, "Cancel", "Update", 0, 1, this, "", "%s", final_stats.c_str());
+			goto Extra_Info;
+		}
+		else {
+			client->Message(15, "The window has exceeded its character limit, displaying stats to chat window:");
+		}
+	}
+
 	client->Message(15, "~~~~~ %s %s ~~~~~", GetCleanName(), GetLastName());
 	client->Message(0, " Level: %i Class: %i Race: %i DS: %i/%i Size: %1.1f  Weight: %.1f/%d  ", GetLevel(), GetClass(), GetRace(), GetDS(), RuleI(Character, ItemDamageShieldCap), GetSize(), (float)CalcCurrentWeight() / 10.0f, GetSTR());
 	client->Message(0, " HP: %i/%i  HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
@@ -5964,6 +6128,16 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 	strcpy(cms->msg, msg.c_str());
 
 	QueuePacket(&outapp);
+}
+
+void Client::PlayMP3(const char* fname)
+{
+	std::string filename = fname;
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
+	PlayMP3_Struct* buf = (PlayMP3_Struct*)outapp->pBuffer;
+	strncpy(buf->filename, fname, filename.length());
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::Starve()

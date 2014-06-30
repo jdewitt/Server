@@ -120,6 +120,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Shielding] = &Client::Handle_OP_Shielding;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_Consume] = &Client::Handle_OP_Consume;
+	ConnectedOpcodes[OP_ItemVerifyRequest] = &Client::Handle_OP_ItemVerifyRequest;
 	ConnectedOpcodes[OP_ConsiderCorpse] = &Client::Handle_OP_ConsiderCorpse;
 	ConnectedOpcodes[OP_Consider] = &Client::Handle_OP_Consider;
 	ConnectedOpcodes[OP_Begging] = &Client::Handle_OP_Begging;
@@ -136,6 +137,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SpawnAppearance] = &Client::Handle_OP_SpawnAppearance;
 	ConnectedOpcodes[OP_Death] = &Client::Handle_OP_Death;
 	ConnectedOpcodes[OP_MoveCoin] = &Client::Handle_OP_MoveCoin;
+	ConnectedOpcodes[OP_ItemLinkClick] = &Client::Handle_OP_ItemLinkClick;
 	ConnectedOpcodes[OP_ItemLinkResponse] = &Client::Handle_OP_ItemLinkResponse;
 	ConnectedOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
 	ConnectedOpcodes[OP_DeleteCharge] = &Client::Handle_OP_DeleteCharge;
@@ -163,6 +165,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildPeace] = &Client::Handle_OP_GuildPeace;
 	ConnectedOpcodes[OP_GuildWar] = &Client::Handle_OP_GuildWar;
 	ConnectedOpcodes[OP_GuildLeader] = &Client::Handle_OP_GuildLeader;
+	ConnectedOpcodes[OP_GuildDemote] = &Client::Handle_OP_GuildDemote;
 	ConnectedOpcodes[OP_GuildInvite] = &Client::Handle_OP_GuildInvite;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
@@ -215,6 +218,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GMEmoteZone] = &Client::Handle_OP_GMEmoteZone;
 	ConnectedOpcodes[OP_InspectRequest] = &Client::Handle_OP_InspectRequest;
 	ConnectedOpcodes[OP_InspectAnswer] = &Client::Handle_OP_InspectAnswer;
+	ConnectedOpcodes[OP_InspectMessageUpdate] = &Client::Handle_OP_InspectMessageUpdate;
 	ConnectedOpcodes[OP_DeleteSpell] = &Client::Handle_OP_DeleteSpell;
 	ConnectedOpcodes[OP_PetitionBug] = &Client::Handle_OP_PetitionBug;
 	ConnectedOpcodes[OP_Bug] = &Client::Handle_OP_Bug;
@@ -263,20 +267,29 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
+	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
+	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
+	ConnectedOpcodes[OP_PVPLeaderBoardRequest] = &Client::Handle_OP_PVPLeaderBoardRequest;
+	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
+	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
+	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
+	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
+	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
+	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
 	ConnectedOpcodes[OP_Discipline] = &Client::Handle_OP_Discipline;
 	ConnectedOpcodes[OP_ZoneEntryResend] = &Client::Handle_OP_ZoneEntryResend;
@@ -1524,6 +1537,153 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(ItemVerifyRequest_Struct))
+	{
+		LogFile->write(EQEMuLog::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
+		return;
+	}
+
+	ItemVerifyRequest_Struct* request = (ItemVerifyRequest_Struct*)app->pBuffer;
+	int32 slot_id;
+	int32 target_id;
+	int32 spell_id = 0;
+	slot_id = request->slot;
+	target_id = request->target;
+
+
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
+	ItemVerifyReply_Struct* reply = (ItemVerifyReply_Struct*)outapp->pBuffer;
+	reply->slot = slot_id;
+	reply->target = target_id;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+
+	if (IsAIControlled()) {
+		this->Message_StringID(13,NOT_IN_CONTROL);
+		return;
+	}
+
+	if(slot_id < 0) {
+		LogFile->write(EQEMuLog::Debug, "Unknown slot being used by %s, slot being used is: %i",GetName(),request->slot);
+		return;
+	}
+
+	const ItemInst* inst = m_inv[slot_id];
+	if (!inst) {
+		Message(0, "Error: item not found in inventory slot #%i", slot_id);
+		DeleteItemInInventory(slot_id,0,true);
+		return;
+	}
+
+	const Item_Struct* item = inst->GetItem();
+	if (!item) {
+		Message(0, "Error: item not found in inventory slot #%i", slot_id);
+		DeleteItemInInventory(slot_id,0,true);
+		return;
+	}
+
+	spell_id = item->Click.Effect;
+
+	if
+	(
+		spell_id > 0 &&
+		(
+			!IsValidSpell(spell_id) ||
+			casting_spell_id ||
+			delaytimer ||
+			spellend_timer.Enabled() ||
+			IsStunned() ||
+			IsFeared() ||
+			IsMezzed() ||
+			DivineAura() ||
+			(IsSilenced() && !IsDiscipline(spell_id)) ||
+			(IsAmnesiad() && IsDiscipline(spell_id)) ||
+			(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat())
+		)
+	)
+	{
+		SendSpellBarEnable(spell_id);
+		return;
+	}
+
+	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
+
+	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && (item->ItemType == ItemTypePotion))) // sanity check
+	{
+		ItemInst* p_inst = (ItemInst*)inst;
+
+		parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
+		inst = m_inv[slot_id];
+		if(!inst)
+		{
+			return;
+		}
+
+ 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
+		{
+			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
+		}
+		else if (inst->IsType(ItemClassCommon))
+		{
+			if(item->ItemType == ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
+			{
+				DeleteItemInInventory(slot_id, 1, true);
+				TrainDiscipline(item->ID);
+			}
+			else if(item->ItemType == ItemTypeSpell)
+			{
+				return;
+			}
+			else if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2))
+			{
+				if (inst->GetCharges() == 0)
+				{
+					//Message(0, "This item is out of charges.");
+					Message_StringID(13, ITEM_OUT_OF_CHARGES);
+					return;
+				}
+				if(GetLevel() >= item->Click.Level2)
+				{
+					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
+					inst = m_inv[slot_id];
+					if(!inst)
+					{
+						return;
+					}
+
+					if(i == 0) {
+						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
+					}
+				}
+				else
+				{
+					Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
+					return;
+				}
+			}
+			else
+			{
+				LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
+			}
+		}
+		else
+		{
+			Message(0, "Error: item not found in inventory slot #%i", slot_id);
+		}
+	}
+	else
+	{
+		Message(0, "Error: Invalid inventory slot for using effects (inventory slot #%i)", slot_id);
+	}
+
+	return;
+}
+
 void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct))
@@ -2143,6 +2303,111 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 
 	OPMoveCoin(app);
 	eqmac_timer.Start(250, true);
+	return;
+}
+
+void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
+{
+	if(app->size != sizeof(ItemViewRequest_Struct)){
+		LogFile->write(EQEMuLog::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size, sizeof(ItemViewRequest_Struct));
+		DumpPacket(app);
+		return;
+	}
+	//DumpPacket(app);
+	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
+
+	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
+
+	const Item_Struct* item = database.GetItem(ivrs->item_id);
+	if (!item) {
+		if (ivrs->item_id > 500000)
+		{
+			std::string response = "";
+			int sayid = ivrs->item_id - 500000;
+			bool silentsaylink = false;
+
+			if (sayid > 250000)	//Silent Saylink
+			{
+				sayid = sayid - 250000;
+				silentsaylink = true;
+			}
+
+			if (sayid && sayid > 0)
+			{
+				char errbuf[MYSQL_ERRMSG_SIZE];
+				char *query = 0;
+				MYSQL_RES *result;
+				MYSQL_ROW row;
+
+
+				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
+				{
+					if (mysql_num_rows(result) == 1)
+					{
+						row = mysql_fetch_row(result);
+						response = row[0];
+					}
+					mysql_free_result(result);
+				}
+				else
+				{
+					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
+					safe_delete_array(query);
+					return;
+				}
+				safe_delete_array(query);
+			}
+
+			if((response).size() > 0)
+			{
+				if( !mod_saylink(response, silentsaylink) ) { return; }
+
+				if(GetTarget() && GetTarget()->IsNPC())
+				{
+					if(silentsaylink)
+					{
+						parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
+					else
+					{
+						Message(7, "You say, '%s'", response.c_str());
+						ChannelMessageReceived(8, 0, 100, response.c_str());
+					}
+					return;
+				}
+				else
+				{
+					if(silentsaylink)
+					{
+						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+					}
+					else
+					{
+						Message(7, "You say, '%s'", response.c_str());
+						ChannelMessageReceived(8, 0, 100, response.c_str());
+					}
+					return;
+				}
+			}
+			else
+			{
+				Message(13, "Error: Say Link not found or is too long.");
+				return;
+			}
+		}
+		else {
+			Message(13, "Error: The item for the link you have clicked on does not exist!");
+			return;
+		}
+
+	}
+
+	ItemInst* inst = database.CreateItem(item, item->MaxCharges);
+	if (inst) {
+		SendItemPacket(0, inst, ItemPacketViewLink);
+		safe_delete(inst);
+	}
 	return;
 }
 
@@ -2907,6 +3172,58 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		}
 		else
 			Message(0,"Failed to change leader, could not find target.");
+	}
+//	SendGuildMembers(GuildID(), true);
+	return;
+}
+
+void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
+{
+	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDemote");
+	mpkt(GUILDS__IN_PACKET_TRACE, app);
+
+	if(app->size != sizeof(GuildDemoteStruct)) {
+		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildDemoteStruct of %i\n",app->size,sizeof(GuildDemoteStruct));
+		return;
+	}
+
+	if (!IsInAGuild())
+		Message(0, "Error: You arent in a guild!");
+	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
+		Message(0, "You dont have permission to invite.");
+	else if (!worldserver.Connected())
+		Message(0, "Error: World server disconnected");
+	else {
+		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
+
+		CharGuildInfo gci;
+		if(!guild_mgr.GetCharInfo(demote->target, gci)) {
+			Message(0, "Unable to find '%s'", demote->target);
+			return;
+		}
+		if(gci.guild_id != GuildID()) {
+			Message(0, "You aren't in the same guild, what do you think you are doing?");
+			return;
+		}
+
+		if(gci.rank < 1) {
+			Message(0, "%s cannot be demoted any further!", demote->target);
+			return;
+		}
+		uint8 rank = gci.rank - 1;
+
+
+		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
+			demote->target, gci.char_id,
+			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
+			guild_mgr.GetRankName(GuildID(), rank), rank,
+			guild_mgr.GetGuildName(GuildID()), GuildID());
+
+		if(!guild_mgr.SetGuildRank(gci.char_id, rank)) {
+			Message(13, "Error while setting rank %d on '%s'.", rank, demote->target);
+			return;
+		}
+		Message(0, "Successfully demoted %s to rank %d", demote->target, rank);
 	}
 //	SendGuildMembers(GuildID(), true);
 	return;
@@ -5202,6 +5519,19 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	return;
 }
 
+void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app) {
+
+	if (app->size != sizeof(InspectMessage_Struct)) {
+		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectMessageUpdate, size=%i, expected %i", app->size, sizeof(InspectMessage_Struct));
+		return;
+	}
+
+	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) app->pBuffer;
+	InspectMessage_Struct& playermessage = this->GetInspectMessage();
+	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
+	database.SetPlayerInspectMessage(name, &playermessage);
+}
+
 #if 0	// I dont think there's an op for this now, and we check this
 			// when the client is sitting
 void Client::Handle_OP_Medding(const EQApplicationPacket *app)
@@ -5235,6 +5565,21 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 	return;
 }
+
+void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
+{
+	if(app->size!=sizeof(LoadSpellSet_Struct)) {
+		printf("Wrong size of LoadSpellSet_Struct! Expected: %zu, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
+		return;
+	}
+	int i;
+	LoadSpellSet_Struct* ss=(LoadSpellSet_Struct*)app->pBuffer;
+	for(i=0;i<MAX_PP_MEMSPELL;i++) {
+		if (ss->spell[i] != 0xFFFFFFFF)
+			UnmemSpell(i,true);
+	}
+}
+
 
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
@@ -6792,6 +7137,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	// This should be a part of the PlayerProfile BLOB, but we don't want to modify that
 	// The player inspect message is retrieved from the db on load, then saved as new updates come in..no mods to Client::Save()
+	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message);
 
 	conn_state = PlayerProfileLoaded;
 
@@ -8236,6 +8582,40 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	SacrificeCaster.clear();
 }
 
+void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
+
+	if(app->size != sizeof(PopupResponse_Struct)) {
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PopupResponse expected %i got %i",
+					sizeof(PopupResponse_Struct), app->size);
+		DumpPacket(app);
+		return;
+	}
+	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
+
+	// Handle any EQEmu defined popup Ids first
+	switch(prs->popupid)
+	{
+		case POPUPID_UPDATE_SHOWSTATSWINDOW:
+			if(GetTarget() && GetTarget()->IsClient())
+				GetTarget()->CastToClient()->SendStatsWindow(this, true);
+			else
+				SendStatsWindow(this, true);
+			return;
+
+		default:
+			break;
+	}
+
+	char buf[16];
+	sprintf(buf, "%d\0", prs->popupid);
+
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
+
+	Mob* Target = GetTarget();
+	if(Target && Target->IsNPC()) {
+		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
+	}
+}
 
 void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	if (app->size != sizeof(ApplyPoison_Struct)) {
@@ -8286,6 +8666,58 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	ApplyPoisonResult->inventorySlot = ApplyPoisonData->inventorySlot;
 
 	FastQueuePacket(&outapp);
+}
+
+void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
+{
+	// This Opcode is sent by the client when the Leaderboard button on the PVP Stats window is pressed.
+	//
+	// It has a single uint32 payload which is the sort method:
+	//
+	// PVPSortByKills = 0, PVPSortByPoints = 1, PVPSortByInfamy = 2
+	//
+	if(app->size != sizeof(PVPLeaderBoardRequest_Struct))
+	{
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PVPLeaderBoardRequest expected %i got %i",
+					sizeof(PVPLeaderBoardRequest_Struct), app->size);
+
+		DumpPacket(app);
+
+		return;
+	}
+	/*PVPLeaderBoardRequest_Struct *pvplbrs = (PVPLeaderBoardRequest_Struct *)app->pBuffer;*/	//unused
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPLeaderBoardReply, sizeof(PVPLeaderBoard_Struct));
+	/*PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;*/	//unused
+
+	// TODO: Record and send this data.
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app)
+{
+	// This opcode is sent by the client when the player right clicks a name on the PVP leaderboard and sends
+	// further details about the selected player, e.g. Race/Class/AAs/Guild etc.
+	//
+	if(app->size != sizeof(PVPLeaderBoardDetailsRequest_Struct))
+	{
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PVPLeaderBoardDetailsRequest expected %i got %i",
+					sizeof(PVPLeaderBoardDetailsRequest_Struct), app->size);
+
+		DumpPacket(app);
+
+		return;
+	}
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
+	PVPLeaderBoardDetailsReply_Struct *pvplbdrs = (PVPLeaderBoardDetailsReply_Struct *)outapp->pBuffer;
+
+	// TODO: Record and send this data.
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
@@ -8603,6 +9035,63 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 	HideCorpseMode = hcs->Action;
 }
 
+void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
+{
+	if(app->size != sizeof(GuildStatus_Struct))
+	{
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GuildStatus expected %i got %i",
+					sizeof(GuildStatus_Struct), app->size);
+
+		DumpPacket(app);
+
+		return;
+	}
+	GuildStatus_Struct *gss = (GuildStatus_Struct*)app->pBuffer;
+
+	Client *c = entity_list.GetClientByName(gss->Name);
+
+	if(!c)
+	{
+		Message_StringID(clientMessageWhite, TARGET_PLAYER_FOR_GUILD_STATUS);
+		return;
+	}
+
+	uint32 TargetGuildID = c->GuildID();
+
+	if(TargetGuildID == GUILD_NONE)
+	{
+		Message_StringID(clientMessageWhite, NOT_IN_A_GUILD, c->GetName());
+		return;
+	}
+
+	const char *GuildName = guild_mgr.GetGuildName(TargetGuildID);
+
+	if(!GuildName)
+		return;
+
+	bool IsLeader = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_PROMOTE);
+	bool IsOfficer = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_INVITE);
+
+	if((TargetGuildID == GuildID()) && (c != this))
+	{
+		if(IsLeader)
+			Message_StringID(clientMessageWhite, LEADER_OF_YOUR_GUILD, c->GetName());
+		else if(IsOfficer)
+			Message_StringID(clientMessageWhite, OFFICER_OF_YOUR_GUILD, c->GetName());
+		else
+			Message_StringID(clientMessageWhite, MEMBER_OF_YOUR_GUILD, c->GetName());
+
+		return;
+	}
+
+	if(IsLeader)
+		Message_StringID(clientMessageWhite, LEADER_OF_X_GUILD, c->GetName(), GuildName);
+	else if(IsOfficer)
+		Message_StringID(clientMessageWhite, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
+	else
+		Message_StringID(clientMessageWhite, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
+}
+
 void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 {
 	if(DraggedCorpses.size() >= (unsigned int)RuleI(Character, MaxDraggedCorpses))
@@ -8638,6 +9127,112 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
+}
+
+void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
+{
+	if(IsInAGuild())
+	{
+		Message(clientMessageError, "You are already in a guild!");
+		return;
+	}
+
+	if(!RuleB(Guild, PlayerCreationAllowed))
+	{
+		Message(clientMessageError, "This feature is disabled on this server. Contact a GM or post on your server message boards to create a guild.");
+		return;
+	}
+
+	if ((Admin() < RuleI(Guild, PlayerCreationRequiredStatus)) ||
+		(GetLevel() < RuleI(Guild, PlayerCreationRequiredLevel)) ||
+		(database.GetTotalTimeEntitledOnAccount(AccountID()) < (unsigned int)RuleI(Guild, PlayerCreationRequiredTime)))
+	{
+		Message(clientMessageError, "Your status, level or time playing on this account are insufficient to use this feature.");
+		return;
+	}
+
+	// The Underfoot client Guild Creation window will only allow a guild name of <= around 30 characters, but the packet is 64 bytes. Sanity check the
+	// name anway.
+	//
+
+	char *GuildName = (char *)app->pBuffer;
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+	if (strlen(GuildName) > 60)
+#else
+	if(strnlen(GuildName, 64) > 60)
+#endif // __DARWIN_C_LEVEL
+#else
+	if(strnlen(GuildName, 64) > 60)
+#endif // DARWIN
+	{
+		Message(clientMessageError, "Guild name too long.");
+		return;
+	}
+
+	for(unsigned int i = 0; i < strlen(GuildName); ++i)
+	{
+		if(!isalpha(GuildName[i]) && (GuildName[i] != ' '))
+		{
+			Message(clientMessageError, "Invalid character in Guild name.");
+			return;
+		}
+	}
+
+	int32 GuildCount = guild_mgr.DoesAccountContainAGuildLeader(AccountID());
+
+	if(GuildCount >= RuleI(Guild, PlayerCreationLimit))
+	{
+		Message(clientMessageError, "You cannot create this guild because this account may only be leader of %i guilds.", RuleI(Guild, PlayerCreationLimit));
+		return;
+	}
+
+	if(guild_mgr.GetGuildIDByName(GuildName) != GUILD_NONE)
+	{
+		Message_StringID(clientMessageError, GUILD_NAME_IN_USE);
+		return;
+	}
+
+	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
+
+	_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
+		GuildName, CharacterID(), (unsigned long)NewGuildID);
+
+	if (NewGuildID == GUILD_NONE)
+		Message(clientMessageError, "Guild creation failed.");
+	else
+	{
+		if(!guild_mgr.SetGuild(CharacterID(), NewGuildID, GUILD_LEADER))
+			Message(clientMessageError, "Unable to set guild leader's guild in the database. Contact a GM.");
+		else
+		{
+			Message(clientMessageYellow, "You are now the leader of %s", GuildName);
+
+		}
+	}
+}
+
+void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {
+	// Does not exist in Ti, UF or RoF clients
+	// SoF and SoD both send a 4-byte packet with a uint32 value of '8'
+}
+
+void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app) {
+	// Does not exist in Ti client
+	// SoF, SoD and UF clients send a 4-byte packet indicating the 'parent' slot
+	// SoF, SoD and UF slots are defined by a uint32 value and currently untranslated
+	// RoF client sends a 12-byte packet based on the RoF::Structs::ItemSlotStruct
+
+	// RoF structure types are defined as signed uint16 and currently untranslated
+	// RoF::struct.SlotType = {0 - Equipment, 1 - Bank, 2 - Shared Bank} // not tested beyond listed types
+	// RoF::struct.Unknown2 = 0
+	// RoF::struct.MainSlot = { <parent slot range designated by slottype..zero-based> }
+	// RoF::struct.SubSlot = -1 (non-child)
+	// RoF::struct.AugSlot = -1 (non-child)
+	// RoF::struct.Unknown1 = 141 (unsure why, but always appears to be this value..combine containers not tested)
+
+	// SideNote: Watching the slot translations, Unknown1 is showing '141' as well on certain item swaps.
+	// Manually looting a corpse results in a from '34' to '68' value for equipment items, '0' to '0' for inventory.
 }
 
 void Client::Handle_OP_Action(const EQApplicationPacket *app) {
