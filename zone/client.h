@@ -268,8 +268,6 @@ public:
 	inline Inventory& GetInv()				{ return m_inv; }
 	inline const Inventory& GetInv() const	{ return m_inv; }
 	inline PetInfo* GetPetInfo(uint16 pet)	{ return (pet==1)?&m_suspendedminion:&m_petinfo; }
-	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
-	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 
 	bool	CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -796,14 +794,12 @@ public:
 	//Doesn't appear to work directly after the client recieves an action packet.
 	void SendBuffDurationPacket(uint16 spell_id, int duration, int inlevel);
 
-	void	ProcessInspectRequest(Client* requestee, Client* requester);
 	bool	ClientFinishedLoading() { return (conn_state == ClientConnectFinished); }
 	int		FindSpellBookSlotBySpellID(uint16 spellid);
 	int		GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
 	uint16	GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill);
-	void	SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool	PendingTranslocate;
 	time_t	TranslocateTime;
 	bool	PendingSacrifice;
@@ -817,7 +813,6 @@ public:
 	int GetAggroCount();
 	void IncrementAggroCount();
 	void DecrementAggroCount();
-	void SendPVPStats();
 	void SendDisciplineTimers();
 
 	void CheckEmoteHail(Mob *target, const char* message);
@@ -886,7 +881,6 @@ public:
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
-	void PlayMP3(const char* fname);
 	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);
@@ -1041,7 +1035,6 @@ private:
 	Object*						m_tradeskill_object;
 	PetInfo						m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo						m_suspendedminion; // pet data for our suspended minion.
-	InspectMessage_Struct		m_inspect_message;
 
 	void NPCSpawn(const Seperator* sep);
 	uint32 GetEXPForLevel(uint16 level);

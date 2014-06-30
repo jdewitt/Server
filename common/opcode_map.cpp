@@ -45,7 +45,6 @@ void load_opcode_names()
 	opcode_map[0x0130]="LiveOP_GuildInvite";
 	opcode_map[0x01c0]="LiveOP_GuildMOTD";
 	opcode_map[0x027e]="LiveOP_GetGuildMOTD";
-	opcode_map[0x0277]="LiveOP_GuildDemote";
 	opcode_map[0x0131]="LiveOP_GuildInviteAccept";
 	opcode_map[0x00a4]="LiveOP_GuildWar";
 	opcode_map[0x0133]="LiveOP_GuildDelete";
@@ -90,7 +89,6 @@ void load_opcode_names()
 	opcode_map[0x0234]="LiveOP_TrackTarget";
 	opcode_map[0x0286]="LiveOP_Track";
 	opcode_map[0x0297]="LiveOP_ReadBook";
-	opcode_map[0x001f]="LiveOP_ItemLinkClick";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
 	opcode_map[0x01d9]="LiveOP_ItemLinkText";
 	opcode_map[0x0a41]="LiveOP_RezzRequest";

@@ -5238,32 +5238,6 @@ XS(XS_Client_SilentMessage)
         XSRETURN_EMPTY;
 }
 
-XS(XS_Client_PlayMP3); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_PlayMP3)
-{
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, fname)");
-	{
-		Client *	THIS;
-		char *		fname = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 1)	{	fname = (char *)SvPV_nolen(ST(1));	}
-
-		THIS->PlayMP3(fname);
-	}
-	XSRETURN_EMPTY;
-}
-
 //Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
 
 XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
@@ -5555,7 +5529,6 @@ XS(boot_Client)
         newXSproto(strcpy(buf, "SetThirst"), XS_Client_SetThirst, file, "$$");
         newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
 		newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
-		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
