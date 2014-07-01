@@ -34,7 +34,6 @@ public:
 
 	virtual void Process();
 
-	void SendGuildJoin(GuildJoin_Struct* gj);
 	bool SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);

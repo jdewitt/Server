@@ -72,7 +72,6 @@
 	void Handle_OP_GuildPeace(const EQApplicationPacket *app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_GuildLeader(const EQApplicationPacket *app);
-	void Handle_OP_GuildDemote(const EQApplicationPacket *app);
 	void Handle_OP_GuildInvite(const EQApplicationPacket *app);
 	void Handle_OP_GuildRemove(const EQApplicationPacket *app);
 	void Handle_OP_GetGuildMOTD(const EQApplicationPacket *app);
@@ -201,9 +200,7 @@
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
 	void Handle_OP_HideCorpse(const EQApplicationPacket *app);
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
-	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
-	void Handle_OP_GuildCreate(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);

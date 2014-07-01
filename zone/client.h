@@ -545,7 +545,6 @@ public:
 	void	SendGuildMembers();
 	void	SendGuildList();
 	void	SendPlayerGuild();
-	void	SendGuildJoin(GuildJoin_Struct* gj);
 	void	RefreshGuildInfo();
 
 
