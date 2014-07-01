@@ -42,13 +42,6 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	// If the text in the OP_GuildMOTD packet is the same, it does nothing. If not the same, it displays
 	// the new MOTD and then stores the new text.
 	//
-	// When the Client receives an OP_GetGuildMOTDReply, it displays the text in the packet.
-	//
-	// So OP_GuildMOTD should be sent on zone entry and when an Officer changes the MOTD, and OP_GetGuildMOTDReply
-	// should be sent when the client issues the /getguildmotd command.
-	//
-	if(GetGuildMOTDReply)
-		outapp->SetOpcode(OP_GetGuildMOTDReply);
 
 	GuildMOTD_Struct *motd = (GuildMOTD_Struct *) outapp->pBuffer;
 	motd->unknown0 = 0;

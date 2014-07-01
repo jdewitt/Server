@@ -167,7 +167,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildLeader] = &Client::Handle_OP_GuildLeader;
 	ConnectedOpcodes[OP_GuildInvite] = &Client::Handle_OP_GuildInvite;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
-	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
 	ConnectedOpcodes[OP_GuildInviteAccept] = &Client::Handle_OP_GuildInviteAccept;
 	ConnectedOpcodes[OP_ManaChange] = &Client::Handle_OP_ManaChange;
 	ConnectedOpcodes[OP_MemorizeSpell] = &Client::Handle_OP_MemorizeSpell;
@@ -3044,20 +3043,6 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 		else {
 			Message(0, "Guild successfully deleted.");
 		}
-	}
-}
-
-void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
-{
-	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildMOTD");
-	mpkt(GUILDS__IN_PACKET_TRACE, app);
-
-	SendGuildMOTD(true);
-
-	if(IsInAGuild())
-	{
-		SendGuildURL();
-		SendGuildChannel();
 	}
 }
 
