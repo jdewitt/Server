@@ -1622,7 +1622,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			int MaxSkillValue = MaxSkill(skill);
-			if (skilllevel > 99 || skilllevel >= MaxSkillValue)
+			if (skilllevel >= MaxSkillValue)
 			{
 				// Don't allow training over max skill level
 				Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());

@@ -118,103 +118,6 @@ const char *GetRandPetName()
 	return petnames[r];
 }
 
-//not used anymore
-/*int CalcPetHp(int levelb, int classb, int STA)
-{
-	int multiplier = 0;
-	int base_hp = 0;
-	switch(classb) {
-		case WARRIOR:{
-			if (levelb < 20)
-				multiplier = 22;
-			else if (levelb < 30)
-				multiplier = 23;
-			else if (levelb < 40)
-				multiplier = 25;
-			else if (levelb < 53)
-				multiplier = 27;
-			else if (levelb < 57)
-				multiplier = 28;
-			else
-				multiplier = 30;
-			break;
-		}
-		case DRUID:
-		case CLERIC:
-		case SHAMAN:{
-			multiplier = 15;
-			break;
-		}
-		case PALADIN:
-		case SHADOWKNIGHT:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-		case MONK:
-		case BARD:
-		case ROGUE:
-		case BEASTLORD:{
-			if (levelb < 51)
-				multiplier = 18;
-			else if (levelb < 58)
-				multiplier = 19;
-			else
-				multiplier = 20;
-			break;
-		}
-		case RANGER:{
-			if (levelb < 58)
-				multiplier = 20;
-			else
-				multiplier = 21;
-			break;
-		}
-		case MAGICIAN:
-		case WIZARD:
-		case NECROMANCER:
-		case ENCHANTER:{
-			multiplier = 12;
-			break;
-		}
-		default:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-	}
-
-	if (multiplier == 0)
-	{
-		LogFile->write(EQEMuLog::Error, "Multiplier == 0 in CalcPetHp,using Generic....");;
-		multiplier=12;
-	}
-
-	base_hp = 5 + (multiplier*levelb) + ((multiplier*levelb*STA) + 1)/300;
-	return base_hp;
-}
-*/
-
 void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 	// petpower of -1 is used to get the petpower based on whichever focus is currently
 	// equipped. This should replicate the old functionality for the most part.
@@ -464,7 +367,7 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 	else {
 		querylen = MakeAnyLenString(&query,
 			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1", pet_type, petpower);
+			"WHERE type='%s' AND petpower=%d", pet_type, petpower);
 	}
 
 	if (RunQuery(query, querylen, errbuf, &result)) {

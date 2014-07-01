@@ -6458,7 +6458,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		{
 			if(GetBoatNPCID() > 0)
 			{
-				Message(15, "You are too distracted to cast a spell now!");
+				Message(13, "You are too distracted to cast a spell now!");
 				return;
 			}
 

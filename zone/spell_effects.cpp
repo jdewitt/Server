@@ -1013,20 +1013,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
 #endif
-				if(!spellbonuses.AntiGate){
+				if(!spellbonuses.AntiGate)
+					Gate();		
 
-					if(MakeRandomInt(0, 99) < effect_value)
-					{
-						Gate();				
-					}
-					else
-					{
-						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
-						ZoneChange_Struct *zc = new struct ZoneChange_Struct;
-						CastToClient()->SendZoneCancel(zc);
-						_log(EQMAC__LOG, "Gate failed. Wah wah.");
-					}
-				}
 				break;
 			}
 
@@ -1222,7 +1211,98 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				else
 				{
-					MakePet(spell_id, spell.teleport_zone);
+					if(this && this->IsClient() && (GetClass() == MAGICIAN || GetClass() == NECROMANCER))
+					{
+						int16 focus = 0;
+						const ItemInst* FocusItem = this->CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+						if(FocusItem)
+							focus = FocusItem->GetID();
+						switch(focus)
+						{
+							case 6360: //Air
+							{
+								if(spell_id == 627 || spell_id == 631 || spell_id == 635 || spell_id == 317 || 
+									spell_id == 400 || spell_id == 404 || spell_id == 396 || spell_id == 499 || 
+									spell_id == 572 || spell_id == 576 || spell_id == 623)
+								{
+									MakePoweredPet(spell_id, spell.teleport_zone, 1);
+									break;
+								}
+								else
+								{
+									MakePet(spell_id, spell.teleport_zone);
+									break;
+								}
+							}
+							case 6361: //Earth
+							{
+								if(spell_id == 624 || spell_id == 628 || spell_id == 632 || spell_id == 58 || 
+									spell_id == 397 || spell_id == 401 || spell_id == 335 || spell_id == 496 || 
+									spell_id == 569 || spell_id == 573 || spell_id == 620)
+								{
+									MakePoweredPet(spell_id, spell.teleport_zone, 1);
+									break;
+								}
+								else
+								{
+									MakePet(spell_id, spell.teleport_zone);
+									break;
+								}
+							}
+							case 6362: //Fire
+							{
+								if(spell_id == 626 || spell_id == 630 || spell_id == 634 || spell_id == 316 || 
+									spell_id == 399 || spell_id == 403 || spell_id == 395 || spell_id == 498 || 
+									spell_id == 571 || spell_id == 575 || spell_id == 622)
+								{
+									MakePoweredPet(spell_id, spell.teleport_zone, 1);
+									break;
+								}
+								else
+								{
+									MakePet(spell_id, spell.teleport_zone);
+									break;
+								}
+							}
+							case 6363: //Water
+							{
+								if(spell_id == 625 || spell_id == 629 || spell_id == 633 || spell_id == 315 || 
+									spell_id == 398 || spell_id == 402 || spell_id == 336 || spell_id == 497 || 
+									spell_id == 570 || spell_id == 574 || spell_id == 621)
+								{
+									MakePoweredPet(spell_id, spell.teleport_zone, 1);
+									break;
+								}
+								else
+								{
+									MakePet(spell_id, spell.teleport_zone);
+									break;
+								}
+							}
+							case 11571: //Necro
+							{
+								if(spell_id == 1623 || spell_id == 1621 || spell_id == 443 || spell_id == 1622)
+								{
+									MakePoweredPet(spell_id, spell.teleport_zone, 1);
+									break;
+								}
+								else
+								{
+									MakePet(spell_id, spell.teleport_zone);
+									break;
+								}
+							}
+							default:
+							{
+								MakePet(spell_id, spell.teleport_zone);
+								break;
+							}					
+						}
+					}	
+					else
+					{
+						MakePet(spell_id, spell.teleport_zone);
+					}
 				}
 				break;
 			}

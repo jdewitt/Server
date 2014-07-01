@@ -97,8 +97,9 @@ RULE_BOOL ( Character, EnableDiscoveredItems, false ) // If enabled, it enables 
 RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
-RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
+RULE_INT ( Character, BaseRunSpeedCap, 150) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
 RULE_BOOL (Character, StripBuffsOnLowHP, true)
+RULE_REAL (Character, BaseRunSpeed, 0.35)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Guild )
@@ -298,6 +299,7 @@ RULE_INT ( Spells, FRProjectileItem_SOF, 80684) // Item id for SOF clients for F
 RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell projectile'.
 RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
 RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
+RULE_INT ( Spells, BaseFizzleChance, 20) //Base percentage you will fizzle. The chance then is modified by skill to go up or down.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

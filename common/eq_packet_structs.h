@@ -411,8 +411,8 @@ struct Charm_Struct {
 
 struct InterruptCast_Struct
 {
-	uint32 spawnid;
-	uint32 messageid;
+	uint16 messageid;
+	uint16 spawnid;
 	char	message[0];
 };
 
