@@ -260,7 +260,6 @@ OUTz(OP_WorldObjectsSent);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
-OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);
 OUTv(OP_ItemLinkResponse, ItemPacket_Struct);
 OUTv(OP_ZoneSpawns, Spawn_Struct);

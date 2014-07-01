@@ -2245,7 +2245,6 @@ ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }

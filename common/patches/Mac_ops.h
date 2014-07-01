@@ -127,7 +127,6 @@ E(OP_DeleteItem);
 E(OP_DisciplineUpdate);
 E(OP_Dye);
 E(OP_GMTrainSkillConfirm);
-E(OP_GuildMemberList);
 E(OP_HideCorpse);
 E(OP_IncreaseStats);
 E(OP_InspectMessageUpdate);

@@ -65,16 +65,6 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	FastQueuePacket(&outapp);
 }
 
-void Client::SendGuildURL()
-{
-//CAVEREM
-}
-
-void Client::SendGuildChannel()
-{
-//CAVEREM
-}
-
 void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
@@ -140,38 +130,6 @@ void Client::SendPlayerGuild() {
 	FastQueuePacket(&outapp);
 }
 
-void Client::SendGuildMembers() {
-	uint32 len;
-	uint8 *data = guild_mgr.MakeGuildMembers(GuildID(), GetName(), len);
-	if(data == nullptr)
-		return;	//invalid guild, shouldent happen.
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
-	outapp->size = len;
-	outapp->pBuffer = data;
-	data = nullptr;
-
-	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberList of length %d", outapp->size);
-	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
-
-	FastQueuePacket(&outapp);
-
-	ServerPacket* pack = new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
-
-	ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*)pack->pBuffer;
-
-	srogms->FromID = CharacterID();
-	srogms->GuildID = GuildID();
-
-	worldserver.SendPacket(pack);
-
-	safe_delete(pack);
-
-	// We need to send the Guild URL and Channel name again, as sending OP_GuildMemberList appears to clear this information out.
-	SendGuildURL();
-	SendGuildChannel();
-}
-
 void Client::RefreshGuildInfo()
 {
 	uint32 OldGuildID = guild_id;
@@ -199,8 +157,6 @@ void EntityList::SendGuildMOTD(uint32 guild_id) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildMOTD();
-			client->SendGuildURL();
-			client->SendGuildChannel();
 		}
 		++it;
 	}
@@ -227,23 +183,6 @@ void EntityList::RefreshAllGuildInfo(uint32 guild_id) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->RefreshGuildInfo();
-		}
-		++it;
-	}
-}
-
-void EntityList::SendGuildMembers(uint32 guild_id) {
-	if(guild_id == GUILD_NONE)
-		return;
-
-	//this could be optimized a bit to only build the member's packet once
-	//and then keep swapping out the name in the packet on each send.
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *client = it->second;
-		if (client->GuildID() == guild_id) {
-			client->SendGuildMembers();
 		}
 		++it;
 	}

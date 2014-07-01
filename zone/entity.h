@@ -169,7 +169,6 @@ public:
 	bool CanAddHateForMob(Mob *p);
 	void	SendGuildMOTD(uint32 guild_id);
 	void	SendGuildSpawnAppearance(uint32 guild_id);
-	void	SendGuildMembers(uint32 guild_id);
 	void	RefreshAllGuildInfo(uint32 guild_id);
 	void	SendGuildList();
 	void	CheckGroupList (const char *fname, const int fline);

@@ -679,12 +679,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if(IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-	}
-
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
 
@@ -3155,7 +3149,6 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		else
 			Message(0,"Failed to change leader, could not find target.");
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
@@ -3354,7 +3347,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			safe_delete(outapp);
 		}
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
@@ -6753,10 +6745,6 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
-	if(IsInAGuild())
-	{
-		SendGuildMembers();
-	}
 	return;
 }
 

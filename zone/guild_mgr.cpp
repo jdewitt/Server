@@ -360,22 +360,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			c->RefreshGuildInfo();
 		}
 
-		//it would be nice if we had the packet to send just a one-person update
-		if(s->guild_id == GUILD_NONE) {
-			if(c != nullptr)
-				c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
-		} else {
-			entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
-		}
-
-		if(s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
-			entity_list.SendGuildMembers(s->old_guild_id);
-		else if(c != nullptr && s->guild_id != GUILD_NONE) {
+		if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
 		}
-
-
 		break;
 	}
 

@@ -301,7 +301,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("GuildLeader", static_cast<int>(OP_GuildLeader)),
 			luabind::value("GuildPeace", static_cast<int>(OP_GuildPeace)),
 			luabind::value("GuildRemove", static_cast<int>(OP_GuildRemove)),
-			luabind::value("GuildMemberList", static_cast<int>(OP_GuildMemberList)),
 			luabind::value("GuildInvite", static_cast<int>(OP_GuildInvite)),
 			luabind::value("GuildMOTD", static_cast<int>(OP_GuildMOTD)),
 			luabind::value("SetGuildMOTD", static_cast<int>(OP_SetGuildMOTD)),
