@@ -1591,9 +1591,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		} else {
 			switch(skill) {
 			case SkillBrewing:
-			case SkillMakePoison:
 			case SkillTinkering:
-			case SkillResearch:
 			case SkillAlchemy:
 			case SkillBaking:
 			case SkillTailoring:
@@ -1601,6 +1599,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case SkillFletching:
 			case SkillJewelryMaking:
 			case SkillPottery:
+			case SkillFishing:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
