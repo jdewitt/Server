@@ -1,3 +1,6 @@
+/*
+ * vim: set noexpandtab tabstop=4 shiftwidth=4 syntax=cpp:
+*/
 /*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
@@ -36,7 +39,6 @@
 #endif
 
 #include "StringIDs.h"
-
 ///////////////////////////////////////////////////////////////////////////////
 // pet related functions
 
@@ -118,6 +120,60 @@ const char *GetRandPetName()
 	return petnames[r];
 }
 
+const FocusPetItem Pet::focusItems[11] = {
+	// Symbol of Ancient Summoning
+	{20508, 25, 75, 59, FocusPetType::ALL},
+	// Dark Gloves of Summoning
+	{28144, 20, 75, 49, FocusPetType::ALL},
+	// Encyclopedia Necrotheurgia
+	{11571, 10, 60, 41, FocusPetType::NECRO},
+	// Staff of Elemental Mastery: Water
+	{11569, 10, 60, 49, FocusPetType::WATER},
+	// Staff of Elemental Mastery: Earth
+	{11567, 10, 60, 49, FocusPetType::EARTH},
+	// Staff of Elemental Mastery: Fire
+	{11566, 10, 60, 49, FocusPetType::FIRE},
+	// Staff of Elemental Mastery: Air
+	{11568, 10, 60, 49, FocusPetType::AIR},
+	// Broom of Trilon
+	{6361, 5, 49, 4, FocusPetType::AIR},
+	// Shovel of Ponz
+	{6361, 5, 49, 4, FocusPetType::EARTH},
+	// Torch of Alna
+	{6362, 5, 49, 4, FocusPetType::FIRE},
+	// Stein of Ulissa
+	{6363, 5, 49, 4, FocusPetType::WATER},
+};
+
+FocusPetType Pet::GetPetItemPetTypeFromSpellId(uint16 spell_id) {
+	static const int firePets[]  = {626, 630, 634, 316, 399, 403, 395, 498, 571, 575, 622};
+	static const int airPets[]   = {627, 631, 635, 317, 396, 400, 404, 499, 572, 576, 623};
+	static const int earthPets[] = {624, 628, 632, 58, 397, 401, 335, 496, 569, 573, 620};
+	static const int waterPets[] = {625, 629, 633, 315, 398, 403, 336, 497, 570, 574, 621};
+
+	for(int i=0; i < sizeof(firePets); i++) {
+		if((int)spell_id == firePets[i]) {
+			return FocusPetType::FIRE;
+		}
+	}
+	for(int i=0; i < sizeof(airPets); i++) {
+		if((int)spell_id == airPets[i]) {
+			return FocusPetType::AIR;
+		}
+	}
+	for(int i=0; i < sizeof(earthPets); i++) {
+		if((int)spell_id == earthPets[i]) {
+			return FocusPetType::EARTH;
+		}
+	}
+	for(int i=0; i < sizeof(waterPets); i++) {
+		if((int)spell_id == waterPets[i]) {
+			return FocusPetType::WATER;
+		}
+	}
+	return FocusPetType::NONE;
+}
+
 void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 	// petpower of -1 is used to get the petpower based on whichever focus is currently
 	// equipped. This should replicate the old functionality for the most part.
@@ -134,23 +190,9 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if(HasPet() || pettype == nullptr)
 		return;
 
-	int16 act_power = 0; // The actual pet power we'll use.
-	if (petpower == -1) {
-		if (this->IsClient()) {
-			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
-		}
-	}
-	else if (petpower > 0)
-		act_power = petpower;
-
-	// optional rule: classic style variance in pets. Achieve this by
-	// adding a random 0-4 to pet power, since it only comes in increments
-	// of five from focus effects.
-
 	//lookup our pets table record for this type
 	PetRecord record;
-	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
+	if(!database.GetPoweredPetEntry(pettype, petpower, &record)) {
 		Message(13, "Unable to find data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to find data for pet %s, check pets table.", pettype);
 		return;
@@ -164,6 +206,64 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		return;
 	}
 
+	int16 act_power = 0; // The actual pet power we'll use.
+	if (petpower == -1) {
+		if (this->IsClient()) {
+			//Message(13, "We are a client time to check for focus items");
+			uint16 focusItemId;
+			FocusPetItem petItem;
+			// Loop over all the focus items and figure out which on is the best to use
+			// It will step down from PoP - Classic looking for the best focus item to use based on pet level
+			for(int i=0; i < sizeof(*Pet::focusItems); i++) {
+				petItem = Pet::focusItems[i];
+				// Look in out inventory
+				int16 slot_id = this->CastToClient()->GetInv().HasItem(petItem.item_id, 1, invWhereWorn);
+				if(slot_id != SLOT_INVALID) {
+					//skip this focus item if its effect is out of rage for the pet we are casting
+					if(base->level >= petItem.min_level && base->level <= petItem.max_level) {
+						//Message(13, "Found Focus Item in Inventory: %d", slot_id);
+						focusItemId = petItem.item_id;
+						break;
+					} //else {
+						//Message(13, "Moving on Pet base level is out of range: %d (%d - %d)", base->level, petItem.min_level, petItem.max_level);
+					//}
+				}
+			}
+			// we have a focus item
+			if(focusItemId) {
+				FocusPetType focusType;
+				// Symbol or Gloves can be used by all NEC, MAG, BST
+				if(petItem.pet_type == FocusPetType::ALL)
+				{
+					//Message(13, "Type is ALL");
+					focusType = FocusPetType::ALL;
+				} else {
+					// make sure we can use the focus item as the class .. client should never let us fail this but for sanity!
+					if (GetClass() == MAGICIAN) {
+						//Message(13, "Looking up mage");
+						focusType = Pet::GetPetItemPetTypeFromSpellId(spell_id);
+					} else if (GetClass() == NECROMANCER) {
+						//Message(13, "We are a necro");
+						focusType = FocusPetType::NECRO;
+					}
+				}
+				// Sets the power to be what the focus item has as a mod
+				if (focusType == petItem.pet_type) {
+					//Message(13, "Setting power to: %d", petItem.power);
+					act_power = petItem.power;
+				}
+			}
+		}
+	}
+	else if (petpower > 0) {
+		act_power = petpower;
+	}
+
+	//Message(13, "Power is: %d", act_power);
+	// optional rule: classic style variance in pets. Achieve this by
+	// adding a random 0-4 to pet power, since it only comes in increments
+	// of five from focus effects.
+
 	//we copy the npc_type data because we need to edit it a bit
 	NPCType *npc_type = new NPCType;
 	memcpy(npc_type, base, sizeof(NPCType));
@@ -174,13 +274,13 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		float scale_power = (float)act_power / 100.0f;
 		if(scale_power > 0)
 		{
-			npc_type->max_hp *= (1 + scale_power);
-			npc_type->cur_hp = npc_type->max_hp;
-			npc_type->AC *= (1 + scale_power);
-			npc_type->level += 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
-			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
-			npc_type->max_dmg = (npc_type->max_dmg * (1 + (scale_power / 2)));
-			npc_type->size *= (1 + (scale_power / 2));
+			npc_type->max_hp  = (int) (npc_type->max_hp * (1 + scale_power));
+			npc_type->cur_hp  = npc_type->max_hp;
+			npc_type->AC	  = (int) (npc_type->AC * (1 + scale_power));
+			npc_type->level  += (int) 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
+			npc_type->min_dmg = (int) (npc_type->min_dmg * (1 + (scale_power / 2)));
+			npc_type->max_dmg = (int) (npc_type->max_dmg * (1 + (scale_power / 2)));
+			npc_type->size	  = (npc_type->size * (1 + scale_power));
 		}
 		record.petpower = act_power;
 	}
