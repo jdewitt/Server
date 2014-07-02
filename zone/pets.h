@@ -1,3 +1,6 @@
+/*
+ * vim: set noexpandtab tabstop=4 shiftwidth=4 syntax=cpp:
+*/
 #ifndef PETS_H
 #define PETS_H
 
@@ -22,11 +25,31 @@
 	#define PET_HOLD_ON			27
 	#define PET_HOLD_OFF		28
 
+
+	typedef enum {
+		ALL,
+		FIRE,
+		WATER,
+		AIR,
+		EARTH,
+		NECRO,
+		BEAST,
+		NONE
+	} FocusPetType;
+
+	struct FocusPetItem {
+		int item_id;
+		int power;
+		int max_level;
+		int min_level;
+		int pet_type;
+	};
+
 	class Pet : public NPC {
 	public:
 		Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power);
-
+		static const FocusPetItem focusItems[11];
+		static FocusPetType GetPetItemPetTypeFromSpellId(uint16 spell_id);
 	};
 
 #endif
-
