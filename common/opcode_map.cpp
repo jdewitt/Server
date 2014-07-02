@@ -41,17 +41,11 @@ void load_opcode_names()
 	opcode_map[0x01bf]="LiveOP_GuildLeader";
 	opcode_map[0x009a]="LiveOP_GuildPeace";
 	opcode_map[0x0132]="LiveOP_GuildRemove";
-	opcode_map[0x0059]="LiveOP_GuildMemberList";
 	opcode_map[0x0130]="LiveOP_GuildInvite";
 	opcode_map[0x01c0]="LiveOP_GuildMOTD";
-	opcode_map[0x027e]="LiveOP_GetGuildMOTD";
-	opcode_map[0x0277]="LiveOP_GuildDemote";
 	opcode_map[0x0131]="LiveOP_GuildInviteAccept";
 	opcode_map[0x00a4]="LiveOP_GuildWar";
 	opcode_map[0x0133]="LiveOP_GuildDelete";
-	opcode_map[0x0233]="LiveOP_GuildManageRemove";
-	opcode_map[0x022d]="LiveOP_GuildManageAdd";
-	opcode_map[0x0039]="LiveOP_GuildManageStatus";
 	opcode_map[0x01e8]="LiveOP_Trader";
 	opcode_map[0x01c4]="LiveOP_BecomeTrader";
 	opcode_map[0x006e]="LiveOP_TraderItemUpdate";

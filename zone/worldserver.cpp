@@ -74,19 +74,6 @@ WorldServer::WorldServer()
 WorldServer::~WorldServer() {
 }
 
-/*void WorldServer::SendGuildJoin(GuildJoin_Struct* gj){
-	ServerPacket* pack = new ServerPacket(ServerOP_GuildJoin, sizeof(GuildJoin_Struct));
-	GuildJoin_Struct* wgj = (GuildJoin_Struct*)pack->pBuffer;
-	wgj->class_=gj->class_;
-	wgj->guild_id=gj->guild_id;
-	wgj->level=gj->level;
-	strcpy(wgj->name,gj->name);
-	wgj->rank=gj->rank;
-	wgj->zoneid=gj->zoneid;
-	SendPacket(pack);
-	safe_delete(pack);
-}*/
-
 void WorldServer::SetZone(uint32 iZoneID, uint32 iInstanceID) {
 	ServerPacket* pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
 	SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;

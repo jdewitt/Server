@@ -2244,17 +2244,7 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageAdd) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageRemove) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageStatus) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberLevelUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }

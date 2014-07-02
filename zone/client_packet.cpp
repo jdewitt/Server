@@ -165,10 +165,8 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GuildPeace] = &Client::Handle_OP_GuildPeace;
 	ConnectedOpcodes[OP_GuildWar] = &Client::Handle_OP_GuildWar;
 	ConnectedOpcodes[OP_GuildLeader] = &Client::Handle_OP_GuildLeader;
-	ConnectedOpcodes[OP_GuildDemote] = &Client::Handle_OP_GuildDemote;
 	ConnectedOpcodes[OP_GuildInvite] = &Client::Handle_OP_GuildInvite;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
-	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
 	ConnectedOpcodes[OP_GuildInviteAccept] = &Client::Handle_OP_GuildInviteAccept;
 	ConnectedOpcodes[OP_ManaChange] = &Client::Handle_OP_ManaChange;
 	ConnectedOpcodes[OP_MemorizeSpell] = &Client::Handle_OP_MemorizeSpell;
@@ -285,9 +283,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
-	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
-	ConnectedOpcodes[OP_GuildCreate] = &Client::Handle_OP_GuildCreate;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -682,12 +678,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 	zonesendname->unknown0=0x0A;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
-	if(IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-	}
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
@@ -3050,20 +3040,6 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
-{
-	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildMOTD");
-	mpkt(GUILDS__IN_PACKET_TRACE, app);
-
-	SendGuildMOTD(true);
-
-	if(IsInAGuild())
-	{
-		SendGuildURL();
-		SendGuildChannel();
-	}
-}
-
 void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
 {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildsList");
@@ -3173,59 +3149,6 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		else
 			Message(0,"Failed to change leader, could not find target.");
 	}
-//	SendGuildMembers(GuildID(), true);
-	return;
-}
-
-void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
-{
-	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDemote");
-	mpkt(GUILDS__IN_PACKET_TRACE, app);
-
-	if(app->size != sizeof(GuildDemoteStruct)) {
-		mlog(GUILDS__ERROR, "Error: app size of %i != size of GuildDemoteStruct of %i\n",app->size,sizeof(GuildDemoteStruct));
-		return;
-	}
-
-	if (!IsInAGuild())
-		Message(0, "Error: You arent in a guild!");
-	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
-		Message(0, "You dont have permission to invite.");
-	else if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
-	else {
-		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
-
-		CharGuildInfo gci;
-		if(!guild_mgr.GetCharInfo(demote->target, gci)) {
-			Message(0, "Unable to find '%s'", demote->target);
-			return;
-		}
-		if(gci.guild_id != GuildID()) {
-			Message(0, "You aren't in the same guild, what do you think you are doing?");
-			return;
-		}
-
-		if(gci.rank < 1) {
-			Message(0, "%s cannot be demoted any further!", demote->target);
-			return;
-		}
-		uint8 rank = gci.rank - 1;
-
-
-		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
-			demote->target, gci.char_id,
-			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
-			guild_mgr.GetRankName(GuildID(), rank), rank,
-			guild_mgr.GetGuildName(GuildID()), GuildID());
-
-		if(!guild_mgr.SetGuildRank(gci.char_id, rank)) {
-			Message(13, "Error while setting rank %d on '%s'.", rank, demote->target);
-			return;
-		}
-		Message(0, "Successfully demoted %s to rank %d", demote->target, rank);
-	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
@@ -3415,16 +3338,15 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 
 		uint32 guid = client->GuildID();
 		if(!guild_mgr.SetGuild(char_id, GUILD_NONE, 0)) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageRemove, sizeof(GuildManageRemove_Struct));
-			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildRemove, sizeof(GuildRemove_Struct));
+			GuildRemove_Struct* gm = (GuildRemove_Struct*) outapp->pBuffer;
 			gm->guildeqid = guid;
-			strcpy(gm->member, gc->othername);
+			strcpy(gm->Removee, gc->othername);
 			Message(0,"%s successfully removed from your guild.",gc->othername);
 			entity_list.QueueClientsGuild(this, outapp, false, GuildID());
 			safe_delete(outapp);
 		}
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
@@ -3436,7 +3358,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	SetPendingGuildInvitation(false);
 
 	if (app->size != sizeof(GuildInviteAccept_Struct)) {
-		std::cout << "Wrong size: OP_GuildInviteAccept, size=" << app->size << ", expected " << sizeof(GuildJoin_Struct) << std::endl;
+		std::cout << "Wrong size: OP_GuildInviteAccept, size=" << app->size << ", expected " << sizeof(GuildInviteAccept_Struct) << std::endl;
 		return;
 	}
 
@@ -6823,10 +6745,6 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
-	if(IsInAGuild())
-	{
-		SendGuildMembers();
-	}
 	return;
 }
 
@@ -9035,63 +8953,6 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 	HideCorpseMode = hcs->Action;
 }
 
-void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(GuildStatus_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GuildStatus expected %i got %i",
-					sizeof(GuildStatus_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-	GuildStatus_Struct *gss = (GuildStatus_Struct*)app->pBuffer;
-
-	Client *c = entity_list.GetClientByName(gss->Name);
-
-	if(!c)
-	{
-		Message_StringID(clientMessageWhite, TARGET_PLAYER_FOR_GUILD_STATUS);
-		return;
-	}
-
-	uint32 TargetGuildID = c->GuildID();
-
-	if(TargetGuildID == GUILD_NONE)
-	{
-		Message_StringID(clientMessageWhite, NOT_IN_A_GUILD, c->GetName());
-		return;
-	}
-
-	const char *GuildName = guild_mgr.GetGuildName(TargetGuildID);
-
-	if(!GuildName)
-		return;
-
-	bool IsLeader = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_PROMOTE);
-	bool IsOfficer = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_INVITE);
-
-	if((TargetGuildID == GuildID()) && (c != this))
-	{
-		if(IsLeader)
-			Message_StringID(clientMessageWhite, LEADER_OF_YOUR_GUILD, c->GetName());
-		else if(IsOfficer)
-			Message_StringID(clientMessageWhite, OFFICER_OF_YOUR_GUILD, c->GetName());
-		else
-			Message_StringID(clientMessageWhite, MEMBER_OF_YOUR_GUILD, c->GetName());
-
-		return;
-	}
-
-	if(IsLeader)
-		Message_StringID(clientMessageWhite, LEADER_OF_X_GUILD, c->GetName(), GuildName);
-	else if(IsOfficer)
-		Message_StringID(clientMessageWhite, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
-	else
-		Message_StringID(clientMessageWhite, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
-}
-
 void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 {
 	if(DraggedCorpses.size() >= (unsigned int)RuleI(Character, MaxDraggedCorpses))
@@ -9127,89 +8988,6 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
-}
-
-void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
-{
-	if(IsInAGuild())
-	{
-		Message(clientMessageError, "You are already in a guild!");
-		return;
-	}
-
-	if(!RuleB(Guild, PlayerCreationAllowed))
-	{
-		Message(clientMessageError, "This feature is disabled on this server. Contact a GM or post on your server message boards to create a guild.");
-		return;
-	}
-
-	if ((Admin() < RuleI(Guild, PlayerCreationRequiredStatus)) ||
-		(GetLevel() < RuleI(Guild, PlayerCreationRequiredLevel)) ||
-		(database.GetTotalTimeEntitledOnAccount(AccountID()) < (unsigned int)RuleI(Guild, PlayerCreationRequiredTime)))
-	{
-		Message(clientMessageError, "Your status, level or time playing on this account are insufficient to use this feature.");
-		return;
-	}
-
-	// The Underfoot client Guild Creation window will only allow a guild name of <= around 30 characters, but the packet is 64 bytes. Sanity check the
-	// name anway.
-	//
-
-	char *GuildName = (char *)app->pBuffer;
-#ifdef DARWIN
-#if __DARWIN_C_LEVEL < 200809L
-	if (strlen(GuildName) > 60)
-#else
-	if(strnlen(GuildName, 64) > 60)
-#endif // __DARWIN_C_LEVEL
-#else
-	if(strnlen(GuildName, 64) > 60)
-#endif // DARWIN
-	{
-		Message(clientMessageError, "Guild name too long.");
-		return;
-	}
-
-	for(unsigned int i = 0; i < strlen(GuildName); ++i)
-	{
-		if(!isalpha(GuildName[i]) && (GuildName[i] != ' '))
-		{
-			Message(clientMessageError, "Invalid character in Guild name.");
-			return;
-		}
-	}
-
-	int32 GuildCount = guild_mgr.DoesAccountContainAGuildLeader(AccountID());
-
-	if(GuildCount >= RuleI(Guild, PlayerCreationLimit))
-	{
-		Message(clientMessageError, "You cannot create this guild because this account may only be leader of %i guilds.", RuleI(Guild, PlayerCreationLimit));
-		return;
-	}
-
-	if(guild_mgr.GetGuildIDByName(GuildName) != GUILD_NONE)
-	{
-		Message_StringID(clientMessageError, GUILD_NAME_IN_USE);
-		return;
-	}
-
-	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
-
-	_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
-		GuildName, CharacterID(), (unsigned long)NewGuildID);
-
-	if (NewGuildID == GUILD_NONE)
-		Message(clientMessageError, "Guild creation failed.");
-	else
-	{
-		if(!guild_mgr.SetGuild(CharacterID(), NewGuildID, GUILD_LEADER))
-			Message(clientMessageError, "Unable to set guild leader's guild in the database. Contact a GM.");
-		else
-		{
-			Message(clientMessageYellow, "You are now the leader of %s", GuildName);
-
-		}
-	}
 }
 
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {

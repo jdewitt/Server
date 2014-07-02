@@ -1563,34 +1563,22 @@ struct LootingItem_Struct {
 /*008*/	uint32	auto_loot;
 };
 
-struct GuildManageStatus_Struct{
-	uint32	guild_id;
-	uint32	oldrank;
-	uint32	newrank;
-	char	name[64];
-};
-// Guild invite, remove
-struct GuildJoin_Struct{
-/*000*/	uint32	guild_id;
-/*004*/	uint32	unknown04;
-/*008*/	uint32	level;
-/*012*/	uint32	class_;
-/*016*/	uint32	rank;//0 member, 1 officer, 2 leader
-/*020*/	uint32	zoneid;
-/*024*/	uint32	unknown24;
-/*028*/	char	name[64];
-/*092*/
-};
 struct GuildInviteAccept_Struct {
 	char inviter[64];
 	char newmember[64];
 	uint32 response;
 	uint32 guildeqid;
 };
-struct GuildManageRemove_Struct {
-	uint32 guildeqid;
-	char member[64];
+struct GuildRemove_Struct
+{
+	/*000*/	char Remover[64];
+	/*064*/	char Removee[64];
+	/*128*/	uint16 guildeqid;
+	/*130*/	uint8 unknown[2];
+	/*132*/	uint32 rank;
+	/*136*/
 };
+
 struct GuildCommand_Struct {
 	char othername[64];
 	char myname[64];
@@ -2867,12 +2855,6 @@ struct SimpleMessage_Struct{
 	uint32	unknown8;
 };
 
-struct GuildMemberLevelUpdate_Struct {
-/*00*/	uint32 guild_id;
-/*04*/	char	member_name[64];
-/*68*/	uint32	level;	//not sure
-};
-
 struct Internal_GuildMemberEntry_Struct {
 //	char	name[64];					//variable length
 	uint32	level;						//network byte order
@@ -2913,24 +2895,6 @@ struct GuildUpdate_PublicNote{
 	char	name[64];
 	char	target[64];
 	char	note[1]; //variable length.
-};
-
-struct GuildStatus_Struct
-{
-/*000*/	char	Name[64];
-/*064*/	uint8	Unknown064[72];
-};
-
-struct GuildDemoteStruct{
-	char	name[64];
-	char	target[64];
-};
-
-struct GuildRemoveStruct{
-	char	target[64];
-	char	name[64];
-	uint32	unknown128;
-	uint32	leaderstatus; //?
 };
 
 struct GuildMakeLeader{

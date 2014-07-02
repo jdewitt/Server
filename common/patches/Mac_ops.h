@@ -98,7 +98,6 @@ E(OP_LogServer)
 E(OP_RequestClientZoneChange)
 D(OP_SetGuildMOTD)
 E(OP_GuildMOTD)
-//E(OP_GetGuildMOTDReply)
 D(OP_GuildInviteAccept)
 E(OP_Trader)
 D(OP_Trader)
@@ -127,17 +126,7 @@ E(OP_Unknown);
 E(OP_DeleteItem);
 E(OP_DisciplineUpdate);
 E(OP_Dye);
-E(OP_GetGuildMOTD);
-E(OP_GetGuildMOTDReply);
 E(OP_GMTrainSkillConfirm);
-E(OP_GuildCreate);
-E(OP_GuildDemote);
-E(OP_GuildManageAdd);
-E(OP_GuildManageRemove);
-E(OP_GuildManageStatus);
-E(OP_GuildMemberLevelUpdate);
-E(OP_GuildMemberList);
-E(OP_GuildStatus);
 E(OP_HideCorpse);
 E(OP_IncreaseStats);
 E(OP_InspectMessageUpdate);

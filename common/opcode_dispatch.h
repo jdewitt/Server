@@ -134,7 +134,6 @@ IN(OP_SetGuildMOTD, GuildMOTD_Struct);
 INz(OP_GuildPeace);		//?
 INz(OP_GuildWar);		//?
 IN(OP_GuildLeader, GuildMakeLeader);
-IN(OP_GuildDemote, GuildDemoteStruct);
 IN(OP_GuildInvite, GuildCommand_Struct);
 IN(OP_GuildRemove, GuildCommand_Struct);
 IN(OP_GuildInviteAccept, GuildInviteAccept_Struct);
@@ -261,7 +260,6 @@ OUTz(OP_WorldObjectsSent);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
-OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);
 OUTv(OP_ItemLinkResponse, ItemPacket_Struct);
 OUTv(OP_ZoneSpawns, Spawn_Struct);
@@ -289,9 +287,6 @@ OUT(OP_ExpUpdate, ExpUpdate_Struct);
 OUT(OP_GroundSpawn, Object_Struct);
 OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
 OUT(OP_GuildMOTD, GuildMOTD_Struct);
-OUT(OP_GuildManageAdd, GuildJoin_Struct);
-OUT(OP_GuildManageRemove, GuildManageRemove_Struct);
-OUT(OP_GuildManageStatus, GuildManageStatus_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
 OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);
