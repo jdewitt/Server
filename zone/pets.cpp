@@ -147,7 +147,7 @@ const FocusPetItem Pet::focusItems[11] = {
 
 FocusPetType Pet::GetPetItemPetTypeFromSpellId(uint16 spell_id) {
 	static const int firePets[]  = {626, 630, 634, 316, 399, 403, 395, 489, 571, 575, 622};
-	static const int airPets[]	 = {627, 631, 635, 317, 396, 400, 404, 499, 572, 576, 623};
+	static const int airPets[]   = {627, 631, 635, 317, 396, 400, 404, 499, 572, 576, 623};
 	static const int earthPets[] = {624, 628, 632, 58, 397, 401, 335, 496, 569, 573, 620};
 	static const int waterPets[] = {625, 629, 633, 315, 398, 403, 336, 497, 570, 574, 621};
 
