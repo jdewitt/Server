@@ -5801,6 +5801,10 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
 		snprintf(name, sizeof(name),"Faction%i",faction_id);
 
+	//We need to get total faction here, including racial, class, and deity modifiers.
+	int32 fac = GetModCharacterFactionLevel(faction_id) + tmpvalue;
+	totalvalue = fac;
+
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
 	else if (totalvalue >= MAX_FACTION)
