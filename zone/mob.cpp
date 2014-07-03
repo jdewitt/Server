@@ -551,8 +551,8 @@ float Mob::_GetMovementSpeed(int mod) const
 	spell_mod += spellbonuses.movementspeed + itembonuses.movementspeed;
 
 	// hard cap
-	if (runspeedcap > 225)
-		runspeedcap = 225;
+	if (runspeedcap > 150)
+		runspeedcap = 150;
 
 	if (spell_mod < 0)
 		movemod += spell_mod;

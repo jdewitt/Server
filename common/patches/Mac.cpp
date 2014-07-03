@@ -926,14 +926,14 @@ DECODE(OP_ClickDoor) {
 	FINISH_DIRECT_DECODE();
 }
 
-ENCODE(OP_InterruptCast) {
+/*ENCODE(OP_InterruptCast) {
 	ENCODE_LENGTH_EXACT(InterruptCast_Struct);
 	SETUP_DIRECT_ENCODE(InterruptCast_Struct, structs::InterruptCast_Struct);
 	OUT(spawnid);
 	OUT(messageid);
 	eq->message[0] = emu->message[0];
 	FINISH_ENCODE();
-}
+}*/
 
 DECODE(OP_GMEndTraining) {
 	DECODE_LENGTH_EXACT(structs::GMTrainEnd_Struct);

@@ -233,7 +233,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if(slot < MAX_PP_MEMSPELL && !CheckFizzle(spell_id))
 	{
 		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
-		InterruptSpell(fizzle_msg, 0x121, spell_id);
+		InterruptSpell(fizzle_msg, 13, spell_id);
 
 		uint32 use_mana = ((spells[spell_id].mana) / 4);
 		mlog(SPELLS__CASTING_ERR, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
@@ -368,8 +368,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		mlog(SPELLS__CASTING_ERR, "Spell Error: no target. spell=%d\n", GetName(), spell_id);
 		if(IsClient()) {
 			//clients produce messages... npcs should not for this case
-			Message_StringID(13, SPELL_NEED_TAR);
-			InterruptSpell();
+			InterruptSpell(SPELL_NEED_TAR,13);
 		} else {
 			InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 		}
@@ -406,8 +405,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 				mlog(SPELLS__CASTING_ERR, "Spell Error not enough mana spell=%d mymana=%d cost=%d\n", GetName(), spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
-					Message_StringID(13, INSUFFICIENT_MANA);
-					InterruptSpell();
+					InterruptSpell(INSUFFICIENT_MANA,13);
 				} else {
 					InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 				}
@@ -423,6 +421,26 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_mana = mana_cost;
 
 	casting_spell_resist_adjust = resist_adjust;
+
+	Mob *spell_target = entity_list.GetMob(target_id);
+	// check line of sight to target if it's a detrimental spell
+	if((zone->IsCity() || !zone->CanCastOutdoor()) && spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].effectid[0] != SE_BindSight)
+	{
+		mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_id, spell_target->GetName());
+		InterruptSpell(CANT_SEE_TARGET,13,spell_id);
+		return (false);
+	}
+
+	//We have to check for Gate failure before its cast, because the client resolves on its own.
+	if(spell_id == 36)
+	{
+		if(MakeRandomInt(0, 99) > 98)
+		{
+			InterruptSpell(GATE_FAIL,13,spell_id);
+			_log(EQMAC__LOG, "Gate failed. Wah wah.");
+			return (false);
+		}
+	}
 
 	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d",
 			spell_id, cast_time, orgcasttime, mana_cost);
@@ -718,7 +736,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	}
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
-	float basefizzle = 10;
+	float basefizzle = RuleI(Spells, BaseFizzleChance);
 	float fizzlechance = basefizzle - specialize + diff / 5.0;
 
 	// always at least 1% chance to fail or 5% to succeed
@@ -764,7 +782,8 @@ void Mob::InterruptSpell(uint16 spellid)
 	if (spellid == SPELL_UNKNOWN)
 		spellid = casting_spell_id;
 
-	InterruptSpell(0, 0x121, spellid);
+	int16 message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
+	InterruptSpell(message, 0, spellid);
 }
 
 // color not used right now
@@ -806,8 +825,8 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		return;
 	}
 
-	if(!message)
-		message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
+	//if(!message)
+	//	message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
 
 	// clients need some packets
 	if (IsClient() && message != SONG_ENDS)
@@ -816,7 +835,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
 		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
 		ic->messageid = message;
-		ic->spawnid = GetID();
+		ic->spawnid = color;
 		outapp->priority = 5;
 		CastToClient()->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1743,14 +1762,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		spell_target = nullptr;
 		ae_center = beacon;
 		CastAction = AECaster;
-	}
-
-	// check line of sight to target if it's a detrimental spell
-	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].effectid[0] != SE_BindSight)
-	{
-		mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_target->GetName());
-		Message_StringID(13,CANT_SEE_TARGET);
-		return false;
 	}
 
 	// check to see if target is a caster mob before performing a mana tap

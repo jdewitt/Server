@@ -90,7 +90,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// level
 	0,	// npctypeid
 	0,	// size
-	0.7,	// runspeed
+	RuleR(Character, BaseRunSpeed),	// runspeed
 	0,	// heading
 	0,	// x
 	0,	// y

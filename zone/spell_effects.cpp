@@ -1,3 +1,7 @@
+/*
+ * vim: set noexpandtab tabstop=4 shiftwidth=4 syntax=cpp:
+*/
+
 /*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
@@ -15,6 +19,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/debug.h"
 #include "../common/spdat.h"
 #include "masterentity.h"
@@ -1013,20 +1018,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
 #endif
-				if(!spellbonuses.AntiGate){
+				if(!spellbonuses.AntiGate)
+					Gate();		
 
-					if(MakeRandomInt(0, 99) < effect_value)
-					{
-						Gate();				
-					}
-					else
-					{
-						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
-						ZoneChange_Struct *zc = new struct ZoneChange_Struct;
-						CastToClient()->SendZoneCancel(zc);
-						_log(EQMAC__LOG, "Gate failed. Wah wah.");
-					}
-				}
 				break;
 			}
 
@@ -1222,11 +1216,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				else
 				{
+                    //Message(13, "MakePet");
 					MakePet(spell_id, spell.teleport_zone);
 				}
 				break;
 			}
-
 			case SE_DivineAura:
 			{
 #ifdef SPELL_EFFECT_SPAM
