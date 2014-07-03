@@ -216,7 +216,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GMEmoteZone] = &Client::Handle_OP_GMEmoteZone;
 	ConnectedOpcodes[OP_InspectRequest] = &Client::Handle_OP_InspectRequest;
 	ConnectedOpcodes[OP_InspectAnswer] = &Client::Handle_OP_InspectAnswer;
-	ConnectedOpcodes[OP_InspectMessageUpdate] = &Client::Handle_OP_InspectMessageUpdate;
 	ConnectedOpcodes[OP_DeleteSpell] = &Client::Handle_OP_DeleteSpell;
 	ConnectedOpcodes[OP_PetitionBug] = &Client::Handle_OP_PetitionBug;
 	ConnectedOpcodes[OP_Bug] = &Client::Handle_OP_Bug;
@@ -265,7 +264,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
-	ConnectedOpcodes[OP_LoadSpellSet] = &Client::Handle_OP_LoadSpellSet;
 	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
@@ -284,8 +282,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
-	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
-	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
 	ConnectedOpcodes[OP_Discipline] = &Client::Handle_OP_Discipline;
 	ConnectedOpcodes[OP_ZoneEntryResend] = &Client::Handle_OP_ZoneEntryResend;
@@ -5441,19 +5437,6 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app) {
 	return;
 }
 
-void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app) {
-
-	if (app->size != sizeof(InspectMessage_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_InspectMessageUpdate, size=%i, expected %i", app->size, sizeof(InspectMessage_Struct));
-		return;
-	}
-
-	InspectMessage_Struct* newmessage = (InspectMessage_Struct*) app->pBuffer;
-	InspectMessage_Struct& playermessage = this->GetInspectMessage();
-	memcpy(&playermessage, newmessage, sizeof(InspectMessage_Struct));
-	database.SetPlayerInspectMessage(name, &playermessage);
-}
-
 #if 0	// I dont think there's an op for this now, and we check this
 			// when the client is sitting
 void Client::Handle_OP_Medding(const EQApplicationPacket *app)
@@ -5487,21 +5470,6 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 	return;
 }
-
-void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
-{
-	if(app->size!=sizeof(LoadSpellSet_Struct)) {
-		printf("Wrong size of LoadSpellSet_Struct! Expected: %zu, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
-		return;
-	}
-	int i;
-	LoadSpellSet_Struct* ss=(LoadSpellSet_Struct*)app->pBuffer;
-	for(i=0;i<MAX_PP_MEMSPELL;i++) {
-		if (ss->spell[i] != 0xFFFFFFFF)
-			UnmemSpell(i,true);
-	}
-}
-
 
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
@@ -7055,7 +7023,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	// This should be a part of the PlayerProfile BLOB, but we don't want to modify that
 	// The player inspect message is retrieved from the db on load, then saved as new updates come in..no mods to Client::Save()
-	database.GetPlayerInspectMessage(m_pp.name, &m_inspect_message);
 
 	conn_state = PlayerProfileLoaded;
 
@@ -8988,29 +8955,6 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
-}
-
-void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {
-	// Does not exist in Ti, UF or RoF clients
-	// SoF and SoD both send a 4-byte packet with a uint32 value of '8'
-}
-
-void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app) {
-	// Does not exist in Ti client
-	// SoF, SoD and UF clients send a 4-byte packet indicating the 'parent' slot
-	// SoF, SoD and UF slots are defined by a uint32 value and currently untranslated
-	// RoF client sends a 12-byte packet based on the RoF::Structs::ItemSlotStruct
-
-	// RoF structure types are defined as signed uint16 and currently untranslated
-	// RoF::struct.SlotType = {0 - Equipment, 1 - Bank, 2 - Shared Bank} // not tested beyond listed types
-	// RoF::struct.Unknown2 = 0
-	// RoF::struct.MainSlot = { <parent slot range designated by slottype..zero-based> }
-	// RoF::struct.SubSlot = -1 (non-child)
-	// RoF::struct.AugSlot = -1 (non-child)
-	// RoF::struct.Unknown1 = 141 (unsure why, but always appears to be this value..combine containers not tested)
-
-	// SideNote: Watching the slot translations, Unknown1 is showing '141' as well on certain item swaps.
-	// Manually looting a corpse results in a from '34' to '68' value for equipment items, '0' to '0' for inventory.
 }
 
 void Client::Handle_OP_Action(const EQApplicationPacket *app) {

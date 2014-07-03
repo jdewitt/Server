@@ -122,7 +122,6 @@
 	void Handle_OP_GMEmoteZone(const EQApplicationPacket *app);
 	void Handle_OP_InspectRequest(const EQApplicationPacket *app);
 	void Handle_OP_InspectAnswer(const EQApplicationPacket *app);
-	void Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app);
 	void Handle_OP_Medding(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpell(const EQApplicationPacket *app);
 	void Handle_OP_PetitionBug(const EQApplicationPacket *app);
@@ -182,7 +181,6 @@
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
-	void Handle_OP_LoadSpellSet(const EQApplicationPacket *app);
 	void Handle_OP_Rewind(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
@@ -200,8 +198,6 @@
 	void Handle_OP_HideCorpse(const EQApplicationPacket *app);
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
-	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
-	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);
 	void Handle_OP_Discipline(const EQApplicationPacket *app);
 	void Handle_OP_ZoneEntryResend(const EQApplicationPacket *app);

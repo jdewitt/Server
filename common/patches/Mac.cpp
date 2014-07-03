@@ -2244,10 +2244,8 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemLinkClick) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemName) { ENCODE_FORWARD(OP_Unknown); }
@@ -2255,14 +2253,9 @@ ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MoveLogRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OpenContainer) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OpenInventory) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionBug) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionCheckout2) { ENCODE_FORWARD(OP_Unknown); }

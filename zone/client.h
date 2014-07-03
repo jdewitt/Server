@@ -268,8 +268,6 @@ public:
 	inline Inventory& GetInv()				{ return m_inv; }
 	inline const Inventory& GetInv() const	{ return m_inv; }
 	inline PetInfo* GetPetInfo(uint16 pet)	{ return (pet==1)?&m_suspendedminion:&m_petinfo; }
-	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
-	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 
 	bool	CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -1037,7 +1035,6 @@ private:
 	Object*						m_tradeskill_object;
 	PetInfo						m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo						m_suspendedminion; // pet data for our suspended minion.
-	InspectMessage_Struct		m_inspect_message;
 
 	void NPCSpawn(const Seperator* sep);
 	uint32 GetEXPForLevel(uint16 level);

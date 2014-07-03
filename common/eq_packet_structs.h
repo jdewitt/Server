@@ -518,13 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct RemoveNimbusEffect_Struct
-{
-/*00*/ uint32 spawnid;			// Spawn ID
-/*04*/ int32 nimbus_effect;	// Nimbus Effect Number
-/*08*/
-};
-
 struct ItemNamePacket_Struct {
 /*000*/	uint32 item_id;
 /*004*/	uint32 unkown004;
@@ -575,14 +568,6 @@ struct GMSkillChange_Struct {
 /*006*/ uint16		unknown2;
 /*008*/ uint16		skill_id;
 /*010*/ uint16		unknown3;		//probably void
-};
-
-struct GMTrainSkillConfirm_Struct {	// SoF only
-/*000*/	uint32	SkillID;
-/*004*/	uint32	Cost;
-/*008*/	uint8	NewSkill;	// Set to 1 for 'You have learned the basics' message.
-/*009*/	char	TrainerName[64];
-/*073*/
 };
 
 struct ConsentResponse_Struct {
@@ -1587,6 +1572,7 @@ struct GuildCommand_Struct {
 	uint32 officer;
 };
 
+
 struct OnLevelMessage_Struct
 {
 	char	Title[128];
@@ -2102,12 +2088,6 @@ struct OldInspectResponse_Struct
 	int16 PlayerID;			// Comment: ?
 	int8  unknown[1740];	// Comment: ?
 }; 
-
-//OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed) -U
-struct InspectMessage_Struct {
-/*000*/ char text[256];
-/*256*/
-};
 
 //OP_SetDataRate
 struct SetDataRate_Struct {
@@ -3453,11 +3433,6 @@ struct ZoneInUnknown_Struct {
 struct MobHealth_Struct {
 	uint16 entity_id;
 	uint8 hp;
-};
-
-struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
-	uint32 unknown;					//there seems to be an extra field in this packet...
 };
 
 // This is the structure for OP_ZonePlayerToBind opcode. Discovered on Feb 9 2007 by FNW from packet logs for titanium client
