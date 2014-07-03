@@ -7491,7 +7491,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Zone Spawns Packet
 	entity_list.SendZoneSpawnsBulk(this);
 	entity_list.SendZoneCorpsesBulk(this);
-	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
+	//entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
 
 
 

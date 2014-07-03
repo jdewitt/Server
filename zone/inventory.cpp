@@ -599,7 +599,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	CalcBonuses();
 }
 bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cursor){
-	if(!item || !item->IsStackable() || item->GetCharges()>=item->GetItem()->StackSize)
+	if(!item || !item->IsStackable())
 		return false;
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
