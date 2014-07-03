@@ -2277,16 +2277,13 @@ ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ReloadUI) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetChatServer2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SetGroupTarget) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetTitleReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }

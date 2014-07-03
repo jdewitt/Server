@@ -231,7 +231,6 @@ INz(OP_TrackUnknown);		//follows OP_Track
 #ifdef DISJOINT_STATES
 IN(OP_ClientError, ClientError_Struct);
 #endif
-INr(OP_ReloadUI);	//?
 INr(OP_TGB);		//4 bytes, value is 0, 1, or 2
 IN(OP_Split, Split_Struct);
 INz(OP_SenseTraps);		//?

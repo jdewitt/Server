@@ -161,7 +161,6 @@
 	void Handle_OP_TrackUnknown(const EQApplicationPacket *app);
 	void Handle_0x01e7(const EQApplicationPacket *app);
 	void Handle_OP_ClientError(const EQApplicationPacket *app);
-	void Handle_OP_ReloadUI(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);
 	void Handle_OP_Split(const EQApplicationPacket *app);
 	void Handle_OP_SenseTraps(const EQApplicationPacket *app);

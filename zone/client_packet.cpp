@@ -252,7 +252,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Track] = &Client::Handle_OP_Track;
 	ConnectedOpcodes[OP_TrackUnknown] = &Client::Handle_OP_TrackUnknown;
 	ConnectedOpcodes[OP_ClientError] = &Client::Handle_OP_ClientError;
-	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
 	ConnectedOpcodes[OP_Split] = &Client::Handle_OP_Split;
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
@@ -6708,11 +6707,6 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 	ClientError_Struct* error = (ClientError_Struct*)app->pBuffer;
 	LogFile->write(EQEMuLog::Error, "Client error: %s", error->character_name);
 	LogFile->write(EQEMuLog::Error, "Error message:%s", error->message);
-	return;
-}
-
-void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
-{
 	return;
 }
 
