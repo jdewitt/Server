@@ -1228,7 +1228,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if(spell_id==4789) // Touch of the Divine - Divine Save
 					buffs[buffslot].ticsremaining = spells[spell_id].buffduration; // Prevent focus/aa buff extension
-
+				entity_list.ReduceAggro(this);
 				SetInvul(true);
 				break;
 			}
@@ -5872,78 +5872,5 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 						
 	return false;
 }
-
-bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
-
-	/*For mage 'Bolt' line and other various spells.
-	-This is mostly accurate for how the modern clients handle this effect.
-	-It was changed at some point to use an actual projectile as done here (opposed to a particle effect in classic)
-	-The projectile graphic appears to be that of 'Ball of Sunlight' ID 80648 and will be visible to anyone in SoF+
-	-There is no LOS check to prevent a bolt from being cast. If you don't have LOS your bolt simply goes into whatever barrier
-	and you lose your mana. If there is LOS the bolt will lock onto your target and the damage is applied when it hits the target.
-	-If your target moves the bolt moves with it in any direction or angle (consistent with other projectiles).
-	-The way this is written once a bolt is cast a timer checks the distance from the initial cast to the target repeatedly
-	and calculates at what predicted time the bolt should hit that target in client_process (therefore accounting for any target movement). 
-	When bolt hits its predicted point the damage is then done to target.
-	Note: Projectile speed of 1 takes 3 seconds to go 100 distance units. Calculations are based on this constant.
-	Live Bolt speed: Projectile speed of X takes 5 seconds to go 300 distance units. 
-	Pending Implementation: What this code can not do is prevent damage if the bolt hits a barrier after passing the initial LOS check
-	because the target has moved while the bolt is in motion. (it is rare to actual get this to occur on live in normal game play)
-	*/
-
-	if (!spell_target)
-		return false;
-	
-	uint8 anim = spells[spell_id].CastingAnim; 
-	int bolt_id = -1;
-
-	//Make sure there is an avialable bolt to be cast.
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-		if (projectile_spell_id[i] == 0){
-			bolt_id = i;
-			break;
-		}
-	}
-
-	if (bolt_id < 0)
-		return false;
-
-	if (CheckLosFN(spell_target)) {
-		
-		projectile_spell_id[bolt_id] = spell_id;
-		projectile_target_id[bolt_id] = spell_target->GetID();
-		projectile_x[bolt_id] = GetX(), projectile_y[bolt_id] = GetY(), projectile_z[bolt_id] = GetZ();
-		projectile_increment[bolt_id] = 1;
-		projectile_timer.Start(250);
-	}
-
-	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
-	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
-		ProjectileAnimation(spell_target,0, false, 1.5,0,0,0,Skill1HBlunt,spells[spell_id].player_1);
-	}
-
-	//This allows limited support for server using older spell files that do not contain data for bolt graphics. 
-	else {
-		//Only use fire graphic for fire spells.
-		if (spells[spell_id].resisttype == RESIST_FIRE) {
-		
-			if (IsClient())
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
-			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
-
-		}
-
-		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
-		else
-			ProjectileAnimation(spell_target,0, 1, 1.5);
-	}
-
-	if (spells[spell_id].CastingAnim == 64)
-		anim = 44; //Corrects for animation error.
-
-	DoAnim(static_cast<Animation>(anim), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
-	return true;
-}			
 
 

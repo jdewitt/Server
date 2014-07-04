@@ -2645,6 +2645,16 @@ void EntityList::HalveAggro(Mob *who)
 	}
 }
 
+void EntityList::ReduceAggro(Mob *who)
+{
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		if (it->second->CastToNPC()->CheckAggro(who))
+			it->second->CastToNPC()->SetHate(who, 1);
+		++it;
+	}
+}
+
 void EntityList::Evade(Mob *who)
 {
 	uint32 flatval = who->GetLevel() * 13;

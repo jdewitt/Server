@@ -294,10 +294,6 @@ RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low le
 RULE_INT ( Spells, RootBreakCheckChance, 70) //Determines chance for a root break check to occur each buff tick.
 RULE_INT ( Spells, FearBreakCheckChance, 70) //Determines chance for a fear break check to occur each buff tick.
 RULE_INT ( Spells, SuccorFailChance, 2) //Determines chance for a succor spell not to teleport an invidual player
-RULE_INT ( Spells, FRProjectileItem_Titanium, 1113) // Item id for Titanium clients for Fire 'spell projectile'.
-RULE_INT ( Spells, FRProjectileItem_SOF, 80684) // Item id for SOF clients for Fire 'spell projectile'.
-RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell projectile'.
-RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
 RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_INT ( Spells, BaseFizzleChance, 20) //Base percentage you will fizzle. The chance then is modified by skill to go up or down.
 RULE_CATEGORY_END()

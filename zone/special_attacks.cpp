@@ -1336,7 +1336,7 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 	safe_delete(outapp);
 }
 
-void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float angle, float tilt, float arc, SkillUseTypes skillInUse, const char *IDFile) {
+void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float angle, float tilt, float arc, SkillUseTypes skillInUse) {
 	const Item_Struct* item = nullptr;
 	uint8 effect_type = 0;
 	char name[16];
@@ -1375,7 +1375,7 @@ void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float a
 			angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
 		else
 			angle = to->GetHeading()*2;
-	
+
 	if(!tilt || tilt < 0)
 		if(IsItem) 
 			tilt = 125;
@@ -1393,11 +1393,6 @@ void Mob::ProjectileAnimation(Mob* to, int id, bool IsItem, float speed, float a
 		yaw = 0.001;
 		target_id = 0;
 	}
-
-	const char *item_IDFile = item->IDFile;
-
-	if (IDFile && (strncmp(IDFile, "IT", 2) == 0))
-		strn0cpy(name,IDFile, 16);
 
 	// See SendItemAnimation() for some notes on this struct
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Projectile, sizeof(Arrow_Struct));	
