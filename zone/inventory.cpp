@@ -303,18 +303,17 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		else
 		{
 			bool bag = false;
-			bool cursor = true;
 			if(inst->IsType(ItemClassContainer))
 			{
 				bag = true;
-				cursor = false;
 			}
-			to_slot = m_inv.FindFreeSlot(bag, cursor, item->Size);
+			to_slot = m_inv.FindFreeSlot(bag, true, item->Size);
 
 			//make sure we are not completely full...
 			if(to_slot == SLOT_CURSOR || to_slot == SLOT_INVALID) {
 				if(m_inv.GetItem(SLOT_CURSOR) != nullptr || to_slot == SLOT_INVALID) {
-					Message(13,"You have no more room. The item falls to the ground.");
+					Message(13,"You have no more room. The item falls to the ground."); 
+					//This crashes the Intel client. But, we still need to put the item somewhere.
 					DropInst(inst);
 				}
 			}
@@ -600,7 +599,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	CalcBonuses();
 }
 bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cursor){
-	if(!item || !item->IsStackable() || item->GetCharges()>=item->GetItem()->StackSize)
+	if(!item || !item->IsStackable())
 		return false;
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;

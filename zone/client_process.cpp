@@ -667,14 +667,23 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	//remove ourself from all proximities
 	ClearAllProximities();
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
-	GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
-	strcpy(gmk->name,GetName());
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	/*EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
-	FastQueuePacket(&outapp);*/
-	//Disconnect();
+	//Prevent GMs from being kicked all the way when camping.
+	if(GetGM())
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
+		FastQueuePacket(&outapp);
+		
+		Disconnect();
+	}
+	else
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
+		GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
+		strcpy(gmk->name,GetName());
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+
 }
 
 // Sends the client complete inventory used in character login
@@ -1472,8 +1481,8 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		SkillUseTypes sk;
 		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) 
 		{
-			//Only Gnomes can tinker, and Vah Shir can Safe Fall.
-			if((sk == SkillTinkering && GetRace() != GNOME) || (sk == SkillSafeFall && GetRace() != VAHSHIR))
+			//Only Gnomes can tinker.
+			if(sk == SkillTinkering && GetRace() != GNOME)
 				gmtrain->skills[sk] = 0;
 			else if((sk == SkillHide || sk == SkillSneak) && GetRace() == HALFLING)
 				gmtrain->skills[sk] = 50; //Alkabor sends this as 0, but it doesn't show up for us.

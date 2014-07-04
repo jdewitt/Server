@@ -472,7 +472,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			Stats->packets_received=Stats->packets_sent;
 			Stats->packets_sent=x;
 			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse,p->pBuffer,p->size));
-			AdjustRates(ntohl(Stats->average_delta));
+			//AdjustRates(ntohl(Stats->average_delta));
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 				if(RETRANSMIT_TIMEOUT_MULT && ntohl(Stats->average_delta)) {

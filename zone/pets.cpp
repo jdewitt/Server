@@ -187,6 +187,7 @@ void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		const char *petname, float in_size) {
 	// Sanity and early out checking first.
+	bool scale_pet = false;
 	if(HasPet() || pettype == nullptr)
 		return;
 
@@ -206,7 +207,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		return;
 	}
 
-	int16 act_power = 0; // The actual pet power we'll use.
+	int act_power = 0; // The actual pet power we'll use.
 	if (petpower == -1) {
 		if (this->IsClient()) {
 			//Message(13, "We are a client time to check for focus items");
@@ -251,12 +252,14 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 				if (focusType == petItem.pet_type) {
 					//Message(13, "Setting power to: %d", petItem.power);
 					act_power = petItem.power;
+					scale_pet = true;
 				}
 			}
 		}
 	}
 	else if (petpower > 0) {
 		act_power = petpower;
+		scale_pet = true;
 	}
 
 	//Message(13, "Power is: %d", act_power);
@@ -271,18 +274,20 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// If pet power is set to -1 in the DB, use stat scaling
 	if (this->IsClient() && record.petpower == -1)
 	{
-		float scale_power = (float)act_power / 100.0f;
-		if(scale_power > 0)
-		{
-			npc_type->max_hp  = (int) (npc_type->max_hp * (1 + scale_power));
-			npc_type->cur_hp  = npc_type->max_hp;
-			npc_type->AC	  = (int) (npc_type->AC * (1 + scale_power));
-			npc_type->level  += (int) 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
-			npc_type->min_dmg = (int) (npc_type->min_dmg * (1 + (scale_power / 2)));
-			npc_type->max_dmg = (int) (npc_type->max_dmg * (1 + (scale_power / 2)));
-			npc_type->size	  = (npc_type->size * (1 + scale_power));
+		if(scale_pet) {
+			float scale_power = (float)act_power / 100.0f;
+			if(scale_power > 0)
+			{
+				npc_type->max_hp  = (int16) (npc_type->max_hp * (1 + scale_power));
+				npc_type->cur_hp  = npc_type->max_hp;
+				npc_type->AC	  = (int16) (npc_type->AC * (1 + scale_power));
+				npc_type->level  += (int16) 1 + ((int16)act_power / 25); // gains an additional level for every 25 pet power
+				npc_type->min_dmg = (int16) (npc_type->min_dmg * (1 + (scale_power / 2)));
+				npc_type->max_dmg = (int16) (npc_type->max_dmg * (1 + (scale_power / 2)));
+				npc_type->size	  = (npc_type->size * (1 + scale_power));
+			}
+			record.petpower = act_power;
 		}
-		record.petpower = act_power;
 	}
 
 	//Live AA - Elemental Durability
