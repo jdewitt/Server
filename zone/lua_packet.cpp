@@ -272,7 +272,6 @@ luabind::scope lua_register_packet_opcodes() {
 		.enum_("constants")
 		[
 			luabind::value("ExploreUnknown", static_cast<int>(OP_ExploreUnknown)),
-			luabind::value("ReloadUI", static_cast<int>(OP_ReloadUI)),
 			luabind::value("IncreaseStats", static_cast<int>(OP_IncreaseStats)),
 			luabind::value("Dye", static_cast<int>(OP_Dye)),
 			luabind::value("Stamina", static_cast<int>(OP_Stamina)),
@@ -516,10 +515,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("Disarm", static_cast<int>(OP_Disarm)),
 			luabind::value("FriendsWho", static_cast<int>(OP_FriendsWho)),
 			luabind::value("GMSearchCorpse", static_cast<int>(OP_GMSearchCorpse)),
-			luabind::value("LoadSpellSet", static_cast<int>(OP_LoadSpellSet)),
 			luabind::value("MobHealth", static_cast<int>(OP_MobHealth)),
-			luabind::value("MoveLogDisregard", static_cast<int>(OP_MoveLogDisregard)),
-			luabind::value("MoveLogRequest", static_cast<int>(OP_MoveLogRequest)),
 			luabind::value("PetitionSearch", static_cast<int>(OP_PetitionSearch)),
 			luabind::value("PetitionSearchResults", static_cast<int>(OP_PetitionSearchResults)),
 			luabind::value("PetitionSearchText", static_cast<int>(OP_PetitionSearchText)),
@@ -554,11 +550,9 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("PopupResponse", static_cast<int>(OP_PopupResponse)),
 			luabind::value("DeleteCharge", static_cast<int>(OP_DeleteCharge)),
 			luabind::value("WorldObjectsSent", static_cast<int>(OP_WorldObjectsSent)),
-			luabind::value("SetGroupTarget", static_cast<int>(OP_SetGroupTarget)),
 			luabind::value("ApplyPoison", static_cast<int>(OP_ApplyPoison)),
 			luabind::value("ItemVerifyRequest", static_cast<int>(OP_ItemVerifyRequest)),
 			luabind::value("ItemVerifyReply", static_cast<int>(OP_ItemVerifyReply)),
-			luabind::value("GMTrainSkillConfirm", static_cast<int>(OP_GMTrainSkillConfirm)),
 			luabind::value("PVPStats", static_cast<int>(OP_PVPStats)),
 			luabind::value("PVPLeaderBoardRequest", static_cast<int>(OP_PVPLeaderBoardRequest)),
 			luabind::value("PVPLeaderBoardReply", static_cast<int>(OP_PVPLeaderBoardReply)),
@@ -571,17 +565,12 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("ItemViewUnknown", static_cast<int>(OP_ItemViewUnknown)),
 			luabind::value("SpawnPositionUpdate", static_cast<int>(OP_SpawnPositionUpdate)),
 			luabind::value("ManaUpdate", static_cast<int>(OP_ManaUpdate)),
-			luabind::value("SendFindableNPCs", static_cast<int>(OP_SendFindableNPCs)),
 			luabind::value("HideCorpse", static_cast<int>(OP_HideCorpse)),
 			luabind::value("TradeBusy", static_cast<int>(OP_TradeBusy)),
 			luabind::value("SpellEffect", static_cast<int>(OP_SpellEffect)),
 			luabind::value("CorpseDrag", static_cast<int>(OP_CorpseDrag)),
 			luabind::value("RemoveAllDoors", static_cast<int>(OP_RemoveAllDoors)),
-//			luabind::value("RemoveNimbusEffect", static_cast<int>(OP_RemoveNimbusEffect)),
-			luabind::value("Untargetable", static_cast<int>(OP_Untargetable)),
-			luabind::value("InspectMessageUpdate", static_cast<int>(OP_InspectMessageUpdate)),
-			luabind::value("OpenInventory", static_cast<int>(OP_OpenInventory)),
-			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer))
+			luabind::value("Untargetable", static_cast<int>(OP_Untargetable))
 		];
 }
 

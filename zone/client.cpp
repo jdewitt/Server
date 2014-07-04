@@ -4636,8 +4636,6 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 				insr->itemicons[22] = 0xFFFFFFFF;
 		}
 
-		strcpy(insr->text, requestee->GetInspectMessage().text);
-
 		// There could be an OP for this..or not... (Ti clients are not processed here..this message is generated client-side)
 		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(0, "%s is looking at your equipment...", requester->GetName()); }
 
