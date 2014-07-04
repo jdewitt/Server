@@ -53,7 +53,6 @@ void load_opcode_names()
 	opcode_map[0x01ca]="LiveOP_TraderBuy";
 	opcode_map[0x01ac]="LiveOP_PetCommands";
 	opcode_map[0x0042]="LiveOP_TradeSkillCombine";
-	opcode_map[0x0367]="LiveOP_ItemName";
 	opcode_map[0x02cd]="LiveOP_ShopItem";
 	opcode_map[0x0065]="LiveOP_ShopPlayerBuy";
 	opcode_map[0x006a]="LiveOP_ShopPlayerSell";
@@ -83,9 +82,7 @@ void load_opcode_names()
 	opcode_map[0x0234]="LiveOP_TrackTarget";
 	opcode_map[0x0286]="LiveOP_Track";
 	opcode_map[0x0297]="LiveOP_ReadBook";
-	opcode_map[0x001f]="LiveOP_ItemLinkClick";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
-	opcode_map[0x01d9]="LiveOP_ItemLinkText";
 	opcode_map[0x0a41]="LiveOP_RezzRequest";
 	opcode_map[0x00e5]="LiveOP_RezzAnswer";
 	opcode_map[0x019b]="LiveOP_RezzComplete";

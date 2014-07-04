@@ -1630,7 +1630,7 @@ ENCODE(OP_TradeCoins) {
 
 DECODE(OP_ItemLinkResponse){
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
-	SETUP_DIRECT_DECODE(LDONItemViewRequest_Struct, structs::ItemViewRequest_Struct);
+	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
 	IN(item_id);
 	strcpy(emu->item_name,eq->item_name);
 	FINISH_DIRECT_DECODE();
@@ -2246,12 +2246,6 @@ ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemLinkClick) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemName) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }

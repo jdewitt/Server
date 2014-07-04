@@ -1223,11 +1223,6 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		return;
 	}
 
-	if (IsPlayerCorpse())
-		client->SendItemLink(inst);
-	else
-		client->SendItemLink(inst, true);
-
 	safe_delete(inst);
 }
 

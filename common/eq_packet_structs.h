@@ -518,13 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct ItemNamePacket_Struct {
-/*000*/	uint32 item_id;
-/*004*/	uint32 unkown004;
-/*008*/ char name[64];
-/*072*/
-};
-
 // Length: 10
 struct ItemProperties_Struct {
 
@@ -2530,27 +2523,11 @@ uint8	clientcastfilters;		// 0) No, 1) Ignore PC Casts (all), 2) Ignore PC Casts
 uint8	npccastfilters;			// 0) No, 1) Ignore NPC Casts (all), 2) Ignore NPC Casts (not directed towards self)
 };
 
-/*
-** Client requesting item statistics
-** Size: 48 bytes
-** Used In: OP_ItemLinkClick
-** Last Updated: 2/15/2009
-**
-*/
-struct	ItemViewRequest_Struct {
-/*000*/	uint32	item_id;
-/*004*/	uint32	augments[5];
-/*024*/ uint32	link_hash;
-/*028*/	uint32	unknown028;
-/*032*/	char	unknown032[12];	//probably includes loregroup & evolving info. see Client::MakeItemLink() in zone/inventory.cpp:469
-/*044*/	uint16	icon;
-/*046*/	char	unknown046[2];
-};
-
-struct	LDONItemViewRequest_Struct {
-	uint32	item_id;
-	uint8	unknown004[4];
-	char	item_name[64];
+struct	ItemViewRequest_Struct
+{
+	/*000*/int16	item_id;
+	/*002*/char	item_name[64];
+	/*066*/
 };
 
 /*
