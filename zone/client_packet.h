@@ -24,7 +24,6 @@
 	void Handle_OP_Shielding(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
 	void Handle_OP_Consume(const EQApplicationPacket *app);
-	void Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app);
 	void Handle_OP_ConsiderCorpse(const EQApplicationPacket *app);
 	void Handle_OP_Consider(const EQApplicationPacket *app);
 	void Handle_OP_Begging(const EQApplicationPacket *app);
@@ -41,7 +40,6 @@
 	void Handle_OP_SpawnAppearance(const EQApplicationPacket *app);
 	void Handle_OP_Death(const EQApplicationPacket *app);
 	void Handle_OP_MoveCoin(const EQApplicationPacket *app);
-	void Handle_OP_ItemLinkClick(const EQApplicationPacket *app);
 	void Handle_OP_ItemLinkResponse(const EQApplicationPacket *app);
 	void Handle_OP_MoveItem(const EQApplicationPacket *app);
 	void Handle_OP_DeleteCharge(const EQApplicationPacket *app);

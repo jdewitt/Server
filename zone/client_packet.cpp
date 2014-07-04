@@ -120,7 +120,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Shielding] = &Client::Handle_OP_Shielding;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_Consume] = &Client::Handle_OP_Consume;
-	ConnectedOpcodes[OP_ItemVerifyRequest] = &Client::Handle_OP_ItemVerifyRequest;
 	ConnectedOpcodes[OP_ConsiderCorpse] = &Client::Handle_OP_ConsiderCorpse;
 	ConnectedOpcodes[OP_Consider] = &Client::Handle_OP_Consider;
 	ConnectedOpcodes[OP_Begging] = &Client::Handle_OP_Begging;
@@ -137,7 +136,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SpawnAppearance] = &Client::Handle_OP_SpawnAppearance;
 	ConnectedOpcodes[OP_Death] = &Client::Handle_OP_Death;
 	ConnectedOpcodes[OP_MoveCoin] = &Client::Handle_OP_MoveCoin;
-	ConnectedOpcodes[OP_ItemLinkClick] = &Client::Handle_OP_ItemLinkClick;
 	ConnectedOpcodes[OP_ItemLinkResponse] = &Client::Handle_OP_ItemLinkResponse;
 	ConnectedOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
 	ConnectedOpcodes[OP_DeleteCharge] = &Client::Handle_OP_DeleteCharge;
@@ -275,7 +273,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_PVPLeaderBoardDetailsRequest] = &Client::Handle_OP_PVPLeaderBoardDetailsRequest;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
-	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
@@ -1522,153 +1519,6 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(ItemVerifyRequest_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
-		return;
-	}
-
-	ItemVerifyRequest_Struct* request = (ItemVerifyRequest_Struct*)app->pBuffer;
-	int32 slot_id;
-	int32 target_id;
-	int32 spell_id = 0;
-	slot_id = request->slot;
-	target_id = request->target;
-
-
-	EQApplicationPacket *outapp;
-	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
-	ItemVerifyReply_Struct* reply = (ItemVerifyReply_Struct*)outapp->pBuffer;
-	reply->slot = slot_id;
-	reply->target = target_id;
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-
-	if (IsAIControlled()) {
-		this->Message_StringID(13,NOT_IN_CONTROL);
-		return;
-	}
-
-	if(slot_id < 0) {
-		LogFile->write(EQEMuLog::Debug, "Unknown slot being used by %s, slot being used is: %i",GetName(),request->slot);
-		return;
-	}
-
-	const ItemInst* inst = m_inv[slot_id];
-	if (!inst) {
-		Message(0, "Error: item not found in inventory slot #%i", slot_id);
-		DeleteItemInInventory(slot_id,0,true);
-		return;
-	}
-
-	const Item_Struct* item = inst->GetItem();
-	if (!item) {
-		Message(0, "Error: item not found in inventory slot #%i", slot_id);
-		DeleteItemInInventory(slot_id,0,true);
-		return;
-	}
-
-	spell_id = item->Click.Effect;
-
-	if
-	(
-		spell_id > 0 &&
-		(
-			!IsValidSpell(spell_id) ||
-			casting_spell_id ||
-			delaytimer ||
-			spellend_timer.Enabled() ||
-			IsStunned() ||
-			IsFeared() ||
-			IsMezzed() ||
-			DivineAura() ||
-			(IsSilenced() && !IsDiscipline(spell_id)) ||
-			(IsAmnesiad() && IsDiscipline(spell_id)) ||
-			(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat())
-		)
-	)
-	{
-		SendSpellBarEnable(spell_id);
-		return;
-	}
-
-	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
-
-	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && (item->ItemType == ItemTypePotion))) // sanity check
-	{
-		ItemInst* p_inst = (ItemInst*)inst;
-
-		parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
-		inst = m_inv[slot_id];
-		if(!inst)
-		{
-			return;
-		}
-
- 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
-		{
-			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
-		}
-		else if (inst->IsType(ItemClassCommon))
-		{
-			if(item->ItemType == ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
-			{
-				DeleteItemInInventory(slot_id, 1, true);
-				TrainDiscipline(item->ID);
-			}
-			else if(item->ItemType == ItemTypeSpell)
-			{
-				return;
-			}
-			else if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2))
-			{
-				if (inst->GetCharges() == 0)
-				{
-					//Message(0, "This item is out of charges.");
-					Message_StringID(13, ITEM_OUT_OF_CHARGES);
-					return;
-				}
-				if(GetLevel() >= item->Click.Level2)
-				{
-					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
-					inst = m_inv[slot_id];
-					if(!inst)
-					{
-						return;
-					}
-
-					if(i == 0) {
-						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
-					}
-				}
-				else
-				{
-					Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
-					return;
-				}
-			}
-			else
-			{
-				LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
-			}
-		}
-		else
-		{
-			Message(0, "Error: item not found in inventory slot #%i", slot_id);
-		}
-	}
-	else
-	{
-		Message(0, "Error: Invalid inventory slot for using effects (inventory slot #%i)", slot_id);
-	}
-
-	return;
-}
-
 void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct))
@@ -2291,117 +2141,12 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
-{
-	if(app->size != sizeof(ItemViewRequest_Struct)){
-		LogFile->write(EQEMuLog::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size, sizeof(ItemViewRequest_Struct));
-		DumpPacket(app);
-		return;
-	}
-	//DumpPacket(app);
-	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
-
-	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
-
-	const Item_Struct* item = database.GetItem(ivrs->item_id);
-	if (!item) {
-		if (ivrs->item_id > 500000)
-		{
-			std::string response = "";
-			int sayid = ivrs->item_id - 500000;
-			bool silentsaylink = false;
-
-			if (sayid > 250000)	//Silent Saylink
-			{
-				sayid = sayid - 250000;
-				silentsaylink = true;
-			}
-
-			if (sayid && sayid > 0)
-			{
-				char errbuf[MYSQL_ERRMSG_SIZE];
-				char *query = 0;
-				MYSQL_RES *result;
-				MYSQL_ROW row;
-
-
-				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
-				{
-					if (mysql_num_rows(result) == 1)
-					{
-						row = mysql_fetch_row(result);
-						response = row[0];
-					}
-					mysql_free_result(result);
-				}
-				else
-				{
-					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
-					safe_delete_array(query);
-					return;
-				}
-				safe_delete_array(query);
-			}
-
-			if((response).size() > 0)
-			{
-				if( !mod_saylink(response, silentsaylink) ) { return; }
-
-				if(GetTarget() && GetTarget()->IsNPC())
-				{
-					if(silentsaylink)
-					{
-						parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
-					}
-					else
-					{
-						Message(7, "You say, '%s'", response.c_str());
-						ChannelMessageReceived(8, 0, 100, response.c_str());
-					}
-					return;
-				}
-				else
-				{
-					if(silentsaylink)
-					{
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
-					}
-					else
-					{
-						Message(7, "You say, '%s'", response.c_str());
-						ChannelMessageReceived(8, 0, 100, response.c_str());
-					}
-					return;
-				}
-			}
-			else
-			{
-				Message(13, "Error: Say Link not found or is too long.");
-				return;
-			}
-		}
-		else {
-			Message(13, "Error: The item for the link you have clicked on does not exist!");
-			return;
-		}
-
-	}
-
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges);
-	if (inst) {
-		SendItemPacket(0, inst, ItemPacketViewLink);
-		safe_delete(inst);
-	}
-	return;
-}
-
 void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app) {
-	if (app->size != sizeof(LDONItemViewRequest_Struct)) {
-		LogFile->write(EQEMuLog::Error, "OP size error: OP_ItemLinkResponse expected:%i got:%i", sizeof(LDONItemViewRequest_Struct), app->size);
+	if (app->size != sizeof(ItemViewRequest_Struct)) {
+		LogFile->write(EQEMuLog::Error, "OP size error: OP_ItemLinkResponse expected:%i got:%i", sizeof(ItemViewRequest_Struct), app->size);
 		return;
 	}
-	LDONItemViewRequest_Struct* item = (LDONItemViewRequest_Struct*)app->pBuffer;
+	ItemViewRequest_Struct* item = (ItemViewRequest_Struct*)app->pBuffer;
 	ItemInst* inst = database.CreateItem(item->item_id);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);

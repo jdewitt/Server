@@ -108,7 +108,6 @@ IN(OP_DuelResponse2, Duel_Struct);
 IN(OP_SpawnAppearance, SpawnAppearance_Struct);
 IN(OP_Death, Death_Struct);
 IN(OP_MoveCoin, MoveCoin_Struct);
-IN(OP_ItemLinkClick, ItemViewRequest_Struct);
 IN(OP_MoveItem, MoveItem_Struct);
 INz(OP_Camp);	//?
 INz(OP_Logout);
@@ -243,8 +242,6 @@ INr(OP_Ignore);
 INr(OP_ClearTitle);		//follows OP_SendTitleList
 IN(OP_SetTitle, SetTitle_Struct);
 INz(OP_RequestTitles);
-IN(OP_ItemVerifyRequest, ItemVerifyRequest_Struct);
-
 
 /*
 	for now we are listing outgoing packets which are NOT
@@ -288,7 +285,6 @@ OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
 OUT(OP_GuildMOTD, GuildMOTD_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
-OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);

@@ -83,7 +83,6 @@ void load_opcode_names()
 	opcode_map[0x0234]="LiveOP_TrackTarget";
 	opcode_map[0x0286]="LiveOP_Track";
 	opcode_map[0x0297]="LiveOP_ReadBook";
-	opcode_map[0x001f]="LiveOP_ItemLinkClick";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
 	opcode_map[0x01d9]="LiveOP_ItemLinkText";
 	opcode_map[0x0a41]="LiveOP_RezzRequest";
