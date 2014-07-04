@@ -1358,7 +1358,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if(!spell_target)
 				spell_target = this;
 			CastAction = SingleTarget;
-		//	ProjectileAnimation(this, spell_id, false, 1.5);
+			ProjectileAnimation(this, spell_id, false, 1.5);
 			break;
 		}
 
@@ -1812,12 +1812,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				if (spells[spell_id].targettype == ST_TargetOptional){
-					if (!TrySpellProjectile(spell_target, spell_id))
-						return false;
-				}
-				
-				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_type == 1)

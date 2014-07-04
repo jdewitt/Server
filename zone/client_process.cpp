@@ -446,9 +446,6 @@ bool Client::Process() {
 			if(viral_timer_counter > 999)
 				viral_timer_counter = 0;
 		}
-
-		if(projectile_timer.Check())
-			SpellProjectileEffect();
 					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())

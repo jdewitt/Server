@@ -7380,9 +7380,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 
-	if(m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate))
-		m_pp.RestTimer = 0;
-
 	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
 	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
 	outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
@@ -7431,9 +7428,6 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 
-	if(m_pp.RestTimer)
-		rest_timer.Start(m_pp.RestTimer * 1000);
-
 	////////////////////////////////////////////////////////////
 	// Server Zone Entry Packet
 	outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
@@ -7452,7 +7446,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	// Zone Spawns Packet
 	entity_list.SendZoneSpawnsBulk(this);
 	entity_list.SendZoneCorpsesBulk(this);
-	//entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
+	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
 
 
 
