@@ -202,7 +202,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RecipeDetails] = &Client::Handle_OP_RecipeDetails;
 	ConnectedOpcodes[OP_RecipeAutoCombine] = &Client::Handle_OP_RecipeAutoCombine;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
-	ConnectedOpcodes[OP_ItemName] = &Client::Handle_OP_ItemName;
 	ConnectedOpcodes[OP_ClickDoor] = &Client::Handle_OP_ClickDoor;
 	ConnectedOpcodes[OP_GroundSpawn] = &Client::Handle_OP_CreateObject;
 	ConnectedOpcodes[OP_FaceChange] = &Client::Handle_OP_FaceChange;
@@ -4700,25 +4699,6 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 	// Delegate to tradeskill object to perform combine
 	NewCombine_Struct* in_combine = (NewCombine_Struct*)app->pBuffer;
 	Object::HandleCombine(this, in_combine, m_tradeskill_object);
-	return;
-}
-
-void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(ItemNamePacket_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for ItemNamePacket_Struct: Expected: %i, Got: %i",
-			sizeof(ItemNamePacket_Struct), app->size);
-		return;
-	}
-	ItemNamePacket_Struct *p = (ItemNamePacket_Struct*)app->pBuffer;
-	const Item_Struct *item = 0;
-	if ((item = database.GetItem(p->item_id))!=nullptr) {
-		EQApplicationPacket* outapp=new EQApplicationPacket(OP_ItemName,sizeof(ItemNamePacket_Struct));
-		p=(ItemNamePacket_Struct*)outapp->pBuffer;
-		memset(p, 0, sizeof(ItemNamePacket_Struct));
-		strcpy(p->name,item->Name);
-		FastQueuePacket(&outapp);
-	}
 	return;
 }
 

@@ -108,7 +108,6 @@
 	void Handle_OP_RecipeDetails(const EQApplicationPacket *app);
 	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_TradeSkillCombine(const EQApplicationPacket *app);
-	void Handle_OP_ItemName(const EQApplicationPacket *app);
 	void Handle_OP_ClickDoor(const EQApplicationPacket *app);
 	void Handle_OP_CreateObject(const EQApplicationPacket *app);
 	void Handle_OP_FaceChange(const EQApplicationPacket *app);

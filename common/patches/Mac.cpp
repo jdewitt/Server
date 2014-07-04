@@ -2246,8 +2246,6 @@ ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemName) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }

@@ -853,41 +853,6 @@ int Client::GetItemLinkHash(const ItemInst* inst) {
 	return hash;
 }
 
-void Client::SendItemLink(const ItemInst* inst, bool send_to_all)
-{
-/*
-
-this stuff is old, live dosent do this anymore. they send a much smaller
-packet with the item number in it, but I cant seem to find it right now
-
-*/
-	if (!inst)
-		return;
-
-	const Item_Struct* item = inst->GetItem();
-	const char* name2 = &item->Name[0];
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(name2)+68);
-	char buffer2[135] = {0};
-	char itemlink[135] = {0};
-	sprintf(itemlink,"%c0%06u000000000%c",
-		0x12,
-		item->ID,
-		0x12);
-	sprintf(buffer2,"%c%c%c%c%c%c%c%c%c%c%c%c%s",0x00,0x00,0x00,0x00,0xD3,0x01,0x00,0x00,0x1E,0x01,0x00,0x00,itemlink);
-	memcpy(outapp->pBuffer,buffer2,outapp->size);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	if (send_to_all==false)
-		return;
-	const char* charname = this->GetName();
-	outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(itemlink)+14+strlen(charname));
-	char buffer3[150] = {0};
-	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
-	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->CastToMob(),outapp,true,200,0,false);
-	safe_delete(outapp);
-}
-
 void Client::SendLootItemInPacket(const ItemInst* inst, int16 slot_id)
 {
 	SendItemPacket(slot_id,inst, ItemPacketTrade);

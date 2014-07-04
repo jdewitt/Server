@@ -518,13 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct ItemNamePacket_Struct {
-/*000*/	uint32 item_id;
-/*004*/	uint32 unkown004;
-/*008*/ char name[64];
-/*072*/
-};
-
 // Length: 10
 struct ItemProperties_Struct {
 

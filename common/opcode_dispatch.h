@@ -174,7 +174,6 @@ IN(OP_RecipeDetails, uint32);
 //there is also a complicated OP_RecipeDetails reply struct OUT
 IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 IN(OP_TradeSkillCombine, NewCombine_Struct);
-IN(OP_ItemName, ItemNamePacket_Struct);
 IN(OP_ClickDoor, ClickDoor_Struct);
 INr(OP_CreateObject);	//?
 IN(OP_FaceChange, FaceChange_Struct);
@@ -265,10 +264,6 @@ OUTv(OP_SendZonepoints, ZonePoints);
 OUTv(OP_TributeInfo, TributeAbility_Struct);
 OUTv(OP_GuildTributeInfo, GuildTributeAbility_Struct);
 OUTv(OP_SendTitleList, TitleList_Struct);
-//these arnt used anymore
-//OUTv(OP_ItemLinkText, strlen(itemlink)+14+strlen(charname));
-//OUTv(OP_ItemLinkText, strlen(name2)+68);
-
 OUT(OP_SendMaxCharacters, MaxCharacters_Struct);
 OUT(OP_AAExpUpdate, AAExpUpdate_Struct);
 OUT(OP_Action, Action_Struct);
@@ -353,7 +348,6 @@ OUT(OP_GMNameChange, GMName_Struct);
 OUT(OP_GMSummon, GMSummon_Struct);
 OUT(OP_GMZoneRequest, GMZoneRequest_Struct);
 OUT(OP_Illusion, Illusion_Struct);
-OUT(OP_ItemName, ItemNamePacket_Struct);
 OUT(OP_ManaChange, ManaChange_Struct);
 //alt:OUTz(OP_ManaChange);		//takes on at least two lengths
 OUT(OP_MemorizeSpell, MemorizeSpell_Struct);

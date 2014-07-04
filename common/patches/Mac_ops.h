@@ -128,8 +128,6 @@ E(OP_DisciplineUpdate);
 E(OP_Dye);
 E(OP_HideCorpse);
 E(OP_IncreaseStats);
-E(OP_ItemLinkText);
-E(OP_ItemName);
 E(OP_KeyRing);
 E(OP_MobRename);
 E(OP_NewTitlesAvailable);
