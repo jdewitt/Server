@@ -1394,7 +1394,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	if (damage > 0) {
 		if (spell_id == SPELL_UNKNOWN) {
-			CheckIncreaseSkill(SkillDefense, other, -17);
+			CheckIncreaseSkill(SkillDefense, other, -12);
         }
 	}
 }

@@ -783,10 +783,9 @@ void Mob::InterruptSpell(uint16 spellid)
 		spellid = casting_spell_id;
 
 	int16 message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
-	InterruptSpell(message, 0, spellid);
+	InterruptSpell(message, 263, spellid);
 }
 
-// color not used right now
 void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 {
 	EQApplicationPacket *outapp;
@@ -825,9 +824,6 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		return;
 	}
 
-	//if(!message)
-	//	message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
-
 	// clients need some packets
 	if (IsClient() && message != SONG_ENDS)
 	{
@@ -835,7 +831,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
 		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
 		ic->messageid = message;
-		ic->spawnid = color;
+		ic->color = color;
 		outapp->priority = 5;
 		CastToClient()->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -864,15 +860,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 			message_other = INTERRUPT_SPELL_OTHER;
 	}
 
-	// this is the actual message, it works the same as a formatted message
-	outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct) + strlen(GetCleanName()) + 1);
-	InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
-	ic->messageid = message_other;
-	ic->spawnid = GetID();
-	strcpy(ic->message, GetCleanName());
-	entity_list.QueueCloseClients(this, outapp, true, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
-	safe_delete(outapp);
-
+	entity_list.MessageClose_StringID(this, true, 200, color, message_other, this->GetName());
 }
 
 // this is called after the timer is up and the spell is finished
@@ -2973,7 +2961,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		return false;
 	}
 
-	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
+	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true, spell_id) && !IsResurrectionEffects(spell_id))
+	{
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 			return false;
@@ -3200,7 +3189,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				}
 			}
 		}
-		else if	( !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) // Detrimental spells - PVP check
+		else if	( !IsAttackAllowed(spelltar, true, spell_id) && !IsResurrectionEffects(spell_id)) // Detrimental spells - PVP check
 		{
 			mlog(SPELLS__CASTING_ERR, "Detrimental spell %d can't take hold %s -> %s", spell_id, GetName(), spelltar->GetName());
 			spelltar->Message_StringID(MT_SpellFailure, YOU_ARE_PROTECTED, GetCleanName());
@@ -3546,6 +3535,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				spelltar->CastToClient()->FastQueuePacket(&outapp_push);
 			}
 		}
+	}
+
+	if(spelltar->IsClient() && spelltar->CastToClient()->GetFeigned() && IsDetrimentalSpell(spell_id))
+	{
+		spelltar->CastToClient()->SetFeigned(false);
 	}
 
 	if(spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))

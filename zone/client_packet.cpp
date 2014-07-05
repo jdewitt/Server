@@ -2331,18 +2331,18 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 
 	//BreakInvis();
 
-	uint16 primfeign = GetSkill(SkillFeignDeath);
-	uint16 secfeign = GetSkill(SkillFeignDeath);
-	if (primfeign > 100) {
-		primfeign = 100;
-		secfeign = secfeign - 100;
-		secfeign = secfeign / 2;
-	}
-	else
-		secfeign = 0;
+	float feignbase = 120.0f;
+	uint16 skill = GetSkill(SkillFeignDeath);
+	float feignchance = 0.0f;
 
-	uint16 totalfeign = primfeign + secfeign;
-	if (MakeRandomFloat(0, 160) > totalfeign) {
+	if (skill > 100)
+		feignchance = (int16)skill - 100.0f;
+
+	feignchance = feignchance / 3.0f;
+
+	float totalfeign = feignbase + feignchance;
+
+	if (MakeRandomFloat(0, 150) > totalfeign) {
 		SetFeigned(false);
 		entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 	}
@@ -6072,7 +6072,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		{
 			if(GetBoatNPCID() > 0)
 			{
-				Message(13, "You are too distracted to cast a spell now!");
+				Message_StringID(15,TOO_DISTRACTED);
 				return;
 			}
 
@@ -8702,7 +8702,7 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
 		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
 		ic->messageid = 393;
-		ic->spawnid = GetID();
+		ic->color = 0;
 		strcpy(ic->message, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);

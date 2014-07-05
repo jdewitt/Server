@@ -578,7 +578,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				SetInvisible(spell.base[i], false);
+				//SetInvisible(spell.base[i], false);
 
 				if(HasPet())
 				{
@@ -599,12 +599,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				SetInvisible(spell.base[i], false);
+				//SetInvisible(spell.base[i], false);
 
 				if(HasPet())
 				{
 					Mob* mypet = GetPet();
-				 	if(mypet->GetBodyType() == BT_Undead)
+				 	if(mypet->GetBodyType() == BT_Undead || mypet->GetBodyType() == BT_SummonedUndead)
 						SetPet(nullptr);
 						if(!mypet->IsCharmed())
 							mypet->CastToNPC()->Depop();
@@ -1013,7 +1013,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
+			case SE_Gate:
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");

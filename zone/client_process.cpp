@@ -624,7 +624,7 @@ bool Client::Process() {
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
-		Message(0,"Your enemies have forgotten you!");
+		//Message(0,"Your enemies have forgotten you!");
 	}
 
 	return ret;
