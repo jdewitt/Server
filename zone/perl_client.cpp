@@ -4121,56 +4121,6 @@ XS(XS_Client_KeyRingCheck)
 	XSRETURN(1);
 }
 
-XS(XS_Client_AddPVPPoints);
-XS(XS_Client_AddPVPPoints)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, Points)");
-	{
-		Client *	THIS;
-		uint32		Points = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->AddPVPPoints(Points);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetPVPPoints)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)");
-	{
-		Client *		THIS;
-		uint32		RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetPVPPoints();
-		XSprePUSH; PUSHu((UV)RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_ReadBook); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ReadBook)
 {
@@ -5514,8 +5464,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SetStartZone"), XS_Client_SetStartZone, file, "$$");
 		newXSproto(strcpy(buf, "KeyRingAdd"), XS_Client_KeyRingAdd, file, "$$");
 		newXSproto(strcpy(buf, "KeyRingCheck"), XS_Client_KeyRingCheck, file, "$$");
-		newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
-		newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
 		newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
 		newXSproto(strcpy(buf, "GetGroupPoints"), XS_Client_GetGroupPoints, file, "$");
 		newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");

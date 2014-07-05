@@ -185,8 +185,6 @@
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
-	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
-	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);

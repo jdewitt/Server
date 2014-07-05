@@ -382,7 +382,6 @@ int command_init(void){
 		command_add("setlanguage","[language ID] [value] - Set your target's language skillnum to value",50,command_setlanguage) ||
 		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
-		command_add("setpvppoints","[value] - Set your or your player target's PVP points",100,command_setpvppoints) ||
 		command_add("setstartzone","[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity",80,command_setstartzone) ||
 		command_add("setstat","- Sets the stats to a specific value.",255,command_setstat) ||
 		command_add("setxp","[value] - Set your or your player target's experience",100,command_setxp) ||
@@ -4128,26 +4127,6 @@ void command_setxp(Client *c, const Seperator *sep){
 	}
 	else
 		c->Message(0, "Usage: #setxp number");
-}
-
-void command_setpvppoints(Client *c, const Seperator *sep){
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if (sep->IsNumber(1)) {
-		if (atoi(sep->arg[1]) > 9999999)
-			c->Message(0, "Error: Value too high.");
-		else
-		{
-			t->SetPVPPoints(atoi(sep->arg[1]));
-			t->Save();
-			t->SendPVPStats();
-		}
-	}
-	else
-		c->Message(0, "Usage: #setpvppoints number");
 }
 
 void command_name(Client *c, const Seperator *sep){

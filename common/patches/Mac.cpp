@@ -2262,11 +2262,6 @@ ENCODE(OP_PetitionUnCheckout) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardDetailsReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }

@@ -3915,30 +3915,6 @@ void Client::DecrementAggroCount() {
 
 }
 
-void Client::SendPVPStats()
-{
-	// This sends the data to the client to populate the PVP Stats Window.
-	//
-	// When the PVP Stats window is opened, no opcode is sent. Therefore this method should be called
-	// from Client::CompleteConnect, and also when the player makes a PVP kill.
-	//
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
-	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
-
-	pvps->Kills = m_pp.PVPKills;
-	pvps->Deaths = m_pp.PVPDeaths;
-	pvps->PVPPointsAvailable = m_pp.PVPCurrentPoints;
-	pvps->TotalPVPPoints = m_pp.PVPCareerPoints;
-	pvps->BestKillStreak = m_pp.PVPBestKillStreak;
-	pvps->WorstDeathStreak = m_pp.PVPWorstDeathStreak;
-	pvps->CurrentKillStreak = m_pp.PVPCurrentKillStreak;
-
-	// TODO: Record and send other PVP Stats
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void Client::SendDisciplineTimers()
 {
 
@@ -4575,16 +4551,6 @@ void Client::SuspendMinion()
 			return;
 		}
 	}
-}
-
-void Client::AddPVPPoints(uint32 Points)
-{
-	m_pp.PVPCurrentPoints += Points;
-	m_pp.PVPCareerPoints += Points;
-
-	Save();
-
-	SendPVPStats();
 }
 
 // Processes a client request to inspect a SoF client's equipment.
