@@ -440,7 +440,7 @@ class EQOldStream : public EQStreamInterface {
 		// parce/make packets
 		void ParceEQPacket(uint16 dwSize, uchar* pPacket);
 		void MakeEQPacket(EQProtocolPacket* app, bool ack_req=true); //Make a fragment eq packet and put them on the SQUEUE/RSQUEUE
-
+		void MakeClosePacket();
 		// Add ack to packet if requested
 		void AddAck(EQOldPacket *pack)
 		{
@@ -480,7 +480,7 @@ class EQOldStream : public EQStreamInterface {
 		void OutboundQueueClear();
 		void PacketQueueClear();
 
-		MyQueue<MySendPacketStruct>			  SendQueue;	//Store packets thats on the send que
+		std::deque<MySendPacketStruct*>			  SendQueue;	//Store packets thats on the send que
 		MyQueue<EQRawApplicationPacket>           OutQueue;	//parced packets ready to go out of this class
 
 
@@ -519,6 +519,7 @@ class EQOldStream : public EQStreamInterface {
 
 		uint32 LastPacket;
 		Mutex MVarlock;
+		bool sent_Fin;
 
 	public:
 		//interface used by application (EQStreamInterface)
@@ -528,7 +529,7 @@ class EQOldStream : public EQStreamInterface {
 		virtual uint32 GetRemoteIP() const { return remote_ip; }
 		virtual uint16 GetRemotePort() const { return remote_port; }
 		virtual void ReleaseFromUse() { MInUse.lock(); if(active_users > 0) active_users--; MInUse.unlock(); }
-		virtual void RemoveData() { InboundQueueClear(); OutboundQueueClear(); /*if (CombinedAppPacket) delete CombinedAppPacket;*/ }
+		virtual void RemoveData();
 		virtual bool CheckState(EQStreamState state) { return GetState() == state; }
 		virtual std::string Describe() const { return("Direct EQOldStream"); }
 		virtual bool IsInUse() { bool flag; MInUse.lock(); flag=(active_users>0); MInUse.unlock(); if(IsWriting()) return true; return flag; }
