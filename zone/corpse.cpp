@@ -1106,7 +1106,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 
 		if (client->CheckLoreConflict(item))
 		{
-			client->Message_StringID(0,LOOT_LORE_ERROR);
+			client->Message_StringID(CC_Default,LOOT_LORE_ERROR);
 			SendEndLootErrorPacket(client);
 			BeingLootedBy = 0;
 			delete inst;

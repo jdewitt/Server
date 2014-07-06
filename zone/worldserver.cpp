@@ -297,7 +297,7 @@ void WorldServer::Process() {
 				Client* client = entity_list.GetClientByID(wars->id);
 				if (client) {
 					if(pack->size==58)//no results
-						client->Message_StringID(0,WHOALL_NO_RESULTS);
+						client->Message_StringID(CC_Default,WHOALL_NO_RESULTS);
 					else{
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
 					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
@@ -1315,7 +1315,7 @@ void WorldServer::Process() {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 			Client* client = entity_list.GetClientByName(s->ownername);
 			if(client) {
-				client->Message_StringID(0, s->message_string_id);
+				client->Message_StringID(CC_Default, s->message_string_id);
 			}
 			break;
 		}

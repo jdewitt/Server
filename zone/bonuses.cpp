@@ -1843,6 +1843,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_IncreaseArchery:
 			case SE_HitChance:
 			{
 
@@ -3334,6 +3335,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 				}
 
+				case SE_IncreaseArchery:
 				case SE_HitChance:
 				{
 					for(int e = 0; e < HIGHEST_SKILL+1; e++)

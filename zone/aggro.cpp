@@ -1045,6 +1045,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 			case SE_DoubleAttackChance:
 			case SE_MeleeSkillCheck:
 			case SE_HitChance:
+			case SE_IncreaseArchery:
 			case SE_DamageModifier:
 			case SE_MinDamageModifier:
 			case SE_IncreaseBlockChance:

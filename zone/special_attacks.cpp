@@ -509,7 +509,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	if(IsClient()) {
 		const ItemInst *wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		if(!wpn || (wpn->GetItem()->ItemType != ItemType1HPiercing)){
-			Message_StringID(13, BACKSTAB_WEAPON);
+			Message_StringID(CC_Red, BACKSTAB_WEAPON);
 			return;
 		}
 	}

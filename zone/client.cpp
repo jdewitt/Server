@@ -3102,11 +3102,11 @@ void Client::SacrificeConfirm(Client *caster) {
 	if(!caster || PendingSacrifice) return;
 
 	if(GetLevel() < RuleI(Spells, SacrificeMinLevel)){
-		caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
+		caster->Message_StringID(CC_Red, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
 		return;
 	}
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
-		caster->Message_StringID(13, SAC_TOO_HIGH);
+		caster->Message_StringID(CC_Red, SAC_TOO_HIGH);
 		return;
 	}
 
@@ -3164,7 +3164,7 @@ void Client::Sacrifice(Client *caster)
 					}
 				}
 				else{
-					caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
+					caster->Message_StringID(CC_Red, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
 				}
 }
 
@@ -5151,7 +5151,7 @@ const char* Client::GetClassPlural(Client* client) {
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	Message_StringID(0, PICK_LORE);
+	Message_StringID(CC_Default, PICK_LORE);
 	return;
 
 	const Item_Struct *item = database.GetItem(ItemID);
@@ -5159,7 +5159,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 	if(!item)
 		return;
 
-	Message_StringID(0, PICK_LORE, item->Name);
+	Message_StringID(CC_Default, PICK_LORE, item->Name);
 }
 
 void Client::GarbleMessage(char *message, uint8 variance)
@@ -5442,13 +5442,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
 	else if (totalvalue >= MAX_FACTION)
-		Message_StringID(0, FACTION_BEST, name);
+		Message_StringID(CC_Default, FACTION_BEST, name);
 	else if (tmpvalue > 0 && totalvalue < MAX_FACTION)
-		Message_StringID(0, FACTION_BETTER, name);
+		Message_StringID(CC_Default, FACTION_BETTER, name);
 	else if (tmpvalue < 0 && totalvalue > MIN_FACTION)
-		Message_StringID(0, FACTION_WORSE, name);
+		Message_StringID(CC_Default, FACTION_WORSE, name);
 	else if (totalvalue <= MIN_FACTION)
-		Message_StringID(0, FACTION_WORST, name);
+		Message_StringID(CC_Default, FACTION_WORST, name);
 
 	return;
 }

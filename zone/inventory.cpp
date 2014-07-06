@@ -1027,8 +1027,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			if(!SwapItem(move_in)) { 
 				_log(INVENTORY__ERROR, "Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
 				//Intel EQMac sends 2 SwapItem packets when moving things to the cursor. Handle this here, and figure out a better way in the future. 
-				if(GetClientVersion() == EQClientMac)
-					return 2;
+				return 2;
 			}
 			else
 				recursive_si = true;
@@ -1235,8 +1234,9 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		else if(!src_inst)
 		{
+			//I also believe this is being caused by EQMac double packets.
 			_log(INVENTORY__ERROR, "src_inst has become invalid somewhere.");
-			return 0;
+			return 2;
 		}
 		else {
 			// Nothing in destination slot: split stack into two
