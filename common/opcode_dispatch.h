@@ -108,7 +108,6 @@ IN(OP_DuelResponse2, Duel_Struct);
 IN(OP_SpawnAppearance, SpawnAppearance_Struct);
 IN(OP_Death, Death_Struct);
 IN(OP_MoveCoin, MoveCoin_Struct);
-IN(OP_ItemLinkClick, ItemViewRequest_Struct);
 IN(OP_MoveItem, MoveItem_Struct);
 INz(OP_Camp);	//?
 INz(OP_Logout);
@@ -134,7 +133,6 @@ IN(OP_SetGuildMOTD, GuildMOTD_Struct);
 INz(OP_GuildPeace);		//?
 INz(OP_GuildWar);		//?
 IN(OP_GuildLeader, GuildMakeLeader);
-IN(OP_GuildDemote, GuildDemoteStruct);
 IN(OP_GuildInvite, GuildCommand_Struct);
 IN(OP_GuildRemove, GuildCommand_Struct);
 IN(OP_GuildInviteAccept, GuildInviteAccept_Struct);
@@ -176,14 +174,12 @@ IN(OP_RecipeDetails, uint32);
 //there is also a complicated OP_RecipeDetails reply struct OUT
 IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 IN(OP_TradeSkillCombine, NewCombine_Struct);
-IN(OP_ItemName, ItemNamePacket_Struct);
 IN(OP_ClickDoor, ClickDoor_Struct);
 INr(OP_CreateObject);	//?
 IN(OP_FaceChange, FaceChange_Struct);
 IN(OP_GroupInvite, GroupInvite_Struct);
 IN(OP_GroupInvite2, GroupInvite_Struct);	//will generally follow OP_GroupInvite for next invite
 IN(OP_GroupFollow, GroupGeneric_Struct);	//will follow invite
-IN(OP_GroupFollow2, GroupGeneric_Struct);	//will follow invite2
 IN(OP_GroupCancelInvite, GroupGeneric_Struct);	//follows invite or invite2
 IN(OP_GroupDisband, GroupGeneric_Struct);
 IN(OP_GMEmoteZone, GMEmoteZone_Struct);
@@ -233,7 +229,6 @@ INz(OP_TrackUnknown);		//follows OP_Track
 #ifdef DISJOINT_STATES
 IN(OP_ClientError, ClientError_Struct);
 #endif
-INr(OP_ReloadUI);	//?
 INr(OP_TGB);		//4 bytes, value is 0, 1, or 2
 IN(OP_Split, Split_Struct);
 INz(OP_SenseTraps);		//?
@@ -243,12 +238,9 @@ INr(OP_SetRunMode);
 INr(OP_SafeFallSuccess);
 INr(OP_SafePoint);
 INr(OP_Ignore);
-IN(OP_FindPersonRequest, FindPersonRequest_Struct);
 INr(OP_ClearTitle);		//follows OP_SendTitleList
 IN(OP_SetTitle, SetTitle_Struct);
 INz(OP_RequestTitles);
-IN(OP_ItemVerifyRequest, ItemVerifyRequest_Struct);
-
 
 /*
 	for now we are listing outgoing packets which are NOT
@@ -263,7 +255,6 @@ OUTz(OP_WorldObjectsSent);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
 OUTv(OP_FormattedMessage, FormattedMessage_Struct);
-OUTv(OP_GuildMemberList, uint32);		//variable length, but nasty
 OUTv(OP_InterruptCast, InterruptCast_Struct);
 OUTv(OP_ItemLinkResponse, ItemPacket_Struct);
 OUTv(OP_ZoneSpawns, Spawn_Struct);
@@ -273,10 +264,6 @@ OUTv(OP_SendZonepoints, ZonePoints);
 OUTv(OP_TributeInfo, TributeAbility_Struct);
 OUTv(OP_GuildTributeInfo, GuildTributeAbility_Struct);
 OUTv(OP_SendTitleList, TitleList_Struct);
-//these arnt used anymore
-//OUTv(OP_ItemLinkText, strlen(itemlink)+14+strlen(charname));
-//OUTv(OP_ItemLinkText, strlen(name2)+68);
-
 OUT(OP_SendMaxCharacters, MaxCharacters_Struct);
 OUT(OP_AAExpUpdate, AAExpUpdate_Struct);
 OUT(OP_Action, Action_Struct);
@@ -290,16 +277,9 @@ OUT(OP_ConsentResponse, ConsentResponse_Struct);
 OUT(OP_ExpUpdate, ExpUpdate_Struct);
 OUT(OP_GroundSpawn, Object_Struct);
 OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
-//alt:OUT(OP_GroupUpdate, GroupUpdate2_Struct);
-//alt:OUT(OP_GroupUpdate, GroupUpdate_Struct);
 OUT(OP_GuildMOTD, GuildMOTD_Struct);
-OUT(OP_GuildManageAdd, GuildJoin_Struct);
-OUT(OP_GuildManageRemove, GuildManageRemove_Struct);
-OUT(OP_GuildManageStatus, GuildManageStatus_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_IncreaseStats, IncreaseStat_Struct);
-OUT(OP_ItemVerifyReply, ItemVerifyReply_Struct);
-OUT(OP_LFGAppearance, LFG_Appearance_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);
@@ -368,7 +348,6 @@ OUT(OP_GMNameChange, GMName_Struct);
 OUT(OP_GMSummon, GMSummon_Struct);
 OUT(OP_GMZoneRequest, GMZoneRequest_Struct);
 OUT(OP_Illusion, Illusion_Struct);
-OUT(OP_ItemName, ItemNamePacket_Struct);
 OUT(OP_ManaChange, ManaChange_Struct);
 //alt:OUTz(OP_ManaChange);		//takes on at least two lengths
 OUT(OP_MemorizeSpell, MemorizeSpell_Struct);

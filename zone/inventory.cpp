@@ -303,18 +303,17 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		else
 		{
 			bool bag = false;
-			bool cursor = true;
 			if(inst->IsType(ItemClassContainer))
 			{
 				bag = true;
-				cursor = false;
 			}
-			to_slot = m_inv.FindFreeSlot(bag, cursor, item->Size);
+			to_slot = m_inv.FindFreeSlot(bag, true, item->Size);
 
 			//make sure we are not completely full...
 			if(to_slot == SLOT_CURSOR || to_slot == SLOT_INVALID) {
 				if(m_inv.GetItem(SLOT_CURSOR) != nullptr || to_slot == SLOT_INVALID) {
-					Message(13,"You have no more room. The item falls to the ground.");
+					Message(13,"You have no more room. The item falls to the ground."); 
+					//This crashes the Intel client. But, we still need to put the item somewhere.
 					DropInst(inst);
 				}
 			}
@@ -600,7 +599,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	CalcBonuses();
 }
 bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cursor){
-	if(!item || !item->IsStackable() || item->GetCharges()>=item->GetItem()->StackSize)
+	if(!item || !item->IsStackable())
 		return false;
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
@@ -854,41 +853,6 @@ int Client::GetItemLinkHash(const ItemInst* inst) {
 	return hash;
 }
 
-void Client::SendItemLink(const ItemInst* inst, bool send_to_all)
-{
-/*
-
-this stuff is old, live dosent do this anymore. they send a much smaller
-packet with the item number in it, but I cant seem to find it right now
-
-*/
-	if (!inst)
-		return;
-
-	const Item_Struct* item = inst->GetItem();
-	const char* name2 = &item->Name[0];
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(name2)+68);
-	char buffer2[135] = {0};
-	char itemlink[135] = {0};
-	sprintf(itemlink,"%c0%06u000000000%c",
-		0x12,
-		item->ID,
-		0x12);
-	sprintf(buffer2,"%c%c%c%c%c%c%c%c%c%c%c%c%s",0x00,0x00,0x00,0x00,0xD3,0x01,0x00,0x00,0x1E,0x01,0x00,0x00,itemlink);
-	memcpy(outapp->pBuffer,buffer2,outapp->size);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	if (send_to_all==false)
-		return;
-	const char* charname = this->GetName();
-	outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(itemlink)+14+strlen(charname));
-	char buffer3[150] = {0};
-	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
-	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->CastToMob(),outapp,true,200,0,false);
-	safe_delete(outapp);
-}
-
 void Client::SendLootItemInPacket(const ItemInst* inst, int16 slot_id)
 {
 	SendItemPacket(slot_id,inst, ItemPacketTrade);
@@ -1063,8 +1027,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			if(!SwapItem(move_in)) { 
 				_log(INVENTORY__ERROR, "Recursive SwapItem call failed due to non-existent destination item (charid: %i, fromslot: %i, toslot: %i)", CharacterID(), src_slot_id, dst_slot_id); 
 				//Intel EQMac sends 2 SwapItem packets when moving things to the cursor. Handle this here, and figure out a better way in the future. 
-				if(GetClientVersion() == EQClientMac)
-					return 2;
+				return 2;
 			}
 			else
 				recursive_si = true;
@@ -1271,8 +1234,9 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		else if(!src_inst)
 		{
+			//I also believe this is being caused by EQMac double packets.
 			_log(INVENTORY__ERROR, "src_inst has become invalid somewhere.");
-			return 0;
+			return 2;
 		}
 		else {
 			// Nothing in destination slot: split stack into two

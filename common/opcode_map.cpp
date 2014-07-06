@@ -12,7 +12,6 @@ std::map<unsigned long, std::string>::iterator itr;;
 }
 void load_opcode_names()
 {
-	opcode_map[0x02d7]="LiveOP_ReloadUI";
 	opcode_map[0x01eb]="LiveOP_IncreaseStats";
 	opcode_map[0x01d5]="LiveOP_Dye";
 	opcode_map[0x0168]="LiveOP_Stamina";
@@ -41,17 +40,11 @@ void load_opcode_names()
 	opcode_map[0x01bf]="LiveOP_GuildLeader";
 	opcode_map[0x009a]="LiveOP_GuildPeace";
 	opcode_map[0x0132]="LiveOP_GuildRemove";
-	opcode_map[0x0059]="LiveOP_GuildMemberList";
 	opcode_map[0x0130]="LiveOP_GuildInvite";
 	opcode_map[0x01c0]="LiveOP_GuildMOTD";
-	opcode_map[0x027e]="LiveOP_GetGuildMOTD";
-	opcode_map[0x0277]="LiveOP_GuildDemote";
 	opcode_map[0x0131]="LiveOP_GuildInviteAccept";
 	opcode_map[0x00a4]="LiveOP_GuildWar";
 	opcode_map[0x0133]="LiveOP_GuildDelete";
-	opcode_map[0x0233]="LiveOP_GuildManageRemove";
-	opcode_map[0x022d]="LiveOP_GuildManageAdd";
-	opcode_map[0x0039]="LiveOP_GuildManageStatus";
 	opcode_map[0x01e8]="LiveOP_Trader";
 	opcode_map[0x01c4]="LiveOP_BecomeTrader";
 	opcode_map[0x006e]="LiveOP_TraderItemUpdate";
@@ -60,7 +53,6 @@ void load_opcode_names()
 	opcode_map[0x01ca]="LiveOP_TraderBuy";
 	opcode_map[0x01ac]="LiveOP_PetCommands";
 	opcode_map[0x0042]="LiveOP_TradeSkillCombine";
-	opcode_map[0x0367]="LiveOP_ItemName";
 	opcode_map[0x02cd]="LiveOP_ShopItem";
 	opcode_map[0x0065]="LiveOP_ShopPlayerBuy";
 	opcode_map[0x006a]="LiveOP_ShopPlayerSell";
@@ -69,14 +61,12 @@ void load_opcode_names()
 	opcode_map[0x00f7]="LiveOP_ShopRequest";
 	opcode_map[0x006c]="LiveOP_ShopEnd";
 	opcode_map[0x0270]="LiveOP_LFGCommand";
-	opcode_map[0x01d0]="LiveOP_LFGAppearance";
 	opcode_map[0x01b5]="LiveOP_MoneyUpdate";
 	opcode_map[0x024a]="LiveOP_GroupUpdate";
 	opcode_map[0x025f]="LiveOP_GroupInvite";
 	opcode_map[0x00ff]="LiveOP_GroupDisband";
 	opcode_map[0x00d5]="LiveOP_GroupInvite2";
 	opcode_map[0x025e]="LiveOP_GroupFollow";
-	opcode_map[0x00d7]="LiveOP_GroupFollow2";
 	opcode_map[0x00d6]="LiveOP_GroupCancelInvite";
 	opcode_map[0x0156]="LiveOP_Split";
 	opcode_map[0x00d8]="LiveOP_Jump";
@@ -92,9 +82,7 @@ void load_opcode_names()
 	opcode_map[0x0234]="LiveOP_TrackTarget";
 	opcode_map[0x0286]="LiveOP_Track";
 	opcode_map[0x0297]="LiveOP_ReadBook";
-	opcode_map[0x001f]="LiveOP_ItemLinkClick";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
-	opcode_map[0x01d9]="LiveOP_ItemLinkText";
 	opcode_map[0x0a41]="LiveOP_RezzRequest";
 	opcode_map[0x00e5]="LiveOP_RezzAnswer";
 	opcode_map[0x019b]="LiveOP_RezzComplete";
@@ -231,8 +219,6 @@ void load_opcode_names()
 	opcode_map[0x01fa]="LiveOP_RecipeReply";
 	opcode_map[0x01fb]="LiveOP_RecipeDetails";
 	opcode_map[0x01fc]="LiveOP_RecipeAutoCombine";
-	opcode_map[0x02db]="LiveOP_FindPersonRequest";
-	opcode_map[0x02dc]="LiveOP_FindPersonReply";
 	opcode_map[0x01dd]="LiveOP_Shielding";
 	opcode_map[0x0198]="LiveOP_SetDataRate";
 	opcode_map[0x023b]="LiveOP_ZoneEntry";

@@ -558,7 +558,7 @@ void NPC::AI_Stop() {
 
 void Client::AI_Stop() {
 	Mob::AI_Stop();
-	this->Message_StringID(13,PLAYER_REGAIN);
+	this->Message_StringID(CC_Red,PLAYER_REGAIN);
 
 	EQApplicationPacket *app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
 	Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
@@ -800,9 +800,17 @@ void Client::AI_Process()
 			RemoveFromHateList(this);
 			return;
 		}
-
-		if(DivineAura())
+		//Todo: Figure out why 'this' can become invalid here. It is related to Fear.
+		if(this)
+		{
+			if(DivineAura())
+				return;
+		}
+		else
+		{
+			LogFile->write(EQEMuLog::Error, "Preventing DivineAura() crash due to null this.");
 			return;
+		}
 
 		bool is_combat_range = CombatRange(GetTarget());
 

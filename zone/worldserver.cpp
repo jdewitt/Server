@@ -74,19 +74,6 @@ WorldServer::WorldServer()
 WorldServer::~WorldServer() {
 }
 
-/*void WorldServer::SendGuildJoin(GuildJoin_Struct* gj){
-	ServerPacket* pack = new ServerPacket(ServerOP_GuildJoin, sizeof(GuildJoin_Struct));
-	GuildJoin_Struct* wgj = (GuildJoin_Struct*)pack->pBuffer;
-	wgj->class_=gj->class_;
-	wgj->guild_id=gj->guild_id;
-	wgj->level=gj->level;
-	strcpy(wgj->name,gj->name);
-	wgj->rank=gj->rank;
-	wgj->zoneid=gj->zoneid;
-	SendPacket(pack);
-	safe_delete(pack);
-}*/
-
 void WorldServer::SetZone(uint32 iZoneID, uint32 iInstanceID) {
 	ServerPacket* pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
 	SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;
@@ -310,7 +297,7 @@ void WorldServer::Process() {
 				Client* client = entity_list.GetClientByID(wars->id);
 				if (client) {
 					if(pack->size==58)//no results
-						client->Message_StringID(0,WHOALL_NO_RESULTS);
+						client->Message_StringID(CC_Default,WHOALL_NO_RESULTS);
 					else{
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
 					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
@@ -831,9 +818,6 @@ void WorldServer::Process() {
 				if(!group->AddMember(nullptr, sgfs->gf.name2, sgfs->CharacterID))
 					break;
 
-				if(Inviter->CastToClient()->IsLFP())
-					Inviter->CastToClient()->UpdateLFP();
-
 				ServerPacket* pack2 = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
 
 				ServerGroupJoin_Struct* gj = (ServerGroupJoin_Struct*)pack2->pBuffer;
@@ -1331,19 +1315,10 @@ void WorldServer::Process() {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 			Client* client = entity_list.GetClientByName(s->ownername);
 			if(client) {
-				client->Message_StringID(0, s->message_string_id);
+				client->Message_StringID(CC_Default, s->message_string_id);
 			}
 			break;
 		}
-		case ServerOP_LFGMatches: {
-			HandleLFGMatches(pack);
-			break;
-		}
-		case ServerOP_LFPMatches: {
-			HandleLFPMatches(pack);
-			break;
-		}
-
 		case ServerOP_UpdateSpawn: {
 			if(zone)
 			{
@@ -1715,139 +1690,4 @@ uint32 WorldServer::NextGroupID() {
 	}
 	printf("Handing out new group id %d\n", cur_groupid);
 	return(cur_groupid++);
-}
-
-void WorldServer::UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes,
-				const char *Comments, GroupLFPMemberEntry *LFPMembers) {
-
-	ServerPacket* pack = new ServerPacket(ServerOP_LFPUpdate, sizeof(ServerLFPUpdate_Struct));
-	ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;
-
-	sus->LeaderID = LeaderID;
-	sus->Action = Action;
-	sus->MatchFilter = MatchFilter;
-	sus->FromLevel = FromLevel;
-	sus->ToLevel = ToLevel;
-	sus->Classes = Classes;
-	strcpy(sus->Comments, Comments);
-	memcpy(sus->Members, LFPMembers, sizeof(sus->Members));
-	SendPacket(pack);
-	safe_delete(pack);
-
-}
-
-void WorldServer::UpdateLFP(uint32 LeaderID, GroupLFPMemberEntry *LFPMembers) {
-
-	UpdateLFP(LeaderID, LFPMemberUpdate, 0, 0, 0, 0, "", LFPMembers);
-}
-
-void WorldServer::StopLFP(uint32 LeaderID) {
-
-	GroupLFPMemberEntry LFPMembers;
-	UpdateLFP(LeaderID, LFPOff, 0, 0, 0, 0, "", &LFPMembers);
-}
-
-void WorldServer::HandleLFGMatches(ServerPacket *pack) {
-
-	char *Buffer = (char *)pack->pBuffer;
-
-	int PacketLength = 4;
-
-	int Entries = (pack->size - 4) / sizeof(ServerLFGMatchesResponse_Struct);
-
-	uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-
-	Client* client = entity_list.GetClientByID(EntityID);
-
-	if(client) {
-		ServerLFGMatchesResponse_Struct* smrs = (ServerLFGMatchesResponse_Struct*)Buffer;
-
-		for(int i=0; i<Entries; i++) {
-			PacketLength = PacketLength + 12 + strlen(smrs->Name) + strlen(smrs->Comments);
-			smrs++;
-		}
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_LFGGetMatchesResponse, PacketLength);
-
-		smrs = (ServerLFGMatchesResponse_Struct*)Buffer;
-
-		char *OutBuffer = (char *)outapp->pBuffer;
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0x00074af); // Unknown
-
-		for(int i=0; i<Entries; i++) {
-			VARSTRUCT_ENCODE_STRING(OutBuffer, smrs->Comments);
-			VARSTRUCT_ENCODE_STRING(OutBuffer, smrs->Name);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Class_);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Level);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Zone);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->GuildID);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Anon);
-			smrs++;
-		}
-		client->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-}
-
-void WorldServer::HandleLFPMatches(ServerPacket *pack) {
-
-	char *Buffer = (char *)pack->pBuffer;
-
-	int PacketLength = 4;
-
-	int Entries = (pack->size - 4) / sizeof(ServerLFPMatchesResponse_Struct);
-
-	uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-
-	ServerLFPMatchesResponse_Struct* smrs = (ServerLFPMatchesResponse_Struct*)Buffer;
-
-	Client* client = entity_list.GetClientByID(EntityID);
-
-	if(client) {
-		for(int i=0; i<Entries; i++) {
-			PacketLength += strlen(smrs->Comments) + 11;
-			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++) {
-
-				if(smrs->Members[j].Name[0] != '\0')
-					PacketLength += strlen(smrs->Members[j].Name) + 9;
-			}
-			smrs++;
-		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_LFPGetMatchesResponse, PacketLength);
-
-		smrs = (ServerLFPMatchesResponse_Struct*)Buffer;
-
-		char *OutBuffer = (char *)outapp->pBuffer;
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0x00074af); // Unknown
-
-		for(int i=0; i<Entries; i++) {
-
-			int MemberCount = 0;
-
-			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++)
-				if(smrs->Members[j].Name[0] != '\0')
-					MemberCount++;
-
-			VARSTRUCT_ENCODE_STRING(OutBuffer, smrs->Comments);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->FromLevel);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->ToLevel);
-			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, smrs->Classes);
-			VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, MemberCount);
-
-			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++) {
-				if(smrs->Members[j].Name[0] != '\0') {
-					VARSTRUCT_ENCODE_STRING(OutBuffer, smrs->Members[j].Name);
-					VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Members[j].Class);
-					VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Members[j].Level);
-					VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Members[j].Zone);
-					VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, smrs->Members[j].GuildID);
-				}
-			}
-			smrs++;
-		}
-		client->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
 }

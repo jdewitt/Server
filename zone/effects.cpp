@@ -652,7 +652,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
 		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//Message_StringID(0, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
+		//Message_StringID(CC_Default, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
 		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
 		return(false);
 	}
@@ -673,7 +673,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 
 	if(level_to_use > GetLevel()) {
-		Message_StringID(13, DISC_LEVEL_USE_ERROR);
+		Message_StringID(CC_Red, DISC_LEVEL_USE_ERROR);
 		//should summon them a new one...
 		return(false);
 	}

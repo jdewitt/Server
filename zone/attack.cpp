@@ -1394,7 +1394,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	if (damage > 0) {
 		if (spell_id == SPELL_UNKNOWN) {
-			CheckIncreaseSkill(SkillDefense, other, -17);
+			CheckIncreaseSkill(SkillDefense, other, -12);
         }
 	}
 }
@@ -1673,18 +1673,18 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {   
-	if(IsPet() && GetOwner()->IsClient() && other->IsMezzed()) {
-		RemoveFromHateList(other);
-		GetOwner()->Message_StringID(15, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
-		return false;
-	}
-	int damage = 0;
-
 	if (!other) {
 		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
 		return false;
 	}
+
+	if(IsPet() && GetOwner()->IsClient() && other->IsMezzed()) {
+		RemoveFromHateList(other);
+		GetOwner()->Message_StringID(CC_Yellow, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
+		return false;
+	}
+	int damage = 0;
 
 	if(DivineAura())
 		return false;
@@ -2070,12 +2070,12 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	safe_delete(app);
 
-	Mob *give_exp;
-	if(oos->IsNPC())
-		give_exp = oos;
-
-	else
-		give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp = hate_list.GetDamageTop(this);
+	if(killerMob)
+	{
+		if(oos && oos->IsNPC())
+			give_exp = oos;
+	}
 
 	if(give_exp == nullptr)
 		give_exp = killer;
@@ -2318,8 +2318,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	p_depop = true;
 	if(killerMob && killerMob->GetTarget() == this) //we can kill things without having them targeted
 		killerMob->SetTarget(nullptr); //via AE effects and such..
-
-	entity_list.UpdateFindableNPCState(this, true);
 
 	char buffer[48] = { 0 };
 	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
@@ -3907,9 +3905,9 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
-						own->Message_StringID(13, PROC_PETTOOLOW);
+						own->Message_StringID(CC_Red, PROC_PETTOOLOW);
 				} else {
-					Message_StringID(13, PROC_TOOLOW);
+					Message_StringID(CC_Red, PROC_TOOLOW);
 				}
 			} else {
 				mlog(COMBAT__PROCS,

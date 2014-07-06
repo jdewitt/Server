@@ -446,9 +446,6 @@ bool Client::Process() {
 			if(viral_timer_counter > 999)
 				viral_timer_counter = 0;
 		}
-
-		if(projectile_timer.Check())
-			SpellProjectileEffect();
 					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
@@ -627,7 +624,7 @@ bool Client::Process() {
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
-		Message(0,"Your enemies have forgotten you!");
+		//Message(0,"Your enemies have forgotten you!");
 	}
 
 	return ret;
@@ -666,9 +663,24 @@ void Client::OnDisconnect(bool hard_disconnect) {
 
 	//remove ourself from all proximities
 	ClearAllProximities();
-	/*EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
-	FastQueuePacket(&outapp);*/
-	//Disconnect();
+
+	//Prevent GMs from being kicked all the way when camping.
+	if(GetGM())
+	{
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
+		FastQueuePacket(&outapp);
+		
+		Disconnect();
+	}
+	else
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
+		GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
+		strcpy(gmk->name,GetName());
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+
 }
 
 // Sends the client complete inventory used in character login
@@ -1041,7 +1053,7 @@ void Client::OPTGB(const EQApplicationPacket *app)
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
-		Message_StringID(0, TGB() ? TGB_ON : TGB_OFF);
+		Message_StringID(CC_Default, TGB() ? TGB_ON : TGB_OFF);
 	else
 		tgb = tgb_flag;
 }
@@ -1070,7 +1082,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	)
 	{
 		char val1[20]={0};
-		Message_StringID(13,SPELL_LEVEL_TO_LOW,ConvertArray(spells[memspell->spell_id].classes[GetClass()-1],val1),spells[memspell->spell_id].name);
+		Message_StringID(CC_Red,SPELL_LEVEL_TO_LOW,ConvertArray(spells[memspell->spell_id].classes[GetClass()-1],val1),spells[memspell->spell_id].name);
 		//Message(13, "Unexpected error: Class cant use this spell at your level!");
 		return;
 	}
@@ -1466,8 +1478,8 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		SkillUseTypes sk;
 		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) 
 		{
-			//Only Gnomes can tinker, and Vah Shir can Safe Fall.
-			if((sk == SkillTinkering && GetRace() != GNOME) || (sk == SkillSafeFall && GetRace() != VAHSHIR))
+			//Only Gnomes can tinker.
+			if(sk == SkillTinkering && GetRace() != GNOME)
 				gmtrain->skills[sk] = 0;
 			else if((sk == SkillHide || sk == SkillSneak) && GetRace() == HALFLING)
 				gmtrain->skills[sk] = 50; //Alkabor sends this as 0, but it doesn't show up for us.
@@ -1585,9 +1597,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		} else {
 			switch(skill) {
 			case SkillBrewing:
-			case SkillMakePoison:
 			case SkillTinkering:
-			case SkillResearch:
 			case SkillAlchemy:
 			case SkillBaking:
 			case SkillTailoring:
@@ -1595,8 +1605,9 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case SkillFletching:
 			case SkillJewelryMaking:
 			case SkillPottery:
+			case SkillFishing:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
-					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					Message_StringID(CC_Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
@@ -1607,7 +1618,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case SkillSpecializeDivination:
 			case SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
-					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					Message_StringID(CC_Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
@@ -1616,10 +1627,10 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			}
 
 			int MaxSkillValue = MaxSkill(skill);
-			if (skilllevel > 99 || skilllevel >= MaxSkillValue)
+			if (skilllevel >= MaxSkillValue)
 			{
 				// Don't allow training over max skill level
-				Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+				Message_StringID(CC_Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 				SetSkill(skill, skilllevel);
 				return;
 			}
@@ -1630,7 +1641,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				if (skilllevel >= MaxSpecSkill)
 				{
 					// Restrict specialization training to follow the rules
-					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					Message_StringID(CC_Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}

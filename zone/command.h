@@ -63,6 +63,7 @@ void command_logcommand(Client *c, const char *message);
 
 //commands
 void command_resetaa(Client* c,const Seperator *sep);
+void command_resetboat(Client* c,const Seperator *sep);
 void command_bind(Client* c,const Seperator *sep);
 void command_sendop(Client *c, const Seperator *sep);
 void command_optest(Client *c, const Seperator *sep);
@@ -196,7 +197,6 @@ void command_freeze(Client *c, const Seperator *sep);
 void command_unfreeze(Client *c, const Seperator *sep);
 void command_pvp(Client *c, const Seperator *sep);
 void command_setxp(Client *c, const Seperator *sep);
-void command_setpvppoints(Client *c, const Seperator *sep);
 void command_name(Client *c, const Seperator *sep);
 void command_tempname(Client *c, const Seperator *sep);
 void command_npcspecialattk(Client *c, const Seperator *sep);
@@ -323,6 +323,7 @@ void command_npctype_cache(Client *c, const Seperator *sep);
 void command_starve(Client *c, const Seperator *sep);
 void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
+void command_ppdump(Client *c, const Seperator *sep);
 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);

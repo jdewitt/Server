@@ -250,8 +250,6 @@ public:
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
 	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
-	inline bool		IsLFP() { return LFP; }
-	void			UpdateLFP();
 
 	virtual bool	Save() { return Save(0); }
 			bool	Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
@@ -270,8 +268,6 @@ public:
 	inline Inventory& GetInv()				{ return m_inv; }
 	inline const Inventory& GetInv() const	{ return m_inv; }
 	inline PetInfo* GetPetInfo(uint16 pet)	{ return (pet==1)?&m_suspendedminion:&m_petinfo; }
-	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
-	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 
 	bool	CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -482,9 +478,6 @@ public:
 
 	inline uint32	GetEXP()		const { return m_pp.exp; }
 
-	void	SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
-	uint32	GetPVPPoints() { return m_pp.PVPCurrentPoints; }
-	void	AddPVPPoints(uint32 Points);
 	void	AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	void	SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void	AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);
@@ -541,13 +534,9 @@ public:
 	inline uint32	GuildID() const { return guild_id; }
 	inline uint8	GuildRank()		const { return guildrank; }
 	void	SendGuildMOTD(bool GetGuildMOTDReply = false);
-	void	SendGuildURL();
-	void	SendGuildChannel();
 	void	SendGuildSpawnAppearance();
-	void	SendGuildMembers();
 	void	SendGuildList();
 	void	SendPlayerGuild();
-	void	SendGuildJoin(GuildJoin_Struct* gj);
 	void	RefreshGuildInfo();
 
 
@@ -650,8 +639,6 @@ public:
 	bool BindWound(Mob* bindmob, bool start, bool fail = false);
 	void SetTradeskillObject(Object* object) { m_tradeskill_object = object; }
 	Object* GetTradeskillObject() { return m_tradeskill_object; }
-	void	SendPathPacket(std::vector<FindPerson_Point> &path);
-
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//AA Methods
@@ -710,7 +697,6 @@ public:
 	void	DropItem(int16 slot_id);
 	bool	MakeItemLink(char* &ret_link, const ItemInst* inst);
 	int		GetItemLinkHash(const ItemInst* inst);
-	void	SendItemLink(const ItemInst* inst, bool sendtoall=false);
 	void	SendLootItemInPacket(const ItemInst* inst, int16 slot_id);
 	void	SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type, int16 fromid = 0);
 	bool	IsValidSlot(uint32 slot);
@@ -734,7 +720,6 @@ public:
 
 	bool	CheckTradeLoreConflict(Client* other);
 	void	LinkDead();
-	void	Insight(uint32 t_id);
 	bool	CheckDoubleAttack(bool tripleAttack = false);
 	bool	CheckDoubleRangedAttack();
 
@@ -821,7 +806,6 @@ public:
 	int GetAggroCount();
 	void IncrementAggroCount();
 	void DecrementAggroCount();
-	void SendPVPStats();
 	void SendDisciplineTimers();
 
 	void CheckEmoteHail(Mob *target, const char* message);
@@ -851,8 +835,6 @@ public:
 	void SetBoatName(const char* boatname);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
-	void SendGroupCreatePacket();
-	void SendGroupLeaderChangePacket(const char *LeaderName);
 	void DoTracking();
 	inline bool IsTracking() { return (TrackingID > 0); }
 	inline void SetPendingGuildInvitation(bool inPendingGuildInvitation) { PendingGuildInvitation = inPendingGuildInvitation; }
@@ -918,6 +900,7 @@ public:
 	void Starve();
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 	void RewindCommand();
+	void DumpPlayerProfile();
 
 protected:
 	friend class Mob;
@@ -1014,12 +997,6 @@ private:
 	std::list<uint32> keyring;
 	bool				tellsoff;	// GM /toggle
 	bool				gmhideme;
-	bool				LFG;
-	bool				LFP;
-	uint8				LFGFromLevel;
-	uint8				LFGToLevel;
-	bool				LFGMatchFilter;
-	char				LFGComments[64];
 	bool				AFK;
 	bool				auto_attack;
 	bool				auto_fire;
@@ -1052,7 +1029,6 @@ private:
 	Object*						m_tradeskill_object;
 	PetInfo						m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo						m_suspendedminion; // pet data for our suspended minion.
-	InspectMessage_Struct		m_inspect_message;
 
 	void NPCSpawn(const Seperator* sep);
 	uint32 GetEXPForLevel(uint16 level);

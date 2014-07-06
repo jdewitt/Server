@@ -249,12 +249,13 @@ ENCODE(OP_PlayerProfile) {
 	OUT(silver_cursor);
 	OUT(copper_cursor);
 	OUT_array(skills, structs::MAX_PP_SKILL);  // 1:1 direct copy (100 dword)
-	for(r = 0; r < 50; r++) {
-		eq->innate[r] = 255;
-	}
-	OUT(ATR_PET_LOH_timer);
-	OUT(UnknownTimer);
-	OUT(HarmTouchTimer);
+
+	//for(r = 0; r < 50; r++) {
+	//	eq->innate[r] = 255;
+	//}
+	//OUT(ATR_PET_LOH_timer);
+	//OUT(UnknownTimer);
+	//OUT(HarmTouchTimer);
 	int value = RuleI(Character,ConsumptionValue);
 
 	float tpercent = (float)emu->thirst_level/(float)value;
@@ -557,13 +558,29 @@ ENCODE(OP_ClientUpdate)
 {
 	SETUP_DIRECT_ENCODE(PlayerPositionUpdateServer_Struct, structs::SpawnPositionUpdate_Struct);
 	OUT(spawn_id);
-	eq->x_pos = (int16)emu->y_pos;
-	OUT(delta_x);
+	if(emu->y_pos >= 0)
+		eq->x_pos = int16(emu->y_pos + 0.5);
+	else
+		eq->x_pos = int16(emu->y_pos - 0.5);
+	if(emu->x_pos >= 0)
+		eq->y_pos = int16(emu->x_pos + 0.5);
+	else
+		eq->y_pos = int16(emu->x_pos - 0.5);
+	if(emu->z_pos >= 0)
+		eq->z_pos = int16(emu->z_pos + 0.5)*10;
+	else
+		eq->z_pos = int16(emu->z_pos - 0.5)*10;
+	/*OUT(delta_x);
 	OUT(delta_y);
-	eq->z_pos=emu->z_pos*10;
-	eq->delta_heading = (uint8)emu->delta_heading;
-	eq->y_pos = (int16)emu->x_pos;
 	OUT(delta_z);
+	if(emu->delta_heading >= 0)
+		eq->delta_heading = uint8(emu->delta_heading + 0.5);
+	else
+		eq->delta_heading = uint8(emu->delta_heading - 0.5);*/
+	eq->delta_x = 0;
+	eq->delta_y = 0;
+	eq->delta_z = 0;
+	eq->delta_heading = 0;
 	eq->anim_type = (uint8)emu->animation;
 	eq->heading = (uint8)emu->heading;
 	FINISH_ENCODE();
@@ -574,10 +591,23 @@ DECODE(OP_ClientUpdate)
 	SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::SpawnPositionUpdate_Struct);
 	IN(spawn_id);
 //	IN(sequence);
-	emu->x_pos = (int16)eq->y_pos;
-	emu->y_pos = (int16)eq->x_pos;
-	emu->z_pos = (int16)eq->z_pos/10;
+	if(eq->y_pos >= 0)
+		emu->x_pos = int16(eq->y_pos + 0.5);
+	else
+		emu->x_pos = int16(eq->y_pos - 0.5);
+	if(eq->x_pos >= 0)
+		emu->y_pos = int16(eq->x_pos + 0.5);
+	else
+		emu->y_pos = int16(eq->x_pos - 0.5);
+	if(eq->z_pos >= 0)
+		emu->z_pos = int16(eq->z_pos + 0.5)/10;
+	else
+		emu->z_pos = int16(eq->z_pos - 0.5)/10;
 	emu->heading = (uint8)eq->heading;
+	/*emu->delta_x = 0;
+	emu->delta_y = 0;
+	emu->delta_z = 0;
+	emu->delta_heading = 0;*/
 	IN(delta_x);
 	IN(delta_y);
 	IN(delta_z);
@@ -766,6 +796,11 @@ ENCODE(OP_Buff) {
 	OUT(entityid);
 	OUT(spellid);
 	OUT(slotid);
+	OUT(bufffade);
+	OUT(duration);
+	OUT(slot);
+	OUT(level);
+	OUT(effect);
 	FINISH_ENCODE();	
 }
 
@@ -775,6 +810,11 @@ DECODE(OP_Buff) {
 	IN(entityid);
 	IN(spellid);
 	IN(slotid);
+	IN(bufffade);
+	IN(duration);
+	IN(slot);
+	IN(level);
+	IN(effect);
 	FINISH_DIRECT_DECODE();	
 }
 
@@ -876,7 +916,6 @@ ENCODE(OP_Consider) {
 	FINISH_ENCODE();
 }
 
-
 DECODE(OP_ClickDoor) {
 	DECODE_LENGTH_EXACT(structs::ClickDoor_Struct);
 	SETUP_DIRECT_DECODE(ClickDoor_Struct, structs::ClickDoor_Struct);
@@ -884,15 +923,6 @@ DECODE(OP_ClickDoor) {
 	IN(item_id);
 	IN(player_id);
 	FINISH_DIRECT_DECODE();
-}
-
-ENCODE(OP_InterruptCast) {
-	ENCODE_LENGTH_EXACT(InterruptCast_Struct);
-	SETUP_DIRECT_ENCODE(InterruptCast_Struct, structs::InterruptCast_Struct);
-	OUT(spawnid);
-	OUT(messageid);
-	eq->message[0] = emu->message[0];
-	FINISH_ENCODE();
 }
 
 DECODE(OP_GMEndTraining) {
@@ -1590,7 +1620,7 @@ ENCODE(OP_TradeCoins) {
 
 DECODE(OP_ItemLinkResponse){
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
-	SETUP_DIRECT_DECODE(LDONItemViewRequest_Struct, structs::ItemViewRequest_Struct);
+	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
 	IN(item_id);
 	strcpy(emu->item_name,eq->item_name);
 	FINISH_DIRECT_DECODE();
@@ -1940,7 +1970,7 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 	const Item_Struct *item=inst->GetItem();
 
 	if(item->ID > 32767)
-		return 0 ;
+		return 0;
 
 	structs::Item_Struct *thejuice = new struct structs::Item_Struct;
 	memset(thejuice,0,sizeof(structs::Item_Struct));
@@ -1958,13 +1988,9 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   	}
   	else
   	{ 
-		if(inst->GetMerchantCount() > 1)
-			thejuice->Charges = 0;
-		else
-  			thejuice->Charges = 1;
-  
+  		thejuice->Charges = 1;
   		thejuice->equipSlot = inst->GetMerchantSlot();
-		thejuice->Price = inst->GetPrice();  
+		thejuice->Price = inst->GetPrice();  //This handles sellrate for us. 
 		thejuice->SellRate = 1;
     }
   
@@ -1979,7 +2005,6 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 		thejuice->ID = item->ID;        
 		thejuice->Icon = item->Icon;       
 		thejuice->Slots = item->Slots;  
-		//thejuice->SellRate = item->SellRate;
 		thejuice->CastTime = item->CastTime;  
 		thejuice->SkillModType = item->SkillModType;
 		thejuice->SkillModValue = item->SkillModValue;
@@ -2007,11 +2032,6 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 			thejuice->FocusEffect = 0;
 		else
 			thejuice->FocusEffect = item->Focus.Effect;
-	/*	thejuice->unknown0212=0x8a;
-		thejuice->unknown0213=0x26;
-		thejuice->unknown0216=0x01;
-		thejuice->unknown0282=0xFF;
-		thejuice->unknown0283=0xFF;*/
 
 		if(item->ItemClass == 1){
 			thejuice->container.BagType = item->BagType; 
@@ -2214,54 +2234,12 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FindPersonReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_FindPersonRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ForceFindPerson) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GetGuildMOTD) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GetGuildMOTDReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GMTrainSkillConfirm) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupDisbandOther) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupDisbandYou) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupFollow2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupLeaderChange) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupMakeLeader) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GroupUpdateB) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildCreate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildDemote) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageAdd) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageRemove) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildManageStatus) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberLevelUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildMemberList) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_GuildStatus) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InitialHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InitialMobHealth) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_InspectMessageUpdate) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemLinkClick) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemLinkText) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemName) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemVerifyReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemVerifyRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ItemViewUnknown) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGAppearance) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFGResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPCommand) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPGetMatchesRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LFPGetMatchesResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_LoadSpellSet) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MendHPUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MoveLogDisregard) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MoveLogRequest) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OpenContainer) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OpenInventory) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionBug) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionCheckout2) { ENCODE_FORWARD(OP_Unknown); }
@@ -2274,25 +2252,17 @@ ENCODE(OP_PetitionUnCheckout) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardDetailsReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardDetailsRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPLeaderBoardRequest) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PVPStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ReloadUI) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SendFindableNPCs) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetChatServer2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SetGroupTarget) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetTitleReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }

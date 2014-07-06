@@ -411,8 +411,8 @@ struct Charm_Struct {
 
 struct InterruptCast_Struct
 {
-	uint32 spawnid;
-	uint32 messageid;
+	uint16 messageid;
+	uint16 color;
 	char	message[0];
 };
 
@@ -518,20 +518,6 @@ struct SpellBuffFade_Struct {
 /*032*/
 };
 
-struct RemoveNimbusEffect_Struct
-{
-/*00*/ uint32 spawnid;			// Spawn ID
-/*04*/ int32 nimbus_effect;	// Nimbus Effect Number
-/*08*/
-};
-
-struct ItemNamePacket_Struct {
-/*000*/	uint32 item_id;
-/*004*/	uint32 unkown004;
-/*008*/ char name[64];
-/*072*/
-};
-
 // Length: 10
 struct ItemProperties_Struct {
 
@@ -575,14 +561,6 @@ struct GMSkillChange_Struct {
 /*006*/ uint16		unknown2;
 /*008*/ uint16		skill_id;
 /*010*/ uint16		unknown3;		//probably void
-};
-
-struct GMTrainSkillConfirm_Struct {	// SoF only
-/*000*/	uint32	SkillID;
-/*004*/	uint32	Cost;
-/*008*/	uint8	NewSkill;	// Set to 1 for 'You have learned the basics' message.
-/*009*/	char	TrainerName[64];
-/*073*/
 };
 
 struct ConsentResponse_Struct {
@@ -660,17 +638,16 @@ struct AA_Array
 	uint32 value;
 };
 
-
 typedef struct
 {
-/*00*/ char Name[64];
-/*64*/ uint32 Level;
-/*68*/ uint32 Race;
-/*72*/ uint32 Class;
-/*76*/ uint32 Zone;
-/*80*/ uint32 Time;
-/*84*/ uint32 Points;
-/*88*/
+	/*00*/ char Name[64];
+	/*64*/ uint32 Level;
+	/*68*/ uint32 Race;
+	/*72*/ uint32 Class;
+	/*76*/ uint32 Zone;
+	/*80*/ uint32 Time;
+	/*84*/ uint32 Points;
+	/*88*/
 } PVPStatsEntry_Struct;
 
 static const uint32 MAX_PP_DISCIPLINES = 100;
@@ -1563,34 +1540,22 @@ struct LootingItem_Struct {
 /*008*/	uint32	auto_loot;
 };
 
-struct GuildManageStatus_Struct{
-	uint32	guild_id;
-	uint32	oldrank;
-	uint32	newrank;
-	char	name[64];
-};
-// Guild invite, remove
-struct GuildJoin_Struct{
-/*000*/	uint32	guild_id;
-/*004*/	uint32	unknown04;
-/*008*/	uint32	level;
-/*012*/	uint32	class_;
-/*016*/	uint32	rank;//0 member, 1 officer, 2 leader
-/*020*/	uint32	zoneid;
-/*024*/	uint32	unknown24;
-/*028*/	char	name[64];
-/*092*/
-};
 struct GuildInviteAccept_Struct {
 	char inviter[64];
 	char newmember[64];
 	uint32 response;
 	uint32 guildeqid;
 };
-struct GuildManageRemove_Struct {
-	uint32 guildeqid;
-	char member[64];
+struct GuildRemove_Struct
+{
+	/*000*/	char Remover[64];
+	/*064*/	char Removee[64];
+	/*128*/	uint16 guildeqid;
+	/*130*/	uint8 unknown[2];
+	/*132*/	uint32 rank;
+	/*136*/
 };
+
 struct GuildCommand_Struct {
 	char othername[64];
 	char myname[64];
@@ -1598,6 +1563,7 @@ struct GuildCommand_Struct {
 	uint8 unknown[2]; // for guildinvite all 0's, for remove 0=0x56, 2=0x02
 	uint32 officer;
 };
+
 
 struct OnLevelMessage_Struct
 {
@@ -1719,81 +1685,6 @@ struct RandomReply_Struct {
 /* 12 */	char name[64];
 /* 76 */
 };
-
-struct LFG_Struct {
-/*
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 00 00 00 00 64 00 00 00  | ............d...
-  16: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 3F 00 00 00 41 00 00 00  | ........?...A...
-  16: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-Wrong size on OP_LFG. Got: 80, Expected: 68
-   0: 00 00 00 00 01 00 00 00 - 3F 00 00 00 41 00 00 00  | ........?...A...
-  16: 46 72 75 62 20 66 72 75 - 62 20 66 72 75 62 00 00  | Frub frub frub..
-  32: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  48: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-  64: 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  | ................
-*/
-/*000*/	uint32 unknown000;
-/*004*/	uint8 value; // 0x00 = off 0x01 = on
-/*005*/	uint8 MatchFilter;
-/*006*/	uint16 Unknown006;
-/*008*/	uint32 FromLevel;
-/*012*/	uint32 ToLevel;
-/*016*/	char Comments[64];
-};
-
-struct LFGGetMatchesRequest_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint32	FromLevel;
-/*008*/	uint32	ToLevel;
-/*012*/	uint32	Classes;
-};
-
-enum {	LFPOff = 0,
-	LFPOn = 1,
-	LFPMemberUpdate = 255 // Internal use, not sent by client
-};
-
-struct LFP_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint8	Action;
-/*005*/	uint8	MatchFilter;
-/*006*/	uint16	Unknown006;
-/*008*/	uint32	FromLevel;
-/*012*/	uint32	ToLevel;
-/*016*/	uint32	Classes;
-/*020*/	char	Comments[64];
-};
-
-struct LFPGetMatchesRequest_Struct {
-/*000*/	uint32	Unknown000;
-/*004*/	uint32	FromLevel;
-/*008*/	uint32	ToLevel;
-};
-
-/*
-** LFG_Appearance_Struct
-** Packet sent to clients to notify when someone in zone toggles LFG flag
-** Size: 8 bytes
-** Used in: OP_LFGAppearance
-**
-*/
-struct LFG_Appearance_Struct
-{
-/*0000*/ uint32 spawn_id;		// ID of the client
-/*0004*/ uint8 lfg;				// 1=LFG, 0=Not LFG
-/*0005*/ char unknown0005[3];	//
-/*0008*/
-};
-
 
 // EverQuest Time Information:
 // 72 minutes per EQ Day
@@ -1997,6 +1888,8 @@ struct GroupCancel_Struct {
 	uint8	toggle;
 };
 
+//Group structs are fragile, this works for now until they can be cleaned up.
+
 struct GroupUpdate_Struct {
 /*0000*/	uint32	action;
 /*0004*/	char	yourname[64];
@@ -2015,6 +1908,7 @@ struct GroupUpdate2_Struct {
 /*0780*/	uint8	unknown780[56];
 /*0836*/
 };
+
 struct GroupJoin_Struct {
 /*0000*/	uint32	action;
 /*0004*/	char	yourname[64];
@@ -2033,11 +1927,12 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0132*/
 };
 
-struct GroupLeaderChange_Struct
+struct GroupLeader_Struct
 {
-/*000*/		char	Unknown000[64];
-/*064*/		char	LeaderName[64];
-/*128*/		char	Unknown128[20];
+/*0000*/	uint32	action;
+/*0004*/	char	yourname[64];
+/*0068*/	char	membername[64];
+/*0132*/	uint32	unknown132;
 };
 
 struct FaceChange_Struct {
@@ -2185,12 +2080,6 @@ struct OldInspectResponse_Struct
 	int16 PlayerID;			// Comment: ?
 	int8  unknown[1740];	// Comment: ?
 }; 
-
-//OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed) -U
-struct InspectMessage_Struct {
-/*000*/ char text[256];
-/*256*/
-};
 
 //OP_SetDataRate
 struct SetDataRate_Struct {
@@ -2633,27 +2522,11 @@ uint8	clientcastfilters;		// 0) No, 1) Ignore PC Casts (all), 2) Ignore PC Casts
 uint8	npccastfilters;			// 0) No, 1) Ignore NPC Casts (all), 2) Ignore NPC Casts (not directed towards self)
 };
 
-/*
-** Client requesting item statistics
-** Size: 48 bytes
-** Used In: OP_ItemLinkClick
-** Last Updated: 2/15/2009
-**
-*/
-struct	ItemViewRequest_Struct {
-/*000*/	uint32	item_id;
-/*004*/	uint32	augments[5];
-/*024*/ uint32	link_hash;
-/*028*/	uint32	unknown028;
-/*032*/	char	unknown032[12];	//probably includes loregroup & evolving info. see Client::MakeItemLink() in zone/inventory.cpp:469
-/*044*/	uint16	icon;
-/*046*/	char	unknown046[2];
-};
-
-struct	LDONItemViewRequest_Struct {
-	uint32	item_id;
-	uint8	unknown004[4];
-	char	item_name[64];
+struct	ItemViewRequest_Struct
+{
+	/*000*/int16	item_id;
+	/*002*/char	item_name[64];
+	/*066*/
 };
 
 /*
@@ -2938,12 +2811,6 @@ struct SimpleMessage_Struct{
 	uint32	unknown8;
 };
 
-struct GuildMemberLevelUpdate_Struct {
-/*00*/	uint32 guild_id;
-/*04*/	char	member_name[64];
-/*68*/	uint32	level;	//not sure
-};
-
 struct Internal_GuildMemberEntry_Struct {
 //	char	name[64];					//variable length
 	uint32	level;						//network byte order
@@ -2984,24 +2851,6 @@ struct GuildUpdate_PublicNote{
 	char	name[64];
 	char	target[64];
 	char	note[1]; //variable length.
-};
-
-struct GuildStatus_Struct
-{
-/*000*/	char	Name[64];
-/*064*/	uint8	Unknown064[72];
-};
-
-struct GuildDemoteStruct{
-	char	name[64];
-	char	target[64];
-};
-
-struct GuildRemoveStruct{
-	char	target[64];
-	char	name[64];
-	uint32	unknown128;
-	uint32	leaderstatus; //?
 };
 
 struct GuildMakeLeader{
@@ -3562,11 +3411,6 @@ struct MobHealth_Struct {
 	uint8 hp;
 };
 
-struct LoadSpellSet_Struct {
-	uint32 spell[MAX_PP_MEMSPELL];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
-	uint32 unknown;					//there seems to be an extra field in this packet...
-};
-
 // This is the structure for OP_ZonePlayerToBind opcode. Discovered on Feb 9 2007 by FNW from packet logs for titanium client
 // This field "zone_name" is text the Titanium client will display on player death
 // it appears to be a variable length, null-terminated string
@@ -3657,14 +3501,6 @@ struct spawnShroudSelf
 #endif
 
 
-typedef struct {
-	char	Name[64];
-	uint16	Class;
-	uint16	Level;
-	uint16	Zone;
-	uint16	GuildID;
-} GroupLFPMemberEntry;
-
 struct ControlBoat_Struct {
 /*000*/	uint32	boatId;			// entitylist id of the boat
 /*004*/	bool	TakeControl;	// 01 if taking control, 00 if releasing it
@@ -3683,77 +3519,6 @@ struct ClearObject_Struct
 {
 /*000*/	uint8	Clear;	// If this is not set to non-zero there is a random chance of a client crash.
 /*001*/	uint8	Unknown001[7];
-};
-
-struct PVPStats_Struct
-{
-/*0000*/ uint32 Kills;
-/*0004*/ uint32 Deaths;
-/*0008*/ uint32 PVPPointsAvailable;
-/*0012*/ uint32 TotalPVPPoints;
-/*0016*/ uint32 BestKillStreak;
-/*0020*/ uint32 WorstDeathStreak;
-/*0024*/ uint32 CurrentKillStreak;
-/*0028*/ uint32 Infamy;
-/*0032*/ uint32 Vitality;
-/*0036*/ PVPStatsEntry_Struct LastDeath;
-/*0124*/ PVPStatsEntry_Struct LastKill;
-/*0212*/ PVPStatsEntry_Struct KillsLast24Hours[50];
-/*4612*/
-};
-
-typedef struct
-{
-/*000*/	char Name[64];
-/*064*/	uint32 Kills;
-/*068*/	uint32 Deaths;
-/*072*/	uint32 TotalPoints;
-/*076*/	uint32 Infamy;
-/*080*/
-} PVPLeaderBoardEntry_Struct;
-
-enum { PVPSortByKills = 0, PVPSortByPoints, PVPSortByInfamy };
-
-struct PVPLeaderBoardRequest_Struct
-{
-/*00*/ uint32 SortType;
-/*04*/
-};
-
-struct PVPLeaderBoard_Struct
-{
-/*0000*/ uint32 Unknown0000;
-/*0004*/ uint32 MyKills;
-/*0008*/ uint32 MyTotalPoints;
-/*0012*/ uint32 MyRank;
-/*0016*/ uint32 MyDeaths;
-/*0020*/ uint32 MyInfamy;
-/*0024*/ PVPLeaderBoardEntry_Struct Entries[100];
-/*8024*/
-};
-
-struct PVPLeaderBoardDetailsRequest_Struct
-{
-/*00*/ uint32 Unknown00;
-/*04*/ char Name[64];
-/*68*/
-};
-
-struct PVPLeaderBoardDetailsReply_Struct
-{
-/*000*/ char Name[64];
-/*064*/ uint8 Unknown064[64];
-/*128*/ uint32 Level;
-/*132*/ uint32 Race;
-/*136*/ uint32 Class;
-/*140*/ uint32 GuildID;
-/*144*/ uint32 TotalAA;
-/*148*/ uint32 Unknown148;
-/*152*/ uint32 Kills;
-/*156*/ uint32 Deaths;
-/*160*/ uint32 Infamy;
-/*164*/ uint32 Points;
-/*168*/
 };
 
 struct DisciplineTimer_Struct
@@ -3833,16 +3598,6 @@ struct CorpseDrag_Struct
 /*064*/ char DraggerName[64];
 /*128*/ uint8 Unknown128[24];
 /*152*/
-};
-
-// New OpCode/Struct for SoD+
-struct GroupMakeLeader_Struct
-{
-/*000*/ uint32 Unknown000;
-/*004*/ char CurrentLeader[64];
-/*068*/ char NewLeader[64];
-/*132*/ char Unknown072[324];
-/*456*/
 };
 
 struct Untargetable_Struct {

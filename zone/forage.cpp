@@ -266,7 +266,7 @@ void Client::GoFish()
 
 	//TODO: generate a message if we're already fishing
 	/*if (!fishing_timer.Check()) {	//this isn't the right check, may need to add something to the Client class like 'bool is_fishing'
-		Message_StringID(0, ALREADY_FISHING);	//You are already fishing!
+		Message_StringID(CC_Default, ALREADY_FISHING);	//You are already fishing!
 		return;
 	}*/
 
@@ -352,7 +352,7 @@ void Client::GoFish()
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				Message_StringID(0, DUP_LORE);
+				Message_StringID(CC_Default, DUP_LORE);
 				safe_delete(inst);
 			}
 			else
@@ -465,7 +465,7 @@ void Client::ForageItem(bool guarantee) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				Message_StringID(0, DUP_LORE);
+				Message_StringID(CC_Default, DUP_LORE);
 				safe_delete(inst);
 			}
 			else {

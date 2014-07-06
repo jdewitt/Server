@@ -13,7 +13,6 @@ SET(world_sources
 	HTTPRequest.cpp
 	LauncherLink.cpp
 	LauncherList.cpp
-	lfplist.cpp
 	LoginServer.cpp
 	LoginServerList.cpp
 	net.cpp
@@ -43,7 +42,6 @@ SET(world_headers
 	HTTPRequest.h
 	LauncherLink.h
 	LauncherList.h
-	lfplist.h
 	LoginServer.h
 	LoginServerList.h
 	net.h

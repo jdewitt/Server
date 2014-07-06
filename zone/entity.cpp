@@ -303,8 +303,11 @@ void EntityList::AddClient(Client *client)
 
 void EntityList::TrapProcess()
 {
+
+#ifdef IDLE_WHEN_EMPTY
 	if (numclients < 1)
 		return;
+#endif
 
 	if (trap_list.empty()) {
 		net.trap_timer.Disable();
@@ -589,8 +592,6 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 			AddToSpawnQueue(npc->GetID(), &ns);
 			safe_delete(ns);
 		}
-		if (npc->IsFindable())
-			UpdateFindableNPCState(npc, false);
 	}
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
@@ -1384,9 +1385,9 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 		//might want some sort of distance check in here?
 		if (cur != winner && cur != loser) {
 			if (flee)
-				cur->Message_StringID(15, DUEL_FLED, winner->GetName(),loser->GetName(),loser->GetName());
+				cur->Message_StringID(CC_Yellow, DUEL_FLED, winner->GetName(),loser->GetName(),loser->GetName());
 			else
-				cur->Message_StringID(15, DUEL_FINISHED, winner->GetName(),loser->GetName());
+				cur->Message_StringID(CC_Yellow, DUEL_FINISHED, winner->GetName(),loser->GetName());
 		}
 		++it;
 	}
@@ -2209,9 +2210,6 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (own && own->IsClient())
 				continue;
 
-			if (pnpc->IsFindable())
-				UpdateFindableNPCState(pnpc, true);
-
 			pnpc->Depop(StartSpawnTimer);
 		}
 	}
@@ -2643,6 +2641,16 @@ void EntityList::HalveAggro(Mob *who)
 	while (it != npc_list.end()) {
 		if (it->second->CastToNPC()->CheckAggro(who))
 			it->second->CastToNPC()->SetHate(who, it->second->CastToNPC()->GetHateAmount(who) / 2);
+		++it;
+	}
+}
+
+void EntityList::ReduceAggro(Mob *who)
+{
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		if (it->second->CastToNPC()->CheckAggro(who))
+			it->second->CastToNPC()->SetHate(who, 1);
 		++it;
 	}
 }
@@ -3503,8 +3511,6 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 					c->QueuePacket(outapp);
 					safe_delete(outapp);
 					g->DelMemberOOZ(name);
-					if (g->IsLeader(c) && c->IsLFP())
-						c->UpdateLFP();
 				}
 			}
 		}
@@ -4051,71 +4057,6 @@ void EntityList::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, ui
 		}
 		++it;
 	}
-}
-
-void EntityList::SendFindableNPCList(Client *c)
-{
-	if (!c)
-		return;
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
-
-	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
-
-	fnpcs->Unknown109 = 0x16;
-	fnpcs->Unknown110 = 0x06;
-	fnpcs->Unknown111 = 0x24;
-
-	fnpcs->Action = 0;
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		if (it->second) {
-			NPC *n = it->second;
-
-			if (n->IsFindable()) {
-				fnpcs->EntityID = n->GetID();
-				strn0cpy(fnpcs->Name, n->GetCleanName(), sizeof(fnpcs->Name));
-				strn0cpy(fnpcs->LastName, n->GetLastName(), sizeof(fnpcs->LastName));
-				fnpcs->Race = n->GetRace();
-				fnpcs->Class = n->GetClass();
-
-				c->QueuePacket(outapp);
-			}
-		}
-		++it;
-	}
-	safe_delete(outapp);
-}
-
-void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
-{
-	if (!n || !n->IsFindable())
-		return;
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
-
-	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
-
-	fnpcs->Unknown109 = 0x16;
-	fnpcs->Unknown110 = 0x06;
-	fnpcs->Unknown111 = 0x24;
-
-	fnpcs->Action = Remove ? 1: 0;
-	fnpcs->EntityID = n->GetID();
-	strn0cpy(fnpcs->Name, n->GetCleanName(), sizeof(fnpcs->Name));
-	strn0cpy(fnpcs->LastName, n->GetLastName(), sizeof(fnpcs->LastName));
-	fnpcs->Race = n->GetRace();
-	fnpcs->Class = n->GetClass();
-
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-
-		++it;
-	}
-
-	safe_delete(outapp);
 }
 
 void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)

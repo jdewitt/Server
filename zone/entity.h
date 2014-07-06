@@ -169,7 +169,6 @@ public:
 	bool CanAddHateForMob(Mob *p);
 	void	SendGuildMOTD(uint32 guild_id);
 	void	SendGuildSpawnAppearance(uint32 guild_id);
-	void	SendGuildMembers(uint32 guild_id);
 	void	RefreshAllGuildInfo(uint32 guild_id);
 	void	SendGuildList();
 	void	CheckGroupList (const char *fname, const int fline);
@@ -316,6 +315,7 @@ public:
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);
 	void	DoubleAggro(Mob* who);
+	void	ReduceAggro(Mob* who);
 	void	Evade(Mob *who);
 
 	void	Process();
@@ -362,8 +362,6 @@ public:
 	void	SignalAllClients(uint32 data);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
-	void	SendFindableNPCList(Client *c);
-	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
 
 	void GetMobList(std::list<Mob*> &m_list);

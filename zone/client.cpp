@@ -62,6 +62,8 @@ extern volatile bool RunLoops;
 #include "client_logs.h"
 #include "guild_mgr.h"
 #include "QuestParserCollection.h"
+#include "../common/crc32.h"
+#include "../common/packet_dump_file.h"
 
 
 extern EntityList entity_list;
@@ -88,7 +90,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// level
 	0,	// npctypeid
 	0,	// size
-	0.7,	// runspeed
+	RuleR(Character, BaseRunSpeed),	// runspeed
 	0,	// heading
 	0,	// x
 	0,	// y
@@ -187,12 +189,6 @@ Client::Client(EQStreamInterface* ieqs)
 	last_reported_endur = 0;
 	gmhideme = false;
 	AFK = false;
-	LFG = false;
-	LFGFromLevel = 0;
-	LFGToLevel = 0;
-	LFGMatchFilter = false;
-	LFGComments[0] = '\0';
-	LFP = false;
 	gmspeed = 0;
 	playeraction = 0;
 	SetTarget(0);
@@ -1265,13 +1261,6 @@ void Client::UpdateWho(uint8 remove) {
 	scl->ClientVersion = GetClientVersion();
 	scl->tellsoff = tellsoff;
 	scl->guild_id = guild_id;
-	scl->LFG = LFG;
-	if(LFG) {
-		scl->LFGFromLevel = LFGFromLevel;
-		scl->LFGToLevel = LFGToLevel;
-		scl->LFGMatchFilter = LFGMatchFilter;
-		memcpy(scl->LFGComments, LFGComments, sizeof(scl->LFGComments));
-	}
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -1557,7 +1546,6 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	// Populate client-specific spawn information
 	ns->spawn.afk		= AFK;
-	ns->spawn.lfg		= LFG; // afk and lfg are cleared on zoning on live
 	ns->spawn.anon		= m_pp.anon;
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
@@ -2361,7 +2349,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 
 			// Send client unlock
 			bind_out->type = 3;
-			QueuePacket(outapp);
+			//QueuePacket(outapp);
 			bind_out->type = 0;
 			// Client Unlocked
 			if(!bindmob) {
@@ -2383,10 +2371,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->to = 0;
 				}
 				else if (bindmob->IsAIControlled() && bindmob != this ){
-					; // Tell IPC to stand still?
+					// Tell IPC to stand still?
 				}
 				else {
-					; // Binding self
+				   // Binding self
 				}
 			}
 		} else {
@@ -2463,11 +2451,12 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					}
 					else {
 						//I dont have the real, live
-						Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						if(bindmob->IsClient())
+						if(bindmob->IsClient() && bindmob != this)
 							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
-						// Too many hp message goes here.
+						else
+							Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
 					}
+					Stand();
 				}
 				else {
 					// Send client bind failed
@@ -3023,336 +3012,6 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 	return chaformula; //Returns 1.10, expensive stuff!
 }
 
-//neat idea from winter's roar, not implemented
-void Client::Insight(uint32 t_id)
-{
-	Mob* who = entity_list.GetMob(t_id);
-	if (!who)
-		return;
-	if (!who->IsNPC())
-	{
-		Message(0,"This ability can only be used on NPCs.");
-		return;
-	}
-	if (Dist(*who) > 200)
-	{
-		Message(0,"You must get closer to your target!");
-		return;
-	}
-	if (!CheckLosFN(who))
-	{
-		Message(0,"You must be able to see your target!");
-		return;
-	}
-	char hitpoints[64];
-	char resists[320];
-	char dmg[64];
-	memset(hitpoints,0,sizeof(hitpoints));
-	memset(resists,0,sizeof(resists));
-	memset(dmg,0,sizeof(dmg));
-	//Start with HP blah
-	int avg_hp = GetLevelHP(who->GetLevel());
-	int cur_hp = who->GetHP();
-	if (cur_hp == avg_hp)
-	{
-		strn0cpy(hitpoints,"averagely tough",32);
-	}
-	else if (cur_hp >= avg_hp*5)
-	{
-		strn0cpy(hitpoints,"extremely tough",32);
-	}
-	else if (cur_hp >= avg_hp*4)
-	{
-		strn0cpy(hitpoints,"exceptionally tough",32);
-	}
-	else if (cur_hp >= avg_hp*3)
-	{
-		strn0cpy(hitpoints,"very tough",32);
-	}
-	else if (cur_hp >= avg_hp*2)
-	{
-		strn0cpy(hitpoints,"quite tough",32);
-	}
-	else if (cur_hp >= avg_hp*1.25)
-	{
-		strn0cpy(hitpoints,"rather tough",32);
-	}
-	else if (cur_hp > avg_hp)
-	{
-		strn0cpy(hitpoints,"slightly tough",32);
-	}
-	else if (cur_hp <= avg_hp*0.20)
-	{
-		strn0cpy(hitpoints,"extremely frail",32);
-	}
-	else if (cur_hp <= avg_hp*0.25)
-	{
-		strn0cpy(hitpoints,"exceptionally frail",32);
-	}
-	else if (cur_hp <= avg_hp*0.33)
-	{
-		strn0cpy(hitpoints,"very frail",32);
-	}
-	else if (cur_hp <= avg_hp*0.50)
-	{
-		strn0cpy(hitpoints,"quite frail",32);
-	}
-	else if (cur_hp <= avg_hp*0.75)
-	{
-		strn0cpy(hitpoints,"rather frail",32);
-	}
-	else if (cur_hp < avg_hp)
-	{
-		strn0cpy(hitpoints,"slightly frail",32);
-	}
-
-	int avg_dmg = who->CastToNPC()->GetMaxDamage(who->GetLevel());
-	int cur_dmg = who->CastToNPC()->GetMaxDMG();
-	if (cur_dmg == avg_dmg)
-	{
-		strn0cpy(dmg,"averagely strong",32);
-	}
-	else if (cur_dmg >= avg_dmg*4)
-	{
-		strn0cpy(dmg,"extremely strong",32);
-	}
-	else if (cur_dmg >= avg_dmg*3)
-	{
-		strn0cpy(dmg,"exceptionally strong",32);
-	}
-	else if (cur_dmg >= avg_dmg*2)
-	{
-		strn0cpy(dmg,"very strong",32);
-	}
-	else if (cur_dmg >= avg_dmg*1.25)
-	{
-		strn0cpy(dmg,"quite strong",32);
-	}
-	else if (cur_dmg >= avg_dmg*1.10)
-	{
-		strn0cpy(dmg,"rather strong",32);
-	}
-	else if (cur_dmg > avg_dmg)
-	{
-		strn0cpy(dmg,"slightly strong",32);
-	}
-	else if (cur_dmg <= avg_dmg*0.20)
-	{
-		strn0cpy(dmg,"extremely weak",32);
-	}
-	else if (cur_dmg <= avg_dmg*0.25)
-	{
-		strn0cpy(dmg,"exceptionally weak",32);
-	}
-	else if (cur_dmg <= avg_dmg*0.33)
-	{
-		strn0cpy(dmg,"very weak",32);
-	}
-	else if (cur_dmg <= avg_dmg*0.50)
-	{
-		strn0cpy(dmg,"quite weak",32);
-	}
-	else if (cur_dmg <= avg_dmg*0.75)
-	{
-		strn0cpy(dmg,"rather weak",32);
-	}
-	else if (cur_dmg < avg_dmg)
-	{
-		strn0cpy(dmg,"slightly weak",32);
-	}
-
-	//Resists
-	int res;
-	int i = 1;
-
-	//MR
-	res = who->GetResist(i);
-	i++;
-	if (res >= 1000)
-	{
-		strcat(resists,"immune");
-	}
-	else if (res >= 500)
-	{
-		strcat(resists,"practically immune");
-	}
-	else if (res >= 250)
-	{
-		strcat(resists,"exceptionally resistant");
-	}
-	else if (res >= 150)
-	{
-		strcat(resists,"very resistant");
-	}
-	else if (res >= 100)
-	{
-		strcat(resists,"fairly resistant");
-	}
-	else if (res >= 50)
-	{
-		strcat(resists,"averagely resistant");
-	}
-	else if (res >= 25)
-	{
-		strcat(resists,"weakly resistant");
-	}
-	else
-	{
-		strcat(resists,"barely resistant");
-	}
-	strcat(resists," to magic, ");
-
-	//FR
-	res = who->GetResist(i);
-	i++;
-	if (res >= 1000)
-	{
-		strcat(resists,"immune");
-	}
-	else if (res >= 500)
-	{
-		strcat(resists,"practically immune");
-	}
-	else if (res >= 250)
-	{
-		strcat(resists,"exceptionally resistant");
-	}
-	else if (res >= 150)
-	{
-		strcat(resists,"very resistant");
-	}
-	else if (res >= 100)
-	{
-		strcat(resists,"fairly resistant");
-	}
-	else if (res >= 50)
-	{
-		strcat(resists,"averagely resistant");
-	}
-	else if (res >= 25)
-	{
-		strcat(resists,"weakly resistant");
-	}
-	else
-	{
-		strcat(resists,"barely resistant");
-	}
-	strcat(resists," to fire, ");
-
-	//CR
-	res = who->GetResist(i);
-	i++;
-	if (res >= 1000)
-	{
-		strcat(resists,"immune");
-	}
-	else if (res >= 500)
-	{
-		strcat(resists,"practically immune");
-	}
-	else if (res >= 250)
-	{
-		strcat(resists,"exceptionally resistant");
-	}
-	else if (res >= 150)
-	{
-		strcat(resists,"very resistant");
-	}
-	else if (res >= 100)
-	{
-		strcat(resists,"fairly resistant");
-	}
-	else if (res >= 50)
-	{
-		strcat(resists,"averagely resistant");
-	}
-	else if (res >= 25)
-	{
-		strcat(resists,"weakly resistant");
-	}
-	else
-	{
-		strcat(resists,"barely resistant");
-	}
-	strcat(resists," to cold, ");
-
-	//PR
-	res = who->GetResist(i);
-	i++;
-	if (res >= 1000)
-	{
-		strcat(resists,"immune");
-	}
-	else if (res >= 500)
-	{
-		strcat(resists,"practically immune");
-	}
-	else if (res >= 250)
-	{
-		strcat(resists,"exceptionally resistant");
-	}
-	else if (res >= 150)
-	{
-		strcat(resists,"very resistant");
-	}
-	else if (res >= 100)
-	{
-		strcat(resists,"fairly resistant");
-	}
-	else if (res >= 50)
-	{
-		strcat(resists,"averagely resistant");
-	}
-	else if (res >= 25)
-	{
-		strcat(resists,"weakly resistant");
-	}
-	else
-	{
-		strcat(resists,"barely resistant");
-	}
-	strcat(resists," to poison, and ");
-
-	//MR
-	res = who->GetResist(i);
-	i++;
-	if (res >= 1000)
-	{
-		strcat(resists,"immune");
-	}
-	else if (res >= 500)
-	{
-		strcat(resists,"practically immune");
-	}
-	else if (res >= 250)
-	{
-		strcat(resists,"exceptionally resistant");
-	}
-	else if (res >= 150)
-	{
-		strcat(resists,"very resistant");
-	}
-	else if (res >= 100)
-	{
-		strcat(resists,"fairly resistant");
-	}
-	else if (res >= 50)
-	{
-		strcat(resists,"averagely resistant");
-	}
-	else if (res >= 25)
-	{
-		strcat(resists,"weakly resistant");
-	}
-	else
-	{
-		strcat(resists,"barely resistant");
-	}
-	strcat(resists," to disease.");
-
-	Message(0,"Your target is a level %i %s. It appears %s and %s for its level. It seems %s",who->GetLevel(),GetEQClassName(who->GetClass(),1),dmg,hitpoints,resists);
-}
-
 void Client::ChangeSQLLog(const char *file) {
 	if(SQL_log != nullptr) {
 		fclose(SQL_log);
@@ -3443,11 +3102,11 @@ void Client::SacrificeConfirm(Client *caster) {
 	if(!caster || PendingSacrifice) return;
 
 	if(GetLevel() < RuleI(Spells, SacrificeMinLevel)){
-		caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
+		caster->Message_StringID(CC_Red, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
 		return;
 	}
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
-		caster->Message_StringID(13, SAC_TOO_HIGH);
+		caster->Message_StringID(CC_Red, SAC_TOO_HIGH);
 		return;
 	}
 
@@ -3505,7 +3164,7 @@ void Client::Sacrifice(Client *caster)
 					}
 				}
 				else{
-					caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
+					caster->Message_StringID(CC_Red, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
 				}
 }
 
@@ -3754,46 +3413,6 @@ void Client::DiscoverItem(uint32 itemid) {
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
 }
 
-void Client::UpdateLFP() {
-
-	Group *g = GetGroup();
-
-	if(g && !g->IsLeader(this)) {
-		database.SetLFP(CharacterID(), false);
-		worldserver.StopLFP(CharacterID());
-		LFP = false;
-		return;
-	}
-
-	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
-
-	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		LFPMembers[i].Name[0] = '\0';
-		LFPMembers[i].Class = 0;
-		LFPMembers[i].Level = 0;
-		LFPMembers[i].Zone = 0;
-	}
-
-	// Slot 0 is always for the group leader, or the player if not in a group
-	strcpy(LFPMembers[0].Name, GetName());
-	LFPMembers[0].Class = GetClass();
-	LFPMembers[0].Level = GetLevel();
-	LFPMembers[0].Zone = zone->GetZoneID();
-
-	if(g) {
-		// Fill the LFPMembers array with the rest of the group members, excluding ourself
-		// We don't fill in the class, level or zone, because we may not be able to determine
-		// them if the other group members are not in this zone. World will fill in this information
-		// for us, if it can.
-		int NextFreeSlot = 1;
-		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if((g->membername[i][0] != '\0') && strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
-		}
-	}
-	worldserver.UpdateLFP(CharacterID(), LFPMembers);
-}
-
 uint16 Client::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
@@ -3964,30 +3583,6 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 
-}
-
-void Client::SendPVPStats()
-{
-	// This sends the data to the client to populate the PVP Stats Window.
-	//
-	// When the PVP Stats window is opened, no opcode is sent. Therefore this method should be called
-	// from Client::CompleteConnect, and also when the player makes a PVP kill.
-	//
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
-	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
-
-	pvps->Kills = m_pp.PVPKills;
-	pvps->Deaths = m_pp.PVPDeaths;
-	pvps->PVPPointsAvailable = m_pp.PVPCurrentPoints;
-	pvps->TotalPVPPoints = m_pp.PVPCareerPoints;
-	pvps->BestKillStreak = m_pp.PVPBestKillStreak;
-	pvps->WorstDeathStreak = m_pp.PVPWorstDeathStreak;
-	pvps->CurrentKillStreak = m_pp.PVPCurrentKillStreak;
-
-	// TODO: Record and send other PVP Stats
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::SendDisciplineTimers()
@@ -4628,16 +4223,6 @@ void Client::SuspendMinion()
 	}
 }
 
-void Client::AddPVPPoints(uint32 Points)
-{
-	m_pp.PVPCurrentPoints += Points;
-	m_pp.PVPCareerPoints += Points;
-
-	Save();
-
-	SendPVPStats();
-}
-
 // Processes a client request to inspect a SoF client's equipment.
 void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	if(requestee && requester) {
@@ -4687,53 +4272,12 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 				insr->itemicons[22] = 0xFFFFFFFF;
 		}
 
-		strcpy(insr->text, requestee->GetInspectMessage().text);
-
 		// There could be an OP for this..or not... (Ti clients are not processed here..this message is generated client-side)
 		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(0, "%s is looking at your equipment...", requester->GetName()); }
 
 		requester->QueuePacket(outapp); // Send answer to requester
 		safe_delete(outapp);
 	}
-}
-
-void Client::SendGroupCreatePacket()
-{
-	// For SoD and later clients, this is sent the Group Leader upon initial creation of the group
-	//
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupUpdateB, 32 + strlen(GetName()));
-
-	char *Buffer = (char *)outapp->pBuffer;
-	// Header
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0
-	VARSTRUCT_ENCODE_STRING(Buffer, GetName());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::SendGroupLeaderChangePacket(const char *LeaderName)
-{
-	// For SoD and later, send name of Group Leader to this client
-
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
-
-	GroupLeaderChange_Struct *glcs = (GroupLeaderChange_Struct*)outapp->pBuffer;
-
-	strn0cpy(glcs->LeaderName, LeaderName, sizeof(glcs->LeaderName));
-
-	FastQueuePacket(&outapp);
 }
 
 void Client::CheckEmoteHail(Mob *target, const char* message)
@@ -5607,7 +5151,7 @@ const char* Client::GetClassPlural(Client* client) {
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	Message_StringID(0, PICK_LORE);
+	Message_StringID(CC_Default, PICK_LORE);
 	return;
 
 	const Item_Struct *item = database.GetItem(ItemID);
@@ -5615,7 +5159,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 	if(!item)
 		return;
 
-	Message_StringID(0, PICK_LORE, item->Name);
+	Message_StringID(CC_Default, PICK_LORE, item->Name);
 }
 
 void Client::GarbleMessage(char *message, uint8 variance)
@@ -5891,16 +5435,20 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
 		snprintf(name, sizeof(name),"Faction%i",faction_id);
 
+	//We need to get total faction here, including racial, class, and deity modifiers.
+	int32 fac = GetModCharacterFactionLevel(faction_id) + tmpvalue;
+	totalvalue = fac;
+
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
 		return;
 	else if (totalvalue >= MAX_FACTION)
-		Message_StringID(0, FACTION_BEST, name);
+		Message_StringID(CC_Default, FACTION_BEST, name);
 	else if (tmpvalue > 0 && totalvalue < MAX_FACTION)
-		Message_StringID(0, FACTION_BETTER, name);
+		Message_StringID(CC_Default, FACTION_BETTER, name);
 	else if (tmpvalue < 0 && totalvalue > MIN_FACTION)
-		Message_StringID(0, FACTION_WORSE, name);
+		Message_StringID(CC_Default, FACTION_WORSE, name);
 	else if (totalvalue <= MIN_FACTION)
-		Message_StringID(0, FACTION_WORST, name);
+		Message_StringID(CC_Default, FACTION_WORST, name);
 
 	return;
 }
@@ -6303,3 +5851,19 @@ void Client::RewindCommand()
 	}
 }
 
+void Client::DumpPlayerProfile()
+{
+	CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct)-4);
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(PlayerProfile_Struct));
+	memcpy(outapp->pBuffer,&m_pp,sizeof(PlayerProfile_Struct)-4);
+
+	char* packet_dump = "PP.txt";
+	FileDumpPacketHex(packet_dump, outapp);
+	safe_delete(outapp);
+
+	EQApplicationPacket* noutapp = new EQApplicationPacket(OP_PlayerProfile,sizeof(ExtendedProfile_Struct));
+	memcpy(noutapp->pBuffer,&m_epp,sizeof(ExtendedProfile_Struct));
+
+	FileDumpPacketHex(packet_dump, noutapp);
+	safe_delete(noutapp);
+}

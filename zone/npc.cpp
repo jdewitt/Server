@@ -554,9 +554,6 @@ bool NPC::Process()
 			viral_timer_counter = 0;
 	}
 
-	if(projectile_timer.Check())
-		SpellProjectileEffect();
-
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
 			DoGravityEffect();
@@ -1903,45 +1900,57 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 void NPC::LevelScale() {
 
 	uint8 random_level = (MakeRandomInt(level, maxlevel));
-
 	float scaling = (((random_level / (float)level) - 1) * (scalerate / 100.0f));
 
-	// Compensate for scale rates at low levels so they don't add too much
-	uint8 scale_adjust = 1;
-	if(level > 0 && level <= 5)
-		scale_adjust = 10;
-	if(level > 5 && level <= 10)
-		scale_adjust = 5;
-	if(level > 10 && level <= 15)
-		scale_adjust = 3;
-	if(level > 15 && level <= 25)
-		scale_adjust = 2;
-
-	base_hp += (int)(base_hp * scaling);
-	max_hp += (int)(max_hp * scaling);
-	cur_hp = max_hp;
-	STR += (int)(STR * scaling / scale_adjust);
-	STA += (int)(STA * scaling / scale_adjust);
-	AGI += (int)(AGI * scaling / scale_adjust);
-	DEX += (int)(DEX * scaling / scale_adjust);
-	INT += (int)(INT * scaling / scale_adjust);
-	WIS += (int)(WIS * scaling / scale_adjust);
-	CHA += (int)(CHA * scaling / scale_adjust);
-	if (MR)
-		MR += (int)(MR * scaling / scale_adjust);
-	if (CR)
-		CR += (int)(CR * scaling / scale_adjust);
-	if (DR)
-		DR += (int)(DR * scaling / scale_adjust);
-	if (FR)
-		FR += (int)(FR * scaling / scale_adjust);
-	if (PR)
-		PR += (int)(PR * scaling / scale_adjust);
-
-	if (max_dmg)
+	if(scalerate == 0 || maxlevel <= 25)
 	{
-		max_dmg += (int)(max_dmg * scaling / scale_adjust);
-		min_dmg += (int)(min_dmg * scaling / scale_adjust);
+		//todo: add expansion column to npc_types
+		if (npctype_id < 200000)
+		{
+			max_hp += (random_level - level) * 20;
+			base_hp += (random_level - level) * 20;
+		}
+		else
+		{
+			max_hp += (random_level - level) * 100;
+			base_hp += (random_level - level) * 100;
+		}
+
+		cur_hp = max_hp;
+
+		max_dmg += (random_level - level) * 2;
+	}
+	else
+	{
+		uint8 scale_adjust = 1;
+
+		base_hp += (int)(base_hp * scaling);
+		max_hp += (int)(max_hp * scaling);
+		cur_hp = max_hp;
+
+		if (max_dmg)
+		{
+			max_dmg += (int)(max_dmg * scaling / scale_adjust);
+			min_dmg += (int)(min_dmg * scaling / scale_adjust);
+		}
+
+		STR += (int)(STR * scaling / scale_adjust);
+		STA += (int)(STA * scaling / scale_adjust);
+		AGI += (int)(AGI * scaling / scale_adjust);
+		DEX += (int)(DEX * scaling / scale_adjust);
+		INT += (int)(INT * scaling / scale_adjust);
+		WIS += (int)(WIS * scaling / scale_adjust);
+		CHA += (int)(CHA * scaling / scale_adjust);
+		if (MR)
+			MR += (int)(MR * scaling / scale_adjust);
+		if (CR)
+			CR += (int)(CR * scaling / scale_adjust);
+		if (DR)
+			DR += (int)(DR * scaling / scale_adjust);
+		if (FR)
+			FR += (int)(FR * scaling / scale_adjust);
+		if (PR)
+			PR += (int)(PR * scaling / scale_adjust);
 	}
 
 	level = random_level;

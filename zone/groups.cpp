@@ -449,8 +449,8 @@ bool Group::DelMember(Mob* oldmember,bool ignoresender)
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-	GroupJoin_Struct* gu = (GroupJoin_Struct*) outapp->pBuffer;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupLeader_Struct));
+	GroupLeader_Struct* gu = (GroupLeader_Struct*) outapp->pBuffer;
 	gu->action = groupActLeave;
 	strcpy(gu->membername, oldmember->GetCleanName());
 	strcpy(gu->yourname, oldmember->GetCleanName());
@@ -663,10 +663,6 @@ void Group::DisbandGroup() {
 	entity_list.RemoveGroup(GetID());
 	if(GetID() != 0)
 		database.ClearGroup(GetID());
-
-	if(Leader && (Leader->IsLFP())) {
-		Leader->UpdateLFP();
-	}
 
 	safe_delete(outapp);
 }

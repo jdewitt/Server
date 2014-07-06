@@ -32,12 +32,10 @@
 #include "../common/StringUtil.h"
 #include "cliententry.h"
 #include "wguild_mgr.h"
-#include "lfplist.h"
 #include "ucs.h"
 #include "queryserv.h"
 
 extern ClientList client_list;
-extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern ConsoleList console_list;
 extern LoginServerList loginserverlist;
@@ -810,24 +808,6 @@ bool ZoneServer::Process() {
 			case ServerOP_FriendsWho: {
 				ServerFriendsWho_Struct* FriendsWho = (ServerFriendsWho_Struct*) pack->pBuffer;
 				client_list.SendFriendsWho(FriendsWho, this);
-				break;
-			}
-			case ServerOP_LFGMatches: {
-				ServerLFGMatchesRequest_Struct* smrs = (ServerLFGMatchesRequest_Struct*) pack->pBuffer;
-				client_list.SendLFGMatches(smrs);
-				break;
-			}
-			case ServerOP_LFPMatches: {
-				ServerLFPMatchesRequest_Struct* smrs = (ServerLFPMatchesRequest_Struct*) pack->pBuffer;
-				LFPGroupList.SendLFPMatches(smrs);
-				break;
-			}
-			case ServerOP_LFPUpdate: {
-				ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;
-				if(sus->Action)
-					LFPGroupList.UpdateGroup(sus);
-				else
-					LFPGroupList.RemoveGroup(sus);
 				break;
 			}
 			case ServerOP_ZonePlayer: {

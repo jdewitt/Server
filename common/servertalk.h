@@ -823,53 +823,6 @@ struct ServerRaidMessage_Struct {
 	char message[0];
 };
 
-struct ServerLFGMatchesRequest_Struct {
-	uint32	FromID;
-	uint8	QuerierLevel;
-	char	FromName[64];
-	uint8	FromLevel;
-	uint8	ToLevel;
-	uint32	Classes;
-};
-
-struct ServerLFGMatchesResponse_Struct {
-	char Name[64];
-	uint8 Level;
-	uint8 Class_;
-	uint16 Zone;
-	uint16 GuildID;
-	uint16 Anon;
-	char Comments[64];
-};
-
-struct ServerLFPUpdate_Struct {
-	uint32 LeaderID;
-	uint8 Action;
-	uint8 MatchFilter;
-	uint32	FromLevel;
-	uint32	ToLevel;
-	uint32	Classes;
-	char	Comments[64];
-	GroupLFPMemberEntry Members[MAX_GROUP_MEMBERS];
-};
-
-struct ServerLFPMatchesResponse_Struct {
-	uint32	FromLevel;
-	uint32	ToLevel;
-	uint32	Classes;
-	GroupLFPMemberEntry Members[MAX_GROUP_MEMBERS];
-	char Comments[64];
-};
-
-struct ServerLFPMatchesRequest_Struct {
-	uint32	FromID;
-	uint8	FromLevel;
-	uint8	ToLevel;
-	uint8	QuerierClass;
-	uint8	QuerierLevel;
-	char	FromName[64];
-};
-
 struct UpdateSpawnTimer_Struct {
 	uint32 id;
 	uint32 duration;

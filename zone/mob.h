@@ -162,12 +162,13 @@ public:
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
 	void DoAnim(Animation animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsItem = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt, const char *IDFile = nullptr);
+		float angle = 0, float tilt = 0, float arc = 0, SkillUseTypes skillInUse = Skill1HBlunt);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline bool GetSeeInvisible(uint8 see_invis);
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state, bool showInvis = true);
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
@@ -225,8 +226,6 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
-	void SpellProjectileEffect();
-	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 
 	//Buff
 	void BuffProcess();
@@ -506,7 +505,7 @@ public:
 
 
 	//More stuff to sort:
-	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
+	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false, int16 spellid = 0);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
 	void SetFollowID(uint32 id) { follow = id; }
@@ -1047,12 +1046,6 @@ protected:
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
-
-	Timer projectile_timer;
-	uint32 projectile_spell_id[MAX_SPELL_PROJECTILE];
-	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
-	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
-	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
 
 	float rewind_x;
 	float rewind_y;

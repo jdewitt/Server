@@ -887,16 +887,6 @@ bool Lua_Client::KeyRingCheck(uint32 item) {
 	return self->KeyRingCheck(item);
 }
 
-void Lua_Client::AddPVPPoints(uint32 points) {
-	Lua_Safe_Call_Void();
-	self->AddPVPPoints(points);
-}
-
-uint32 Lua_Client::GetPVPPoints() {
-	Lua_Safe_Call_Int();
-	return self->GetPVPPoints();
-}
-
 void Lua_Client::QuestReadBook(const char *text, int type) {
 	Lua_Safe_Call_Void();
 	self->QuestReadBook(text, type);
@@ -1371,8 +1361,6 @@ luabind::scope lua_register_client() {
 		.def("SetStartZone", (void(Lua_Client::*)(int,float,float,float))&Lua_Client::SetStartZone)
 		.def("KeyRingAdd", (void(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
 		.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
-		.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
-		.def("GetPVPPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetPVPPoints)
 		.def("QuestReadBook", (void(Lua_Client::*)(const char *,int))&Lua_Client::QuestReadBook)
 		.def("GetGroupPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints)
 		.def("GetRaidPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetRaidPoints)

@@ -205,8 +205,6 @@ public:
 	void SetStartZone(int zone_id, float x, float y, float z);
 	void KeyRingAdd(uint32 item);
 	bool KeyRingCheck(uint32 item);
-	void AddPVPPoints(uint32 points);
-	uint32 GetPVPPoints();
 	void QuestReadBook(const char *text, int type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();

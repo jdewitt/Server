@@ -278,14 +278,6 @@ Mob::Mob(const char* in_name,
 	casting_spell_inventory_slot = 0;
 	target = 0;
 
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_spell_id[i] = 0; }
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_target_id[i] = 0; }
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_increment[i] = 0; }
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_x[i] = 0; }
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_y[i] = 0; }
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_z[i] = 0; }
-	projectile_timer.Disable();
-
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
@@ -343,10 +335,10 @@ Mob::Mob(const char* in_name,
 	}
 	pStandingPetOrder = SPO_Follow;
 
-	see_invis = in_see_invis;
-	see_invis_undead = in_see_invis_undead != 0;
-	see_hide = in_see_hide != 0;
-	see_improved_hide = in_see_improved_hide != 0;
+	see_invis = GetSeeInvisible(in_see_invis);
+	see_invis_undead = GetSeeInvisible(in_see_invis_undead);
+	see_hide = GetSeeInvisible(in_see_hide);
+	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
 	qglobal = in_qglobal != 0;
 
 	// Bind wound
@@ -551,8 +543,8 @@ float Mob::_GetMovementSpeed(int mod) const
 	spell_mod += spellbonuses.movementspeed + itembonuses.movementspeed;
 
 	// hard cap
-	if (runspeedcap > 225)
-		runspeedcap = 225;
+	if (runspeedcap > 150)
+		runspeedcap = 150;
 
 	if (spell_mod < 0)
 		movemod += spell_mod;
@@ -1239,7 +1231,7 @@ void Mob::ShowStats(Client* client)
 				spawngroupid = n->respawn2->SpawnGroupID();
 			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
 			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %f Walkspeed: %f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
-			client->Message(0, "  Attack Speed: %i", n->GetAttackSpeedTimer());
+			client->Message(0, "  Attack Speed: %i SeeInvis: %i SeeInvUndead: %i SeeHide: %i SeeImpHide: %i", n->GetAttackSpeedTimer(), n->SeeInvisible(), n->SeeInvisibleUndead(), n->SeeHide(), n->SeeImprovedHide());
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
@@ -4241,49 +4233,6 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 	return false;
 }
 
-void Mob::SpellProjectileEffect()
-{
-	bool time_disable = false;
-
-	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-
-		if (projectile_increment[i] == 0){
-			continue;
-		}
-
-		Mob* target = entity_list.GetMobID(projectile_target_id[i]);
-		
-		float dist = 0;
-		
-		if (target) 
-				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
-	
-		int increment_end = 0;
-		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
-
-		if (increment_end <= projectile_increment[i]){
-
-			if (target && IsValidSpell(projectile_spell_id[i]))
-				SpellOnTarget(projectile_spell_id[i], target, false, true, spells[projectile_spell_id[i]].ResistDiff, true);
-
-			projectile_spell_id[i] = 0;
-			projectile_target_id[i] = 0;
-			projectile_x[i] = 0, projectile_y[i] = 0, projectile_z[i] = 0;
-			projectile_increment[i] = 0;
-			time_disable = true;
-		}
-
-		else {
-			projectile_increment[i]++;
-			time_disable = false;
-		}
-	}
-
-	if (time_disable)
-		projectile_timer.Disable();
-}
-
-
 void Mob::DoGravityEffect()
 {
 	Mob *caster = nullptr;
@@ -4961,5 +4910,20 @@ float Mob::HeadingAngleToMob(Mob *other)
 		return angle * 511.5 * 0.0027777778;
 	else
 		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+}
+
+bool Mob::GetSeeInvisible(uint8 see_invis)
+{ 
+	if(see_invis > 0)
+	{
+		if(see_invis == 1)
+			return true;
+		else
+		{
+			if(MakeRandomInt(0,99) < see_invis)
+				return true;
+		}
+	}
+	return false;
 }
 
