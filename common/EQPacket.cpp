@@ -824,6 +824,8 @@ uchar* EQOldPacket::ReturnPacket(uint16 *dwLength)
 		temp[0] = ntohs(dwOpCode);
 		temp++;
 
+		_log(NET__DEBUG, "Messing with old opcode 0x%x", dwOpCode);
+
 		*dwLength+=2;
 	}
 	if(pExtra)
