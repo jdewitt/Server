@@ -720,7 +720,6 @@ public:
 
 	bool	CheckTradeLoreConflict(Client* other);
 	void	LinkDead();
-	void	Insight(uint32 t_id);
 	bool	CheckDoubleAttack(bool tripleAttack = false);
 	bool	CheckDoubleRangedAttack();
 

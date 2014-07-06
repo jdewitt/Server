@@ -1196,7 +1196,7 @@ void Client::Handle_OP_Consent(const EQApplicationPacket *app)
 			safe_delete(pack);
 		}
 		else {
-			Message_StringID(0, CONSENT_YOURSELF);
+			Message_StringID(CC_Default, CONSENT_YOURSELF);
 		}
 	}
 	return;
@@ -1429,7 +1429,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	if (!ack)
 	{
-		Message_StringID(0, ALREADY_SHIELDED);
+		Message_StringID(CC_Default, ALREADY_SHIELDED);
 		shield_target = 0;
 		return;
 	}
@@ -1566,7 +1566,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 					Message(0, "This corpse can be resurrected for %i minutes and %i seconds.", min, sec);
 			}
 			else {
-				Message_StringID(0, CORPSE_TOO_OLD);
+				Message_StringID(CC_Default, CORPSE_TOO_OLD);
 			}
 			*/
 		}
@@ -1728,7 +1728,7 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 
 	if(GetLevel() < 20)
 	{
-		Message_StringID(15, SURNAME_LEVEL);
+		Message_StringID(CC_Yellow, SURNAME_LEVEL);
 		return;
 	}
 
@@ -1750,13 +1750,13 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 	}
 
 	if (strlen(surname->lastname) >= 20) {
-		Message_StringID(15, SURNAME_TOO_LONG);
+		Message_StringID(CC_Yellow, SURNAME_TOO_LONG);
 		return;
 	}
 
 	if(!database.CheckNameFilter(surname->lastname, true))
 	{
-		Message_StringID(15, SURNAME_REJECTED);
+		Message_StringID(CC_Yellow, SURNAME_REJECTED);
 		return;
 	}
 
@@ -2329,18 +2329,18 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 
 	//BreakInvis();
 
-	uint16 primfeign = GetSkill(SkillFeignDeath);
-	uint16 secfeign = GetSkill(SkillFeignDeath);
-	if (primfeign > 100) {
-		primfeign = 100;
-		secfeign = secfeign - 100;
-		secfeign = secfeign / 2;
-	}
-	else
-		secfeign = 0;
+	float feignbase = 120.0f;
+	uint16 skill = GetSkill(SkillFeignDeath);
+	float feignchance = 0.0f;
 
-	uint16 totalfeign = primfeign + secfeign;
-	if (MakeRandomFloat(0, 160) > totalfeign) {
+	if (skill > 100)
+		feignchance = (int16)skill - 100.0f;
+
+	feignchance = feignchance / 3.0f;
+
+	float totalfeign = feignbase + feignchance;
+
+	if (MakeRandomFloat(0, 150) > totalfeign) {
 		SetFeigned(false);
 		entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 	}
@@ -3208,7 +3208,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 	if (IsAIControlled()) {
-		this->Message_StringID(13, NOT_IN_CONTROL);
+		this->Message_StringID(CC_Red, NOT_IN_CONTROL);
 		//Message(13, "You cant cast right now, you arent in control of yourself!");
 		return;
 	}
@@ -3595,8 +3595,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			trade->state = TradeCompleting;
 
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
-				Message_StringID(13, TRADE_CANCEL_LORE);
-				other->Message_StringID(13, TRADE_CANCEL_LORE);
+				Message_StringID(CC_Red, TRADE_CANCEL_LORE);
+				other->Message_StringID(CC_Red, TRADE_CANCEL_LORE);
 				this->FinishTrade(this);
 				other->FinishTrade(other);
 				other->trade->Reset();
@@ -3942,13 +3942,13 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	}
 	GMToggle_Struct *ts = (GMToggle_Struct *) app->pBuffer;
 	if (ts->toggle == 0) {
-		this->Message_StringID(0,TOGGLE_OFF);
+		this->Message_StringID(CC_Default,TOGGLE_OFF);
 		//Message(0, "Turning tells OFF");
 		tellsoff = true;
 	}
 	else if (ts->toggle == 1) {
 		//Message(0, "Turning tells ON");
-		this->Message_StringID(0,TOGGLE_ON);
+		this->Message_StringID(CC_Default,TOGGLE_ON);
 		tellsoff = false;
 	}
 	else {
@@ -4080,7 +4080,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		return;
 	}
 	if(tmp->IsEngaged()){
-		this->Message_StringID(0,MERCHANT_BUSY);
+		this->Message_StringID(CC_Default,MERCHANT_BUSY);
 		action = 0;
 	}
 	if (GetFeigned() || IsInvisible())
@@ -5619,9 +5619,9 @@ void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
 		return;
 	}
 	if(petition_list.DeletePetitionByCharName((char*)app->pBuffer))
-		Message_StringID(0,PETITION_DELETED);
+		Message_StringID(CC_Default,PETITION_DELETED);
 	else
-		Message_StringID(0,PETITION_NO_DELETE);
+		Message_StringID(CC_Default,PETITION_NO_DELETE);
 	return;
 }
 
@@ -5858,7 +5858,7 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 	cli->SendAppearancePacket(AT_NPCName, 1, true);
 	cli->CastToClient()->SetBecomeNPC(true);
 	cli->CastToClient()->SetBecomeNPCLevel(bnpc->maxlevel);
-	cli->Message_StringID(0,TOGGLE_OFF);
+	cli->Message_StringID(CC_Default,TOGGLE_OFF);
 	cli->CastToClient()->tellsoff = true;
 	//TODO: Make this toggle a BecomeNPC flag so that it gets updated when people zone in as well; Make combat work with this.
 	return;
@@ -6025,7 +6025,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		if(strncmp((char *)app->pBuffer,"on ",3) == 0) 
 		{
 			if(m_epp.perAA == 0)
-				Message_StringID(0, AA_ON); //ON
+				Message_StringID(CC_Default, AA_ON); //ON
 			m_epp.perAA = atoi((char *)&app->pBuffer[3]);
 			SendAAStats();
 			SendAATable();
@@ -6033,7 +6033,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		else if(strcmp((char *)app->pBuffer,"off") == 0) 
 		{
 			if(m_epp.perAA > 0)
-				Message_StringID(0, AA_OFF); //OFF
+				Message_StringID(CC_Default, AA_OFF); //OFF
 			m_epp.perAA = 0;
 			SendAAStats();
 			SendAATable();
@@ -6070,7 +6070,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		{
 			if(GetBoatNPCID() > 0)
 			{
-				Message(13, "You are too distracted to cast a spell now!");
+				Message_StringID(CC_Red,TOO_DISTRACTED);
 				return;
 			}
 
@@ -6628,7 +6628,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 			boat->SetTarget(this);
 		}
 		else {
-			this->Message_StringID(13,IN_USE);
+			this->Message_StringID(CC_Red,IN_USE);
 			return;
 		}
 	}
@@ -7585,7 +7585,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		Client *i = entity_list.GetClientByName(ri->player_name);
 		if(i){
 			if(IsRaidGrouped()){
-				i->Message_StringID(0, 5060); //group failed, must invite members not in raid...
+				i->Message_StringID(CC_Default, 5060); //group failed, must invite members not in raid...
 				return;
 			}
 			Raid *r = entity_list.GetRaidByClient(i);
@@ -8583,7 +8583,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 {
 	if(DraggedCorpses.size() >= (unsigned int)RuleI(Character, MaxDraggedCorpses))
 	{
-		Message_StringID(13, CORPSEDRAG_LIMIT);
+		Message_StringID(CC_Red, CORPSEDRAG_LIMIT);
 		return;
 	}
 
@@ -8648,7 +8648,7 @@ void Client::Handle_OP_Discipline(const EQApplicationPacket *app)
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
 		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
 		ic->messageid = 393;
-		ic->spawnid = GetID();
+		ic->color = 0;
 		strcpy(ic->message, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);

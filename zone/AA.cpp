@@ -258,7 +258,7 @@ void Client::ActivateAA(aaID activate){
 	if(caa->action != aaActionNone) {
 		if(caa->mana_cost > 0) {
 			if(GetMana() < caa->mana_cost) {
-				Message_StringID(13, INSUFFICIENT_MANA);
+				Message_StringID(CC_Red, INSUFFICIENT_MANA);
 				return;
 			}
 			SetMana(GetMana() - caa->mana_cost);
@@ -293,7 +293,7 @@ void Client::ActivateAA(aaID activate){
 				if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
 					//Reset on failed cast
 					SendAATimer(activate, 0, 0xFFFFFF);
-					Message_StringID(15,ABILITY_FAILED);
+					Message_StringID(CC_Yellow,ABILITY_FAILED);
 					p_timers.Clear(&database, AATimerID + pTimerAAStart);
 					return;
 				}
@@ -301,7 +301,7 @@ void Client::ActivateAA(aaID activate){
 				if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
 					//Reset on failed cast
 					SendAATimer(activate, 0, 0xFFFFFF);
-					Message_StringID(15,ABILITY_FAILED);
+					Message_StringID(CC_Yellow,ABILITY_FAILED);
 					p_timers.Clear(&database, AATimerID + pTimerAAStart);
 					return;
 				}
@@ -526,7 +526,7 @@ void Client::HandleAAAction(aaID activate) {
 		int aatid = GetAATimerID(activate);
 		if(!CastSpell(spell_id, target_id , 10, -1, -1, 0, -1, pTimerAAStart + aatid , CalcAAReuseTimer(caa), 1)) {
 			SendAATimer(activate, 0, 0xFFFFFF);
-			Message_StringID(15,ABILITY_FAILED);
+			Message_StringID(CC_Yellow,ABILITY_FAILED);
 			p_timers.Clear(&database, pTimerAAStart + aatid);
 			return;
 		}
@@ -1329,7 +1329,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 {
 	if(!Inspector || (Rank == 0)) return;
 
-	Inspector->Message_StringID(0, CURRENT_SPELL_EFFECTS, GetName());
+	Inspector->Message_StringID(CC_Default, CURRENT_SPELL_EFFECTS, GetName());
 	uint32 buff_count = GetMaxTotalSlots();
 	for (uint32 i = 0; i < buff_count; ++i)
 	{
@@ -1344,7 +1344,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 				else {
 					char *TempString = nullptr;
 					MakeAnyLenString(&TempString, "%.1f", static_cast<float>(buffs[i].ticsremaining) / 10.0f);
-					Inspector->Message_StringID(0, BUFF_MINUTES_REMAINING, spells[buffs[i].spellid].name, TempString);
+					Inspector->Message_StringID(CC_Default, BUFF_MINUTES_REMAINING, spells[buffs[i].spellid].name, TempString);
 					safe_delete_array(TempString);
 				}
 			}

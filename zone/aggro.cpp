@@ -483,7 +483,7 @@ to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
 */
 
-bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
+bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack, int16 spellid)
 {
 
 	Mob *mob1, *mob2, *tempmob;
@@ -499,6 +499,10 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return false;
 
 	if(this == target)	// you can attack yourself
+		return true;
+
+	//Lifetap on Eye of Zomm.
+	if(target->IsNPC() && target->GetRace() == EYE_OF_ZOMM && IsLifetapSpell(spellid))
 		return true;
 
 	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
@@ -1041,6 +1045,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 			case SE_DoubleAttackChance:
 			case SE_MeleeSkillCheck:
 			case SE_HitChance:
+			case SE_IncreaseArchery:
 			case SE_DamageModifier:
 			case SE_MinDamageModifier:
 			case SE_IncreaseBlockChance:

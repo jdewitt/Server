@@ -505,7 +505,7 @@ public:
 
 
 	//More stuff to sort:
-	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
+	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false, int16 spellid = 0);
 	bool IsTargeted() const { return (targeted > 0); }
 	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
 	void SetFollowID(uint32 id) { follow = id; }

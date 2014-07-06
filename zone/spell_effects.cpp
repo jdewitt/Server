@@ -578,7 +578,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				SetInvisible(spell.base[i], false);
+				//SetInvisible(spell.base[i], false);
 
 				if(HasPet())
 				{
@@ -599,12 +599,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				SetInvisible(spell.base[i], false);
+				//SetInvisible(spell.base[i], false);
 
 				if(HasPet())
 				{
 					Mob* mypet = GetPet();
-				 	if(mypet->GetBodyType() == BT_Undead)
+				 	if(mypet->GetBodyType() == BT_Undead || mypet->GetBodyType() == BT_SummonedUndead)
 						SetPet(nullptr);
 						if(!mypet->IsCharmed())
 							mypet->CastToNPC()->Depop();
@@ -1013,7 +1013,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
+			case SE_Gate:
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
@@ -1695,7 +1695,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					Group* group = entity_list.GetGroupByClient(TargetClient);
 					if(group) {
 						if(!group->IsGroupMember(TargetClient)) {
-							Message(13, "Your target must be a group member for this spell.");
+							Message(CC_Red, "Your target must be a group member for this spell.");
 							break;
 						}
 					}
@@ -1708,13 +1708,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							if(gid < 11)
 							{
 								if(r->GetGroup(TargetClient->GetName()) != gid) {
-									Message(13, "Your target must be a group member for this spell.");
+									Message(CC_Red, "Your target must be a group member for this spell.");
 									break;
 								}
 							}
 						} else {
 							if(TargetClient != this->CastToClient()) {
-								Message(13, "Your target must be a group member for this spell.");
+								Message(CC_Red, "Your target must be a group member for this spell.");
 								break;
 							}
 						}
@@ -1728,22 +1728,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
 							if(corpse) {
 								if(TargetClient == this->CastToClient())
-									Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
+									Message_StringID(CC_User_Spells, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
 								else
-									Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
+									Message_StringID(CC_User_Spells, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
 
 								corpse->Summon(CastToClient(), true, true);
 							}
 							else {
 								// No corpse found in the zone
-								Message_StringID(4, CORPSE_CANT_SENSE);
+								Message_StringID(CC_User_Spells, CORPSE_CANT_SENSE);
 							}
 						}
 						else
 							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
 					}
 					else {
-						Message_StringID(4, TARGET_NOT_FOUND);
+						Message_StringID(CC_Red, TARGET_NOT_FOUND);
 						LogFile->write(EQEMuLog::Error, "%s attempted to cast spell id %u with spell effect SE_SummonCorpse, but could not cast target into a Client object.", GetCleanName(), spell_id);
 					}
 				}
@@ -2604,6 +2604,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_StunResist:
 			case SE_MinDamageModifier:
 			case SE_DamageModifier:
+			case SE_IncreaseArchery:
 			case SE_HitChance:
 			case SE_MeleeSkillCheck:
 			case SE_HundredHands:

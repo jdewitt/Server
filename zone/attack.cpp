@@ -1394,7 +1394,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 
 	if (damage > 0) {
 		if (spell_id == SPELL_UNKNOWN) {
-			CheckIncreaseSkill(SkillDefense, other, -17);
+			CheckIncreaseSkill(SkillDefense, other, -12);
         }
 	}
 }
@@ -1681,7 +1681,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if(IsPet() && GetOwner()->IsClient() && other->IsMezzed()) {
 		RemoveFromHateList(other);
-		GetOwner()->Message_StringID(15, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
+		GetOwner()->Message_StringID(CC_Yellow, CANNOT_WAKE, GetCleanName(), other->GetCleanName());
 		return false;
 	}
 	int damage = 0;
@@ -3905,9 +3905,9 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
-						own->Message_StringID(13, PROC_PETTOOLOW);
+						own->Message_StringID(CC_Red, PROC_PETTOOLOW);
 				} else {
-					Message_StringID(13, PROC_TOOLOW);
+					Message_StringID(CC_Red, PROC_TOOLOW);
 				}
 			} else {
 				mlog(COMBAT__PROCS,

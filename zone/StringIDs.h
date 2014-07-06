@@ -320,6 +320,7 @@
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define	CAMP_ABANDON				12290	//You abandon your preparations to camp.
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
+#define TOO_DISTRACTED				12440   //You are too distracted to cast a spell now!
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
