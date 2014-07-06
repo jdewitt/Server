@@ -478,9 +478,6 @@ public:
 
 	inline uint32	GetEXP()		const { return m_pp.exp; }
 
-	void	SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
-	uint32	GetPVPPoints() { return m_pp.PVPCurrentPoints; }
-	void	AddPVPPoints(uint32 Points);
 	void	AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	void	SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void	AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);
@@ -809,7 +806,6 @@ public:
 	int GetAggroCount();
 	void IncrementAggroCount();
 	void DecrementAggroCount();
-	void SendPVPStats();
 	void SendDisciplineTimers();
 
 	void CheckEmoteHail(Mob *target, const char* message);

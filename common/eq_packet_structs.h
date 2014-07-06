@@ -638,17 +638,16 @@ struct AA_Array
 	uint32 value;
 };
 
-
 typedef struct
 {
-/*00*/ char Name[64];
-/*64*/ uint32 Level;
-/*68*/ uint32 Race;
-/*72*/ uint32 Class;
-/*76*/ uint32 Zone;
-/*80*/ uint32 Time;
-/*84*/ uint32 Points;
-/*88*/
+	/*00*/ char Name[64];
+	/*64*/ uint32 Level;
+	/*68*/ uint32 Race;
+	/*72*/ uint32 Class;
+	/*76*/ uint32 Zone;
+	/*80*/ uint32 Time;
+	/*84*/ uint32 Points;
+	/*88*/
 } PVPStatsEntry_Struct;
 
 static const uint32 MAX_PP_DISCIPLINES = 100;
@@ -3520,77 +3519,6 @@ struct ClearObject_Struct
 {
 /*000*/	uint8	Clear;	// If this is not set to non-zero there is a random chance of a client crash.
 /*001*/	uint8	Unknown001[7];
-};
-
-struct PVPStats_Struct
-{
-/*0000*/ uint32 Kills;
-/*0004*/ uint32 Deaths;
-/*0008*/ uint32 PVPPointsAvailable;
-/*0012*/ uint32 TotalPVPPoints;
-/*0016*/ uint32 BestKillStreak;
-/*0020*/ uint32 WorstDeathStreak;
-/*0024*/ uint32 CurrentKillStreak;
-/*0028*/ uint32 Infamy;
-/*0032*/ uint32 Vitality;
-/*0036*/ PVPStatsEntry_Struct LastDeath;
-/*0124*/ PVPStatsEntry_Struct LastKill;
-/*0212*/ PVPStatsEntry_Struct KillsLast24Hours[50];
-/*4612*/
-};
-
-typedef struct
-{
-/*000*/	char Name[64];
-/*064*/	uint32 Kills;
-/*068*/	uint32 Deaths;
-/*072*/	uint32 TotalPoints;
-/*076*/	uint32 Infamy;
-/*080*/
-} PVPLeaderBoardEntry_Struct;
-
-enum { PVPSortByKills = 0, PVPSortByPoints, PVPSortByInfamy };
-
-struct PVPLeaderBoardRequest_Struct
-{
-/*00*/ uint32 SortType;
-/*04*/
-};
-
-struct PVPLeaderBoard_Struct
-{
-/*0000*/ uint32 Unknown0000;
-/*0004*/ uint32 MyKills;
-/*0008*/ uint32 MyTotalPoints;
-/*0012*/ uint32 MyRank;
-/*0016*/ uint32 MyDeaths;
-/*0020*/ uint32 MyInfamy;
-/*0024*/ PVPLeaderBoardEntry_Struct Entries[100];
-/*8024*/
-};
-
-struct PVPLeaderBoardDetailsRequest_Struct
-{
-/*00*/ uint32 Unknown00;
-/*04*/ char Name[64];
-/*68*/
-};
-
-struct PVPLeaderBoardDetailsReply_Struct
-{
-/*000*/ char Name[64];
-/*064*/ uint8 Unknown064[64];
-/*128*/ uint32 Level;
-/*132*/ uint32 Race;
-/*136*/ uint32 Class;
-/*140*/ uint32 GuildID;
-/*144*/ uint32 TotalAA;
-/*148*/ uint32 Unknown148;
-/*152*/ uint32 Kills;
-/*156*/ uint32 Deaths;
-/*160*/ uint32 Infamy;
-/*164*/ uint32 Points;
-/*168*/
 };
 
 struct DisciplineTimer_Struct
