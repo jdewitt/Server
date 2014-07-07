@@ -1632,8 +1632,8 @@ ENCODE(OP_LogServer) {
 	SETUP_DIRECT_ENCODE(LogServer_Struct, structs::LogServer_Struct);
 	OUT(enable_pvp);
 	OUT(enable_FV);
-	strcpy(eq->worldshortname, emu->worldshortname);
-	eq->ProfanityFilter = 1;
+	eq->NameGen = 1;
+	eq->ProfanityFilter = 0;
 	FINISH_ENCODE();
 }
 

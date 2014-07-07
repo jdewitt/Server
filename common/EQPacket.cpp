@@ -23,6 +23,7 @@
 #include "misc.h"
 #include "op_codes.h"
 #include "CRC16.h"
+#include "CRC32.h"
 #include "platform.h"
 #ifndef STATIC_OPCODE
 #include "opcodemgr.h"
@@ -824,7 +825,7 @@ uchar* EQOldPacket::ReturnPacket(uint16 *dwLength)
 		temp[0] = ntohs(dwOpCode);
 		temp++;
 
-		_log(NET__DEBUG, "Messing with old opcode 0x%x", dwOpCode);
+	//	_log(NET__DEBUG, "Messing with old opcode 0x%x", dwOpCode);
 
 		*dwLength+=2;
 	}
@@ -839,7 +840,7 @@ uchar* EQOldPacket::ReturnPacket(uint16 *dwLength)
 	/************ CALCULATE CHECKSUM ************/
 			    
 	uchar* temp2 = ((uchar*)pPacket)+*dwLength;
-	((uint32*)temp2)[0] = GenerateCRC(0, *dwLength, (uchar*)pPacket);
+	((uint32*)temp2)[0] = htonl(CRC32::Generate((uchar*)pPacket, *dwLength));;
 	*dwLength+=4;
 
 	/************ END CALCULATE CHECKSUM ************/
