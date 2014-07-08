@@ -531,7 +531,7 @@ struct Object_Struct
 	/*206*/		int16	unknown206;
 	/*208*/		int32	unknown208;
 	/*212*/		uint32	object_type;
-	/*216*/		int8	unknown216[8];
+	/*216*/		int16	unknown216[4];
 	/*224*/
 };
 

@@ -1465,10 +1465,16 @@ ENCODE(OP_GroundSpawn) {
 	int g;
 	for(g=0; g<10; g++)
 	{
-		eq->itemsinbag[g] = emu->itemsinbag[g];
 		if(eq->itemsinbag[g] > 0)
+		{
+			eq->itemsinbag[g] = emu->itemsinbag[g];
 			_log(EQMAC__LOG, "Found a container item %i in slot: %i", emu->itemsinbag[g], g);
+		}
+		else
+			eq->itemsinbag[g] = 0xFFFF;
 	}
+	eq->unknown208 = 0xFFFFFFFF;
+	eq->unknown216[0] = 0xFFFF;
 	FINISH_ENCODE();
 }
 
@@ -1981,8 +1987,11 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
   			thejuice->equipSlot = slot_id-1;
   		else
   			thejuice->equipSlot = slot_id;
-
-		thejuice->Charges = inst->GetCharges(); 
+		int8 charges_ = inst->GetCharges();
+		if(charges_ > 127)
+			thejuice->Charges = 127;
+		else
+			thejuice->Charges = charges_;
 		thejuice->Price = item->Price;
 		thejuice->SellRate = item->SellRate;
   	}

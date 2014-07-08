@@ -4358,7 +4358,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else if(!stacked){
 		LogFile->write(EQEMuLog::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
 	}
+
 	QueuePacket(outapp);
+
 	if(inst && tmpmer_used){
 		int32 new_charges = prevcharges - mp->quantity;
 		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(),item_id,new_charges);
@@ -4574,7 +4576,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 
-	SendMoneyUpdate();
 	t1.start();
 	Save(1);
 	t1.stop();
