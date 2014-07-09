@@ -1055,8 +1055,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 	EQApplicationPacket* outapp2;
 
 	if(Quantity < Charges)
-		outapp2 = new EQApplicationPacket(OP_DeleteItem,sizeof(MoveItem_Struct));
-	else
 		outapp2 = new EQApplicationPacket(OP_MoveItem,sizeof(MoveItem_Struct));
 
 	MoveItem_Struct* mis = (MoveItem_Struct*)outapp2->pBuffer;

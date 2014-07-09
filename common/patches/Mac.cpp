@@ -2240,7 +2240,6 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 	return eq;
 }
 
-ENCODE(OP_DeleteItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }

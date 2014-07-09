@@ -1398,12 +1398,6 @@ struct Consume_Struct
 /*0013*/ uint8 unknown13[3];
 };
 
-struct DeleteItem_Struct {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
-};
-
 struct MoveItem_Struct
 {
 /*0000*/ uint32 from_slot;

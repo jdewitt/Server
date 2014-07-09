@@ -170,7 +170,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_MemorizeSpell] = &Client::Handle_OP_MemorizeSpell;
 	ConnectedOpcodes[OP_SwapSpell] = &Client::Handle_OP_SwapSpell;
 	ConnectedOpcodes[OP_CastSpell] = &Client::Handle_OP_CastSpell;
-	ConnectedOpcodes[OP_DeleteItem] = &Client::Handle_OP_DeleteItem;
 	ConnectedOpcodes[OP_CombatAbility] = &Client::Handle_OP_CombatAbility;
 	ConnectedOpcodes[OP_Taunt] = &Client::Handle_OP_Taunt;
 	ConnectedOpcodes[OP_InstillDoubt] = &Client::Handle_OP_InstillDoubt;
@@ -2236,12 +2235,12 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DeleteCharge(const EQApplicationPacket *app)
 {
-		if (app->size != sizeof(DeleteItem_Struct)) {
-		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
+		if (app->size != sizeof(MoveItem_Struct)) {
+		std::cout << "Wrong size on OP_DeleteCharge. Got: " << app->size << ", Expected: " << sizeof(MoveItem_Struct) << std::endl;
 		return;
 	}
 	
-	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
+	MoveItem_Struct* alc = (MoveItem_Struct*) app->pBuffer;
 
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
@@ -3388,39 +3387,6 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
-	return;
-}
-
-void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(DeleteItem_Struct)) {
-		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
-		return;
-	}
-
-	
-	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
-
-	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
-	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
-		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
-		CheckIncreaseSkill(SkillAlcoholTolerance, nullptr, 25);
-
-		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
-		int16 IntoxicationIncrease;
-
-		IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
-
-		if(IntoxicationIncrease < 0)
-			IntoxicationIncrease = 1;
-
-		m_pp.intoxication += IntoxicationIncrease;
-
-		if(m_pp.intoxication > 200)
-			m_pp.intoxication = 200;
-	}
-	DeleteItemInInventory(alc->from_slot, 1);
-
 	return;
 }
 
