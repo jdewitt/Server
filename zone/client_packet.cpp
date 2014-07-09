@@ -3491,7 +3491,11 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 		//npcs always accept
 		trade->Start(msg->to_mob_id);
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeReset, 0);
+		FastQueuePacket(&outapp);
+		safe_delete(outapp);
+
+		outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
 		TradeRequest_Struct* acc = (TradeRequest_Struct*) outapp->pBuffer;
 		acc->from_mob_id = msg->to_mob_id;
 		acc->to_mob_id = msg->from_mob_id;
@@ -3544,6 +3548,11 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 		CancelTrade_Struct* msg = (CancelTrade_Struct*) app->pBuffer;
 		msg->fromid = with->GetID();
 		QueuePacket(app);
+
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeReset, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+
 		FinishTrade(this);
 		trade->Reset();
 	}
@@ -3625,6 +3634,11 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FinishTrade, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
+
+		outapp = new EQApplicationPacket(OP_TradeReset, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+
 		if(with->IsNPC()) {
 			// Audit trade to database for player trade stream
 			if(RuleB(QueryServ, PlayerLogHandins)) {

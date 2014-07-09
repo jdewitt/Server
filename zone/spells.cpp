@@ -1043,14 +1043,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			if(reg_focus > 0)
 				mlog(SPELLS__CASTING, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
 			Client *c = this->CastToClient();
-			int component, component_count, inv_slot_id, expcomponent;
+			int component, component_count, inv_slot_id, focuscomponent;
 			bool missingreags = false;
+			static const int petfocusItems[] = { 20508, 28144, 11571, 11569, 11567, 11566, 11568, 6361, 6361, 6362, 6363 };
 			for(int t_count = 0; t_count < 4; t_count++) {
 				component = spells[spell_id].components[t_count];
 				component_count = spells[spell_id].component_counts[t_count];
-				expcomponent = spells[spell_id].NoexpendReagent[t_count];
+				focuscomponent = spells[spell_id].NoexpendReagent[t_count];
 
-				if (component == -1 && expcomponent == -1)
+				if (component == -1 && focuscomponent == -1)
 					continue;
 
 				// bard components are requirements for a certain instrument type, not a specific item
@@ -1111,7 +1112,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 				// handle the components for traditional casters
 				else {
-					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1 && c->GetInv().HasItem(expcomponent, 1, invWhereWorn|invWherePersonal) == -1) // item not found
+					bool petfocuscomponent = false;
+					for(int i=0; i < sizeof(petfocusItems); i++) {
+						if(focuscomponent == petfocusItems[i]) {
+							petfocuscomponent = true;
+							break;
+						}
+					}
+
+					if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1 && c->GetInv().HasItem(focuscomponent, 1, invWhereWorn|invWherePersonal) == -1 && !petfocuscomponent) // item not found
 					{
 						if (!missingreags)
 						{
@@ -1122,8 +1131,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 						const Item_Struct *item;
 						if(component != -1)
 							item = database.GetItem(component);
-						else if(expcomponent != -1)
-							item = database.GetItem(expcomponent);
+						else if(focuscomponent != -1)
+							item = database.GetItem(focuscomponent);
 
 						if(item) {
 							c->Message_StringID(CC_Red, MISSING_SPELL_COMP_ITEM, item->Name);
