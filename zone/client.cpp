@@ -1809,11 +1809,10 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		else
 		{
 			m_pp.copper = copperpp;
-			if(updateclient)
-				SendMoneyUpdate();
 			Save();
 			return true;
 		}
+
 		silver -= copper;
 		if(silver <= 0)
 		{
@@ -1824,8 +1823,6 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		{
 			m_pp.silver = silver/10;
 			m_pp.copper += (silver-(m_pp.silver*10));
-			if(updateclient)
-				SendMoneyUpdate();
 			Save();
 			return true;
 		}
@@ -1844,8 +1841,6 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 			m_pp.silver += silvertest;
 			uint64 coppertest = (gold-(static_cast<uint64>(m_pp.gold)*100+silvertest*10));
 			m_pp.copper += coppertest;
-			if(updateclient)
-				SendMoneyUpdate();
 			Save();
 			return true;
 		}
@@ -1861,8 +1856,6 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		m_pp.silver += silvertest;
 		uint64 coppertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100+silvertest*10));
 		m_pp.copper = coppertest;
-		if(updateclient)
-			SendMoneyUpdate();
 		RecalcWeight();
 		Save();
 		return true;
@@ -1883,7 +1876,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.platinum = m_pp.platinum + tmp2;
 	}
 	tmp-=tmp2*1000;
-	SendClientMoneyUpdate(3,tmp2);
+	if(updateclient)
+		SendClientMoneyUpdate(3,tmp2);
 
 	// Add Amount of Gold
 	tmp2 = tmp/100;
@@ -1894,7 +1888,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.gold = m_pp.gold + tmp2;
 	}
 	tmp-=tmp2*100;
-	SendClientMoneyUpdate(2,tmp2);
+	if(updateclient)
+		SendClientMoneyUpdate(2,tmp2);
 
 	// Add Amount of Silver
 	tmp2 = tmp/10;
@@ -1905,12 +1900,10 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 		m_pp.silver = m_pp.silver + tmp2;
 	}
 	tmp-=tmp2*10;
-	SendClientMoneyUpdate(1,tmp2);
+	if(updateclient)
+		SendClientMoneyUpdate(1,tmp2);
 
-	// Add Copper
-	//tmp	= tmp - (tmp2* 10);
-	//if (updateclient)
-	//	SendClientMoneyUpdate(0,tmp);
+	// Add Amount of Copper
 	tmp2 = tmp;
 	new_val = m_pp.copper + tmp2;
 	if(new_val < 0) {
@@ -1918,11 +1911,8 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	} else {
 		m_pp.copper = m_pp.copper + tmp2;
 	}
-	SendClientMoneyUpdate(0,tmp2);
-
-	//send them all at once, since the above code stopped working.
 	if(updateclient)
-		SendMoneyUpdate();
+		SendClientMoneyUpdate(0,tmp2);
 
 	RecalcWeight();
 
@@ -1936,25 +1926,26 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 	int32 new_value = m_pp.platinum + platinum;
 	if(new_value >= 0 && new_value > m_pp.platinum)
 		m_pp.platinum += platinum;
+	if(updateclient)
 		SendClientMoneyUpdate(3,platinum);
 
 	new_value = m_pp.gold + gold;
 	if(new_value >= 0 && new_value > m_pp.gold)
 		m_pp.gold += gold;
+	if(updateclient)
 		SendClientMoneyUpdate(2,gold);
 
 	new_value = m_pp.silver + silver;
 	if(new_value >= 0 && new_value > m_pp.silver)
 		m_pp.silver += silver;
+	if(updateclient)
 		SendClientMoneyUpdate(1,silver);
 
 	new_value = m_pp.copper + copper;
 	if(new_value >= 0 && new_value > m_pp.copper)
 		m_pp.copper += copper;
-		SendClientMoneyUpdate(0,copper);
-
 	if(updateclient)
-		SendMoneyUpdate();
+		SendClientMoneyUpdate(0,copper);
 
 	RecalcWeight();
 	Save();
@@ -1963,10 +1954,6 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 		LogFile->write(EQEMuLog::Debug, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
 			GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 #endif
-}
-
-void Client::SendMoneyUpdate() {
-//CAVEREM
 }
 
 bool Client::HasMoney(uint64 Copper) {

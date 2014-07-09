@@ -21,6 +21,7 @@
 #include "masterentity.h"
 #include "../common/faction.h"
 #include "map.h"
+#include "water_map.h"
 #include "../common/spdat.h"
 #include "../common/skills.h"
 #include "../common/MiscFunctions.h"
@@ -885,6 +886,24 @@ bool Mob::CheckLosFN(Mob* other) {
 		Result = CheckLosFN(other->GetX(), other->GetY(), other->GetZ(), other->GetSize());
 
 	return Result;
+}
+
+bool Mob::CheckRegion(Mob* other) {
+
+	if (zone->watermap == nullptr) 
+		return true;
+
+	WaterRegionType ThisRegionType;
+	WaterRegionType OtherRegionType;
+	ThisRegionType = zone->watermap->ReturnRegionType(GetX(), GetY(), GetZ()-1);
+	OtherRegionType = zone->watermap->ReturnRegionType(other->GetX(), other->GetY(), other->GetZ()-1);
+
+	_log(SPELLS__CASTING, "Caster Region: %d Other Region: %d", ThisRegionType, OtherRegionType);
+
+	if(ThisRegionType == OtherRegionType)
+		return true;
+
+	return false;
 }
 
 bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {

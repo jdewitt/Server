@@ -243,12 +243,12 @@ bool Client::CanFish() {
 		Map::Vertex dest;
 		dest.x = RodX;
 		dest.y = RodY;
-		dest.z = z_pos+10;
+		dest.z = z_pos;//+10;
 
-		RodZ = zone->zonemap->FindBestZ(dest, nullptr) - 1;
+		RodZ = zone->zonemap->FindBestZ(dest, nullptr)+5;
 		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
 		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
-		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
+		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f (dest.z: %4.3f), InWater says %d, InLava says %d RodLength: %f LineLength: %f", RodX, RodY, RodZ, dest.z, in_water, in_lava, RodLength, LineLength);
 		if (in_lava) {
 			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
 			return false;

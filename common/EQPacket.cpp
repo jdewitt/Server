@@ -23,7 +23,7 @@
 #include "misc.h"
 #include "op_codes.h"
 #include "CRC16.h"
-#include "CRC32.h"
+#include "crc32.h"
 #include "platform.h"
 #ifndef STATIC_OPCODE
 #include "opcodemgr.h"

@@ -2355,8 +2355,8 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 {
-	if(!HasSkill(SkillSneak) && GetSkill(SkillSneak) == 0) {
-		return; //You cannot sneak if you do not have sneak
+	if(!HasSkill(SkillSneak) && GetClass() != ROGUE && GetBaseRace() != HALFLING && GetBaseRace() != VAHSHIR) {
+		return;
 	}
 
 	if(!p_timers.Expired(&database, pTimerSneak, false)) {
@@ -2370,13 +2370,15 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		sneaking = false;
 		hidden = false;
 		improved_hidden = false;
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
 		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
+		sa_out->type = AT_Invis;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
+
 	}
 	else {
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
@@ -2386,34 +2388,36 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	if(!was && random < hidechance) {
 		sneaking = true;
 	}
+	else
+	{	
+		sneaking = false;
+	}
+
+	if(GetClass() == ROGUE){
+		if (sneaking){
+			Message_StringID(MT_Skills, SNEAK_SUCCESS);
+		}
+		else {
+			Message_StringID(MT_Skills, SNEAK_FAIL);
+		}
+	}
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
 	sa_out->spawn_id = GetID();
-	sa_out->type = 0x0F;
+	sa_out->type = AT_Sneak;
 	sa_out->parameter = sneaking;
-	QueuePacket(outapp);
+	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
-	if(GetClass() == ROGUE){
-		outapp = new EQApplicationPacket(OP_SimpleMessage,12);
-		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (sneaking){
-			msg->string_id=347;
-		}
-		else {
-			msg->string_id=348;
-		}
-		FastQueuePacket(&outapp);
-	}
+
 	return;
 }
 
 void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 {
-	if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
+	if(!HasSkill(SkillHide) && GetBaseRace() != HALFLING && GetBaseRace() != DARK_ELF && GetBaseRace() != WOOD_ELF)
 	{
-		//Can not be able to train hide but still have it from racial though
-		return; //You cannot hide if you do not have hide
+		return;
 	}
 
 	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
@@ -2430,13 +2434,6 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	float random = MakeRandomFloat(0, 100);
 	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 1;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
 		if(GetAA(aaShroudofStealth)){
 			improved_hidden = true;
 			hidden = true;
@@ -2444,29 +2441,44 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		else
 			hidden = true;
 	}
-	if(GetClass() == ROGUE){
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color = 0x010E;
+	else
+	{
+		hidden = false;
+	}
+	
+	if(GetClass() == ROGUE)
+	{
 		Mob *evadetar = GetTarget();
 		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
-					&& evadetar->IsNPC())) {
-			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id = EVADE_SUCCESS;
+					&& evadetar->IsNPC())) 
+		{
+			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) 
+			{
+				Message_StringID(MT_Skills, EVADE_SUCCESS);
 				RogueEvade(evadetar);
-			} else {
-				msg->string_id = EVADE_FAIL;
+			} 
+			else 
+			{
+				Message_StringID(MT_Skills, EVADE_FAIL);
 			}
-		} else {
-			if (hidden){
-				msg->string_id = HIDE_SUCCESS;
-			}
-			else {
-				msg->string_id = HIDE_FAIL;
-			}
+		} 
+		else 
+		{
+			if (hidden)
+				Message_StringID(MT_Skills, HIDE_SUCCESS);
+			else
+				Message_StringID(MT_Skills, HIDE_FAIL);
 		}
-		FastQueuePacket(&outapp);
 	}
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+	sa_out->spawn_id = GetID();
+	sa_out->type = AT_Invis;
+	sa_out->parameter = hidden;
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
+
 	eqmac_timer.Start(250, true);
 	return;
 }
@@ -4358,7 +4370,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else if(!stacked){
 		LogFile->write(EQEMuLog::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
 	}
+
 	QueuePacket(outapp);
+
 	if(inst && tmpmer_used){
 		int32 new_charges = prevcharges - mp->quantity;
 		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(),item_id,new_charges);
@@ -4574,7 +4588,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 
-	SendMoneyUpdate();
 	t1.start();
 	Save(1);
 	t1.stop();

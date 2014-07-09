@@ -424,11 +424,17 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	Mob *spell_target = entity_list.GetMob(target_id);
 	// check line of sight to target if it's a detrimental spell
-	if((zone->IsCity() || !zone->CanCastOutdoor()) && spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].effectid[0] != SE_BindSight)
+	if(spell_target)
 	{
-		mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_id, spell_target->GetName());
-		InterruptSpell(CANT_SEE_TARGET,CC_Red,spell_id);
-		return (false);
+		if(!CheckRegion(spell_target) || 
+		((zone->IsCity() || !zone->CanCastOutdoor()) && 
+		IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && 
+		spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].effectid[0] != SE_BindSight))
+		{
+			mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_id, spell_target->GetName());
+			InterruptSpell(CANT_SEE_TARGET,CC_Red,spell_id);
+			return (false);
+		}
 	}
 
 	//We have to check for Gate failure before its cast, because the client resolves on its own.
@@ -845,9 +851,11 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	{
 		case SONG_ENDS:
 			message_other = SONG_ENDS_OTHER;
+			color = CC_User_Spells;
 			break;
 		case SONG_ENDS_ABRUPTLY:
 			message_other = SONG_ENDS_ABRUPTLY_OTHER;
+			color = CC_User_Spells;
 			break;
 		case MISS_NOTE:
 			message_other = MISSED_NOTE_OTHER;
@@ -857,6 +865,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 			break;
 		default:
 			message_other = INTERRUPT_SPELL_OTHER;
+			color = CC_User_Spells;
 	}
 
 	entity_list.MessageClose_StringID(this, true, 200, color, message_other, this->GetName());
@@ -2067,11 +2076,16 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	}
 
 	// check line of sight to target if it's a detrimental spell
-	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && spells[spell_id].effectid[0] != SE_BindSight)
+	if(spell_target)
 	{
-		mlog(SPELLS__CASTING, "Bard Song Pulse %d: cannot see target %s", spell_target->GetName());
-		Message_StringID(CC_Red, CANT_SEE_TARGET);
-		return(false);
+		if(!CheckRegion(spell_target) || 
+		((zone->IsCity() || !zone->CanCastOutdoor()) &&
+		IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && spells[spell_id].effectid[0] != SE_BindSight))
+		{
+			mlog(SPELLS__CASTING, "Bard Song Pulse %d: cannot see target %s", spell_target->GetName());
+			Message_StringID(CC_Red, CANT_SEE_TARGET);
+			return(false);
+		}
 	}
 
 	//range check our target, if we have one and it is not us
