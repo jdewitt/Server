@@ -141,7 +141,6 @@ IN(OP_ManaChange, ManaChange_Struct);	//possibly zero len too
 IN(OP_MemorizeSpell, MemorizeSpell_Struct);
 IN(OP_SwapSpell, SwapSpell_Struct);
 IN(OP_CastSpell, CastSpell_Struct);
-IN(OP_DeleteItem, DeleteItem_Struct);
 IN(OP_CombatAbility, CombatAbility_Struct);
 IN(OP_Taunt, ClientTarget_Struct);
 INz(OP_InstillDoubt);

@@ -424,8 +424,8 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 		// Make sure the client deletes anything in this slot to match the server.
 		if(client_update && IsValidSlot(slot_id)) {
 			EQApplicationPacket* outapp;
-			outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
-			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
+			outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+			MoveItem_Struct* delitem	= (MoveItem_Struct*)outapp->pBuffer;
 			delitem->from_slot			= slot_id;
 			delitem->to_slot			= 0xFFFFFFFF;
 			delitem->number_in_stack	= 0xFFFFFFFF;
@@ -495,7 +495,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 			if((!inst->IsStackable() && !isDeleted) || (GetClientVersion() == EQClientMac && !isDeleted)){
 				// Non stackable item with charges = Item with clicky spell effect ? Delete a charge.
 				outapp = new EQApplicationPacket(OP_DeleteCharge, sizeof(MoveItem_Struct));
-				DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
+				MoveItem_Struct* delitem = (MoveItem_Struct*)outapp->pBuffer;
 				delitem->from_slot			= slot_id;
 				delitem->to_slot			= 0xFFFFFFFF;
 				delitem->number_in_stack	= 0xFFFFFFFF;
@@ -1334,8 +1334,8 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 
 			if(m_inv[resync_slot]) { SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade); }
 			else {
-				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
-				DeleteItem_Struct* delete_slot	= (DeleteItem_Struct*)outapp->pBuffer;
+				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+				MoveItem_Struct* delete_slot	= (MoveItem_Struct*)outapp->pBuffer;
 				delete_slot->from_slot			= resync_slot;
 				delete_slot->to_slot			= 0xFFFFFFFF;
 				delete_slot->number_in_stack	= 0xFFFFFFFF;
@@ -1374,8 +1374,8 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 
 			if(m_inv[resync_slot]) { SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade); }
 			else {
-				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
-				DeleteItem_Struct* delete_slot	= (DeleteItem_Struct*)outapp->pBuffer;
+				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+				MoveItem_Struct* delete_slot	= (MoveItem_Struct*)outapp->pBuffer;
 				delete_slot->from_slot			= resync_slot;
 				delete_slot->to_slot			= 0xFFFFFFFF;
 				delete_slot->number_in_stack	= 0xFFFFFFFF;

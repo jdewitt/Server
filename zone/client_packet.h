@@ -77,7 +77,6 @@
 	void Handle_OP_MemorizeSpell(const EQApplicationPacket *app);
 	void Handle_OP_SwapSpell(const EQApplicationPacket *app);
 	void Handle_OP_CastSpell(const EQApplicationPacket *app);
-	void Handle_OP_DeleteItem(const EQApplicationPacket *app);
 	void Handle_OP_CombatAbility(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_InstillDoubt(const EQApplicationPacket *app);

@@ -335,7 +335,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("GMEndTraining", static_cast<int>(OP_GMEndTraining)),
 			luabind::value("GMTrainSkill", static_cast<int>(OP_GMTrainSkill)),
 			luabind::value("GMTraining", static_cast<int>(OP_GMTraining)),
-			luabind::value("DeleteItem", static_cast<int>(OP_DeleteItem)),
 			luabind::value("CombatAbility", static_cast<int>(OP_CombatAbility)),
 			luabind::value("TrackUnknown", static_cast<int>(OP_TrackUnknown)),
 			luabind::value("TrackTarget", static_cast<int>(OP_TrackTarget)),
