@@ -8259,7 +8259,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SetLD"), XS_Mob_SetLD, file, "$$");
 		newXSproto(strcpy(buf, "SetTargetDestSteps"), XS_Mob_SetTargetDestSteps, file, "$$");
 		newXSproto(strcpy(buf, "SetTargetable"), XS_Mob_SetTargetable, file, "$$");
-		newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$$");
 		newXSproto(strcpy(buf, "ModSkillDmgTaken"), XS_Mob_ModSkillDmgTaken, file, "$$$");
 		newXSproto(strcpy(buf, "GetModSkillDmgTaken"), XS_Mob_GetModSkillDmgTaken, file, "$$");
 		newXSproto(strcpy(buf, "GetSkillDmgTaken"), XS_Mob_GetSkillDmgTaken, file, "$$");
