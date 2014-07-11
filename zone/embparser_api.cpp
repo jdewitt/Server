@@ -326,36 +326,6 @@ XS(XS__disable_spawn2)
 	XSRETURN_EMPTY;
 }
 
-XS(XS__setstat);
-XS(XS__setstat)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: setstat(stat, value)");
-
-	int	stat = (int)SvIV(ST(0));
-	int	value = (int)SvIV(ST(1));
-
-	quest_manager.setstat(stat, value);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__incstat);  //old setstat command aza
-XS(XS__incstat)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: incstat(stat, value)");
-
-	int	stat = (int)SvIV(ST(0));
-	int	value = (int)SvIV(ST(1));
-
-	quest_manager.incstat(stat, value);
-
-	XSRETURN_EMPTY;
-}
-
 XS(XS__castspell);
 XS(XS__castspell)
 {
@@ -2820,8 +2790,6 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "spawn_from_spawn2"), XS__spawn_from_spawn2, file);
 		newXS(strcpy(buf, "enable_spawn2"), XS__enable_spawn2, file);
 		newXS(strcpy(buf, "disable_spawn2"), XS__disable_spawn2, file);
-		newXS(strcpy(buf, "setstat"), XS__setstat, file);
-		newXS(strcpy(buf, "incstat"), XS__incstat, file);
 		newXS(strcpy(buf, "castspell"), XS__castspell, file);
 		newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
 		newXS(strcpy(buf, "addloot"), XS__addloot, file);

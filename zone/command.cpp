@@ -241,7 +241,6 @@ int command_init(void){
 		command_add("hideme","[on/off] - Hide yourself from spawn lists.",80,command_hideme) ||
 		command_add("hp","- Refresh your HP bar from the server.",0,command_hp) ||
 		
-		command_add("incstat","- Increases or Decreases a client's stats permanently.",200,command_incstat) ||
 		command_add("instance","- Modify Instances",200,command_instance) ||
 		command_add("interrupt","[message id] [color] - Interrupt your casting. Arguments are optional.",50,command_interrupt) ||
 		command_add("invul",nullptr,0,command_invul) ||
@@ -383,7 +382,6 @@ int command_init(void){
 		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
 		command_add("setstartzone","[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity",80,command_setstartzone) ||
-		command_add("setstat","- Sets the stats to a specific value.",255,command_setstat) ||
 		command_add("setxp","[value] - Set your or your player target's experience",100,command_setxp) ||
 		command_add("showbonusstats","[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.",50, command_showbonusstats) ||
 		command_add("showbuffs","- List buffs active on your target or you if no target",50,command_showbuffs) ||
@@ -678,29 +676,6 @@ void command_dbversion(Client *c, const Seperator* sep){
 	//I gave up on this, pulling the realtime from the eqtime table.
 	//Then displaying on client the human readable time plus the time since this update.
 	c->Message(0, "Unimplemented, see comments in command.cpp");
-}
- 
-void command_setstat(Client* c, const Seperator* sep){
-	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
-		c->GetTarget()->CastToClient()->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
-	}
-	else{
-		c->Message(0,"This command is used to permanently increase or decrease a players stats.");
-		c->Message(0,"Usage: #setstat {type} {value the stat should be}");
-		c->Message(0,"Types: Str: 0, Sta: 1, Agi: 2, Dex: 3, Int: 4, Wis: 5, Cha: 6");
-	}
-}
-
-void command_incstat(Client* c, const Seperator* sep){
-	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
-		c->GetTarget()->CastToClient()->IncStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
-	}
-	else{
-		c->Message(0,"This command is used to permanently increase or decrease a players stats.");
-		c->Message(0,"Usage: #setstat {type} {value by which to increase or decrease}");
-		c->Message(0,"Note: The value is in increments of 2, so a value of 3 will actually increase the stat by 6");
-		c->Message(0,"Types: Str: 0, Sta: 1, Agi: 2, Dex: 3, Int: 4, Wis: 5, Cha: 6");
-	}
 }
 
 void command_resetaa(Client* c,const Seperator *sep){

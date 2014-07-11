@@ -176,11 +176,9 @@
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
-	void Handle_OP_Rewind(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
 	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
-	void Handle_OP_KeyRing(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
@@ -188,7 +186,6 @@
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
-	void Handle_OP_HideCorpse(const EQApplicationPacket *app);
 	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);

@@ -377,18 +377,6 @@ void QuestManager::disable_spawn2(uint32 spawn2_id)
 	safe_delete(pack);
 }
 
-void QuestManager::setstat(int stat, int value) {
-	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->SetStats(stat, value);
-}
-
-void QuestManager::incstat(int stat, int value) {
-	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->IncStats(stat, value);
-}
-
 void QuestManager::castspell(int spell_id, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (owner) {

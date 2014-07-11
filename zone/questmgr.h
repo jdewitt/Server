@@ -59,8 +59,6 @@ public:
 	Mob* spawn_from_spawn2(uint32 spawn2_id);
 	void enable_spawn2(uint32 spawn2_id);
 	void disable_spawn2(uint32 spawn2_id);
-	void setstat(int stat, int value);
-	void incstat(int stat, int value);
 	void castspell(int spell_id, int target_id);
 	void selfcast(int spell_id);
 	void addloot(int item_id, int charges = 0, bool equipitem = true);

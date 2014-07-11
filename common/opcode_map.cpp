@@ -12,7 +12,6 @@ std::map<unsigned long, std::string>::iterator itr;;
 }
 void load_opcode_names()
 {
-	opcode_map[0x01eb]="LiveOP_IncreaseStats";
 	opcode_map[0x01d5]="LiveOP_Dye";
 	opcode_map[0x0168]="LiveOP_Stamina";
 	opcode_map[0x014d]="LiveOP_ControlBoat";

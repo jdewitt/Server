@@ -259,11 +259,9 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
-	ConnectedOpcodes[OP_Rewind] = &Client::Handle_OP_Rewind;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
-	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
@@ -271,7 +269,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
-	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
 	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
@@ -7479,11 +7476,6 @@ void Client::CompleteConnect()
 	}
 }
 
-void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
-{
-	KeyRingList();
-}
-
 void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(SetTitle_Struct)) {
@@ -7515,16 +7507,6 @@ void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 
 	if(outapp != nullptr)
 		FastQueuePacket(&outapp);
-}
-
-void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
-{
-	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
-			Message_StringID(MT_System, REWIND_WAIT);
-	} else {
-		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
-		rewind_timer.Start(30000, true);
-	}
 }
 
 void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
@@ -8543,33 +8525,6 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	}
 	safe_delete_array(Query);
 	safe_delete_array(EscSearchString);
-}
-
-void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
-{
-	// New OPCode for SOD+ as /hidecorpse is handled serverside now.
-	//
-	if(app->size != sizeof(HideCorpse_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_HideCorpse expected %i got %i",
-					sizeof(HideCorpse_Struct), app->size);
-
-		DumpPacket(app);
-
-		return;
-	}
-
-	HideCorpse_Struct *hcs = (HideCorpse_Struct*)app->pBuffer;
-
-	if(hcs->Action == HideCorpseLooted)
-		return;
-
-	if((HideCorpseMode == HideCorpseNone) && (hcs->Action == HideCorpseNone))
-		return;
-
-	entity_list.HideCorpses(this, HideCorpseMode, hcs->Action);
-
-	HideCorpseMode = hcs->Action;
 }
 
 void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)

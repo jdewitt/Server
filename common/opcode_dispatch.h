@@ -278,7 +278,6 @@ OUT(OP_GroundSpawn, Object_Struct);
 OUT(OP_GroupUpdate, GroupJoin_Struct);	//takes on 3 sizes...
 OUT(OP_GuildMOTD, GuildMOTD_Struct);
 OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
-OUT(OP_IncreaseStats, IncreaseStat_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);
