@@ -190,7 +190,6 @@ void PetitionList::UpdateGMQueue() {
 }
 
 void PetitionList::ClearPetitions() {
-	//	entity_list.ClearClientPetitionQueue();
 	LinkedListIterator<Petition*> iterator(list);
 	iterator.Reset();
 	while(iterator.MoreElements())

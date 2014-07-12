@@ -75,7 +75,6 @@ public:
 	Lua_Corpse GetCorpseByID(int id);
 	Lua_Corpse GetCorpseByName(const char *name);
 	Lua_Spawn GetSpawnByID(uint32 id);
-	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Lua_Mob p);
 	void Message(uint32 guild_dbid, uint32 type, const char *message);
 	void MessageStatus(uint32 guild_dbid, int min_status, uint32 type, const char *message);

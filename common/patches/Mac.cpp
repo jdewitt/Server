@@ -2237,16 +2237,6 @@ ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionBug) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionCheckout2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionQue) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionResolve) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionSearch) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionSearchResults) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionSearchText) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionUnCheckout) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PetitionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }

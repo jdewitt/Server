@@ -158,16 +158,9 @@ void load_opcode_names()
 	opcode_map[0x0239]="LiveOP_GMZoneRequest2";
 	opcode_map[0x0068]="LiveOP_Petition";
 	opcode_map[0x0085]="LiveOP_PetitionRefresh";
-	opcode_map[0x01ee]="LiveOP_PDeletePetition";
-	opcode_map[0x0092]="LiveOP_PetitionBug";
-	opcode_map[0x0069]="LiveOP_PetitionUpdate";
 	opcode_map[0x0076]="LiveOP_PetitionCheckout";
-	opcode_map[0x0056]="LiveOP_PetitionCheckout2";
 	opcode_map[0x0091]="LiveOP_PetitionDelete";
-	opcode_map[0x02b4]="LiveOP_PetitionResolve";
 	opcode_map[0x007e]="LiveOP_PetitionCheckIn";
-	opcode_map[0x0090]="LiveOP_PetitionUnCheckout";
-	opcode_map[0x01ec]="LiveOP_PetitionQue";
 	opcode_map[0x01bb]="LiveOP_SetServerFilter";
 	opcode_map[0x0218]="LiveOP_NewSpawn";
 	opcode_map[0x0140]="LiveOP_Animation";

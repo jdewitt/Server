@@ -185,18 +185,13 @@ IN(OP_GMEmoteZone, GMEmoteZone_Struct);
 IN(OP_InspectRequest, Inspect_Struct);
 IN(OP_InspectAnswer, Inspect_Struct);	//follows request
 IN(OP_DeleteSpell, DeleteSpell_Struct);
-IN(OP_PetitionBug, PetitionBug_Struct);
 IN(OP_Bug, BugStruct);
 
 //all these petition opcodes need checking
 //converted most of them to raw so they wouldent cause problems
 INr(OP_Petition);	//used to be just a string
 IN(OP_PetitionCheckIn, Petition_Struct);
-IN(OP_PetitionResolve, PetitionUpdate_Struct);
 IN(OP_PetitionDelete, PetitionUpdate_Struct);
-INr(OP_PetitionUnCheckout);	//prolly 4 bytes in length
-INr(OP_PetitionQue);
-INr(OP_PDeletePetition);	//used to be just a string
 INr(OP_PetitionCheckout);	//prolly 4 bytes in length
 INr(OP_PetitionRefresh);
 
@@ -288,7 +283,6 @@ OUT(OP_MoveDoor, MoveDoor_Struct);
 OUT(OP_NewSpawn, NewSpawn_Struct);
 OUT(OP_NewZone, NewZone_Struct);
 OUT(OP_PetitionCheckout, Petition_Struct);
-OUT(OP_PetitionUpdate, PetitionUpdate_Struct);
 OUT(OP_PlayerProfile, PlayerProfile_Struct);
 OUT(OP_RaidUpdate, ZoneInSendName_Struct);
 //alt:OUTv(OP_RaidUpdate, RaidMembers_Struct);

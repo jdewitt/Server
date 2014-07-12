@@ -807,29 +807,6 @@ XS(XS_EntityList_GetCorpseByName)
 	XSRETURN(1);
 }
 
-XS(XS_EntityList_ClearClientPetitionQueue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_ClearClientPetitionQueue)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearClientPetitionQueue(THIS)");
-	{
-		EntityList *		THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->ClearClientPetitionQueue();
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_EntityList_CanAddHateForMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_CanAddHateForMob)
 {
@@ -2177,7 +2154,6 @@ XS(boot_EntityList)
 		newXSproto(strcpy(buf, "GetCorpseByOwner"), XS_EntityList_GetCorpseByOwner, file, "$$");
 		newXSproto(strcpy(buf, "GetCorpseByID"), XS_EntityList_GetCorpseByID, file, "$$");
 		newXSproto(strcpy(buf, "GetCorpseByName"), XS_EntityList_GetCorpseByName, file, "$$");
-		newXSproto(strcpy(buf, "ClearClientPetitionQueue"), XS_EntityList_ClearClientPetitionQueue, file, "$");
 		newXSproto(strcpy(buf, "CanAddHateForMob"), XS_EntityList_CanAddHateForMob, file, "$$");
 		newXSproto(strcpy(buf, "Clear"), XS_EntityList_Clear, file, "$");
 		newXSproto(strcpy(buf, "RemoveMob"), XS_EntityList_RemoveMob, file, "$$");
