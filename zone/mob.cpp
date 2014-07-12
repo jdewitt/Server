@@ -181,6 +181,8 @@ Mob::Mob(const char* in_name,
 	trackable	= true;
 	has_shieldequiped = false;
 	has_numhits = false;
+	has_MGB = false;
+	has_ProjectIllusion = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
@@ -3034,7 +3036,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
 			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(7,0, focus_spell);
+			CheckNumHitsRemaining(NUMHIT_MatchingSpells,0, focus_spell);
 		}
 	}
 }
@@ -3287,7 +3289,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		value += tmp_focus;
 
 		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(7, tmp_buffslot);
+			CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
 	}
 	return value;
 }
@@ -3296,6 +3298,8 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
+	int16 MeleeVuln = spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
+
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
@@ -3303,6 +3307,8 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	//Innate SetSkillDamgeTaken(skill,value)
 	if ((SkillDmgTaken_Mod[skill_used]) || (SkillDmgTaken_Mod[HIGHEST_SKILL+1]))
 		skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+
+	skilldmg_mod += MeleeVuln;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
@@ -3329,8 +3335,8 @@ bool Mob::TryFadeEffect(int slot)
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade
-				|| spells[buffs[slot].spellid].effectid[i] == SE_TriggerMeleeThreshold || spells[buffs[slot].spellid].effectid[i] == SE_TriggerSpellThreshold)
+			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways || 
+				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);
@@ -3388,7 +3394,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 			
-			CheckNumHitsRemaining(7, 0, focus_spell);
+			CheckNumHitsRemaining(NUMHIT_MatchingSpells, 0, focus_spell);
 		}
 }
 
@@ -4008,9 +4014,9 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 {
 	if (spell_id != SPELL_UNKNOWN)
 	{
-		if(IsEffectInSpell(spell_id, SE_SpellOnKill2)) {
+		if(IsEffectInSpell(spell_id, SE_ProcOnSpellKillShot)) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
-				if (spells[spell_id].effectid[i] == SE_SpellOnKill2)
+				if (spells[spell_id].effectid[i] == SE_ProcOnSpellKillShot)
 				{
 					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
@@ -4145,6 +4151,9 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	dmg_mod += itembonuses.DamageModifier[HIGHEST_SKILL+1] + spellbonuses.DamageModifier[HIGHEST_SKILL+1] + aabonuses.DamageModifier[HIGHEST_SKILL+1] +
 				itembonuses.DamageModifier[skill] + spellbonuses.DamageModifier[skill] + aabonuses.DamageModifier[skill];
 
+	dmg_mod += itembonuses.DamageModifier2[HIGHEST_SKILL+1] + spellbonuses.DamageModifier2[HIGHEST_SKILL+1] + aabonuses.DamageModifier2[HIGHEST_SKILL+1] +
+				itembonuses.DamageModifier2[skill] + spellbonuses.DamageModifier2[skill] + aabonuses.DamageModifier2[skill];
+
 	if (HasShieldEquiped() && !IsOffHandAtk())
 		dmg_mod += itembonuses.ShieldEquipDmgMod[0] + spellbonuses.ShieldEquipDmgMod[0] + aabonuses.ShieldEquipDmgMod[0];
 
@@ -4202,22 +4211,19 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 
 void Mob::MeleeLifeTap(int32 damage) {
 	
-	if(damage > 0 && (spellbonuses.MeleeLifetap || itembonuses.MeleeLifetap || aabonuses.MeleeLifetap ))
-	{
-		int lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap;
-		
-		if(lifetap_amt > 100)
-			lifetap_amt = 100;
+	int16 lifetap_amt = 0;
+	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
+				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
 
-		else if (lifetap_amt < -99)
-			lifetap_amt = -99;
-
+	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-
 		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
-		//heal self for damage done..
-		HealDamage(lifetap_amt);
+		
+		if (lifetap_amt > 0)
+			HealDamage(lifetap_amt); //Heal self for modified damage amount.
+		else
+			Damage(this, -lifetap_amt,0, SkillEvocation,false); //Dmg self for modified damage amount.
 	}
 }
 

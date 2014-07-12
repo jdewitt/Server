@@ -84,6 +84,7 @@
 #include "wguild_mgr.h"
 #include "ucs.h"
 #include "queryserv.h"
+#include "web_interface.h"
 
 TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
@@ -94,6 +95,7 @@ LoginServerList loginserverlist;
 EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
+WebInterfaceConnection WILink;
 LauncherList launcher_list;
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
@@ -456,6 +458,8 @@ int main(int argc, char** argv) {
 		UCSLink.Process();
 
 		QSLink.Process();
+
+		WILink.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
