@@ -559,11 +559,21 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
 		} else if (IsNPC()) {
 			armor = CastToNPC()->GetRawAC();
+			int PetACBonus = 0;
 
 			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
+			else{
+				Mob *owner = nullptr;
+				owner = GetOwner();
+				if (owner){
+					PetACBonus = owner->aabonuses.PetMeleeMitigation 
+					+ owner->itembonuses.PetMeleeMitigation + 
+					owner->spellbonuses.PetMeleeMitigation;
+				}
+			}
 
-			armor += spellbonuses.AC + itembonuses.AC + 1;
+			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 		}
 
 		if (opts) {
@@ -1304,7 +1314,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	MeleeLifeTap(damage);
 
 	if (damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//break invis when you attack
 	if(invisible) {
@@ -1909,7 +1919,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	MeleeLifeTap(damage);
 	
 	if (damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//break invis when you attack
 	if(invisible) {
@@ -3027,7 +3037,11 @@ int32 Mob::ReduceDamage(int32 damage)
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return -6;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return -6;
 		}
 	}
 
@@ -3039,11 +3053,11 @@ int32 Mob::ReduceDamage(int32 damage)
 		{
 			DisableMeleeRune = true;
 			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+			if(damage_to_reduce >= buffs[slot].melee_rune)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MeleeThresholdGuard %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
-				damage -= damage_to_reduce;
+				damage -= buffs[slot].melee_rune;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
@@ -3063,11 +3077,15 @@ int32 Mob::ReduceDamage(int32 damage)
 		if(slot >= 0)
 		{
 			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+
+			if (spellbonuses.MitigateMeleeRune[2] && (damage_to_reduce > spellbonuses.MitigateMeleeRune[2]))
+					damage_to_reduce = spellbonuses.MitigateMeleeRune[2];
+			
+			if(spellbonuses.MitigateMeleeRune[3] && (damage_to_reduce >= buffs[slot].melee_rune))
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
-				damage -= damage_to_reduce;
+				damage -= buffs[slot].melee_rune;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
@@ -3075,22 +3093,11 @@ int32 Mob::ReduceDamage(int32 damage)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
-				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
+				
+				if (spellbonuses.MitigateMeleeRune[3])
+					buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
+				
 				damage -= damage_to_reduce;
-			}
-		}
-	}
-
-	if (spellbonuses.TriggerMeleeThreshold[2]){
-		slot = spellbonuses.TriggerMeleeThreshold[1];
-		
-		if (slot >= 0) {
-			if(damage > buffs[slot].melee_rune)	{
-				if(!TryFadeEffect(slot))
-					BuffFadeBySlot(slot);
-			}
-			else{
-				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
 			}
 		}
 	}
@@ -3116,7 +3123,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	int32 slot = -1;
 
 	// See if we block the spell outright first
-	if (spellbonuses.NegateAttacks[0]){
+	if (!iBuffTic && spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
 		if(slot >= 0) {
 			if(--buffs[slot].numhits == 0) {
@@ -3124,7 +3131,11 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return 0;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return 0;
 		}
 	}
 
@@ -3137,15 +3148,21 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].dot_rune)
+
+				if (spellbonuses.MitigateDotRune[2] && (damage_to_reduce > spellbonuses.MitigateDotRune[2]))
+					damage_to_reduce = spellbonuses.MitigateDotRune[2];
+
+				if(spellbonuses.MitigateDotRune[3] && (damage_to_reduce >= buffs[slot].dot_rune))
 				{
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].dot_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
 				else
 				{
-					buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
+					if (spellbonuses.MitigateDotRune[3])
+						buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
+					
 					damage -= damage_to_reduce;
 				}
 			}
@@ -3167,9 +3184,9 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			{
 				DisableSpellRune = true;
 				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+				if(damage_to_reduce >= buffs[slot].magic_rune)
 				{
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].magic_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
@@ -3188,11 +3205,15 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+
+				if (spellbonuses.MitigateSpellRune[2] && (damage_to_reduce > spellbonuses.MitigateSpellRune[2]))
+					damage_to_reduce = spellbonuses.MitigateSpellRune[2];
+
+				if(spellbonuses.MitigateSpellRune[3] && (damage_to_reduce >= buffs[slot].magic_rune))
 				{
 					mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateSpellDamage %d damage negated, %d"
 						" damage remaining, fading buff.", damage_to_reduce, buffs[slot].magic_rune);
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].magic_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
@@ -3200,22 +3221,11 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				{
 					mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 						" damage remaining.", damage_to_reduce, buffs[slot].magic_rune);
-					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
+					
+					if (spellbonuses.MitigateSpellRune[3])
+						buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
+					
 					damage -= damage_to_reduce;
-				}
-			}
-		}
-
-		if (spellbonuses.TriggerSpellThreshold[2]){
-			slot = spellbonuses.TriggerSpellThreshold[1];
-		
-			if (slot >= 0) {
-				if(damage > buffs[slot].magic_rune)	{
-					if(!TryFadeEffect(slot))
-						BuffFadeBySlot(slot);
-				}
-				else{
-					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage);
 				}
 			}
 		}
@@ -3226,7 +3236,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 
 		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
-
+		
 		if(damage < 1)
 			return 0;
 	}
@@ -3244,7 +3254,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		TryTriggerOnValueAmount(false, true);
 	}
 	
-	CheckNumHitsRemaining(8);
+	CheckNumHitsRemaining(NUMHIT_IncomingDamage);
 
 	return(damage);
 }
@@ -3354,10 +3364,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	}
 
 	if (spell_id == SPELL_UNKNOWN && skill_used) {
-		CheckNumHitsRemaining(1); //Incoming Hit Attempts
+		CheckNumHitsRemaining(NUMHIT_IncomingHitAttempts);
 
 		if (attacker)
-			attacker->CheckNumHitsRemaining(2); //Outgoing Hit Attempts
+			attacker->CheckNumHitsRemaining(NUMHIT_OutgoingHitAttempts);
 	}
 
 	if(attacker){
@@ -3406,6 +3416,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(spell_id == SPELL_UNKNOWN) {
 			damage = ReduceDamage(damage);
 			mlog(COMBAT__HITS, "Melee Damage reduced to %d", damage);
+			ReduceAllDamage(damage);
+			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 		} else {
 			int32 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
@@ -3417,13 +3429,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.
 				Message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
 			}
-
+			ReduceAllDamage(damage);
+			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
 
 		if (skill_used)
-			CheckNumHitsRemaining(6); //Incomming Hit Success on Defender
-
-		ReduceAllDamage(damage);
+			CheckNumHitsRemaining(NUMHIT_IncomingHitSuccess);
 
 		if(IsClient() && CastToClient()->sneaking){
 			CastToClient()->sneaking = false;
@@ -3823,7 +3834,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 					int chance = ProcChance * (DefensiveProcs[i].chance);
 					if ((MakeRandomInt(0, 100) < chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(10,0,DefensiveProcs[i].base_spellID);
+						CheckNumHitsRemaining(NUMHIT_DefensiveSpellProcs,0,DefensiveProcs[i].base_spellID);
 					}
 				}
 			}
@@ -3980,7 +3991,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, SpellProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, SpellProcs[i].base_spellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d failed to proc %d (%.2f percent chance)",
@@ -3996,7 +4007,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
 							i, RangedProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, RangedProcs[i].base_spellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d failed to proc %d (%.2f percent chance)",
@@ -4075,6 +4086,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	}
 
 	float critChance = 0.0f;
+	bool IsBerskerSPA = false;
 
 	//1: Try Slay Undead
 	if(defender && defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire){
@@ -4102,12 +4114,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	//are defined you will have an innate chance to hit at Level 1 regardless of bonuses.
 	//Warning: Do not define these rules if you want live like critical hits.
 	critChance += RuleI(Combat, MeleeBaseCritChance);
-
+	
 	if (IsClient()) {
-		critChance += RuleI(Combat, ClientBaseCritChance);
+		critChance  += RuleI(Combat, ClientBaseCritChance);
 
-		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12) {
-			if (IsBerserk())
+		if (spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA)
+				IsBerskerSPA = true;
+
+		if (((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)  || IsBerskerSPA) {
+			if (IsBerserk() || IsBerskerSPA)
 				critChance += RuleI(Combat, BerserkBaseCritChance);
 			else
 				critChance += RuleI(Combat, WarBerBaseCritChance);
@@ -4152,15 +4167,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			uint16 critMod = 200;
 			bool crip_success = false;
 			int16 CripplingBlowChance = GetCrippBlowChance();
-
+			
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
 			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance || IsBerserk()) {
-				if (!IsBerserk())
+			if (CripplingBlowChance || (IsBerserk() || IsBerskerSPA)) {
+				if (!IsBerserk() && !IsBerskerSPA)
 					critChance *= float(CripplingBlowChance)/100.0f;
 
-				if (IsBerserk() || MakeRandomFloat(0, 1) < critChance) {
+				if ((IsBerserk() || IsBerskerSPA) || MakeRandomFloat(0, 1) < critChance) {
 					critMod = 400;
 					crip_success = true;
 				}
@@ -4203,26 +4218,24 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 {
+	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10){
 
-	if (!defender)
-		return false;
+		uint32 FB_Dmg = aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
+		
+		uint16 FB_Level = 0;
+		FB_Level = aabonuses.FinishingBlowLvl[0];
+		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
+			FB_Level = spellbonuses.FinishingBlowLvl[0];
+		else if (FB_Level < itembonuses.FinishingBlowLvl[0])
+			FB_Level = itembonuses.FinishingBlowLvl[0];
 
-	if (aabonuses.FinishingBlow[1] && !defender->IsClient() && defender->GetHPRatio() < 10){
+		//Proc Chance value of 500 = 5%
+		uint32 ProcChance = (aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0])/10;
 
-		uint32 chance = aabonuses.FinishingBlow[0]/10; //500 = 5% chance.
-		uint32 damage = aabonuses.FinishingBlow[1];
-		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
-
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
-			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+		if(FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) && (ProcChance >= MakeRandomInt(0, 1000))){
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
-			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
+			DoSpecialAttackDamage(defender, skillinuse, FB_Dmg, 1, -1, 10, false, false);
 			return true;
-		}
-		else
-		{
-			mlog(COMBAT__ATTACKS, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
-			return false;
 		}
 	}
 	return false;
@@ -4240,6 +4253,10 @@ void Mob::DoRiposte(Mob* defender) {
 	int16 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
 							defender->spellbonuses.GiveDoubleRiposte[0] +
 							defender->itembonuses.GiveDoubleRiposte[0];
+
+	DoubleRipChance		 =  defender->aabonuses.DoubleRiposte +
+							defender->spellbonuses.DoubleRiposte +
+							defender->itembonuses.DoubleRiposte;
 
 	//Live AA - Double Riposte
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
@@ -4350,7 +4367,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 				int ProcChance = chance * (float)SkillProcs[i].chance;
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
 					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
-					CheckNumHitsRemaining(11,0, SkillProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs,0, SkillProcs[i].base_spellID);
 				}
 			}
 		}

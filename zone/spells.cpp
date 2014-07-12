@@ -183,6 +183,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 		return(false);
 	}
+	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
+	if (spellbonuses.Sanctuary && (spells[spell_id].targettype != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id))
+		BuffFadeByEffect(SE_Sanctuary);
 
 	if(IsClient()){
 		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);
@@ -1217,7 +1220,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	}
 
 	if(IsClient()) {		
-		CheckNumHitsRemaining(7);
+		CheckNumHitsRemaining(NUMHIT_MatchingSpells);
 		TrySympatheticProc(target, spell_id);
 	}
 
@@ -2445,7 +2448,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 // -1 if they can't stack and spellid2 should be stopped
 //currently, a spell will not land if it would overwrite a better spell on any effect
 //if all effects are better or the same, we overwrite, else we do nothing
-int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2)
+int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2, int buffslot)
 {
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
@@ -2522,6 +2525,36 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					Message_StringID(MT_SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
 					return -1;
 				}
+			}
+
+			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+			If checking same type ie A vs A, which ever effect base value is higher will take hold.
+			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
+			is not fully removed at the time of the trgger*/
+			if (spellbonuses.AStacker[0]) {
+				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[1]))
+					return -1;
+			}
+
+			if (spellbonuses.BStacker[0]) {
+				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[1]))
+					return -1;
+				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
+					return -1;
+			}
+
+			if (spellbonuses.CStacker[0]) {
+				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[1]))
+					return -1;
+				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
+					return -1;
+			}
+						
+			if (spellbonuses.DStacker[0]) {
+				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[1]))
+					return -1;
+				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
+					return -1;
 			}
 
 			if(effect2 == SE_StackingCommand_Overwrite)
@@ -2804,7 +2837,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		if (curbuf.spellid != SPELL_UNKNOWN) {
 			// there's a buff in this slot
 			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
-					caster_level, entity_list.GetMobID(curbuf.casterid), caster);
+					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
 			if (ret == -1) {	// stop the spell
 				mlog(SPELLS__BUFFS, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
@@ -2935,7 +2968,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 			return(-1);	//do not recast a buff we already have on, we recast fast enough that we dont need to refresh our buffs
 
 		// there's a buff in this slot
-		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level);
+		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level, nullptr, nullptr, i);
 		if(ret == 1) {
 			// should overwrite current slot
 			if(iFailIfOverwrite) {
@@ -3250,7 +3283,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
-					CheckNumHitsRemaining(7,b);
+					CheckNumHitsRemaining(NUMHIT_MatchingSpells,b);
 					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
@@ -3299,7 +3332,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
-			CheckNumHitsRemaining(9);
+			CheckNumHitsRemaining(NUMHIT_ReflectSpell);
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
@@ -3350,7 +3383,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					}
 				}
 
-				spelltar->CheckNumHitsRemaining(3);
+				spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+				CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
 
 				safe_delete(action_packet);
 				return false;
@@ -3503,8 +3537,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	
-	if (spelltar && IsDetrimentalSpell(spell_id))
-		spelltar->CheckNumHitsRemaining(3); //Incoming spells
+	if (IsDetrimentalSpell(spell_id)) {
+		
+		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+		
+		if (spelltar)
+			spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+	}
 
 	// send the action packet again now that the spell is successful
 	// NOTE: this is what causes the buff icon to appear on the client, if

@@ -31,7 +31,7 @@ void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *in
 	npc->DoQuestPause(init);
 
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
-	luabind::object l_client_o = luabind::object(L, l_client);
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -45,7 +45,7 @@ void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *in
 void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
-	luabind::object l_client_o = luabind::object(L, l_client);
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 	
@@ -57,7 +57,7 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 		for(size_t i = 0; i < extra_pointers->size(); ++i) {
 			std::string prefix = "item" + std::to_string(static_cast<long long>(i + 1));
 			Lua_ItemInst l_inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
-			luabind::object l_inst_o = luabind::object(L, l_inst);
+			luabind::adl::object l_inst_o = luabind::adl::object(L, l_inst);
 			l_inst_o.push(L);
 
 			lua_setfield(L, -2, prefix.c_str());
@@ -98,7 +98,7 @@ void handle_npc_event_hp(QuestInterface *parse, lua_State* L, NPC* npc, Mob *ini
 void handle_npc_single_mob(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -106,7 +106,7 @@ void handle_npc_single_mob(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 void handle_npc_single_client(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
-	luabind::object l_client_o = luabind::object(L, l_client);
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -114,7 +114,7 @@ void handle_npc_single_client(QuestInterface *parse, lua_State* L, NPC* npc, Mob
 void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
-	luabind::object l_npc_o = luabind::object(L, l_npc);
+	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 	l_npc_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -122,7 +122,7 @@ void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -133,7 +133,7 @@ void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -144,7 +144,7 @@ void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *ini
 void handle_npc_hate(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -168,7 +168,7 @@ void handle_npc_timer(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -179,12 +179,12 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 	int spell_id = std::stoi(sep.arg[1]);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	} else {
 		Lua_Spell l_spell(nullptr);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	}
@@ -198,12 +198,12 @@ void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 	int spell_id = std::stoi(data);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	} else {
 		Lua_Spell l_spell(nullptr);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	}
@@ -238,7 +238,7 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 
 	Mob *o = entity_list.GetMobID(std::stoi(sep.arg[0]));
 	Lua_Mob l_mob(o);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
@@ -248,12 +248,12 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 	int spell_id = std::stoi(sep.arg[2]);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	} else {
 		Lua_Spell l_spell(nullptr);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	}
@@ -273,12 +273,12 @@ void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* cl
 	const Item_Struct *item = database.GetItem(extra_data);
 	if(item) {
 		Lua_Item l_item(item);
-		luabind::object l_item_o = luabind::object(L, l_item);
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 		l_item_o.push(L);
 		lua_setfield(L, -2, "item");
 	} else {
 		Lua_Item l_item(nullptr);
-		luabind::object l_item_o = luabind::object(L, l_item);
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 		l_item_o.push(L);
 		lua_setfield(L, -2, "item");
 	}
@@ -287,7 +287,7 @@ void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* cl
 void handle_player_fish_forage_success(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 									   std::vector<void*> *extra_pointers) {
 	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
-	luabind::object l_item_o = luabind::object(L, l_item);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 }
@@ -295,7 +295,7 @@ void handle_player_fish_forage_success(QuestInterface *parse, lua_State* L, Clie
 void handle_player_click_object(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 								std::vector<void*> *extra_pointers) {
 	Lua_Object l_object(reinterpret_cast<Object*>(extra_pointers->at(0)));
-	luabind::object l_object_o = luabind::object(L, l_object);
+	luabind::adl::object l_object_o = luabind::adl::object(L, l_object);
 	l_object_o.push(L);
 	lua_setfield(L, -2, "object");
 }
@@ -303,7 +303,7 @@ void handle_player_click_object(QuestInterface *parse, lua_State* L, Client* cli
 void handle_player_click_door(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 							  std::vector<void*> *extra_pointers) {
 	Lua_Door l_door(reinterpret_cast<Doors*>(extra_pointers->at(0)));
-	luabind::object l_door_o = luabind::object(L, l_door);
+	luabind::adl::object l_door_o = luabind::adl::object(L, l_door);
 	l_door_o.push(L);
 	lua_setfield(L, -2, "door");
 }
@@ -323,7 +323,7 @@ void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* c
 void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						   std::vector<void*> *extra_pointers) {
 	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
-	luabind::object l_item_o = luabind::object(L, l_item);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 }
@@ -333,11 +333,11 @@ void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std
 	int spell_id = std::stoi(data);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 	} else {
 		Lua_Spell l_spell(nullptr);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 	}
 
@@ -353,7 +353,7 @@ void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std
 void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 							std::vector<void*> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(extra_pointers->at(1)));
-	luabind::object l_client_o = luabind::object(L, l_client);
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -361,7 +361,7 @@ void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client,
 void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 							 std::vector<void*> *extra_pointers) {
 	Lua_Client l_client(reinterpret_cast<Client*>(extra_pointers->at(0)));
-	luabind::object l_client_o = luabind::object(L, l_client);
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -369,12 +369,12 @@ void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client
 void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
 	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
-	luabind::object l_item_o = luabind::object(L, l_item);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
 
 	Lua_Corpse l_corpse(reinterpret_cast<Corpse*>(extra_pointers->at(1)));
-	luabind::object l_corpse_o = luabind::object(L, l_corpse);
+	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 	l_corpse_o.push(L);
 	lua_setfield(L, -2, "corpse");
 }
@@ -386,7 +386,7 @@ void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, 
 	lua_pushstring(L, command.c_str());
 	lua_setfield(L, -2, "command");
 
-	luabind::object args = luabind::newtable(L);
+	luabind::adl::object args = luabind::newtable(L);
 	int max_args = sep.GetMaxArgNum();
 	for(int i = 1; i < max_args; ++i) {
 		if(strlen(sep.arg[i]) > 0) {
@@ -410,7 +410,7 @@ void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, 
 void handle_player_feign(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
 	Lua_NPC l_npc(reinterpret_cast<NPC*>(extra_pointers->at(0)));
-	luabind::object l_npc_o = luabind::object(L, l_npc);
+	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 	l_npc_o.push(L);
 	lua_setfield(L, -2, "other");
 }
@@ -436,7 +436,7 @@ void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, 
 void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
 	Lua_Packet l_packet(reinterpret_cast<EQApplicationPacket*>(extra_pointers->at(0)));
-	luabind::object l_packet_o = luabind::object(L, l_packet);
+	luabind::adl::object l_packet_o = luabind::adl::object(L, l_packet);
 	l_packet_o.push(L);
 	lua_setfield(L, -2, "packet");
 
@@ -465,18 +465,18 @@ void handle_item_proc(QuestInterface *parse, lua_State* L, Client* client, ItemI
 					   std::vector<void*> *extra_pointers) {
 
 	Lua_Mob l_mob(mob);
-	luabind::object l_mob_o = luabind::object(L, l_mob);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "target");
 
 	if(IsValidSpell(extra_data)) {
 		Lua_Spell l_spell(&spells[extra_data]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	} else {
 		Lua_Spell l_spell(nullptr);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
 		lua_setfield(L, -2, "spell");
 	}
@@ -486,12 +486,12 @@ void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemI
 					  std::vector<void*> *extra_pointers) {
 	if(mob && mob->IsCorpse()) {
 		Lua_Corpse l_corpse(mob->CastToCorpse());
-		luabind::object l_corpse_o = luabind::object(L, l_corpse);
+		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 		l_corpse_o.push(L);
 		lua_setfield(L, -2, "corpse");
 	} else {
 		Lua_Corpse l_corpse(nullptr);
-		luabind::object l_corpse_o = luabind::object(L, l_corpse);
+		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 		l_corpse_o.push(L);
 		lua_setfield(L, -2, "corpse");
 	}
@@ -512,15 +512,15 @@ void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* 
 						 std::vector<void*> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
-		luabind::object l_npc_o = luabind::object(L, l_npc);
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
 	} else if(client) {
 		Lua_Mob l_client(client);
-		luabind::object l_client_o = luabind::object(L, l_client);
+		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
 	} else {
 		Lua_Mob l_mob(nullptr);
-		luabind::object l_mob_o = luabind::object(L, l_mob);
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 	}
 
@@ -537,15 +537,15 @@ void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* cli
 						 std::vector<void*> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
-		luabind::object l_npc_o = luabind::object(L, l_npc);
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
 	} else if(client) {
 		Lua_Mob l_client(client);
-		luabind::object l_client_o = luabind::object(L, l_client);
+		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
 	} else {
 		Lua_Mob l_mob(nullptr);
-		luabind::object l_mob_o = luabind::object(L, l_mob);
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 	}
 
@@ -568,15 +568,15 @@ void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 					   std::vector<void*> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
-		luabind::object l_npc_o = luabind::object(L, l_npc);
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
 	} else if(client) {
 		Lua_Mob l_client(client);
-		luabind::object l_client_o = luabind::object(L, l_client);
+		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
 	} else {
 		Lua_Mob l_mob(nullptr);
-		luabind::object l_mob_o = luabind::object(L, l_mob);
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 	}
 
@@ -593,15 +593,15 @@ void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Cl
 					   std::vector<void*> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
-		luabind::object l_npc_o = luabind::object(L, l_npc);
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
 	} else if(client) {
 		Lua_Mob l_client(client);
-		luabind::object l_client_o = luabind::object(L, l_client);
+		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
 	} else {
 		Lua_Mob l_mob(nullptr);
-		luabind::object l_mob_o = luabind::object(L, l_mob);
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 	}
 
