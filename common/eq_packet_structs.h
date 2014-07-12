@@ -2089,34 +2089,6 @@ struct SetServerFilter_Struct {
 struct SetServerFilterAck_Struct {
 	uint8 blank[8];
 };
-struct IncreaseStat_Struct{
-	/*0000*/	uint8	unknown0;
-	/*0001*/	uint8	str;
-	/*0002*/	uint8	sta;
-	/*0003*/	uint8	agi;
-	/*0004*/	uint8	dex;
-	/*0005*/	uint8	int_;
-	/*0006*/	uint8	wis;
-	/*0007*/	uint8	cha;
-	/*0008*/	uint8	fire;
-	/*0009*/	uint8	cold;
-	/*0010*/	uint8	magic;
-	/*0011*/	uint8	poison;
-	/*0012*/	uint8	disease;
-	/*0013*/	char	unknown13[116];
-	/*0129*/	uint8	str2;
-	/*0130*/	uint8	sta2;
-	/*0131*/	uint8	agi2;
-	/*0132*/	uint8	dex2;
-	/*0133*/	uint8	int_2;
-	/*0134*/	uint8	wis2;
-	/*0135*/	uint8	cha2;
-	/*0136*/	uint8	fire2;
-	/*0137*/	uint8	cold2;
-	/*0138*/	uint8	magic2;
-	/*0139*/	uint8	poison2;
-	/*0140*/	uint8	disease2;
-};
 
 struct GMName_Struct {
 	char oldname[64];
@@ -3536,40 +3508,6 @@ struct BeggingResponse_Struct
 /*08*/	uint32	Unknown08;
 /*12*/	uint32	Result;	// 0 = Fail, 1 = Plat, 2 = Gold, 3 = Silver, 4 = Copper
 /*16*/	uint32	Amount;
-};
-
-struct FindableNPC_Struct
-{
-/*000*/	uint32	Action;		// 0 = Add, 1 = Remove
-/*004*/	uint32	EntityID;
-/*008*/	char	Name[64];
-/*072*/	char	LastName[32];
-/*104*/	uint32	Race;
-/*108*/	uint8	Class;
-/*109*/	uint8	Unknown109;	// Observed 0x16
-/*110*/	uint8	Unknown110;	// Observed 0x06
-/*111*/	uint8	Unknown111;	// Observed 0x24
-/*112*/
-};
-
-struct GroupRole_Struct
-{
-/*000*/	char	Name1[64];
-/*064*/	char	Name2[64];
-/*128*/	uint32	Unknown128;
-/*132*/	uint32	Unknown132;
-/*136*/	uint32	Unknown136;
-/*140*/	uint32	RoleNumber;
-/*144*/	uint8	Toggle;
-/*145*/	uint8	Unknown145[3];
-/*148*/
-};
-
-struct HideCorpse_Struct
-{
-/*00*/	uint32	Action;
-/*04*/	uint32	Unknown04;
-/*08*/
 };
 
 struct BuffIconEntry_Struct

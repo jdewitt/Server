@@ -67,8 +67,6 @@ void command_resetboat(Client* c,const Seperator *sep);
 void command_bind(Client* c,const Seperator *sep);
 void command_sendop(Client *c, const Seperator *sep);
 void command_optest(Client *c, const Seperator *sep);
-void command_setstat(Client *c, const Seperator *sep);
-void command_incstat(Client *c, const Seperator *sep);
 void command_help(Client *c, const Seperator *sep);
 void command_version(Client *c, const Seperator *sep);
 void command_dbversion(Client *c, const Seperator *sep);

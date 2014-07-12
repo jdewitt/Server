@@ -2988,56 +2988,6 @@ XS(XS_Client_SummonItem)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_SetStats); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetStats)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, type, increase_val)");
-	{
-		Client *		THIS;
-		uint8		type = (uint8)SvUV(ST(1));
-		int16		increase_val = (int16)SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->SetStats(type, increase_val);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IncStats); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IncStats)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, type, increase_val)");
-	{
-		Client *		THIS;
-		uint8		type = (uint8)SvUV(ST(1));
-		int16		increase_val = (int16)SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->IncStats(type, increase_val);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_DropItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DropItem)
 {
@@ -5422,8 +5372,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
 		newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
 		newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
-		newXSproto(strcpy(buf, "SetStats"), XS_Client_SetStats, file, "$$$");
-		newXSproto(strcpy(buf, "IncStats"), XS_Client_IncStats, file, "$$$");
 		newXSproto(strcpy(buf, "DropItem"), XS_Client_DropItem, file, "$$");
 		newXSproto(strcpy(buf, "BreakInvis"), XS_Client_BreakInvis, file, "$");
 		newXSproto(strcpy(buf, "GetGroup"), XS_Client_GetGroup, file, "$");

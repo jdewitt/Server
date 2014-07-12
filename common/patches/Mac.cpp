@@ -2235,11 +2235,7 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_HideCorpse) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_IncreaseStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_KeyRing) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_NewTitlesAvailable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PDeletePetition) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PetitionBug) { ENCODE_FORWARD(OP_Unknown); }
@@ -2259,7 +2255,6 @@ ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Rewind) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
