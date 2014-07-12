@@ -185,11 +185,6 @@ Lua_Spawn Lua_EntityList::GetSpawnByID(uint32 id) {
 	return self->GetSpawnByID(id);
 }
 
-void Lua_EntityList::ClearClientPetitionQueue() {
-	Lua_Safe_Call_Void();
-	self->ClearClientPetitionQueue();
-}
-
 bool Lua_EntityList::CanAddHateForMob(Lua_Mob p) {
 	Lua_Safe_Call_Bool();
 	return self->CanAddHateForMob(p);
@@ -449,7 +444,6 @@ luabind::scope lua_register_entity_list() {
 		.def("GetCorpseByID", (Lua_Corpse(Lua_EntityList::*)(int))&Lua_EntityList::GetCorpseByID)
 		.def("GetCorpseByName", (Lua_Corpse(Lua_EntityList::*)(const char*))&Lua_EntityList::GetCorpseByName)
 		.def("GetSpawnByID", (Lua_Spawn(Lua_EntityList::*)(uint32))&Lua_EntityList::GetSpawnByID)
-		.def("ClearClientPetitionQueue", (void(Lua_EntityList::*)(void))&Lua_EntityList::ClearClientPetitionQueue)
 		.def("CanAddHateForMob", (bool(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::CanAddHateForMob)
 		.def("Message", (void(Lua_EntityList::*)(uint32,uint32,const char*))&Lua_EntityList::Message)
 		.def("MessageStatus", (void(Lua_EntityList::*)(uint32,uint32,uint32,const char*))&Lua_EntityList::MessageStatus)

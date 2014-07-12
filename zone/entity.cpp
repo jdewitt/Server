@@ -2492,7 +2492,7 @@ int32 EntityList::DeletePlayerCorpses()
 
 void EntityList::SendPetitionToAdmins()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionRefresh,sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct *pcus = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pcus->petnumber = 0;		// Petition Number
 	pcus->color = 0;
@@ -2512,7 +2512,7 @@ void EntityList::SendPetitionToAdmins()
 
 void EntityList::SendPetitionToAdmins(Petition *pet)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionRefresh,sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct *pcus = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pcus->petnumber = pet->GetID();		// Petition Number
 	if (pet->CheckedOut()) {
@@ -2541,32 +2541,6 @@ void EntityList::SendPetitionToAdmins(Petition *pet)
 		++it;
 	}
 	safe_delete(outapp);
-}
-
-void EntityList::ClearClientPetitionQueue()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
-	PetitionUpdate_Struct *pet = (PetitionUpdate_Struct*) outapp->pBuffer;
-	pet->color = 0x00;
-	pet->status = 0xFFFFFFFF;
-	pet->senttime = 0;
-	strcpy(pet->accountid, "");
-	strcpy(pet->gmsenttoo, "");
-	strcpy(pet->charname, "");
-	pet->quetotal = petition_list.GetTotalPetitions();
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second->CastToClient()->Admin() >= 100) {
-			int x = 0;
-			for (x = 0; x < 64; x++) {
-				pet->petnumber = x;
-				it->second->CastToClient()->QueuePacket(outapp);
-			}
-		}
-		++it;
-	}
-	safe_delete(outapp);
-	return;
 }
 
 void EntityList::WriteEntityIDs()

@@ -214,16 +214,11 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_InspectRequest] = &Client::Handle_OP_InspectRequest;
 	ConnectedOpcodes[OP_InspectAnswer] = &Client::Handle_OP_InspectAnswer;
 	ConnectedOpcodes[OP_DeleteSpell] = &Client::Handle_OP_DeleteSpell;
-	ConnectedOpcodes[OP_PetitionBug] = &Client::Handle_OP_PetitionBug;
 	ConnectedOpcodes[OP_Bug] = &Client::Handle_OP_Bug;
 	ConnectedOpcodes[OP_Petition] = &Client::Handle_OP_Petition;
 	ConnectedOpcodes[OP_PetitionCheckIn] = &Client::Handle_OP_PetitionCheckIn;
-	ConnectedOpcodes[OP_PetitionResolve] = &Client::Handle_OP_PetitionResolve;
 	ConnectedOpcodes[OP_PetitionDelete] = &Client::Handle_OP_PetitionDelete;
 	ConnectedOpcodes[OP_PetCommands] = &Client::Handle_OP_PetCommands;
-	ConnectedOpcodes[OP_PetitionUnCheckout] = &Client::Handle_OP_PetitionUnCheckout;
-	ConnectedOpcodes[OP_PetitionQue] = &Client::Handle_OP_PetitionQue;
-	ConnectedOpcodes[OP_PDeletePetition] = &Client::Handle_OP_PDeletePetition;
 	ConnectedOpcodes[OP_PetitionCheckout] = &Client::Handle_OP_PetitionCheckout;
 	ConnectedOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectedOpcodes[OP_ReadBook] = &Client::Handle_OP_ReadBook;
@@ -5185,16 +5180,6 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
-{
-	if(app->size!=sizeof(PetitionBug_Struct))
-		printf("Wrong size of BugStruct! Expected: %zu, Got: %i\n",sizeof(PetitionBug_Struct),app->size);
-	else{
-		Message(0, "Petition Bugs are not supported, please use /bug.");
-	}
-	return;
-}
-
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(BugStruct))
@@ -5265,18 +5250,13 @@ void Client::Handle_OP_PetitionCheckIn(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_PetitionResolve(const EQApplicationPacket *app)
-{
-	Handle_OP_PetitionDelete(app);
-}
-
 void Client::Handle_OP_PetitionDelete(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PetitionUpdate_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_PetitionDelete, size=%i, expected %i", app->size, sizeof(PetitionUpdate_Struct));
 		return;
 	}
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetitionRefresh,sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct* pet = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pet->petnumber = *((int*) app->pBuffer);
 	pet->color = 0x00;
@@ -5573,48 +5553,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		printf("Client attempted to use a unknown pet command:\n");
 		break;
 	}
-}
-
-void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(uint32)) {
-		std::cout << "Wrong size: OP_PetitionUnCheckout, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
-		return;
-	}
-	if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
-	else {
-		uint32 getpetnum = *((uint32*) app->pBuffer);
-		Petition* getpet = petition_list.GetPetitionByID(getpetnum);
-		if (getpet != 0) {
-			getpet->SetCheckedOut(false);
-			petition_list.UpdatePetition(getpet);
-			petition_list.UpdateGMQueue();
-			petition_list.UpdateZoneListQueue();
-		}
-	}
-	return;
-}
-
-void Client::Handle_OP_PetitionQue(const EQApplicationPacket *app)
-{
-#ifdef _EQDEBUG
-		printf("%s looking at petitions..\n",this->GetName());
-#endif
-	return;
-}
-
-void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
-{
-	if (app->size < 2) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_PDeletePetition, size=%i, expected %i", app->size, 2);
-		return;
-	}
-	if(petition_list.DeletePetitionByCharName((char*)app->pBuffer))
-		Message_StringID(CC_Default,PETITION_DELETED);
-	else
-		Message_StringID(CC_Default,PETITION_NO_DELETE);
-	return;
 }
 
 void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket *app)

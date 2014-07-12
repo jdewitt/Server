@@ -120,16 +120,11 @@
 	void Handle_OP_InspectAnswer(const EQApplicationPacket *app);
 	void Handle_OP_Medding(const EQApplicationPacket *app);
 	void Handle_OP_DeleteSpell(const EQApplicationPacket *app);
-	void Handle_OP_PetitionBug(const EQApplicationPacket *app);
 	void Handle_OP_Bug(const EQApplicationPacket *app);
 	void Handle_OP_Petition(const EQApplicationPacket *app);
 	void Handle_OP_PetitionCheckIn(const EQApplicationPacket *app);
-	void Handle_OP_PetitionResolve(const EQApplicationPacket *app);
 	void Handle_OP_PetitionDelete(const EQApplicationPacket *app);
 	void Handle_OP_PetCommands(const EQApplicationPacket *app);
-	void Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app);
-	void Handle_OP_PetitionQue(const EQApplicationPacket *app);
-	void Handle_OP_PDeletePetition(const EQApplicationPacket *app);
 	void Handle_OP_PetitionCheckout(const EQApplicationPacket *app);
 	void Handle_OP_PetitionRefresh(const EQApplicationPacket *app);
 	void Handle_OP_ReadBook(const EQApplicationPacket *app);

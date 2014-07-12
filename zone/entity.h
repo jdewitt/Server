@@ -165,7 +165,6 @@ public:
 	void RemoveCorpseByDBID(uint32 dbid);
 	int RezzAllCorpsesByCharID(uint32 charid);
 	bool IsMobInZone(Mob *who);
-	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Mob *p);
 	void	SendGuildMOTD(uint32 guild_id);
 	void	SendGuildSpawnAppearance(uint32 guild_id);
