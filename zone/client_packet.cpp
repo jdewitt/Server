@@ -109,6 +109,7 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_BazaarSearch] = &Client::Handle_OP_BazaarSearchCon;
 //temporary hack:
 	ConnectingOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList;
+	ConnectingOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
 
 	//Begin Connected opcodes:
 	ConnectedOpcodes[OP_ClientUpdate] = &Client::Handle_OP_ClientUpdate;
@@ -517,6 +518,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 {
+	_log(EQMAC__LOG, "NewZone Requested.");
 	conn_state = NewZoneRequested;
 
 	EQApplicationPacket* outapp;
@@ -7008,11 +7010,10 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	Mob::SetMana(m_pp.mana);
 	SetEndurance(m_pp.endurance);
 
-	CalcSpellBonuses(&spellbonuses);
 	uint32 max_slots = GetMaxBuffSlots();
 	for(int i = 0; i < max_slots; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN) {
-			if(!RuleB(Character,StripBuffsOnLowHP) || GetHP() > spellbonuses.HP)
+			if(!RuleB(Character,StripBuffsOnLowHP) || GetHP() > itembonuses.HP)
 			{
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = 10;
@@ -7033,7 +7034,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 				m_pp.buffs[i].effect = 0;
 				m_pp.buffs[i].duration = 0;
 				m_pp.buffs[i].counters = 0;
-				_log(EQMAC__LOG, "Removing buffs. HP is: %i MaxHP is: %i BaseHP is: %i HP from spells is: %i", GetHP(), GetMaxHP(), GetBaseHP(), spellbonuses.HP);
+				_log(EQMAC__LOG, "Removing buffs. HP is: %i MaxHP is: %i BaseHP is: %i HP from items is: %i HP from spells is: %i", GetHP(), GetMaxHP(), GetBaseHP(), itembonuses.HP, spellbonuses.HP);
 				BuffFadeAll();
 			}
 		} else {
@@ -7191,6 +7192,17 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 				continue;
 			const ItemInst *inst=*it;
 			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+		}
+
+		//Items in cursor container
+		itemsinabag = false;
+		int16 slot_id = 0;
+		for (slot_id=331; slot_id<=340; slot_id++) {
+			const ItemInst* inst = m_inv[slot_id];
+			if (inst){
+				itemsinabag = true;
+				_log(EQMAC__LOG, "Sending cursor bag item %s in slot: %i to %s", inst->GetItem()->Name, slot_id, GetName());
+			}
 		}
 	}
 
@@ -7477,6 +7489,11 @@ void Client::CompleteConnect()
 	{
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
+
+	//Send a message until we can figure out how to send these items to the client.
+	if(itemsinabag)
+		Message(CC_Red, "You have zoned with items in a bag on your cursor. Please put the bag in your inventory and camp or zone to avoid desyncs!");
+
 }
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)

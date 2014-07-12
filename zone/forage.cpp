@@ -213,7 +213,7 @@ bool Client::CanFish() {
 		Bait = m_inv.GetItem(bslot);
 
 	if(!Pole || !Pole->IsType(ItemClassCommon) || Pole->GetItem()->ItemType != ItemTypeFishingPole) {
-		if (m_inv.HasItemByUse(ItemTypeFishingPole, 1, invWhereWorn|invWherePersonal|invWhereBank|invWhereSharedBank|invWhereTrading|invWhereCursor))	//We have a fishing pole somewhere, just not equipped
+		if (m_inv.HasItemByUse(ItemTypeFishingPole, 1, invWhereWorn|invWherePersonal|invWhereBank|invWhereTrading|invWhereCursor))	//We have a fishing pole somewhere, just not equipped
 			Message_StringID(MT_Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
 		else	//We don't have a fishing pole anywhere
 			Message_StringID(MT_Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.

@@ -898,7 +898,7 @@ bool Mob::CheckRegion(Mob* other) {
 	ThisRegionType = zone->watermap->ReturnRegionType(GetX(), GetY(), GetZ()-1);
 	OtherRegionType = zone->watermap->ReturnRegionType(other->GetX(), other->GetY(), other->GetZ()-1);
 
-	_log(SPELLS__CASTING, "Caster Region: %d Other Region: %d", ThisRegionType, OtherRegionType);
+	//_log(SPELLS__CASTING, "Caster Region: %d Other Region: %d", ThisRegionType, OtherRegionType);
 
 	if(ThisRegionType == OtherRegionType)
 		return true;

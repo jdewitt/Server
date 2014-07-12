@@ -1210,7 +1210,6 @@ luabind::scope lua_register_slot() {
 	return luabind::class_<Slots>("Slot")
 		.enum_("constants")
 		[
-			luabind::value("Charm", static_cast<int>(SLOT_CHARM)),
 			luabind::value("Ear1", static_cast<int>(SLOT_EAR01)),
 			luabind::value("Head", static_cast<int>(SLOT_HEAD)),
 			luabind::value("Face", static_cast<int>(SLOT_FACE)),

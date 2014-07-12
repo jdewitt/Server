@@ -151,34 +151,6 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 		}
 	}
 
-	if(where_to_check & invWhereSharedBank) {
-		for (i=2500; i<=2501; i++) { // Shared bank
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, true);
-			}
-		}
-
-		for (i=2531; i<=2550; i++) { // Shared bank's containers
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, true);
-			}
-		}
-	}
-
 	return x;
 }
 
@@ -189,11 +161,11 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 	if (!(item->LoreFlag))
 		return false;
 
-	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
-		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != SLOT_INVALID);
+	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except unused, return the result
+		return (m_inv.HasItem(item->ID, 0, ~invWhereUnused) != SLOT_INVALID);
 
 	//If the item has a lore group, we check for other items with the same group and return the result
-	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != SLOT_INVALID);
+	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereUnused) != SLOT_INVALID);
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
@@ -278,7 +250,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		inst->SetInstNoDrop(true);
 
 	// check to see if item is usable in requested slot
-	if(to_slot != SLOT_QUEST && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
+	if(to_slot != SLOT_QUEST && (((to_slot >= 1) && (to_slot <= 21)) || (to_slot == 9999))) {
 		uint32 slottest = (to_slot == 9999) ? 22 : to_slot;
 
 		if(!(slots & ((uint32)1 << slottest))) {
@@ -866,8 +838,6 @@ bool Client::IsValidSlot(uint32 slot)
 		(slot >= 400 && slot <= 404) ||		// Tribute
 		(slot >= 2000 && slot <= 2023) ||	// Bank
 		(slot >= 2031 && slot <= 2270) ||	// Bank bags
-		(slot >= 2500 && slot <= 2501) ||	// Shared bank
-		(slot >= 2531 && slot <= 2550) ||	// Shared bank bags
 		(slot >= 3000 && slot <= 3007) ||	// Trade window
 		(slot >= 4000 && slot <= 4009) ||	// Tradeskill container
 		(slot == 9999))						// Power Source
@@ -882,9 +852,7 @@ bool Client::IsValidSlot(uint32 slot)
 bool Client::IsBankSlot(uint32 slot)
 {
 	if ((slot >= 2000 && slot <= 2023) || // Bank
-		(slot >= 2031 && slot <= 2270) || // Bank bags
-		(slot >= 2500 && slot <= 2501) || // Shared bank
-		(slot >= 2531 && slot <= 2550))	// Shared bank bags
+		(slot >= 2031 && slot <= 2270)) // Bank bags
 	{
 		return true;
 	}
@@ -1038,43 +1006,10 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			return 0;
 		}
 	}
-	//verify shared bank transactions in the database
-	if(src_inst && src_slot_id >= 2500 && src_slot_id <= 2550) {
-		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
-			DeleteItemInInventory(dst_slot_id,0,true);
-			return 0;
-		}
-		if(src_slot_id >= 2500 && src_slot_id <= 2501 && src_inst->IsType(ItemClassContainer)){
-			for (uint8 idx=0; idx<10; idx++) {
-				const ItemInst* baginst = src_inst->GetItem(idx);
-				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(src_slot_id, idx), baginst)){
-					DeleteItemInInventory(Inventory::CalcSlotId(src_slot_id, idx),0,false);
-				}
-			}
-		}
-	}
-	if(dst_inst && dst_slot_id >= 2500 && dst_slot_id <= 2550) {
-		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
-			DeleteItemInInventory(src_slot_id,0,true);
-			return 0;
-		}
-		if(dst_slot_id >= 2500 && dst_slot_id <= 2501 && dst_inst->IsType(ItemClassContainer)){
-			for (uint8 idx=0; idx<10; idx++) {
-				const ItemInst* baginst = dst_inst->GetItem(idx);
-				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(dst_slot_id, idx), baginst)){
-					DeleteItemInInventory(Inventory::CalcSlotId(dst_slot_id, idx),0,false);
-				}
-			}
-		}
-	}
-
 
 	// Check for No Drop Hacks
 	Mob* with = trade->With();
-	if (((with && with->IsClient() && dst_slot_id>=3000 && dst_slot_id<=3007) || // Trade
-	(dst_slot_id >= 2500 && dst_slot_id <= 2550)) // Shared Bank
+	if (((with && with->IsClient() && dst_slot_id>=3000 && dst_slot_id<=3007)) // Trade
 	&& GetInv().CheckNoDrop(src_slot_id)
 	&& RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
 		DeleteItemInInventory(src_slot_id);
@@ -1260,7 +1195,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	else {
 		// Not dealing with charges - just do direct swap
-		if(src_inst && (dst_slot_id < 22 || dst_slot_id == 9999) && dst_slot_id >= 0) {
+		if(src_inst && (dst_slot_id < 22 || dst_slot_id == 9999) && dst_slot_id >= 1) {
 			if (src_inst->GetItem()->Attuneable) {
 				src_inst->SetInstNoDrop(true);
 			}

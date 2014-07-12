@@ -1251,10 +1251,25 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Blind: %+i", effect_value);
 #endif
+				//Clients handle most of this for us for players.
+
 				if (spells[spell_id].base[i] == 1)
 					BuffFadeByEffect(SE_Blind);
-				// handled by client
-				// TODO: blind flag?
+				if(IsNPC() && !CombatRange(caster))
+				{
+					if(RuleB(Combat, EnableFearPathing)){
+						blind = true;
+						CalculateNewFearpoint();
+						if(curfp)
+						{
+							break;
+						}
+					}
+					else
+					{
+						Stun(buffs[buffslot].ticsremaining * 6000 - (6000 - tic_timer.GetRemainingTime()));
+					}
+				}
 				break;
 			}
 
@@ -3699,6 +3714,12 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				buffs[slot].RootBreakChance = 0;
 				rooted = false;
+				break;
+			}
+
+			case SE_Blind:
+			{
+				blind = false;
 				break;
 			}
 

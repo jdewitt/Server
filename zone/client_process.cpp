@@ -684,10 +684,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 }
 
 // Sends the client complete inventory used in character login
-
-// DO WE STILL NEED THE 'ITEMCOMBINED' CONDITIONAL CODE? -U
-
-//#ifdef ITEMCOMBINED
 void Client::BulkSendInventoryItems() {
 	// For future reference: Only the parent item needs to be sent..the ItemInst already contains child ItemInst information
 
@@ -698,7 +694,7 @@ void Client::BulkSendInventoryItems() {
 	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
-	for(slot_id = 0; slot_id <= 29; slot_id++) {
+	for(slot_id = 1; slot_id <= 29; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -708,7 +704,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	//Items in containers
-	for (slot_id=251; slot_id<=330; slot_id++) {
+	for (slot_id=251; slot_id<=340; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -775,7 +771,7 @@ void Client::BulkSendItems()
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);
 
-	for (slot_id=0; slot_id<=29; slot_id++) {
+	for (slot_id=1; slot_id<=29; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -783,7 +779,7 @@ void Client::BulkSendItems()
 	}
 
 	//Items in containers
-		for (slot_id=251; slot_id<=330; slot_id++) {
+		for (slot_id=251; slot_id<=340; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -1891,14 +1887,3 @@ void Client::DoTracking()
 	}
 }
 
-void Client::SendNewZone(NewZone_Struct newzone_data, char* name)
-{
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
-	NewZone_Struct* nz = (NewZone_Struct*)outapp->pBuffer;
-	memcpy(outapp->pBuffer, &zone->newzone_data, sizeof(NewZone_Struct));
-	strcpy(nz->char_name, name);
-
-	_log(ZONE__INIT, "NewZone data for %s (%i). Underworld: %f max_z: %f", zone->newzone_data.zone_short_name, zone->newzone_data.zone_id, zone->newzone_data.underworld, zone->newzone_data.max_z);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}

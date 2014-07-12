@@ -56,15 +56,11 @@ namespace ItemField
 };
 
 // Indexing positions to the beginning slot_id's for a bucket of slots
-#define IDX_EQUIP		0
 #define IDX_CURSOR_BAG	331
 #define IDX_INV			22
 #define IDX_INV_BAG		251
-#define IDX_TRIBUTE		400
 #define IDX_BANK		2000
 #define IDX_BANK_BAG	2031
-#define IDX_SHBANK		2500
-#define IDX_SHBANK_BAG	2531
 #define IDX_TRADE		3000
 #define IDX_TRADE_BAG	3031
 #define IDX_TRADESKILL	4000
@@ -90,7 +86,7 @@ enum {
 	invWhereWorn		= 0x01,
 	invWherePersonal	= 0x02,	//in the character's inventory
 	invWhereBank		= 0x04,
-	invWhereSharedBank	= 0x08,
+	invWhereUnused	    = 0x08,
 	invWhereTrading		= 0x10,
 	invWhereCursor		= 0x20
 };

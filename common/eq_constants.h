@@ -699,7 +699,7 @@ enum InventorySlot
 	// Equip slots
 	////////////////////////
 
-	SLOT_CHARM		= 0,
+	SLOT_CURSOR		= 0,
 	SLOT_EAR01		= 1,
 	SLOT_HEAD		= 2,
 	SLOT_FACE		= 3,
@@ -728,14 +728,12 @@ enum InventorySlot
 	SLOT_PERSONAL_BEGIN = 22,
 	SLOT_PERSONAL_END = 29,
 
-	SLOT_CURSOR		= 30,
-
 	SLOT_CURSOR_END	= (int16)0xFFFE,	// Last item on cursor queue
-	// Cursor bag slots are 331->340 (10 slots)
+	// Cursor bag slots are 331->340 (10 slots) (EQMac: 330-339)
 
 	// Personal Inventory Slots
 	// Slots 1 through 8 are slots 22->29
-	// Inventory bag slots are 251->330 (10 slots per bag)
+	// Inventory bag slots are 251->330 (10 slots per bag) (EQMac: 250-329)
 
 	// Tribute slots are 400-404? (upper bound unknown)
 	// storing these in worn item's map
@@ -743,10 +741,6 @@ enum InventorySlot
 	// Bank slots
 	// Bank slots 1 through 16 are slots 2000->2015
 	// Bank bag slots are 2031->2190
-
-	// Shared bank slots
-	// Shared bank slots 1 through 2 are slots 2500->2501
-	// Shared bank bag slots are 2531->2550
 
 	// Trade session slots
 	// Trade slots 1 through 8 are slots 3000->3007

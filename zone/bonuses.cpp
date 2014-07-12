@@ -2335,6 +2335,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->BlockBehind += effect_value;
 				break;
 
+			case SE_Blind:
+				if(IsNPC() && IsBlind())
+					newbon->IsFeared = true;
+				break;
+
 			case SE_Fear:
 				newbon->IsFeared = true;
 				break;
@@ -3653,6 +3658,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.BlockBehind = effect_value;
 					aabonuses.BlockBehind = effect_value;
 					itembonuses.BlockBehind = effect_value;
+					break;
+
+				case SE_Blind:
+					if(IsNPC())
+						spellbonuses.IsFeared = false;
 					break;
 
 				case SE_Fear:
