@@ -329,6 +329,7 @@ Mob::Mob(const char* in_name,
 	roamer = false;
 	rooted = false;
 	charmed = false;
+	blind = false;
 	has_virus = false;
 	for (i=0; i<MAX_SPELL_TRIGGER*2; i++) {
 		viral_spells[i] = 0;

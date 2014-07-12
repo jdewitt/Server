@@ -149,17 +149,17 @@ bool ret=true;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	// Delete cursor items
-	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=30 or (slotid>=331 and slotid<=340))", char_id), errbuf))) {
+	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=0 or (slotid>=331 and slotid<=340))", char_id), errbuf))) {
 		for(it=start,i=8000;it!=end;++it,i++) {
 			ItemInst *inst=*it;
-			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? 30 : i)))
+			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? 0 : i)))
 				break;
 		}
+		//_log(EQMAC__LOG, "Cursor Saved Query: %s.", query);
 	} else {
-		std::cout << "Clearing cursor failed: " << errbuf << std::endl;
+		_log(EQMAC__LOG, "Clearing cursor failed: %s", errbuf);
 	}
 	safe_delete_array(query);
-
 	return ret;
 }
 
@@ -204,86 +204,41 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	bool ret = false;
-	uint32 augslot[5] = { 0, 0, 0, 0, 0 };
 
 	//never save tribute slots:
 	if(slot_id >= 400 && slot_id <= 404)
 		return(true);
 
-	if (inst && inst->IsType(ItemClassCommon)) {
-		for(int i=0;i<5;i++) {
-			ItemInst *auginst=inst->GetItem(i);
-			augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
+	// All other inventory
+	if (!inst) {
+		// Delete item
+		ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid=%i",
+			char_id, slot_id), errbuf);
+
+		// Delete bag slots, if need be
+		if (ret && Inventory::SupportsContainers(slot_id)) {
+			safe_delete_array(query);
+			int16 base_slot_id = Inventory::CalcSlotId(slot_id, 0);
+			ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
+				char_id, base_slot_id, (base_slot_id+10)), errbuf);
 		}
 	}
+	else {
+		uint16 charges = 0;
+		if(inst->GetCharges() >= 0)
+			charges = inst->GetCharges();
+		else
+			charges = 0x7FFF;
+		// Update/Insert item
+		uint32 len_query = MakeAnyLenString(&query,
+			"REPLACE INTO inventory "
+			"	(charid,slotid,itemid,charges,instnodrop,custom_data,color)"
+			" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu)",
+			(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
+			(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor());
 
-	if (slot_id>=2500 && slot_id<=2600) { // Shared bank inventory
-		if (!inst) {
-			// Delete item
-			uint32 account_id = GetAccountIDByChar(char_id);
-			uint32 len_query = MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i",
-				account_id, slot_id);
-
-			ret = RunQuery(query, len_query, errbuf);
-
-			// Delete bag slots, if need be
-			if (ret && Inventory::SupportsContainers(slot_id)) {
-				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, 0);
-				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM sharedbank WHERE acctid=%i AND slotid>=%i AND slotid<%i",
-					account_id, base_slot_id, (base_slot_id+10)), errbuf);
-			}
-		}
-		else {
-			// Update/Insert item
-			uint32 account_id = GetAccountIDByChar(char_id);
-			uint16 charges = 0;
-			if(inst->GetCharges() >= 0)
-				charges = inst->GetCharges();
-			else
-				charges = 0x7FFF;
-
-			uint32 len_query = MakeAnyLenString(&query,
-				"REPLACE INTO sharedbank "
-				"	(acctid,slotid,itemid,charges,custom_data)"
-				" VALUES(%lu,%lu,%lu,%lu,'%s')",
-				(unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				inst->GetCustomDataString().c_str());
-
-
-			ret = RunQuery(query, len_query, errbuf);
-		}
-	}
-	else { // All other inventory
-		if (!inst) {
-			// Delete item
-			ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid=%i",
-				char_id, slot_id), errbuf);
-
-			// Delete bag slots, if need be
-			if (ret && Inventory::SupportsContainers(slot_id)) {
-				safe_delete_array(query);
-				int16 base_slot_id = Inventory::CalcSlotId(slot_id, 0);
-				ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND slotid>=%i AND slotid<%i",
-					char_id, base_slot_id, (base_slot_id+10)), errbuf);
-			}
-		}
-		else {
-			uint16 charges = 0;
-			if(inst->GetCharges() >= 0)
-				charges = inst->GetCharges();
-			else
-				charges = 0x7FFF;
-			// Update/Insert item
-			uint32 len_query = MakeAnyLenString(&query,
-				"REPLACE INTO inventory "
-				"	(charid,slotid,itemid,charges,instnodrop,custom_data,color)"
-				" VALUES(%lu,%lu,%lu,%lu,%lu,'%s',%lu)",
-				(unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID, (unsigned long)charges,
-				(unsigned long)(inst->IsInstNoDrop() ? 1:0),inst->GetCustomDataString().c_str(),(unsigned long)inst->GetColor());
-
-			ret = RunQuery(query, len_query, errbuf);
-		}
+		ret = RunQuery(query, len_query, errbuf);
+		//_log(EQMAC__LOG, "Inventory Saved Query: %s.", query);
 	}
 
 	if (!ret)
@@ -534,7 +489,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 					}
 				}
 
-				if (instnodrop || (slot_id >= 0 && slot_id <= 21 && inst->GetItem()->Attuneable))
+				if (instnodrop || (slot_id >= 1 && slot_id <= 21 && inst->GetItem()->Attuneable))
 						inst->SetInstNoDrop(true);
 				if (color > 0)
 					inst->SetColor(color);

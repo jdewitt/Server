@@ -676,7 +676,7 @@ public:
 
 	// Item methods
 	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =
-		(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
+		(invWhereWorn | invWherePersonal | invWhereBank | invWhereTrading | invWhereCursor));
 	void	SetTint(int16 slot_id, uint32 color);
 	void	SetTint(int16 slot_id, Color_Struct& color);
 	void	SetMaterial(int16 slot_id, uint32 item_id);
@@ -846,7 +846,6 @@ public:
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
-	void SendNewZone(NewZone_Struct newzone_data, char* name);
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
@@ -980,6 +979,7 @@ private:
 	uint32				ip;
 	uint16				port;
 	CLIENT_CONN_STATUS	client_state;
+	bool				itemsinabag;
 	uint32				character_id;
 	uint32				WID;
 	uint32				account_id;

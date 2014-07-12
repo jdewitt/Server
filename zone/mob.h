@@ -739,6 +739,7 @@ public:
 	//void SetFeared(Mob *caster, uint32 duration, bool flee = false);
 	float GetFearSpeed();
 	bool IsFeared() { return curfp; } // This returns true if the mob is feared or fleeing due to low HP
+	bool IsBlind() { return blind; } // Returns true if a NPC is blinded and running.
 	//old fear: inline void StartFleeing() { SetFeared(GetHateTop(), FLEE_RUN_DURATION, true); }
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
@@ -1080,6 +1081,7 @@ protected:
 	bool charmed; //this isnt fully implemented yet
 	bool rooted;
 	bool silenced;
+	bool blind;
 	bool amnesiad;
 	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool has_virus; // whether this mob has a viral spell on them
