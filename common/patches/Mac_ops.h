@@ -126,9 +126,6 @@ E(OP_OnLevelMessage);
 E(OP_PlayMP3);
 E(OP_PopupResponse);
 E(OP_RaidJoin);
-E(OP_RecipeAutoCombine);
-E(OP_RecipeDetails);
-E(OP_RecipeReply);
 E(OP_RemoveAllDoors);
 E(OP_RequestTitles);
 E(OP_SendAAStats);
@@ -141,18 +138,9 @@ E(OP_Shielding);
 E(OP_ShopItem);
 E(OP_SpawnPositionUpdate);
 E(OP_SpellEffect);
-E(OP_TargetReject);
-E(OP_TestBuff);
-E(OP_TrackTarget);
-E(OP_TrackUnknown);
-E(OP_TradeBusy);
 E(OP_TraderDelItem);
 E(OP_TraderItemUpdate);
 E(OP_Untargetable);
 E(OP_UpdateAA);
-E(OP_WeaponEquip1);
-E(OP_WeaponEquip2);
-E(OP_WeaponUnequip2);
-E(OP_WorldObjectsSent);
 #undef E
 #undef D

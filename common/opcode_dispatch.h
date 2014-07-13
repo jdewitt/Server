@@ -95,7 +95,6 @@ IN(OP_Consume, Consume_Struct);
 IN(OP_ConsiderCorpse, Consider_Struct);
 IN(OP_Consider, Consider_Struct);
 INr(OP_Begging);	//?
-INr(OP_TestBuff);
 IN(OP_Surname, Surname_Struct);
 INr(OP_YellForHelp);
 IN(OP_Assist, EntityId_Struct);		//generic
@@ -146,7 +145,6 @@ IN(OP_Taunt, ClientTarget_Struct);
 INz(OP_InstillDoubt);
 IN(OP_RezzAnswer, Resurrect_Struct);
 IN(OP_GMSummon, GMSummon_Struct);
-IN(OP_TradeBusy, TradeBusy_Struct);
 IN(OP_TradeRequest, TradeRequest_Struct);
 IN(OP_TradeRequestAck, TradeRequest_Struct);	//follows OP_TradeRequest
 IN(OP_CancelTrade, CancelTrade_Struct);
@@ -169,9 +167,6 @@ IN(OP_ShopPlayerSell, Merchant_Purchase_Struct);
 INr(OP_ShopEnd);		//?
 IN(OP_ClickObjectAction, ClickObjectAction_Struct);
 IN(OP_ClickObject, ClickObject_Struct);
-IN(OP_RecipeDetails, uint32);
-//there is also a complicated OP_RecipeDetails reply struct OUT
-IN(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 IN(OP_TradeSkillCombine, NewCombine_Struct);
 IN(OP_ClickDoor, ClickDoor_Struct);
 INr(OP_CreateObject);	//?
@@ -217,9 +212,7 @@ IN(OP_Trader, Trader_ShowItems_Struct);
 IN(OP_GMFind, GMSummon_Struct);
 IN(OP_PickPocket, PickPocket_Struct);
 IN(OP_Bind_Wound, BindWound_Struct);
-INr(OP_TrackTarget);
 INr(OP_Track);
-INz(OP_TrackUnknown);		//follows OP_Track
 #ifdef DISJOINT_STATES
 IN(OP_ClientError, ClientError_Struct);
 #endif
@@ -244,7 +237,6 @@ OUTz(OP_ClearObject);
 OUTz(OP_FinishTrade);		//follows OP_TradeAcceptClick
 OUTz(OP_GMEndTrainingResponse);	//follows OP_GMTraining
 OUTz(OP_LootComplete);		//follows OP_LootItem
-OUTz(OP_WorldObjectsSent);
 //OUTz(OP_TradeSkillCombine);
 
 OUTv(OP_ItemPacket, ItemPacket_Struct);
@@ -287,7 +279,6 @@ OUT(OP_PlayerProfile, PlayerProfile_Struct);
 OUT(OP_RaidUpdate, ZoneInSendName_Struct);
 //alt:OUTv(OP_RaidUpdate, RaidMembers_Struct);
 OUT(OP_RandomReply, RandomReply_Struct);
-OUT(OP_RecipeReply, RecipeReply_Struct);
 OUT(OP_RequestClientZoneChange, RequestClientZoneChange_Struct);
 OUT(OP_RespondAA, AATable_Struct);
 OUT(OP_RezzRequest, Resurrect_Struct);
@@ -299,7 +290,6 @@ OUT(OP_Projectile, Arrow_Struct);
 OUT(OP_SpellEffect, SpellEffect_Struct);
 OUT(OP_Stamina, Stamina_Struct);
 OUT(OP_Stun, Stun_Struct);
-OUT(OP_TargetReject, TargetReject_Struct);
 OUT(OP_TimeOfDay, TimeOfDay_Struct);
 OUT(OP_Track, Track_Struct);
 OUT(OP_TradeCoins, TradeCoin_Struct);
@@ -345,7 +335,6 @@ OUT(OP_ManaChange, ManaChange_Struct);
 OUT(OP_MemorizeSpell, MemorizeSpell_Struct);
 OUT(OP_MoveItem, MoveItem_Struct);
 OUT(OP_PickPocket, sPickPocket_Struct);
-OUT(OP_RecipeAutoCombine, RecipeAutoCombine_Struct);
 OUT(OP_RequestDuel, Duel_Struct);
 OUT(OP_ShopPlayerBuy, Merchant_Sell_Struct);
 OUT(OP_ShopPlayerSell, Merchant_Purchase_Struct);

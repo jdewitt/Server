@@ -1003,15 +1003,6 @@ struct ClientTarget_Struct {
 /*000*/	uint32	new_target;			// Target ID
 };
 
-/*
-** Target Rejection Struct
-** Length: 12 Bytes
-** OpCode: OP_TargetReject
-*/
-struct TargetReject_Struct {
-/*00*/	uint8	unknown00[12];
-};
-
 struct PetCommand_Struct {
 /*000*/ uint32	command;
 /*004*/ uint32	unknown;
@@ -1976,16 +1967,6 @@ struct CancelTrade_Struct {
 /*08*/
 };
 
-struct TradeBusy_Struct {
-/*00*/	uint32 to_mob_id;
-/*04*/	uint32 from_mob_id;
-/*08*/	uint8 type;			// Seen 01
-/*09*/	uint8 unknown09;	// Seen EF (239)
-/*10*/	uint8 unknown10;	// Seen FF (255)
-/*11*/	uint8 unknown11;	// Seen FF (255)
-/*12*/
-};
-
 struct PetitionUpdate_Struct {
 	uint32 petnumber;	// Petition Number
 	uint32 color;		// 0x00 = green, 0x01 = yellow, 0x02 = red
@@ -2591,11 +2572,6 @@ struct Tracking_Struct {
 	Track_Struct Entrys[0];
 };
 
-struct TrackTarget_Struct
-{
-	uint32	EntityID;
-};
-
 /*
 ** ZoneServerInfo_Struct
 ** Zone server information
@@ -2996,28 +2972,6 @@ struct TradeskillFavorites_Struct {
 	uint32 object_type;
 	uint32 some_id;
 	uint32 favorite_recipes[500];
-};
-
-//one sent for each item, from server in reply to favorites or search
-struct RecipeReply_Struct {
-	uint32 object_type;
-	uint32 some_id; //same as in favorites
-	uint32 component_count;
-	uint32 recipe_id;
-	uint32 trivial;
-	char recipe_name[64];
-/*84*/
-};
-
-//received and sent back as an ACK with different reply_code
-struct RecipeAutoCombine_Struct {
-	uint32 object_type;
-	uint32 some_id;
-	uint32 unknown1;		//echoed in reply
-	uint32 recipe_id;
-	uint32 reply_code;		// 93 64 e1 00 (junk) in request
-								// 00 00 00 00 in successful reply
-								// f5 ff ff ff in 'you dont have all the stuff' reply
 };
 
 struct MerchantList {

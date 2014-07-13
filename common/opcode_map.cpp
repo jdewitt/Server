@@ -21,7 +21,6 @@ void load_opcode_names()
 	opcode_map[0x01d7]="LiveOP_SimpleMessage";
 	opcode_map[0x01d8]="LiveOP_FormattedMessage";
 	opcode_map[0x01c6]="LiveOP_TGB";
-	opcode_map[0x0285]="LiveOP_TestBuff";
 	opcode_map[0x012d]="LiveOP_Bind_Wound";
 	opcode_map[0x01ab]="LiveOP_Charm";
 	opcode_map[0x014c]="LiveOP_Begging";
@@ -77,8 +76,6 @@ void load_opcode_names()
 	opcode_map[0x013b]="LiveOP_GMTraining";
 	opcode_map[0x017b]="LiveOP_ConsumeAmmo";
 	opcode_map[0x0171]="LiveOP_CombatAbility";
-	opcode_map[0x009c]="LiveOP_TrackUnknown";
-	opcode_map[0x0234]="LiveOP_TrackTarget";
 	opcode_map[0x0286]="LiveOP_Track";
 	opcode_map[0x0297]="LiveOP_ReadBook";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
@@ -108,7 +105,6 @@ void load_opcode_names()
 	opcode_map[0x0186]="LiveOP_AutoAttack2";
 	opcode_map[0x0173]="LiveOP_TargetMouse";
 	opcode_map[0x01ba]="LiveOP_TargetCommand";
-	opcode_map[0x01d8]="LiveOP_TargetReject";
 	opcode_map[0x009e]="LiveOP_Hide";
 	opcode_map[0x012e]="LiveOP_Forage";
 	opcode_map[0x0077]="LiveOP_Fishing";
@@ -208,9 +204,6 @@ void load_opcode_names()
 	opcode_map[0x02fa]="LiveOP_TributeNPC";
 	opcode_map[0x02fe]="LiveOP_TributeMoney";
 	opcode_map[0x0364]="LiveOP_TributeToggle";
-	opcode_map[0x01fa]="LiveOP_RecipeReply";
-	opcode_map[0x01fb]="LiveOP_RecipeDetails";
-	opcode_map[0x01fc]="LiveOP_RecipeAutoCombine";
 	opcode_map[0x01dd]="LiveOP_Shielding";
 	opcode_map[0x0198]="LiveOP_SetDataRate";
 	opcode_map[0x023b]="LiveOP_ZoneEntry";
@@ -239,7 +232,6 @@ void load_opcode_names()
 	opcode_map[0x0269]="LiveOP_SetChatServer";
 	opcode_map[0x0264]="LiveOP_ZoneServerInfo";
 	opcode_map[0x012c]="LiveOP_WearChange";
-	opcode_map[0x1FA1]="LiveOP_WorldObjectsSent";
 	opcode_map[0x4656]="LiveOP_SpawnPositionUpdate";
 	opcode_map[0x4b61]="LiveOP_ManaUpdate";
 	opcode_map[0x73a8]="LiveOP_SendMaxCharacters";
