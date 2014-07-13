@@ -282,7 +282,6 @@ public:
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
-	void TempName(const char *newname = nullptr);
 	void SetTargetable(bool on);
 	bool IsTargetable() const { return m_targetable; }
 	bool HasShieldEquiped() const { return has_shieldequiped; }

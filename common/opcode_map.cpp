@@ -232,7 +232,6 @@ void load_opcode_names()
 	opcode_map[0x0269]="LiveOP_SetChatServer";
 	opcode_map[0x0264]="LiveOP_ZoneServerInfo";
 	opcode_map[0x012c]="LiveOP_WearChange";
-	opcode_map[0x4656]="LiveOP_SpawnPositionUpdate";
 	opcode_map[0x4b61]="LiveOP_ManaUpdate";
 	opcode_map[0x73a8]="LiveOP_SendMaxCharacters";
 }

@@ -253,7 +253,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
-	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
@@ -7959,41 +7958,6 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	}
 	PendingSacrifice = false;
 	SacrificeCaster.clear();
-}
-
-void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(PopupResponse_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PopupResponse expected %i got %i",
-					sizeof(PopupResponse_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
-
-	// Handle any EQEmu defined popup Ids first
-	switch(prs->popupid)
-	{
-		case POPUPID_UPDATE_SHOWSTATSWINDOW:
-			if(GetTarget() && GetTarget()->IsClient())
-				GetTarget()->CastToClient()->SendStatsWindow(this, true);
-			else
-				SendStatsWindow(this, true);
-			return;
-
-		default:
-			break;
-	}
-
-	char buf[16];
-	sprintf(buf, "%d\0", prs->popupid);
-
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
-
-	Mob* Target = GetTarget();
-	if(Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
-	}
 }
 
 void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {

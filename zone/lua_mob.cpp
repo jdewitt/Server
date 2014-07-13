@@ -1595,16 +1595,6 @@ void Lua_Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_d
 	self->SendSpellEffect(effect_id, duration, finish_delay, zone_wide, unk020, perm_effect, c);
 }
 
-void Lua_Mob::TempName() {
-	Lua_Safe_Call_Void();
-	self->TempName();
-}
-
-void Lua_Mob::TempName(const char *newname) {
-	Lua_Safe_Call_Void();
-	self->TempName(newname);
-}
-
 void Lua_Mob::SetGlobal(const char *varname, const char *newvalue, int options, const char *duration) {
 	Lua_Safe_Call_Void();
 	self->SetGlobal(varname, newvalue, options, duration);
@@ -2081,8 +2071,6 @@ luabind::scope lua_register_mob() {
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool))&Lua_Mob::SendSpellEffect)
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)
-		.def("TempName", (void(Lua_Mob::*)(void))&Lua_Mob::TempName)
-		.def("TempName", (void(Lua_Mob::*)(const char*))&Lua_Mob::TempName)
 		.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*))&Lua_Mob::SetGlobal)
 		.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*,Lua_Mob))&Lua_Mob::SetGlobal)
 		.def("TarGlobal", (void(Lua_Mob::*)(const char*,const char*,const char*,int,int,int))&Lua_Mob::TarGlobal)

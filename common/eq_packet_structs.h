@@ -1549,24 +1549,6 @@ struct GuildCommand_Struct {
 	uint32 officer;
 };
 
-
-struct OnLevelMessage_Struct
-{
-	char	Title[128];
-	char	Text[4096];
-	uint32	Buttons;
-	uint32	Duration;
-	uint32	PopupID;
-	uint32	NegativeID;
-	char	ButtonName0[25];
-	char	ButtonName1[25];
-};
-
-struct PopupResponse_Struct {
-/*0000*/	uint32	unknown0000;
-/*0004*/	uint32	popupid;
-};
-
 // Server -> Client
 // Update a guild members rank and banker status
 struct GuildSetRank_Struct
@@ -3014,15 +2996,6 @@ struct FindPersonRequest_Struct {
 struct FindPersonResult_Struct {
 	FindPerson_Point dest;
 	FindPerson_Point path[0];	//last element must be the same as dest
-};
-
-struct MobRename_Struct {
-/*000*/	char	old_name[64];
-/*064*/	char	old_name_again[64];	//not sure what the difference is
-/*128*/	char	new_name[64];
-/*192*/	uint32	unknown192;		//set to 0
-/*196*/	uint32	unknown196;		//set to 1
-/*200*/
 };
 
 struct PlayMP3_Struct {

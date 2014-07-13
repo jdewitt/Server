@@ -268,7 +268,6 @@ OUT(OP_HPUpdate, SpawnHPUpdate_Struct);
 OUT(OP_LevelUpdate, LevelUpdate_Struct);
 OUT(OP_ManaUpdate, ManaUpdate_Struct);
 OUT(OP_MobHealth, MobHealth_Struct);
-OUT(OP_MobRename, MobRename_Struct);
 OUT(OP_MoneyOnCorpse, moneyOnCorpseStruct);	//follows OP_LootRequest
 OUT(OP_MoneyUpdate, MoneyUpdate_Struct);
 OUT(OP_MoveDoor, MoveDoor_Struct);
@@ -315,7 +314,6 @@ OUT(OP_AAAction, UseAA_Struct);
 OUT(OP_Buff, SpellBuffFade_Struct);
 OUT(OP_ClickObject, ClickObject_Struct);
 OUT(OP_ClientUpdate, PlayerPositionUpdateServer_Struct);
-OUT(OP_SpawnPositionUpdate, SpawnPositionUpdate_Struct);
 OUT(OP_Consider, Consider_Struct);
 OUT(OP_Damage, CombatDamage_Struct);
 OUT(OP_Death, Death_Struct);

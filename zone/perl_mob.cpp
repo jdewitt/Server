@@ -7130,33 +7130,6 @@ XS(XS_Mob_SpellEffect)
 	XSRETURN_EMPTY;
 }
 
-
-XS(XS_Mob_TempName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_TempName)
-{
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, name)");
-	{
-		Mob *		THIS;
-		char *		name = nullptr;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
-
-		THIS->TempName(name);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_GetItemStat); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetItemStat)
 {
@@ -8244,7 +8217,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SendIllusion"), XS_Mob_SendIllusion, file, "$$;$$$$$$$$$$$$");
 		newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$");
 		newXSproto(strcpy(buf, "SpellEffect"), XS_Mob_SpellEffect, file, "$$;$$$$$$");
-		newXSproto(strcpy(buf, "TempName"), XS_Mob_TempName, file, "$:$");
 		newXSproto(strcpy(buf, "GetItemStat"), XS_Mob_GetItemStat, file, "$$$");
 		newXSproto(strcpy(buf, "SetGlobal"), XS_Mob_SetGlobal, file, "$$$$$;$");
 		newXSproto(strcpy(buf, "TarGlobal"), XS_Mob_TarGlobal, file, "$$$$$$$");

@@ -169,7 +169,6 @@
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
 	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
-	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
