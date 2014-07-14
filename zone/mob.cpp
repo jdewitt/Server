@@ -443,15 +443,27 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
-void Mob::SetInvisible(uint8 state, bool showInvis)
+void Mob::SetInvisible(int invisType)
 {
-	invisible = (bool) state;
-	if(showInvis) {
+    Say("invisType: %d", invisType);
+    switch(invisType)
+    {
+    case InvisType::INVIS_NORMAL:
+        invisible = true;
+    case InvisType::INVIS_ANIMAL:
+        invisible_animals = true;
+    case InvisType::INVIS_UNDEAD:
+        invisible_undead = true;
+    case InvisType::INVIS_HIDDEN:
+        hidden = true;
+    }
+
+	if(invisible) {
 		SendAppearancePacket(AT_Invis, invisible);
 	}
 	// Invis and hide breaks charms
 
-	if (HasPet() && (invisible || hidden || improved_hidden))
+	if (HasPet() && (invisible || invisible_animals || invisible_undead || hidden || improved_hidden))
 	{
 		Mob* formerpet = GetPet();
 
