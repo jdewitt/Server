@@ -442,10 +442,46 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	}
 	return(ANIM_STAND);
 }
+void Mob::BreakInvis()
+{
+	if(invisible && (FindBuff(SE_Invisibility) || FindBuff(SE_Invisibility2)))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
+		BuffFadeByEffect(SE_Invisibility);
+		BuffFadeByEffect(SE_Invisibility2);
+	}
+	if(invisible_undead && (FindBuff(SE_InvisVsUndead) || FindBuff(SE_InvisVsUndead2)))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsUndead);
+		BuffFadeByEffect(SE_InvisVsUndead2);
+	}
+	if(invisible_animals && FindBuff(SE_InvisVsAnimals))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsAnimals);
+	}
+	if (invisible || hidden || improved_hidden)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x03;
+		sa_out->parameter = 0;
+		entity_list.QueueClients(this, outapp, true);
+		safe_delete(outapp);
+	}
+
+	invisible = false;
+	invisible_undead = false;
+	invisible_animals = false;
+	hidden = false;
+	improved_hidden = false;
+}
+
 
 void Mob::SetInvisible(int invisType)
 {
-    Say("invisType: %d", invisType);
     switch(invisType)
     {
     case InvisType::INVIS_NORMAL:

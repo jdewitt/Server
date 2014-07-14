@@ -1124,25 +1124,6 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	Save();
 }
 
-void Client::BreakInvis()
-{
-	if (invisible)
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
-		invisible = false;
-		invisible_undead = false;
-		invisible_animals = false;
-		hidden = false;
-		improved_hidden = false;
-	}
-}
-
 static uint64 CoinTypeCoppers(uint32 type) {
 	switch(type) {
 	case COINTYPE_PP:

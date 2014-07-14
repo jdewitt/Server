@@ -172,6 +172,7 @@ public:
 	inline bool GetSeeInvisible(uint8 see_invis);
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(int invisType);
+	void BreakInvis();
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
 	
 	//Song

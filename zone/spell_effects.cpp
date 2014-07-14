@@ -3694,13 +3694,13 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_InvisVsUndead2:
 			case SE_InvisVsUndead:
 			{
-				invisible_undead = false;	// Mongrel: No longer IVU
+				BreakInvis();
 				break;
 			}
 
 			case SE_InvisVsAnimals:
 			{
-				invisible_animals = false;
+				BreakInvis();
 				break;
 			}
 
