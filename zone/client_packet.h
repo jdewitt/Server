@@ -7,7 +7,6 @@
 	void Handle_Connect_0x3e33(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app);
-	void Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app);
 	void Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket *app);
 	void Handle_Connect_OP_WearChange(const EQApplicationPacket *app);
@@ -27,7 +26,6 @@
 	void Handle_OP_ConsiderCorpse(const EQApplicationPacket *app);
 	void Handle_OP_Consider(const EQApplicationPacket *app);
 	void Handle_OP_Begging(const EQApplicationPacket *app);
-	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_Surname(const EQApplicationPacket *app);
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_Assist(const EQApplicationPacket *app);
@@ -104,8 +102,6 @@
 	void Handle_OP_ShopEnd(const EQApplicationPacket *app);
 	void Handle_OP_ClickObjectAction(const EQApplicationPacket *app);
 	void Handle_OP_ClickObject(const EQApplicationPacket *app);
-	void Handle_OP_RecipeDetails(const EQApplicationPacket *app);
-	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_TradeSkillCombine(const EQApplicationPacket *app);
 	void Handle_OP_ClickDoor(const EQApplicationPacket *app);
 	void Handle_OP_CreateObject(const EQApplicationPacket *app);
@@ -147,9 +143,7 @@
 	void Handle_OP_GMFind(const EQApplicationPacket *app);
 	void Handle_OP_PickPocket(const EQApplicationPacket *app);
 	void Handle_OP_Bind_Wound(const EQApplicationPacket *app);
-	void Handle_OP_TrackTarget(const EQApplicationPacket *app);
 	void Handle_OP_Track(const EQApplicationPacket *app);
-	void Handle_OP_TrackUnknown(const EQApplicationPacket *app);
 	void Handle_0x01e7(const EQApplicationPacket *app);
 	void Handle_OP_ClientError(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);
@@ -175,13 +169,11 @@
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
 	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
-	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
-	void Handle_OP_TradeBusy(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
 	void Handle_OP_Action(const EQApplicationPacket *app);
 	void Handle_OP_Discipline(const EQApplicationPacket *app);

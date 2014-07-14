@@ -1651,42 +1651,6 @@ void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay,
 
 }
 
-void Mob::TempName(const char *newname)
-{
-	char temp_name[64];
-	char old_name[64];
-	strn0cpy(old_name, GetName(), 64);
-
-	if(newname)
-		strn0cpy(temp_name, newname, 64);
-
-	// Reset the name to the original if left null.
-	if(!newname) {
-		strn0cpy(temp_name, GetOrigName(), 64);
-		SetName(temp_name);
-		//CleanMobName(GetName(), temp_name);
-		strn0cpy(temp_name, GetCleanName(), 64);
-	}
-
-	// Make the new name unique and set it
-	strn0cpy(temp_name, entity_list.MakeNameUnique(temp_name), 64);
-
-
-	// Send the new name to all clients
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
-	MobRename_Struct* mr = (MobRename_Struct*) outapp->pBuffer;
-	strn0cpy(mr->old_name, old_name, 64);
-	strn0cpy(mr->old_name_again, old_name, 64);
-	strn0cpy(mr->new_name, temp_name, 64);
-	mr->unknown192 = 0;
-	mr->unknown196 = 1;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
-
-	SetName(temp_name);
-}
-
 void Mob::SetTargetable(bool on) {
 	if(m_targetable != on) {
 		m_targetable = on;

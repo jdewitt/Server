@@ -95,7 +95,6 @@ void MapOpcodes() {
 	ConnectingOpcodes[OP_SetServerFilter] = &Client::Handle_Connect_OP_SetServerFilter;
 	ConnectingOpcodes[OP_ReqClientSpawn] = &Client::Handle_Connect_OP_ReqClientSpawn;
 	ConnectingOpcodes[OP_SendExpZonein] = &Client::Handle_Connect_OP_SendExpZonein;
-	ConnectingOpcodes[OP_WorldObjectsSent] = &Client::Handle_Connect_OP_WorldObjectsSent;
 	ConnectingOpcodes[OP_ReqNewZone] = &Client::Handle_Connect_OP_ReqNewZone;
 	ConnectingOpcodes[OP_SpawnAppearance] = &Client::Handle_Connect_OP_SpawnAppearance;
 	ConnectingOpcodes[OP_WearChange] = &Client::Handle_Connect_OP_WearChange;
@@ -124,7 +123,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ConsiderCorpse] = &Client::Handle_OP_ConsiderCorpse;
 	ConnectedOpcodes[OP_Consider] = &Client::Handle_OP_Consider;
 	ConnectedOpcodes[OP_Begging] = &Client::Handle_OP_Begging;
-	ConnectedOpcodes[OP_TestBuff] = &Client::Handle_OP_TestBuff;
 	ConnectedOpcodes[OP_Surname] = &Client::Handle_OP_Surname;
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_Assist] = &Client::Handle_OP_Assist;
@@ -199,8 +197,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_ShopEnd] = &Client::Handle_OP_ShopEnd;
 	ConnectedOpcodes[OP_ClickObjectAction] = &Client::Handle_OP_ClickObjectAction;
 	ConnectedOpcodes[OP_ClickObject] = &Client::Handle_OP_ClickObject;
-	ConnectedOpcodes[OP_RecipeDetails] = &Client::Handle_OP_RecipeDetails;
-	ConnectedOpcodes[OP_RecipeAutoCombine] = &Client::Handle_OP_RecipeAutoCombine;
 	ConnectedOpcodes[OP_TradeSkillCombine] = &Client::Handle_OP_TradeSkillCombine;
 	ConnectedOpcodes[OP_ClickDoor] = &Client::Handle_OP_ClickDoor;
 	ConnectedOpcodes[OP_GroundSpawn] = &Client::Handle_OP_CreateObject;
@@ -240,9 +236,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_GMFind] = &Client::Handle_OP_GMFind;
 	ConnectedOpcodes[OP_PickPocket] = &Client::Handle_OP_PickPocket;
 	ConnectedOpcodes[OP_Bind_Wound] = &Client::Handle_OP_Bind_Wound;
-	ConnectedOpcodes[OP_TrackTarget] = &Client::Handle_OP_TrackTarget;
 	ConnectedOpcodes[OP_Track] = &Client::Handle_OP_Track;
-	ConnectedOpcodes[OP_TrackUnknown] = &Client::Handle_OP_TrackUnknown;
 	ConnectedOpcodes[OP_ClientError] = &Client::Handle_OP_ClientError;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
 	ConnectedOpcodes[OP_Split] = &Client::Handle_OP_Split;
@@ -259,13 +253,11 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Translocate] = &Client::Handle_OP_Translocate;
 	ConnectedOpcodes[OP_Sacrifice] = &Client::Handle_OP_Sacrifice;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
-	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_ApplyPoison] = &Client::Handle_OP_ApplyPoison;
 	ConnectedOpcodes[OP_GroupUpdate] = &Client::Handle_OP_GroupUpdate;
 	ConnectedOpcodes[OP_SetStartCity] = &Client::Handle_OP_SetStartCity;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_GMSearchCorpse] = &Client::Handle_OP_GMSearchCorpse;
-	ConnectedOpcodes[OP_TradeBusy] = &Client::Handle_OP_TradeBusy;
 	ConnectedOpcodes[OP_CorpseDrag] = &Client::Handle_OP_CorpseDrag;
 	ConnectedOpcodes[OP_Action2] = &Client::Handle_OP_Action;
 	ConnectedOpcodes[OP_Discipline] = &Client::Handle_OP_Discipline;
@@ -598,71 +590,6 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	if (inst){
 		SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 	}
-
-	return;
-}
-
-void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
-{
-	//This is a copy of SendExpZonein created for SoF due to packet order change
-	//This does not affect clients other than SoF
-
-	//////////////////////////////////////////////////////
-	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
-	sa->parameter = GetID();	// Four bytes for this parameter...
-	outapp->priority = 6;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	// Inform the world about the client
-	outapp = new EQApplicationPacket();
-
-	CreateSpawnPacket(outapp);
-	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	if(GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
-
-	//Send AA Exp packet:
-	if(GetLevel() >= 51)
-		SendAAStats();
-
-	// Send exp packets
-	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel()+1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
-	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		float tmpxp = (float) ( (float) m_pp.exp-tmpxp2 ) / ( (float) tmpxp1-tmpxp2 );
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
-	}
-	safe_delete(outapp);
-
-	SendAATimers();
-
-	// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
-	outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
-	ZoneInSendName_Struct* zonesendname=(ZoneInSendName_Struct*)outapp->pBuffer;
-	strcpy(zonesendname->name,m_pp.name);
-	strcpy(zonesendname->name2,m_pp.name);
-	zonesendname->unknown0=0x0A;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
 
 	return;
 }
@@ -1699,10 +1626,6 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	CheckIncreaseSkill(SkillBegging, nullptr, -10);
-}
-
-void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
-{
 }
 
 void Client::Handle_OP_Surname(const EQApplicationPacket *app)
@@ -3661,24 +3584,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_TradeBusy(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(TradeBusy_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_TradeBusy, size=%i, expected %i", app->size, sizeof(TradeBusy_Struct));
-		return;
-	}
-	// Trade request recipient is cancelling the trade due to being busy
-	// Trade requester gets message "I'm busy right now"
-	// Send busy message on to trade initiator if client
-	TradeBusy_Struct* msg = (TradeBusy_Struct*) app->pBuffer;
-	Mob* tradee = entity_list.GetMob(msg->to_mob_id);
-
-	if (tradee && tradee->IsClient()) {
-		tradee->CastToClient()->QueuePacket(app);
-	}
-	return;
-}
-
 void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 {
 
@@ -4636,34 +4541,6 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
 	}
 
-	return;
-}
-
-void Client::Handle_OP_RecipeDetails(const EQApplicationPacket *app)
-{
-	if(app->size < sizeof(uint32)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for RecipeDetails Request: Expected: %i, Got: %i",
-			sizeof(uint32), app->size);
-		return;
-	}
-	uint32 *recipe_id = (uint32*) app->pBuffer;
-
-	SendTradeskillDetails(*recipe_id);
-
-	return;
-}
-
-void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(RecipeAutoCombine_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Invalid size for RecipeAutoCombine_Struct: Expected: %i, Got: %i",
-			sizeof(RecipeAutoCombine_Struct), app->size);
-		return;
-	}
-
-	RecipeAutoCombine_Struct* rac = (RecipeAutoCombine_Struct*)app->pBuffer;
-
-	Object::HandleAutoCombine(this, rac);
 	return;
 }
 
@@ -6314,25 +6191,6 @@ void Client::Handle_OP_Bind_Wound(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_TrackTarget(const EQApplicationPacket *app)
-{
-	int PlayerClass = GetClass();
-
-	if((PlayerClass != RANGER) && (PlayerClass != DRUID) && (PlayerClass != BARD))
-		return;
-
-	if (app->size != sizeof(TrackTarget_Struct))
-	{
-		LogFile->write(EQEMuLog::Error, "Invalid size for OP_TrackTarget: Expected: %i, Got: %i",
-			sizeof(TrackTarget_Struct), app->size);
-		return;
-	}
-
-	TrackTarget_Struct *tts = (TrackTarget_Struct*)app->pBuffer;
-
-	TrackingID = tts->EntityID;
-}
-
 void Client::Handle_OP_Track(const EQApplicationPacket *app)
 {
 	if(GetClass() != RANGER && GetClass() != DRUID && GetClass() != BARD)
@@ -6346,12 +6204,6 @@ void Client::Handle_OP_Track(const EQApplicationPacket *app)
 	if(!entity_list.MakeTrackPacket(this))
 		LogFile->write(EQEMuLog::Error, "Unable to generate OP_Track packet requested by client.");
 
-	return;
-}
-
-void Client::Handle_OP_TrackUnknown(const EQApplicationPacket *app)
-{
-	// size 0 send right after OP_Track
 	return;
 }
 
@@ -8106,41 +7958,6 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	}
 	PendingSacrifice = false;
 	SacrificeCaster.clear();
-}
-
-void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(PopupResponse_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PopupResponse expected %i got %i",
-					sizeof(PopupResponse_Struct), app->size);
-		DumpPacket(app);
-		return;
-	}
-	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
-
-	// Handle any EQEmu defined popup Ids first
-	switch(prs->popupid)
-	{
-		case POPUPID_UPDATE_SHOWSTATSWINDOW:
-			if(GetTarget() && GetTarget()->IsClient())
-				GetTarget()->CastToClient()->SendStatsWindow(this, true);
-			else
-				SendStatsWindow(this, true);
-			return;
-
-		default:
-			break;
-	}
-
-	char buf[16];
-	sprintf(buf, "%d\0", prs->popupid);
-
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
-
-	Mob* Target = GetTarget();
-	if(Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
-	}
 }
 
 void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {

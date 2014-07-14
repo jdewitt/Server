@@ -408,7 +408,6 @@ int command_init(void){
 		command_add("synctod","- Send a time of day update to every client in zone",90,command_synctod) ||
 		
 		command_add("tattoo","- Change the tattoo of your target (Drakkin Only)",80,command_tattoo) ||
-		command_add("tempname","[newname] - Temporarily renames your target. Leave name blank to restore the original name.",100,command_tempname) ||
 		command_add("testspawn","[memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct",200,command_testspawn) ||
 		command_add("testspawnkill","- Sends an OP_Death packet for spawn made with #testspawn",200,command_testspawnkill) ||
 		command_add("texture","[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment",10,command_texture) ||
@@ -4123,25 +4122,6 @@ void command_name(Client *c, const Seperator *sep){
 		else
 			c->Message(13, "ERROR: Unable to rename %s. Check that the new name '%s' isn't already taken.", oldname, sep->arg[2]);
 		free(oldname);
-	}
-}
-
-void command_tempname(Client *c, const Seperator *sep){
-	Mob *target;
-	target = c->GetTarget();
-
-	if(!target)
-		c->Message(0, "Usage: #tempname newname (requires a target)");
-	else if(strlen(sep->arg[1]) > 0)
-	{
-		char *oldname = strdup(target->GetName());
-		target->TempName(sep->arg[1]);
-		c->Message(0, "Renamed %s to %s", oldname, sep->arg[1]);
-		free(oldname);
-	}
-	else {
-		target->TempName();
-		c->Message(0, "Restored the original name");
 	}
 }
 

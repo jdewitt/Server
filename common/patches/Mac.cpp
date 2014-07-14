@@ -2235,39 +2235,22 @@ structs::Spawn_Struct* WeaselTheSpawns(struct Spawn_Struct* emu, int type) {
 
 ENCODE(OP_DisciplineUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_MobRename) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_OnLevelMessage) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_PlayMP3) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_PopupResponse) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RecipeAutoCombine) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RecipeDetails) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_RecipeReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RequestTitles) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendSystemStats) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendTitleList) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SetChatServer2) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetStartCity) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SetTitleReply) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_ShopItem) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_SpawnPositionUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TargetReject) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TestBuff) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TrackTarget) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TrackUnknown) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_TradeBusy) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Untargetable) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_UpdateAA) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WeaponEquip1) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WeaponEquip2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WeaponUnequip2) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_WorldObjectsSent) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_Unknown){
 	EQApplicationPacket *in = *p;
 	*p = nullptr;

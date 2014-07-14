@@ -788,7 +788,6 @@ public:
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
 	uint16	GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill);
-	void	SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool	PendingTranslocate;
 	time_t	TranslocateTime;
 	bool	PendingSacrifice;
