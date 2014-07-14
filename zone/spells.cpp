@@ -427,12 +427,12 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	Mob *spell_target = entity_list.GetMob(target_id);
 	// check line of sight to target if it's a detrimental spell
-	if(spell_target)
+	if(spell_target && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].targettype != ST_Self)
 	{
 		if(!CheckRegion(spell_target) || 
 		((zone->IsCity() || !zone->CanCastOutdoor()) && 
 		IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && 
-		spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].effectid[0] != SE_BindSight))
+		!IsBindSightSpell(spell_id)))
 		{
 			mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_id, spell_target->GetName());
 			InterruptSpell(CANT_SEE_TARGET,CC_Red,spell_id);

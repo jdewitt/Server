@@ -770,6 +770,7 @@ bool IsReduceManaSpell(uint16 spell_id);
 bool IsExtRangeSpell(uint16 spell_id);
 bool IsImprovedHealingSpell(uint16 spell_id);
 bool IsImprovedDamageSpell(uint16 spell_id);
+bool IsBindSightSpell(uint16 spell_id);
 bool IsAEDurationSpell(uint16 spell_id);
 bool IsPureNukeSpell(uint16 spell_id);
 bool IsAENukeSpell(uint16 spell_id);

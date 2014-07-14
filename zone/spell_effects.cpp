@@ -101,7 +101,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	else
 	{
 		if(IsBuffSpell(spell_id)){
-			if(IsEffectInSpell(spell_id, SE_BindSight))
+			if(IsBindSightSpell(spell_id))
 			{
 				if(caster)
 				{

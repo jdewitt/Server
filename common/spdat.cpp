@@ -348,6 +348,11 @@ bool IsImprovedDamageSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_ImprovedDamage);
 }
 
+bool IsBindSightSpell(uint16 spell_id)
+{
+	return IsEffectInSpell(spell_id, SE_BindSight);
+}
+
 bool IsAEDurationSpell(uint16 spell_id)
 {
 	if (IsValidSpell(spell_id) &&
