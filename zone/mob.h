@@ -171,7 +171,8 @@ public:
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline bool GetSeeInvisible(uint8 see_invis);
 	bool IsInvisible(Mob* other = 0) const;
-	void SetInvisible(uint8 state, bool showInvis = true);
+	void SetInvisible(int invisType);
+	void BreakInvis();
 	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
 	
 	//Song

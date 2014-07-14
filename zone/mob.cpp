@@ -442,22 +442,75 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	}
 	return(ANIM_STAND);
 }
-
-void Mob::SetInvisible(uint8 state, bool showInvis)
+void Mob::BreakInvis()
 {
-	invisible = (bool) state;
-	if(showInvis) {
+	if(invisible && (FindBuff(SE_Invisibility) || FindBuff(SE_Invisibility2)))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
+		BuffFadeByEffect(SE_Invisibility);
+		BuffFadeByEffect(SE_Invisibility2);
+	}
+	if(invisible_undead && (FindBuff(SE_InvisVsUndead) || FindBuff(SE_InvisVsUndead2)))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsUndead);
+		BuffFadeByEffect(SE_InvisVsUndead2);
+	}
+	if(invisible_animals && FindBuff(SE_InvisVsAnimals))
+	{
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsAnimals);
+	}
+	if (invisible || hidden || improved_hidden)
+	{
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x03;
+		sa_out->parameter = 0;
+		entity_list.QueueClients(this, outapp, true);
+		safe_delete(outapp);
+	}
+
+	invisible = false;
+	invisible_undead = false;
+	invisible_animals = false;
+	hidden = false;
+	improved_hidden = false;
+}
+
+
+void Mob::SetInvisible(int invisType)
+{
+    switch(invisType)
+    {
+    case InvisType::INVIS_NORMAL:
+        invisible = true;
+    case InvisType::INVIS_ANIMAL:
+        invisible_animals = true;
+    case InvisType::INVIS_UNDEAD:
+        invisible_undead = true;
+    case InvisType::INVIS_HIDDEN:
+        hidden = true;
+    }
+
+	if(invisible) {
 		SendAppearancePacket(AT_Invis, invisible);
 	}
 	// Invis and hide breaks charms
 
-	if ((this->GetPetType() == petCharmed) && (invisible || hidden || improved_hidden))
+	if (HasPet() && (invisible || invisible_animals || invisible_undead || hidden || improved_hidden))
 	{
-		Mob* formerpet = this->GetPet();
+		Mob* formerpet = GetPet();
 
-		if(formerpet) {
+		if(formerpet->IsCharmed()) {
 			formerpet->BuffFadeByEffect(SE_Charm);
-        }
+		}
+		else
+		{
+			SetPet(nullptr);
+			formerpet->CastToNPC()->Depop();
+		}
 	}
 }
 
