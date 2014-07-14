@@ -555,7 +555,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				break;
 			}
-
 			case SE_Invisibility:
 			case SE_Invisibility2:
 			{
@@ -563,15 +562,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
 				SetInvisible(spell.base[i]);
-				
-				if(HasPet())
-				{
-					Mob* mypet = GetPet();
-					SetPet(nullptr);
-					if(!mypet->IsCharmed())
-						mypet->CastToNPC()->Depop();
-				}
-				break;
 			}
 
 			case SE_InvisVsAnimals:
@@ -580,17 +570,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				//SetInvisible(spell.base[i], false);
-
-				if(HasPet())
-				{
-					Mob* mypet = GetPet();
-				 	if(mypet->GetBodyType() == BT_Animal)
-						SetPet(nullptr);
-						if(!mypet->IsCharmed())
-							mypet->CastToNPC()->Depop();
-				}
-
+				SetInvisible(spell.base[i], false);
 				break;
 			}
 
@@ -601,17 +581,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				//SetInvisible(spell.base[i], false);
-
-				if(HasPet())
-				{
-					Mob* mypet = GetPet();
-				 	if(mypet->GetBodyType() == BT_Undead || mypet->GetBodyType() == BT_SummonedUndead)
-						SetPet(nullptr);
-						if(!mypet->IsCharmed())
-							mypet->CastToNPC()->Depop();
-				}
-
+				SetInvisible(spell.base[i], false);
 				break;
 			}
 			case SE_SeeInvis:
