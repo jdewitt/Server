@@ -451,13 +451,18 @@ void Mob::SetInvisible(uint8 state, bool showInvis)
 	}
 	// Invis and hide breaks charms
 
-	if ((this->GetPetType() == petCharmed) && (invisible || hidden || improved_hidden))
+	if (HasPet() && (invisible || hidden || improved_hidden))
 	{
-		Mob* formerpet = this->GetPet();
+		Mob* formerpet = GetPet();
 
-		if(formerpet) {
+		if(formerpet->IsCharmed()) {
 			formerpet->BuffFadeByEffect(SE_Charm);
-        }
+		}
+		else
+		{
+			SetPet(nullptr);
+			formerpet->CastToNPC()->Depop();
+		}
 	}
 }
 
