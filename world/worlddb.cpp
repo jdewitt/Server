@@ -299,12 +299,12 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 			in_cc->deity,
 			in_cc->race), errbuf, &result))
 	{
-		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query, errbuf);
+		LogFile->write(EQEMuLog::Status, "Start zone query failed: %s : %s\n", query, errbuf);
 		safe_delete_array(query);
 		return false;
 	}
 
-	LogFile->write(EQEMuLog::Status, "SoF Start zone query: %s\n", query);
+	LogFile->write(EQEMuLog::Status, "Start zone query: %s\n", query);
 	safe_delete_array(query);
 
 	if((rows = mysql_num_rows(result)) > 0)

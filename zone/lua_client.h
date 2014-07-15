@@ -197,10 +197,6 @@ public:
 	void RefundAA();
 	int GetModCharacterFactionLevel(int faction);
 	int GetStartZone();
-	void SetStartZone(int zone_id);
-	void SetStartZone(int zone_id, float x);
-	void SetStartZone(int zone_id, float x, float y);
-	void SetStartZone(int zone_id, float x, float y, float z);
 	void KeyRingAdd(uint32 item);
 	bool KeyRingCheck(uint32 item);
 	void QuestReadBook(const char *text, int type);
@@ -248,7 +244,6 @@ public:
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
-	void PlayMP3(std::string file);
 	int GetBoatID();
 	void SetBoatID(uint32 in_boatid);
 	char* GetBoatName();

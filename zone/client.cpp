@@ -3470,30 +3470,6 @@ void Client::NotifyNewTitlesAvailable()
 	safe_delete(outapp);
 }
 
-void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
-{
-	// setting city to zero allows the player to use /setstartcity to set the city themselves
-	if(zoneid == 0) {
-		m_pp.binds[4].zoneId = 0;
-		this->Message(15,"Your starting city has been reset. Use /setstartcity to choose a new one");
-		return;
-	}
-
-	// check to make sure the zone is valid
-	const char *target_zone_name = database.GetZoneName(zoneid);
-	if(target_zone_name == nullptr)
-		return;
-
-	m_pp.binds[4].zoneId = zoneid;
-	if (x == 0 && y == 0 && z ==0)
-		database.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
-	else {
-		m_pp.binds[4].x = x;
-		m_pp.binds[4].y = y;
-		m_pp.binds[4].z = z;
-	}
-}
-
 uint32 Client::GetStartZone()
 {
 	return m_pp.binds[4].zoneId;
@@ -5511,16 +5487,6 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 	strcpy(cms->msg, msg.c_str());
 
 	QueuePacket(&outapp);
-}
-
-void Client::PlayMP3(const char* fname)
-{
-	std::string filename = fname;
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
-	PlayMP3_Struct* buf = (PlayMP3_Struct*)outapp->pBuffer;
-	strncpy(buf->filename, fname, filename.length());
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::Starve()

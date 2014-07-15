@@ -227,7 +227,6 @@ INr(OP_SafePoint);
 INr(OP_Ignore);
 INr(OP_ClearTitle);		//follows OP_SendTitleList
 IN(OP_SetTitle, SetTitle_Struct);
-INz(OP_RequestTitles);
 
 /*
 	for now we are listing outgoing packets which are NOT
@@ -249,7 +248,6 @@ OUTv(OP_SpawnDoor, Door_Struct);
 OUTv(OP_SendZonepoints, ZonePoints);
 OUTv(OP_TributeInfo, TributeAbility_Struct);
 OUTv(OP_GuildTributeInfo, GuildTributeAbility_Struct);
-OUTv(OP_SendTitleList, TitleList_Struct);
 OUT(OP_SendMaxCharacters, MaxCharacters_Struct);
 OUT(OP_AAExpUpdate, AAExpUpdate_Struct);
 OUT(OP_Action, Action_Struct);
@@ -281,7 +279,6 @@ OUT(OP_RandomReply, RandomReply_Struct);
 OUT(OP_RequestClientZoneChange, RequestClientZoneChange_Struct);
 OUT(OP_RespondAA, AATable_Struct);
 OUT(OP_RezzRequest, Resurrect_Struct);
-OUT(OP_SetTitleReply, SetTitleReply_Struct);
 OUT(OP_ShopDelItem, Merchant_DelItem_Struct);
 OUT(OP_SimpleMessage, SimpleMessage_Struct);
 OUT(OP_SkillUpdate, SkillUpdate_Struct);

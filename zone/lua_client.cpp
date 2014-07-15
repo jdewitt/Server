@@ -847,26 +847,6 @@ int Lua_Client::GetStartZone() {
 	return self->GetStartZone();
 }
 
-void Lua_Client::SetStartZone(int zone_id) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x, float y) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x, y);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x, float y, float z) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x, y, z);
-}
-
 void Lua_Client::KeyRingAdd(uint32 item) {
 	Lua_Safe_Call_Void();
 	self->KeyRingAdd(item);
@@ -1104,12 +1084,6 @@ void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
 }
 
-void Lua_Client::PlayMP3(std::string file)
-{
-	Lua_Safe_Call_Void();
-	self->PlayMP3(file.c_str());
-}
-
 int Lua_Client::GetBoatID() 
 {
 	Lua_Safe_Call_Int();
@@ -1343,10 +1317,6 @@ luabind::scope lua_register_client() {
 		.def("RefundAA", (void(Lua_Client::*)(void))&Lua_Client::RefundAA)
 		.def("GetModCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetModCharacterFactionLevel)
 		.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float,float))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float,float,float))&Lua_Client::SetStartZone)
 		.def("KeyRingAdd", (void(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
 		.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
 		.def("QuestReadBook", (void(Lua_Client::*)(const char *,int))&Lua_Client::QuestReadBook)
@@ -1394,7 +1364,6 @@ luabind::scope lua_register_client() {
 		.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
 		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
-		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
 		.def("GetBoatID", (int(Lua_Client::*)(void))&Lua_Client::GetBoatID)
 		.def("SetBoatID", (void(Lua_Client::*)(uint32))&Lua_Client::SetBoatID)
 		.def("GetBoatName", (char *(Lua_Client::*)(void))&Lua_Client::GetBoatName)

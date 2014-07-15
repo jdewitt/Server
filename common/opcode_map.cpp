@@ -51,7 +51,6 @@ void load_opcode_names()
 	opcode_map[0x01ca]="LiveOP_TraderBuy";
 	opcode_map[0x01ac]="LiveOP_PetCommands";
 	opcode_map[0x0042]="LiveOP_TradeSkillCombine";
-	opcode_map[0x02cd]="LiveOP_ShopItem";
 	opcode_map[0x0065]="LiveOP_ShopPlayerBuy";
 	opcode_map[0x006a]="LiveOP_ShopPlayerSell";
 	opcode_map[0x006d]="LiveOP_ShopDelItem";
@@ -204,7 +203,6 @@ void load_opcode_names()
 	opcode_map[0x02fa]="LiveOP_TributeNPC";
 	opcode_map[0x02fe]="LiveOP_TributeMoney";
 	opcode_map[0x0364]="LiveOP_TributeToggle";
-	opcode_map[0x01dd]="LiveOP_Shielding";
 	opcode_map[0x0198]="LiveOP_SetDataRate";
 	opcode_map[0x023b]="LiveOP_ZoneEntry";
 	opcode_map[0x006b]="LiveOP_PlayerProfile";

@@ -163,7 +163,6 @@
 	void Handle_OP_SafeFallSuccess(const EQApplicationPacket *app);
 	void Handle_OP_SafePoint(const EQApplicationPacket *app);
 	void Handle_OP_SetTitle(const EQApplicationPacket *app);
-	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
 	void Handle_OP_Ignore(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
 	void Handle_OP_Translocate(const EQApplicationPacket *app);
@@ -171,7 +170,6 @@
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
-	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);
