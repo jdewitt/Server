@@ -439,6 +439,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("InstillDoubt", static_cast<int>(OP_InstillDoubt)),
 			luabind::value("SafeFallSuccess", static_cast<int>(OP_SafeFallSuccess)),
 			luabind::value("DisciplineUpdate", static_cast<int>(OP_DisciplineUpdate)),
+			luabind::value("Shielding", static_cast<int>(OP_Shielding)),
 			luabind::value("ZoneEntry", static_cast<int>(OP_ZoneEntry)),
 			luabind::value("PlayerProfile", static_cast<int>(OP_PlayerProfile)),
 			luabind::value("CharInventory", static_cast<int>(OP_CharInventory)),

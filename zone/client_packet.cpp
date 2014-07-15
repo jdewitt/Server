@@ -117,6 +117,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_Consent] = &Client::Handle_OP_Consent;
 	ConnectedOpcodes[OP_TargetMouse] = &Client::Handle_OP_TargetMouse;
 	ConnectedOpcodes[OP_TargetCommand] = &Client::Handle_OP_TargetCommand;
+	ConnectedOpcodes[OP_Shielding] = &Client::Handle_OP_Shielding;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_Consume] = &Client::Handle_OP_Consume;
 	ConnectedOpcodes[OP_ConsiderCorpse] = &Client::Handle_OP_ConsiderCorpse;
@@ -1265,6 +1266,91 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 			GetTarget()->IsTargeted(1);
 		}
+	}
+	return;
+}
+
+void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(Shielding_Struct)) {
+		LogFile->write(EQEMuLog::Error, "OP size error: OP_Shielding expected:%i got:%i", sizeof(Shielding_Struct), app->size);
+		return;
+		
+	}
+	if (GetClass() != WARRIOR)
+		 {
+		return;
+		}
+
+		if (shield_target)
+		{
+		entity_list.MessageClose_StringID(this, false, 100, 0,
+			END_SHIELDING, GetName(), shield_target->GetName());
+		for (int y = 0; y < 2; y++)
+			 {
+			if (shield_target->shielder[y].shielder_id == GetID())
+				 {
+				shield_target->shielder[y].shielder_id = 0;
+				shield_target->shielder[y].shielder_bonus = 0;
+				}
+			}
+		}
+	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
+	shield_target = entity_list.GetMob(shield->target_id);
+	bool ack = false;
+	ItemInst* inst = GetInv().GetItem(14);
+	if (!shield_target)
+		 return;
+	if (inst)
+	{
+		const Item_Struct* shield = inst->GetItem();
+		if (shield && shield->ItemType == ItemTypeShield)
+		 {
+			for (int x = 0; x < 2; x++)
+			{
+				if (shield_target->shielder[x].shielder_id == 0)
+				{
+					entity_list.MessageClose_StringID(this, false, 100, 0,
+						START_SHIELDING, GetName(), shield_target->GetName());
+					shield_target->shielder[x].shielder_id = GetID();
+					int shieldbonus = shield->AC * 2;
+					switch (GetAA(197))
+					{
+						case 1:
+							shieldbonus = shieldbonus * 115 / 100;
+							break;
+						case 2:
+							shieldbonus = shieldbonus * 125 / 100;
+							break;
+						case 3:
+							shieldbonus = shieldbonus * 150 / 100;
+							break;
+					}
+					shield_target->shielder[x].shielder_bonus = shieldbonus;
+					shield_timer.Start();
+					ack = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			Message(0, "You must have a shield equipped to shield a target!");
+			shield_target = 0;
+			return;
+		}
+	}
+	else
+	{
+		Message(0, "You must have a shield equipped to shield a target!");
+		shield_target = 0;
+		return;
+	}
+	if (!ack)
+	{
+		Message_StringID(CC_Default, ALREADY_SHIELDED);
+		shield_target = 0;
+		return;
 	}
 	return;
 }

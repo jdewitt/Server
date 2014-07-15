@@ -2147,6 +2147,10 @@ struct ClickObject_Struct {
 /*08*/
 };
 
+struct Shielding_Struct {
+	uint32 target_id;
+};
+
 /*
 ** Click Object Action Struct
 ** Response to client clicking on a World Container (ie, forge)

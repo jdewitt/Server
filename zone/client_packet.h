@@ -20,6 +20,7 @@
 	void Handle_OP_Consent(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
+	void Handle_OP_Shielding(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
 	void Handle_OP_Consume(const EQApplicationPacket *app);
 	void Handle_OP_ConsiderCorpse(const EQApplicationPacket *app);
