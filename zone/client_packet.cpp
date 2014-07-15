@@ -246,7 +246,6 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
 	ConnectedOpcodes[OP_SafeFallSuccess] = &Client::Handle_OP_SafeFallSuccess;
 	ConnectedOpcodes[OP_SafePoint] = &Client::Handle_OP_SafePoint;
-	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
 	ConnectedOpcodes[OP_SetTitle] = &Client::Handle_OP_SetTitle;
 	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
 	ConnectedOpcodes[OP_RaidInvite] = &Client::Handle_OP_RaidCommand;
@@ -7305,15 +7304,6 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 		Title = title_manager.GetSuffix(sts->title_id);
 		SetTitleSuffix(Title.c_str());
 	}
-}
-
-void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
-{
-
-	EQApplicationPacket *outapp = title_manager.MakeTitlesPacket(this);
-
-	if(outapp != nullptr)
-		FastQueuePacket(&outapp);
 }
 
 void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)

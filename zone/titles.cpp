@@ -96,26 +96,6 @@ EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
 		++Iterator;
 
 	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendTitleList, Length);
-
-	char *Buffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, AvailableTitles.size());
-
-	Iterator = AvailableTitles.begin();
-
-	while(Iterator != AvailableTitles.end())
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, Iterator->TitleID);
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Prefix.c_str());
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Suffix.c_str());
-
-		++Iterator;
-	}
-	return(outapp);
 }
 
 int TitleManager::NumberOfAvailableTitles(Client *c)
@@ -336,13 +316,11 @@ void Client::SetAATitle(const char *Title)
 {
 	strn0cpy(m_pp.title, Title, sizeof(m_pp.title));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitle, sizeof(SetTitle_Struct));
 
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
+	SetTitle_Struct *strs = (SetTitle_Struct *)outapp->pBuffer;
 
-	strn0cpy(strs->title, Title, sizeof(strs->title));
-
-	strs->entity_id = GetID();
+	strs->title_id = GetID();
 
 	entity_list.QueueClients(this, outapp, false);
 
@@ -353,15 +331,11 @@ void Client::SetTitleSuffix(const char *Suffix)
 {
 	strn0cpy(m_pp.suffix, Suffix, sizeof(m_pp.suffix));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitle, sizeof(SetTitle_Struct));
 
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
+	SetTitle_Struct *strs = (SetTitle_Struct *)outapp->pBuffer;
 
-	strs->is_suffix = 1;
-
-	strn0cpy(strs->title, Suffix, sizeof(strs->title));
-
-	strs->entity_id = GetID();
+	strs->title_id = GetID();
 
 	entity_list.QueueClients(this, outapp, false);
 

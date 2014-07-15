@@ -2998,10 +2998,6 @@ struct FindPersonResult_Struct {
 	FindPerson_Point path[0];	//last element must be the same as dest
 };
 
-struct PlayMP3_Struct {
-	char filename[0];
-};
-
 //this is for custom title display in the skill window
 struct TitleEntry_Struct {
 	uint32	title_id;
@@ -3031,15 +3027,6 @@ struct SetTitle_Struct {
 	uint32	is_suffix;	//guessed: 0 = prefix, 1 = suffix
 	uint32	title_id;
 };
-
-struct SetTitleReply_Struct {
-	uint32	is_suffix;	//guessed: 0 = prefix, 1 = suffix
-	char	title[32];
-	uint32	entity_id;
-};
-
-
-
 
 enum { VoiceMacroTell = 1, VoiceMacroGroup = 2, VoiceMacroRaid = 3 };
 
