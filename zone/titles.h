@@ -50,7 +50,6 @@ public:
 
 	bool LoadTitles();
 
-	EQApplicationPacket *MakeTitlesPacket(Client *c);
 	std::string GetPrefix(int TitleID);
 	std::string GetSuffix(int TitleID);
 	int NumberOfAvailableTitles(Client *c);

@@ -71,33 +71,6 @@ bool TitleManager::LoadTitles()
 	return(true);
 }
 
-EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	std::vector<TitleEntry> AvailableTitles;
-
-	uint32 Length = 4;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(!IsClientEligibleForTitle(c, Iterator))
-		{
-			++Iterator;
-			continue;
-		}
-
-		AvailableTitles.push_back((*Iterator));
-
-		Length += Iterator->Prefix.length() + Iterator->Suffix.length() + 6;
-
-		++Iterator;
-
-	}
-}
-
 int TitleManager::NumberOfAvailableTitles(Client *c)
 {
 	int Count = 0;
