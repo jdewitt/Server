@@ -119,17 +119,6 @@ void handle_npc_single_npc(QuestInterface *parse, lua_State* L, NPC* npc, Mob *i
 	lua_setfield(L, -2, "other");
 }
 
-void handle_npc_popup(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-						  std::vector<void*> *extra_pointers) {
-	Lua_Mob l_mob(init);
-	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
-	l_mob_o.push(L);
-	lua_setfield(L, -2, "other");
-
-	lua_pushinteger(L, std::stoi(data));
-	lua_setfield(L, -2, "popup_id");
-}
-
 void handle_npc_waypoint(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 	Lua_Mob l_mob(init);
@@ -312,12 +301,6 @@ void handle_player_signal(QuestInterface *parse, lua_State* L, Client* client, s
 						  std::vector<void*> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "signal");
-}
-
-void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
-								  std::vector<void*> *extra_pointers) {
-	lua_pushinteger(L, std::stoi(data));
-	lua_setfield(L, -2, "popup_id");
 }
 
 void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

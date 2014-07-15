@@ -61,7 +61,6 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_cast_on",
 	"event_aggro_say",
 	"event_player_pickup",
-	"event_popup_response",
 	"event_proximity_say",
 	"event_cast",
 	"event_cast_begin",
@@ -139,7 +138,6 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_SLAY] = handle_npc_single_mob;
 	NPCArgumentDispatch[EVENT_ENTER] = handle_npc_single_client;
 	NPCArgumentDispatch[EVENT_EXIT] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_npc_popup;
 	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
 	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
 	NPCArgumentDispatch[EVENT_HATE_LIST] = handle_npc_hate;
@@ -164,7 +162,6 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_CLICK_OBJECT] = handle_player_click_object;
 	PlayerArgumentDispatch[EVENT_CLICK_DOOR] = handle_player_click_door;
 	PlayerArgumentDispatch[EVENT_SIGNAL] = handle_player_signal;
-	PlayerArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_player_popup_response;
 	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP] = handle_player_pick_up;
 	PlayerArgumentDispatch[EVENT_CAST] = handle_player_cast;
 	PlayerArgumentDispatch[EVENT_CAST_BEGIN] = handle_player_cast;
