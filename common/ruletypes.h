@@ -296,6 +296,7 @@ RULE_INT ( Spells, FearBreakCheckChance, 70) //Determines chance for a fear brea
 RULE_INT ( Spells, SuccorFailChance, 2) //Determines chance for a succor spell not to teleport an invidual player
 RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_INT ( Spells, BaseFizzleChance, 20) //Base percentage you will fizzle. The chance then is modified by skill to go up or down.
+RULE_BOOL ( Spells, PreNerfBardAEDoT, false) //Allow bard AOE dots to damage targets when moving.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

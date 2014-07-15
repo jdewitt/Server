@@ -271,10 +271,10 @@ SOURCE_GROUP(TinyXML FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
