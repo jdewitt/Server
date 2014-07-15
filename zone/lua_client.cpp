@@ -847,26 +847,6 @@ int Lua_Client::GetStartZone() {
 	return self->GetStartZone();
 }
 
-void Lua_Client::SetStartZone(int zone_id) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x, float y) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x, y);
-}
-
-void Lua_Client::SetStartZone(int zone_id, float x, float y, float z) {
-	Lua_Safe_Call_Void();
-	self->SetStartZone(zone_id, x, y, z);
-}
-
 void Lua_Client::KeyRingAdd(uint32 item) {
 	Lua_Safe_Call_Void();
 	self->KeyRingAdd(item);
@@ -1337,10 +1317,6 @@ luabind::scope lua_register_client() {
 		.def("RefundAA", (void(Lua_Client::*)(void))&Lua_Client::RefundAA)
 		.def("GetModCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetModCharacterFactionLevel)
 		.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float,float))&Lua_Client::SetStartZone)
-		.def("SetStartZone", (void(Lua_Client::*)(int,float,float,float))&Lua_Client::SetStartZone)
 		.def("KeyRingAdd", (void(Lua_Client::*)(uint32))&Lua_Client::KeyRingAdd)
 		.def("KeyRingCheck", (bool(Lua_Client::*)(uint32))&Lua_Client::KeyRingCheck)
 		.def("QuestReadBook", (void(Lua_Client::*)(const char *,int))&Lua_Client::QuestReadBook)

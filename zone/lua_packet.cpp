@@ -514,7 +514,6 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("DeleteCharge", static_cast<int>(OP_DeleteCharge)),
 			luabind::value("ApplyPoison", static_cast<int>(OP_ApplyPoison)),
 			luabind::value("DisciplineTimer", static_cast<int>(OP_DisciplineTimer)),
-			luabind::value("SetStartCity", static_cast<int>(OP_SetStartCity)),
 			luabind::value("LoginUnknown1", static_cast<int>(OP_LoginUnknown1)),
 			luabind::value("LoginUnknown2", static_cast<int>(OP_LoginUnknown2)),
 			luabind::value("ManaUpdate", static_cast<int>(OP_ManaUpdate)),

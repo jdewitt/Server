@@ -197,10 +197,6 @@ public:
 	void RefundAA();
 	int GetModCharacterFactionLevel(int faction);
 	int GetStartZone();
-	void SetStartZone(int zone_id);
-	void SetStartZone(int zone_id, float x);
-	void SetStartZone(int zone_id, float x, float y);
-	void SetStartZone(int zone_id, float x, float y, float z);
 	void KeyRingAdd(uint32 item);
 	bool KeyRingCheck(uint32 item);
 	void QuestReadBook(const char *text, int type);

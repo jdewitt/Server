@@ -170,7 +170,6 @@
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_ApplyPoison(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
-	void Handle_OP_SetStartCity(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_GMSearchCorpse(const EQApplicationPacket *app);
 	void Handle_OP_CorpseDrag(const EQApplicationPacket *app);

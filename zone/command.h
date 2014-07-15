@@ -290,7 +290,6 @@ void command_refreshgroup(Client *c, const Seperator *sep);
 void command_advnpcspawn(Client *c, const Seperator *sep);
 void command_modifynpcstat(Client *c, const Seperator *sep);
 void command_instance(Client *c, const Seperator *sep);
-void command_setstartzone(Client *c, const Seperator *sep);
 void command_netstats(Client *c, const Seperator *sep);
 void command_object(Client* c, const Seperator *sep);
 void command_raidloot(Client* c, const Seperator *sep);

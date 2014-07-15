@@ -381,7 +381,6 @@ int command_init(void){
 		command_add("setlanguage","[language ID] [value] - Set your target's language skillnum to value",50,command_setlanguage) ||
 		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
-		command_add("setstartzone","[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity",80,command_setstartzone) ||
 		command_add("setxp","[value] - Set your or your player target's experience",100,command_setxp) ||
 		command_add("showbonusstats","[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.",50, command_showbonusstats) ||
 		command_add("showbuffs","- List buffs active on your target or you if no target",50,command_showbuffs) ||
@@ -8681,34 +8680,6 @@ void command_instance(Client *c, const Seperator *sep){
 		c->Message(0, "#instance list player_name - lists all the instances 'player_name' is apart of.");
 		return;
 	}
-}
-
-void command_setstartzone(Client *c, const Seperator *sep){
-	uint32 startzone = 0;
-	Client* target = nullptr;
-	if(c->GetTarget() && c->GetTarget()->IsClient() && sep->arg[1][0] != 0)
-		target = c->GetTarget()->CastToClient();
-	else {
-		c->Message(0, "Usage: (needs PC target) #setstartzone zonename");
-		c->Message(0, "Optional Usage: Use '#setstartzone reset' or '#setstartzone 0' to clear a starting zone. Player can select a starting zone using /setstartcity");
-		return;
-	}
-
-	if(sep->IsNumber(1)) {
-		startzone = atoi(sep->arg[1]);
-	}
-	else if(strcasecmp(sep->arg[1],"reset") == 0) {
-		startzone = 0;
-	}
-	else {
-		startzone = database.GetZoneID(sep->arg[1]);
-		if(startzone == 0) {
-			c->Message(0, "Unable to locate zone '%s'", sep->arg[1]);
-			return;
-		}
-	}
-
-	target->SetStartZone(startzone);
 }
 
 void command_netstats(Client *c, const Seperator *sep){
