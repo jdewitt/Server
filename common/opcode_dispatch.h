@@ -89,7 +89,6 @@ IN(OP_AutoAttack2, uint32);
 INv(OP_Consent, Consent_Struct);
 IN(OP_TargetMouse, ClientTarget_Struct);
 IN(OP_TargetCommand, ClientTarget_Struct);
-IN(OP_Shielding, Shielding_Struct);
 INr(OP_Jump);	//?
 IN(OP_Consume, Consume_Struct);
 IN(OP_ConsiderCorpse, Consider_Struct);

@@ -124,8 +124,6 @@ E(OP_Dye);
 E(OP_RaidJoin);
 E(OP_RemoveAllDoors);
 E(OP_SendAAStats);
-E(OP_Shielding);
-E(OP_ShopItem);
 E(OP_SpellEffect);
 E(OP_TraderDelItem);
 E(OP_TraderItemUpdate);

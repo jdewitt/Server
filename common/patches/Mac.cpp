@@ -2238,8 +2238,6 @@ ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_ShopItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }
