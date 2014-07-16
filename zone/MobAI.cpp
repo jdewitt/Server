@@ -2106,164 +2106,194 @@ uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {
 	int16 diff = iOtherLevel - mylevel;
 	uint32 conlevel=0;
 
-	if (diff == 0)
-		return CON_WHITE;
-	else if (diff >= 1 && diff <= 2)
-		return CON_YELLOW;
-	else if (diff >= 3)
-		return CON_RED;
+    if (diff == 0)
+        return CON_WHITE;
+    else if (diff >= 1 && diff <= 2)
+        return CON_YELLOW;
+    else if (diff >= 3)
+        return CON_RED;
 
-	if (mylevel <= 8)
+    if (mylevel <= 7)
+    {
+        if (diff <= -4)
+            conlevel = CON_GREEN;
+        else
+            conlevel = CON_BLUE;
+    }
+	else if (mylevel <= 8)
 	{
-		if (diff <= -4)
-			conlevel = CON_GREEN;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -5)
+            conlevel = CON_GREEN;
+        else if (diff <= -4)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 9)
+    else if (mylevel <= 12)
 	{
-		if (diff <= -6)
-			conlevel = CON_GREEN;
-		else if (diff <= -4)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -6)
+            conlevel = CON_GREEN;
+        else if (diff <= -4)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 13)
+    else if (mylevel <= 16)
 	{
-		if (diff <= -7)
-			conlevel = CON_GREEN;
-		else if (diff <= -5)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -7)
+            conlevel = CON_GREEN;
+        else if (diff <= -5)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 15)
+	else if (mylevel <= 20)
 	{
-		if (diff <= -7)
-			conlevel = CON_GREEN;
-		else if (diff <= -5)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -8)
+            conlevel = CON_GREEN;
+        else if (diff <= -6)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 17)
+	else if (mylevel <= 24)
 	{
-		if (diff <= -8)
-			conlevel = CON_GREEN;
-		else if (diff <= -6)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -9)
+            conlevel = CON_GREEN;
+        else if (diff <= -7)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 21)
+	else if (mylevel <= 28)
 	{
-		if (diff <= -9)
-			conlevel = CON_GREEN;
-		else if (diff <= -7)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -10)
+            conlevel = CON_GREEN;
+        else if (diff <= -8)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 25)
+	else if (mylevel <= 30)
 	{
-		if (diff <= -10)
-			conlevel = CON_GREEN;
-		else if (diff <= -8)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -11)
+            conlevel = CON_GREEN;
+        else if (diff <= -9)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 29)
+	else if (mylevel <= 32)
 	{
-		if (diff <= -11)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -12)
+            conlevel = CON_GREEN;
+        else if (diff <= -9)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 31)
+	else if (mylevel <= 36)
 	{
-		if (diff <= -12)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -13)
+            conlevel = CON_GREEN;
+        else if (diff <= -10)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 33)
+	else if (mylevel <= 40)
 	{
-		if (diff <= -13)
-			conlevel = CON_GREEN;
-		else if (diff <= -10)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -14)
+            conlevel = CON_GREEN;
+        else if (diff <= -11)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 37)
+	else if (mylevel <= 44)
 	{
-		if (diff <= -14)
-			conlevel = CON_GREEN;
-		else if (diff <= -11)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -16)
+            conlevel = CON_GREEN;
+        else if (diff <= -12)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 41)
+	else if (mylevel <= 48)
 	{
-		if (diff <= -16)
-			conlevel = CON_GREEN;
-		else if (diff <= -12)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -17)
+            conlevel = CON_GREEN;
+        else if (diff <= -13)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 45)
+	else if (mylevel <= 52)
 	{
-		if (diff <= -17)
-			conlevel = CON_GREEN;
-		else if (diff <= -13)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -18)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -14)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 49)
+	else if (mylevel <= 54)
 	{
-		if (diff <= -18)
-			conlevel = CON_GREEN;
-		else if (diff <= -14)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -19)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -15)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 53)
+	else if (mylevel <= 56)
 	{
-		if (diff <= -19)
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -20)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -15)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else if (mylevel <= 55)
+	else if (mylevel <= 60)
 	{
-		if (diff <= -20)
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+        if (diff <= -21)
+            conlevel = CON_GREEN;
+        else if (diff <= -16)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
 	}
-	else
-	{
-		if (diff <= -21)
-			conlevel = CON_GREEN;
-		else if (diff <= -16)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
+	else if (mylevel >= 61)
+    {
+        if (diff <= -19)
+            conlevel = CON_GREEN;
+        else if (diff <= -14)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+	else if (mylevel >= 62)
+    {
+        if (diff <= -17)
+            conlevel = CON_GREEN;
+        else if (diff <= -12)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+	else if (mylevel >= 63)
+    {
+        if (diff <= -16)
+            conlevel = CON_GREEN;
+        else if (diff <= -11)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
 	return conlevel;
 }
 
