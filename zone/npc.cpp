@@ -1938,7 +1938,8 @@ void NPC::LevelScale() {
 		STA += (int)(STA * scaling / scale_adjust);
 		AGI += (int)(AGI * scaling / scale_adjust);
 		DEX += (int)(DEX * scaling / scale_adjust);
-		INT += (int)(INT * scaling / scale_adjust);
+		if(INT > RuleI(Aggro, IntAggroThreshold))
+			INT += (int)(INT * scaling / scale_adjust);
 		WIS += (int)(WIS * scaling / scale_adjust);
 		CHA += (int)(CHA * scaling / scale_adjust);
 		if (MR)
