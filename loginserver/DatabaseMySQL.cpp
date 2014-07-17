@@ -239,7 +239,7 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 	}
 
 	char tmpUN[1024];
-	mysql_real_escape_string(db, tmpUN, name.c_str(), name.length());
+	mysql_real_escape_string(db, tmpUN, account_name.c_str(), account_name.length());
 
 	stringstream query(stringstream::in | stringstream::out);
 	query << "INSERT INTO " << server.options.GetAccessLogTable() << " SET account_id = " << account_id;
