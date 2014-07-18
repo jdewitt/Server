@@ -427,7 +427,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	Mob *spell_target = entity_list.GetMob(target_id);
 	// check line of sight to target if it's a detrimental spell
-	if(spell_target && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].targettype != ST_Self)
+	if(spell_target && spells[spell_id].targettype != ST_TargetOptional && spells[spell_id].targettype != ST_Self && spells[spell_id].targettype != ST_AECaster)
 	{
 		if(!CheckRegion(spell_target) || 
 		((zone->IsCity() || !zone->CanCastOutdoor()) && 
