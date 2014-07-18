@@ -137,7 +137,7 @@ public:
 	void SetDBID(uint32 dbid);
 	uint32 GetIcon();
 	void SetIcon(uint32 icon);
-	uint32 GetItemID();
+	int16 GetItemID();
 	void SetItemID(uint32 itemid);
 	void GetObjectData(Object_Struct* Data);
 	void SetObjectData(Object_Struct* Data);

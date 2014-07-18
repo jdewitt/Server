@@ -760,13 +760,13 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 		}
 
 		if(i==30){ //end of standard inventory/cursor, jump to internals of bags/cursor
-			i = 251;
+			i = 250;
 			continue;
 		} else if(i==340){ //end of internals of bags/cursor, jump to bank slots
 			i = 2000;
 			continue;
-		} else if(i==2023){ //end of bank slots, jump to internals of bank bags
-			i = 2031;
+		} else if(i==2007){ //end of bank slots, jump to internals of bank bags
+			i = 2030;
 			continue;
 		}
 

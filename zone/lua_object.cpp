@@ -78,7 +78,7 @@ void Lua_Object::SetItemID(uint32 item_id) {
 	self->SetItemID(item_id);
 }
 
-uint32 Lua_Object::GetItemID() {
+int16 Lua_Object::GetItemID() {
 	Lua_Safe_Call_Int();
 	return self->GetItemID();
 }
@@ -197,7 +197,7 @@ luabind::scope lua_register_object() {
 		.def("SetHeading", (void(Lua_Object::*)(float))&Lua_Object::SetHeading)
 		.def("SetLocation", (void(Lua_Object::*)(float,float,float))&Lua_Object::SetLocation)
 		.def("SetItemID", (void(Lua_Object::*)(uint32))&Lua_Object::SetItemID)
-		.def("GetItemID", (uint32(Lua_Object::*)(void))&Lua_Object::GetItemID)
+		.def("GetItemID", (int16(Lua_Object::*)(void))&Lua_Object::GetItemID)
 		.def("SetIcon", (void(Lua_Object::*)(uint32))&Lua_Object::SetIcon)
 		.def("GetIcon", (uint32(Lua_Object::*)(void))&Lua_Object::GetIcon)
 		.def("SetType", (void(Lua_Object::*)(uint32))&Lua_Object::SetType)

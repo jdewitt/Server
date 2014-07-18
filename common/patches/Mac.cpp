@@ -1127,19 +1127,10 @@ DECODE(OP_MoveItem)
 {
 	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-	_log(INVENTORY__ERROR, "EQMAC DECODE to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
-	//EQMac is 250-339 EQEmu is 251-340
-	if((eq->to_slot >= 250 && eq->to_slot <= 339) || (eq->to_slot >= 2030 && eq->to_slot <= 2109)) 
-		emu->to_slot = eq->to_slot+1;
-	else
-		emu->to_slot=eq->to_slot;
-
-	if((eq->from_slot >= 250 && eq->from_slot <= 339) || (eq->from_slot >= 2030 && eq->from_slot <= 2109)) 
-		emu->from_slot = eq->from_slot+1;
-	else
-		emu->from_slot=eq->from_slot;
-
+	IN(from_slot);
+	IN(to_slot);
 	IN(number_in_stack);
+
 	_log(INVENTORY__ERROR, "EQMAC DECODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", emu->to_slot, emu->from_slot, emu->number_in_stack);
 	FINISH_DIRECT_DECODE();
 }
@@ -1150,17 +1141,11 @@ ENCODE(OP_MoveItem)
 	ENCODE_LENGTH_EXACT(MoveItem_Struct);
 	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-	if((emu->to_slot >= 251 && emu->to_slot <= 340) || (emu->to_slot >= 2031 && emu->to_slot <= 2110)) 
-		eq->to_slot = emu->to_slot-1;
-	else
-		eq->to_slot=emu->to_slot;
-
-	if((emu->from_slot >= 251 && emu->from_slot <= 340) || (emu->from_slot >= 2031 && emu->from_slot <= 2110)) 
-		eq->from_slot = emu->from_slot-1;
-	else
-		eq->from_slot=emu->from_slot;
-
+	OUT(from_slot);
+	OUT(to_slot);
 	OUT(number_in_stack);
+	_log(INVENTORY__ERROR, "EQMAC ENCODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
+
 	FINISH_ENCODE();
 }
 
@@ -1209,10 +1194,7 @@ DECODE(OP_Consume)
 	DECODE_LENGTH_EXACT(structs::Consume_Struct);
 	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
 
-	if(eq->slot >= 250 && eq->slot <= 339)
-		emu->slot = eq->slot+1;
-	else
-		emu->slot = eq->slot;
+	IN(slot);
 	IN(type);
 	IN(auto_consumed);
 
@@ -1976,15 +1958,8 @@ structs::Item_Struct* WeaselTheJuice(const ItemInst *inst, int16 slot_id, int ty
 
   	if(type == 0)
   	{
-  		if((slot_id >= 251 && slot_id <= 340) || (slot_id >= 2031 && slot_id <= 2110))
-  			thejuice->equipSlot = slot_id-1;
-  		else
-  			thejuice->equipSlot = slot_id;
-		int8 charges_ = inst->GetCharges();
-		if(charges_ > 127)
-			thejuice->Charges = 127;
-		else
-			thejuice->Charges = charges_;
+  		thejuice->equipSlot = slot_id;
+		thejuice->Charges = inst->GetCharges();
 		thejuice->Price = item->Price;
 		thejuice->SellRate = item->SellRate;
   	}
@@ -2238,7 +2213,6 @@ ENCODE(OP_Dye) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RaidJoin) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_RemoveAllDoors) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SendAAStats) { ENCODE_FORWARD(OP_Unknown); }
-ENCODE(OP_Shielding) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_SpellEffect) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderDelItem) { ENCODE_FORWARD(OP_Unknown); }
 ENCODE(OP_TraderItemUpdate) { ENCODE_FORWARD(OP_Unknown); }

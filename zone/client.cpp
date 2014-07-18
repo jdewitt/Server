@@ -284,6 +284,9 @@ Client::Client(EQStreamInterface* ieqs)
 	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
+
+	last_used_slot = -1;
+//	walkspeed = 0.46;
 }
 
 Client::~Client() {
@@ -5237,7 +5240,7 @@ void Client::TickItemCheck()
 		TryItemTick(i);
 	}
 	//Scan bags
-	for(i = 251; i < 340; i++)
+	for(i = 250; i < 340; i++)
 	{
 		TryItemTick(i);
 	}
@@ -5278,7 +5281,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for(i = 251; i < 340; i++)
+	for(i = 250; i < 340; i++)
 	{
 		TryItemTimer(i);
 	}

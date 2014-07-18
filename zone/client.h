@@ -1163,6 +1163,8 @@ private:
 	std::map<std::string,std::string> accountflags;
 
 	uint8 initial_respawn_selection;
+
+	int16 last_used_slot;
 };
 
 #endif

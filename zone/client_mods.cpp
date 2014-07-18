@@ -1076,7 +1076,7 @@ uint32 Client::CalcCurrentWeight() {
 		if (TempItem)
 			Total += TempItem->Weight;
 	}
-	for (x = 251; x < 331; x++)
+	for (x = 250; x < 330; x++)
 	{
 		int TmpWeight = 0;
 		TempItem = 0;

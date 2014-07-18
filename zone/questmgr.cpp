@@ -2118,7 +2118,7 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = 251; slot_id <= 330; ++slot_id)
+	for (slot_id = 250; slot_id <= 329; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}

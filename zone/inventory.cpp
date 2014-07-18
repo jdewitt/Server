@@ -70,18 +70,18 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	}
 
 	if(where_to_check & invWhereCursor) {
-		if (GetItemIDAt(30) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(30) != INVALID_ID)) {
-			cur = m_inv.GetItem(30);
+		if (GetItemIDAt(0) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(0) != INVALID_ID)) {
+			cur = m_inv.GetItem(0);
 			if(cur && cur->GetItem()->Stackable) {
 				x += cur->GetCharges();
 			} else {
 				x++;
 			}
 
-			DeleteItemInInventory(30, 0, true);
+			DeleteItemInInventory(0, 0, true);
 		}
 
-		for (i=331; i<=340; i++) { // cursor's containers
+		for (i=330; i<=339; i++) { // cursor's containers
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -109,7 +109,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		for (i=251; i<=330; i++) { // Main inventory's containers
+		for (i=250; i<=329; i++) { // Main inventory's containers
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -124,7 +124,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	}
 
 	if(where_to_check & invWhereBank) {
-		for (i=2000; i<=2023; i++) { // Bank slots
+		for (i=2000; i<=2007; i++) { // Bank slots
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -137,7 +137,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		for (i=2031; i<=2270; i++) { // Bank's containers
+		for (i=2030; i<=2109; i++) { // Bank's containers
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -834,10 +834,9 @@ bool Client::IsValidSlot(uint32 slot)
 {
 	if((slot == (uint32)SLOT_INVALID) ||	// Destroying/Dropping item
 		(slot >= 0 && slot <= 30) ||		// Worn inventory, normal inventory, and cursor
-		(slot >= 251 && slot <= 340) ||		// Normal inventory bags and cursor bag
-		(slot >= 400 && slot <= 404) ||		// Tribute
-		(slot >= 2000 && slot <= 2023) ||	// Bank
-		(slot >= 2031 && slot <= 2270) ||	// Bank bags
+		(slot >= 250 && slot <= 339) ||		// Normal inventory bags and cursor bag
+		(slot >= 2000 && slot <= 2007) ||	// Bank
+		(slot >= 2030 && slot <= 2109) ||	// Bank bags
 		(slot >= 3000 && slot <= 3007) ||	// Trade window
 		(slot >= 4000 && slot <= 4009) ||	// Tradeskill container
 		(slot == 9999))						// Power Source
@@ -851,8 +850,8 @@ bool Client::IsValidSlot(uint32 slot)
 
 bool Client::IsBankSlot(uint32 slot)
 {
-	if ((slot >= 2000 && slot <= 2023) || // Bank
-		(slot >= 2031 && slot <= 2270)) // Bank bags
+	if ((slot >= 2000 && slot <= 2007) || // Bank
+		(slot >= 2030 && slot <= 2109)) // Bank bags
 	{
 		return true;
 	}
@@ -1175,7 +1174,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		else {
 			// Nothing in destination slot: split stack into two
-			if ((int16)move_in->number_in_stack >= src_inst->GetCharges()) {
+			if ((int8)move_in->number_in_stack >= src_inst->GetCharges()) {
 				// Move entire stack
 				if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { 
 					mlog(INVENTORY__ERROR, "Could not move entire stack from %d to %d with stack size %d. Dest empty.", src_slot_id, dst_slot_id, move_in->number_in_stack);
@@ -1195,7 +1194,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	else {
 		// Not dealing with charges - just do direct swap
-		if(src_inst && (dst_slot_id < 22 || dst_slot_id == 9999) && dst_slot_id >= 1) {
+		if(src_inst && dst_slot_id < 22 && dst_slot_id >= 1) {
 			if (src_inst->GetItem()->Attuneable) {
 				src_inst->SetInstNoDrop(true);
 			}
@@ -1207,7 +1206,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		mlog(INVENTORY__SLOTS, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
-		if(src_slot_id < 22 || src_slot_id == 9999) {
+		if(src_slot_id > 0 && src_slot_id < 22) {
 			if(src_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
 			}
@@ -1217,7 +1216,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 
-		if(dst_slot_id < 22 || dst_slot_id == 9999) {
+		if(dst_slot_id > 0 && dst_slot_id < 22) {
 			if(dst_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
 			}
@@ -1229,7 +1228,7 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id<22 && matslot != 0) {
+	if (dst_slot_id > 0 && dst_slot_id<22 && matslot != 0) {
 		SendWearChange(matslot);
 	}
 
@@ -1459,10 +1458,10 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	ItemInst* ins;
 	int x;
 	int num = 0;
-	for(x=0; x < 331; x++)
+	for(x=0; x < 330; x++)
 	{
 		if (x == 31)
-			x = 251;
+			x = 250;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins)
@@ -1476,10 +1475,10 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 	if (num < amt)
 		return false;
-	for(x=0; x < 331; x++)
+	for(x=0; x < 330; x++)
 	{
 		if (x == 31)
-			x = 251;
+			x = 250;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins)
@@ -1517,7 +1516,7 @@ void Client::RemoveNoRent(bool client_update) {
 	}
 
 	// containers
-	for(slot_id = 251; slot_id <= 340; slot_id++) {
+	for(slot_id = 250; slot_id <= 339; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -1526,7 +1525,7 @@ void Client::RemoveNoRent(bool client_update) {
 	}
 
 	// bank
-	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
+	for(slot_id = 2000; slot_id <= 2007; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -1535,7 +1534,7 @@ void Client::RemoveNoRent(bool client_update) {
 	}
 
 	// bank containers
-	for(slot_id = 2031; slot_id <= 2270; slot_id++) {
+	for(slot_id = 2030; slot_id <= 2109; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			mlog(INVENTORY__SLOTS, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -1578,7 +1577,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	}
 
 	// containers
-	for(slot_id = 251; slot_id <= 340; slot_id++) {
+	for(slot_id = 250; slot_id <= 339; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
@@ -1593,7 +1592,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	}
 
 	// bank
-	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
+	for(slot_id = 2000; slot_id <= 2007; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
@@ -1608,7 +1607,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	}
 
 	// bank containers
-	for(slot_id = 2031; slot_id <= 2270; slot_id++) {
+	for(slot_id = 2030; slot_id <= 2109; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {

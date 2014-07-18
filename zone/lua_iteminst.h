@@ -39,7 +39,7 @@ public:
 	Lua_Item GetItem();
 	void SetItem(Lua_Item item);
 	Lua_Item GetUnscaledItem(int slot);
-	uint32 GetItemID(int slot);
+	int16 GetItemID(int slot);
 	int GetTotalItemCount();
 	bool IsWeapon();
 	bool IsAmmo();

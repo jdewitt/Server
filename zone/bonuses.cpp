@@ -139,7 +139,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i=0; i<21; i++) {
+	for (i=1; i<21; i++) {
 		const ItemInst* inst = m_inv[i];
 		if(inst == 0)
 			continue;
@@ -537,7 +537,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = 251; i <= 330; i++)
+	for (i = 250; i <= 329; i++)
 	{
 		if (food && drink)
 			break;
@@ -3032,10 +3032,7 @@ void Client::CalcItemScale()
 	if(CalcItemScale(22, 30))
 		changed = true;
 
-	if(CalcItemScale(251, 341))
-		changed = true;
-
-	if(CalcItemScale(400, 405))
+	if(CalcItemScale(250, 340))
 		changed = true;
 
 	if(changed)
@@ -3083,10 +3080,7 @@ void Client::DoItemEnterZone() {
 	if(DoItemEnterZone(22, 30))
 		changed = true;
 
-	if(DoItemEnterZone(251, 341))
-		changed = true;
-
-	if(DoItemEnterZone(400, 405))
+	if(DoItemEnterZone(250, 340))
 		changed = true;
 
 	if(changed)

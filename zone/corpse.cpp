@@ -1268,7 +1268,7 @@ void Corpse::QueryLoot(Client* to) {
 		ServerLootItem_Struct* sitem = *cur;
 
 		if (IsPlayerCorpse()) {
-			if (sitem->equipSlot >= 251 && sitem->equipSlot <= 340)
+			if (sitem->equipSlot >= 250 && sitem->equipSlot <= 339)
 				sitem->lootslot = 0xFFFF;
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;

@@ -56,13 +56,13 @@ namespace ItemField
 };
 
 // Indexing positions to the beginning slot_id's for a bucket of slots
-#define IDX_CURSOR_BAG	331
+#define IDX_CURSOR_BAG	330
 #define IDX_INV			22
-#define IDX_INV_BAG		251
+#define IDX_INV_BAG		250
 #define IDX_BANK		2000
-#define IDX_BANK_BAG	2031
+#define IDX_BANK_BAG	2030
 #define IDX_TRADE		3000
-#define IDX_TRADE_BAG	3031
+#define IDX_TRADE_BAG	3030
 #define IDX_TRADESKILL	4000
 #define MAX_ITEMS_PER_BAG 10
 
@@ -258,9 +258,9 @@ public:
 	/////////////////////////
 
 	// Constructors/Destructor
-	ItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
+	ItemInst(const Item_Struct* item = nullptr, int8 charges = 0);
 
-	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
+	ItemInst(SharedDatabase *db, int16 item_id, int8 charges = 0);
 
 	ItemInst(ItemInstTypes use_type);
 
@@ -286,7 +286,7 @@ public:
 	// Contents
 	//
 	ItemInst* GetItem(uint8 slot) const;
-	uint32 GetItemID(uint8 slot) const;
+	int16 GetItemID(uint8 slot) const;
 	inline const ItemInst* operator[](uint8 slot) const { return GetItem(slot); }
 	void PutItem(uint8 slot, const ItemInst& inst);
 	void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id) { return; } // not defined anywhere...
@@ -304,13 +304,13 @@ public:
 	bool IsAmmo() const;
 
 	// Accessors
-	const uint32 GetID() const { return m_item->ID; }
+	const int16 GetID() const { return m_item->ID; }
 	const uint32 GetItemScriptID() const { return m_item->ScriptFileID; }
 	const Item_Struct* GetItem() const;
 	const Item_Struct* GetUnscaledItem() const;
 
-	int16 GetCharges() const				{ return m_charges; }
-	void SetCharges(int16 charges)			{ m_charges = charges; }
+	int8 GetCharges() const				{ return m_charges; }
+	void SetCharges(int8 charges)			{ m_charges = charges; }
 
 	uint32 GetPrice() const					{ return m_price; }
 	void SetPrice(uint32 price)				{ m_price = price; }
@@ -390,7 +390,7 @@ protected:
 
 	ItemInstTypes		m_use_type;	// Usage type for item
 	const Item_Struct*	m_item;		// Ptr to item data
-	int16				m_charges;	// # of charges for chargeable items
+	int8				m_charges;	// # of charges for chargeable items
 	uint32				m_price;	// Bazaar /trader price
 	uint32				m_color;
 	uint32				m_merchantslot;

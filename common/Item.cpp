@@ -176,7 +176,7 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 		// Trade slots
 		result = _GetItem(m_trade, slot_id);
 	}
-	else if (slot_id >= 2000 && slot_id <= 2023) {
+	else if (slot_id >= 2000 && slot_id <= 2007) {
 		// Bank slots
 		result = _GetItem(m_bank, slot_id);
 	}
@@ -184,34 +184,34 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 		// Personal inventory slots
 		result = _GetItem(m_inv, slot_id);
 	}
-	else if ((slot_id >= 1 && slot_id <= 21) || (slot_id >= 400 && slot_id <= 404) || (slot_id == 9999)) {
+	else if ((slot_id >= 1 && slot_id <= 21)) {
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
 
-	// Inner bag slots
-	else if (slot_id >= 3031 && slot_id <= 3110) {
+	// Trade bag slots
+	else if (slot_id >= 3030 && slot_id <= 3109) {
 		// Trade bag slots
 		ItemInst* inst = _GetItem(m_trade, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 2031 && slot_id <= 2270) {
+	else if (slot_id >= 2030 && slot_id <= 2109) {
 		// Bank bag slots
 		ItemInst* inst = _GetItem(m_bank, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 331 && slot_id <= 340) {
+	else if (slot_id >= 330 && slot_id <= 339) {
 		// Cursor bag slots
 		ItemInst* inst = m_cursor.peek_front();
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 251 && slot_id <= 330) {
+	else if (slot_id >= 250 && slot_id <= 329) {
 		// Personal inventory bag slots
 		ItemInst* inst = _GetItem(m_inv, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -341,7 +341,7 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 	if (slot_id == SLOT_CURSOR) { // Cursor
 		p = m_cursor.pop();
 	}
-	else if ((slot_id >= 1 && slot_id <= 21) || (slot_id >= 400 && slot_id <= 404) || (slot_id == 9999)) { // Worn slots
+	else if ((slot_id >= 1 && slot_id <= 21)) { // Worn slots
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
@@ -349,7 +349,7 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 		p = m_inv[slot_id];
 		m_inv.erase(slot_id);
 	}
-	else if (slot_id >= 2000 && slot_id <= 2023) { // Bank slots
+	else if (slot_id >= 2000 && slot_id <= 2007) { // Bank slots
 		p = m_bank[slot_id];
 		m_bank.erase(slot_id);
 	}
@@ -639,16 +639,16 @@ int16 Inventory::CalcSlotId(int16 slot_id)
 {
 	int16 parent_slot_id = SLOT_INVALID;
 
-	if (slot_id >= 251 && slot_id <= 330)
-		parent_slot_id = IDX_INV + (slot_id - 251) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 331 && slot_id <= 340)
+	if (slot_id >= 250 && slot_id <= 329)
+		parent_slot_id = IDX_INV + (slot_id - 250) / MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 330 && slot_id <= 339)
 		parent_slot_id = SLOT_CURSOR;
-	else if (slot_id >= 2000 && slot_id <= 2023)
+	else if (slot_id >= 2000 && slot_id <= 2007)
 		parent_slot_id = IDX_BANK + (slot_id - 2000) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2031 && slot_id <= 2270)
-		parent_slot_id = IDX_BANK + (slot_id - 2031) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 3100 && slot_id <= 3179)
-		parent_slot_id = IDX_TRADE + (slot_id - 3100) / MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 2030 && slot_id <= 2109)
+		parent_slot_id = IDX_BANK + (slot_id - 2030) / MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 3030 && slot_id <= 3109)
+		parent_slot_id = IDX_TRADE + (slot_id - 3030) / MAX_ITEMS_PER_BAG;
 
 	return parent_slot_id;
 }
@@ -666,7 +666,7 @@ int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx)
 		slot_id = IDX_CURSOR_BAG + bagidx;
 	else if (bagslot_id >= 22 && bagslot_id <= 29) // Inventory slots
 		slot_id = IDX_INV_BAG + (bagslot_id - 22)*MAX_ITEMS_PER_BAG + bagidx;
-	else if (bagslot_id >= 2000 && bagslot_id <= 2023) // Bank slots
+	else if (bagslot_id >= 2000 && bagslot_id <= 2007) // Bank slots
 		slot_id = IDX_BANK_BAG + (bagslot_id - 2000)*MAX_ITEMS_PER_BAG + bagidx;
 	else if (bagslot_id >= 3000 && bagslot_id <= 3007) // Trade window slots
 		slot_id = IDX_TRADE_BAG + (bagslot_id - 3000)*MAX_ITEMS_PER_BAG + bagidx;
@@ -678,16 +678,16 @@ uint8 Inventory::CalcBagIdx(int16 slot_id)
 {
 	uint8 index = 0;
 
-	if (slot_id >= 251 && slot_id <= 330)
-		index = (slot_id - 251) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 331 && slot_id <= 340)
-		index = (slot_id - 331) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2000 && slot_id <= 2023)
+	if (slot_id >= 250 && slot_id <= 329)
+		index = (slot_id - 250) % MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 330 && slot_id <= 339)
+		index = (slot_id - 330) % MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 2000 && slot_id <= 2007)
 		index = (slot_id - 2000) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2031 && slot_id <= 2270)
-		index = (slot_id - 2031) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 3100 && slot_id <= 3179)
-		index = (slot_id - 3100) % MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 2030 && slot_id <= 2109)
+		index = (slot_id - 2030) % MAX_ITEMS_PER_BAG;
+	else if (slot_id >= 3030 && slot_id <= 3109)
+		index = (slot_id - 3030) % MAX_ITEMS_PER_BAG;
 	else if (slot_id >= 4000 && slot_id <= 4009)
 		index = (slot_id - 4000) % MAX_ITEMS_PER_BAG;
 
@@ -764,7 +764,7 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 bool Inventory::SupportsContainers(int16 slot_id)
 {
 	if ((slot_id >= 22 && slot_id <= 30) ||		// Personal inventory slots
-		(slot_id >= 2000 && slot_id <= 2023) ||	// Bank slots
+		(slot_id >= 2000 && slot_id <= 2007) ||	// Bank slots
 		(slot_id == SLOT_CURSOR) ||			// Cursor
 		(slot_id >= 3000 && slot_id <= 3007))	// Trade window
 		return true;
@@ -927,7 +927,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 		m_cursor.push_front(inst);
 		result = slot_id;
 	}
-	else if ((slot_id >= 1 && slot_id <= 21) || (slot_id >= 400 && slot_id <= 404) || (slot_id == 9999)) { // Worn slots
+	else if ((slot_id >= 1 && slot_id <= 21)) { // Worn slots
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}
@@ -935,7 +935,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 		m_inv[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= 2000 && slot_id <= 2023) { // Bank slots
+	else if (slot_id >= 2000 && slot_id <= 2007) { // Bank slots
 		m_bank[slot_id] = inst;
 		result = slot_id;
 	}
@@ -1165,7 +1165,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 //
 // class ItemInst
 //
-ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
+ItemInst::ItemInst(const Item_Struct* item, int8 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = item;
 	m_charges = charges;
@@ -1187,7 +1187,7 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_scaling = false;
 }
 
-ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
+ItemInst::ItemInst(SharedDatabase *db, int16 item_id, int8 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	m_charges = charges;
@@ -1354,10 +1354,10 @@ ItemInst* ItemInst::GetItem(uint8 index) const
 	return nullptr;
 }
 
-uint32 ItemInst::GetItemID(uint8 slot) const
+int16 ItemInst::GetItemID(uint8 slot) const
 {
 	const ItemInst *item;
-	uint32 id = 0;
+	int16 id = 0;
 	if ((item = GetItem(slot)) != nullptr)
 		id = item->GetItem()->ID;
 

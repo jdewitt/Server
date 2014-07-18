@@ -804,7 +804,7 @@ void Object::SetIcon(uint32 icon)
 	this->m_icon = icon;
 }
 
-uint32 Object::GetItemID()
+int16 Object::GetItemID()
 {
 	if (this->m_inst == 0)
 	{

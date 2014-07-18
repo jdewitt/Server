@@ -704,7 +704,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	//Items in containers
-	for (slot_id=251; slot_id<=340; slot_id++) {
+	for (slot_id=250; slot_id<=339; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -714,7 +714,7 @@ void Client::BulkSendInventoryItems() {
 	}	
 
 	// Bank items
-	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
+	for(slot_id = 2000; slot_id <= 2007; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -724,7 +724,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	//Items in containers
-	for (slot_id=2031; slot_id<=2110; slot_id++) {
+	for (slot_id=2030; slot_id<=2109; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -779,7 +779,7 @@ void Client::BulkSendItems()
 	}
 
 	//Items in containers
-		for (slot_id=251; slot_id<=340; slot_id++) {
+		for (slot_id=250; slot_id<=339; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -795,7 +795,7 @@ void Client::BulkSendItems()
 	}
 
 		// Bank items
-	for (slot_id=2031; slot_id<=2110; slot_id++) {
+	for (slot_id=2030; slot_id<=2109; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);

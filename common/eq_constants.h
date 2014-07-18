@@ -729,14 +729,12 @@ enum InventorySlot
 	SLOT_PERSONAL_END = 29,
 
 	SLOT_CURSOR_END	= (int16)0xFFFE,	// Last item on cursor queue
-	// Cursor bag slots are 331->340 (10 slots) (EQMac: 330-339)
+	// Cursor bag slots are 330->339
 
 	// Personal Inventory Slots
 	// Slots 1 through 8 are slots 22->29
-	// Inventory bag slots are 251->330 (10 slots per bag) (EQMac: 250-329)
+	// Inventory bag slots are 250->329
 
-	// Tribute slots are 400-404? (upper bound unknown)
-	// storing these in worn item's map
 
 	// Bank slots
 	// Bank slots 1 through 16 are slots 2000->2015
@@ -745,7 +743,7 @@ enum InventorySlot
 	// Trade session slots
 	// Trade slots 1 through 8 are slots 3000->3007
 	// Trade bag slots are technically 0->79 when passed to client,
-	// but in our code, we treat them as slots 3100->3179
+	// but in our code, we treat them as slots 3100->3109
 
 	// Slot used in OP_TradeSkillCombine for world tradeskill containers
 	SLOT_TRADESKILL = 1000,

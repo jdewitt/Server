@@ -149,7 +149,7 @@ bool ret=true;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	// Delete cursor items
-	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=0 or (slotid>=331 and slotid<=340))", char_id), errbuf))) {
+	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=0 or (slotid>=330 and slotid<=339))", char_id), errbuf))) {
 		for(it=start,i=8000;it!=end;++it,i++) {
 			ItemInst *inst=*it;
 			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? 0 : i)))
@@ -184,10 +184,10 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 	row = mysql_fetch_row(result);
 	bool found = false;
 	if(row) {
-		uint32 id = atoi(row[0]);
-		uint16 charges = atoi(row[1]);
+		int16 id = atoi(row[0]);
+		int8 charges = atoi(row[1]);
 
-		uint16 expect_charges = 0;
+		int8 expect_charges = 0;
 		if(inst->GetCharges() >= 0)
 			expect_charges = inst->GetCharges();
 		else
@@ -204,10 +204,6 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	bool ret = false;
-
-	//never save tribute slots:
-	if(slot_id >= 400 && slot_id <= 404)
-		return(true);
 
 	// All other inventory
 	if (!inst) {
@@ -451,8 +447,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
 		while ((row = mysql_fetch_row(result))) {
 			int16 slot_id	= atoi(row[0]);
-			uint32 item_id	= atoi(row[1]);
-			uint16 charges	= atoi(row[2]);
+			int16 item_id	= atoi(row[1]);
+			int8 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
 			bool instnodrop	= (row[4] && (uint16)atoi(row[4])) ? true : false;
 
@@ -546,7 +542,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 	{
 		while ((row = mysql_fetch_row(result))) {
 			int16 slot_id	= atoi(row[0]);
-			uint32 item_id	= atoi(row[1]);
+			int16 item_id	= atoi(row[1]);
 			int8 charges	= atoi(row[2]);
 			uint32 color		= atoul(row[3]);
 			bool instnodrop	= (row[4] && (uint16)atoi(row[4])) ? true : false;

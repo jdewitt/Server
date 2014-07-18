@@ -2827,10 +2827,10 @@ void command_peekinv(Client *c, const Seperator *sep){
 	}
 
 	if (bAll || (strcasecmp(sep->arg[1], "bank")==0)) {
-		// Bank and shared bank items
+		// Bank
 		bFound = true;
 		int16 i = 0;
-		for (i=2000; i<=2023; i++) {
+		for (i=2000; i<=2007; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 				static char itemid[7];

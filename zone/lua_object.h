@@ -43,7 +43,7 @@ public:
 	void SetHeading(float h);
 	void SetLocation(float x, float y, float z);
 	void SetItemID(uint32 item_id);
-	uint32 GetItemID();
+	int16 GetItemID();
 	void SetIcon(uint32 icon);
 	uint32 GetIcon();
 	void SetType(uint32 type);

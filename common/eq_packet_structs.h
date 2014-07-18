@@ -2148,7 +2148,7 @@ struct ClickObject_Struct {
 };
 
 struct Shielding_Struct {
-	uint32 target_id;
+	uint16 target_id;
 };
 
 /*

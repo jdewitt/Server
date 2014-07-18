@@ -2069,6 +2069,7 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app) {
 
 void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 {
+
 	if(!CharacterID())
 	{
 		return;
@@ -2079,11 +2080,14 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
-		return;
-
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
+
+	if(last_used_slot == mi->to_slot && last_used_slot != -1)
+	{
+		_log(INVENTORY__ERROR, "Last used slot: %i is equal to current to slot: %i", last_used_slot, mi->to_slot);
+		return;
+	}
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
@@ -2108,8 +2112,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	// Illegal bagslot useage checks. Currently, user only receives a message if this check is triggered.
 	bool mi_hack = false;
 
-	if(mi->from_slot >= 251 && mi->from_slot <= 340) {
-		if(mi->from_slot > 330) { mi_hack = true; }
+	if(mi->from_slot >= 250 && mi->from_slot <= 339) {
+		if(mi->from_slot > 329) { mi_hack = true; }
 		else {
 			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
 			if(!m_inv[from_parent]) { mi_hack = true; }
@@ -2118,8 +2122,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if(mi->to_slot >= 251 && mi->to_slot <= 340) {
-		if(mi->to_slot > 330) { mi_hack = true; }
+	if(mi->to_slot >= 250 && mi->to_slot <= 339) {
+		if(mi->to_slot > 329) { mi_hack = true; }
 		else {
 			int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
 			if(!m_inv[to_parent]) { mi_hack = true; }
@@ -2128,7 +2132,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
+	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots! %i %i", mi->to_slot, mi->from_slot); }
 
 	
 	if(IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { 
@@ -2145,7 +2149,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	eqmac_timer.Start(250, true);
+	last_used_slot = mi->to_slot;
 	return;
 }
 
@@ -4335,9 +4339,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(DistNoRoot(*vendor) > USE_NPC_RANGE2)
 		return;
 
-	if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
-		mp->itemslot = mp->itemslot+1;
-
 	uint32 price=0;
 	uint32 itemid = GetItemIDAt(mp->itemslot);
 	if(itemid == 0)
@@ -4450,10 +4451,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(OldMerchant_Purchase_Struct));
 		OldMerchant_Purchase_Struct* mco=(OldMerchant_Purchase_Struct*)outapp->pBuffer;
 
-		if((mp->itemslot >= 250 && mp->itemslot <= 329) || (mp->itemslot >= 2030 && mp->itemslot <= 2109)) 
-			mco->itemslot = mp->itemslot-1;
-		else
-			mco->itemslot = mp->itemslot;
+		mco->itemslot = mp->itemslot;
 		mco->npcid = vendor->GetID();
 		mco->quantity=mp->quantity;
 		mco->price=price;
@@ -6978,7 +6976,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		//Items in cursor container
 		itemsinabag = false;
 		int16 slot_id = 0;
-		for (slot_id=331; slot_id<=340; slot_id++) {
+		for (slot_id=330; slot_id<=339; slot_id++) {
 			const ItemInst* inst = m_inv[slot_id];
 			if (inst){
 				itemsinabag = true;
@@ -8266,6 +8264,6 @@ void Client::Handle_OP_ZoneEntryResend(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
 {
-	CheckIncreaseSkill(SkillSenseHeading, nullptr, -15);
+	CheckIncreaseSkill(SkillSenseHeading, nullptr, -12);
 	return;
 }

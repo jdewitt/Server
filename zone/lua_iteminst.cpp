@@ -79,7 +79,7 @@ Lua_Item Lua_ItemInst::GetUnscaledItem(int slot) {
 	return self->GetUnscaledItem();
 }
 
-uint32 Lua_ItemInst::GetItemID(int slot) {
+int16 Lua_ItemInst::GetItemID(int slot) {
 	Lua_Safe_Call_Int();
 	return self->GetItemID(slot);
 }
@@ -253,7 +253,7 @@ luabind::scope lua_register_iteminst() {
 		.def("IsExpendable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsExpendable)
 		.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItem)
 		.def("GetUnscaledItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetUnscaledItem)
-		.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
+		.def("GetItemID", (int16(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
 		.def("GetTotalItemCount", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
 		.def("IsWeapon", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsWeapon)
 		.def("IsAmmo", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAmmo)
