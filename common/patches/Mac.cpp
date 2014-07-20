@@ -1131,7 +1131,7 @@ DECODE(OP_MoveItem)
 	IN(to_slot);
 	IN(number_in_stack);
 
-	_log(INVENTORY__ERROR, "EQMAC DECODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", emu->to_slot, emu->from_slot, emu->number_in_stack);
+	_log(INVENTORY__SLOTS, "EQMAC DECODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", emu->to_slot, emu->from_slot, emu->number_in_stack);
 	FINISH_DIRECT_DECODE();
 }
 
@@ -1144,7 +1144,7 @@ ENCODE(OP_MoveItem)
 	OUT(from_slot);
 	OUT(to_slot);
 	OUT(number_in_stack);
-	_log(INVENTORY__ERROR, "EQMAC ENCODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
+	_log(INVENTORY__SLOTS, "EQMAC ENCODE OUTPUT to_slot: %i, from_slot: %i, number_in_stack: %i", eq->to_slot, eq->from_slot, eq->number_in_stack);
 
 	FINISH_ENCODE();
 }

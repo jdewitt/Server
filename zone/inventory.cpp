@@ -1168,9 +1168,10 @@ int Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		else if(!src_inst)
 		{
-			//I also believe this is being caused by EQMac double packets.
+			//I also believe this is being caused by EQMac double packets. I cannot get this to happen on PC client at all, but happens on Intel client all the time.
 			_log(INVENTORY__ERROR, "src_inst has become invalid somewhere.");
-			return 2;
+			Message(CC_Yellow, "Caution: You may have de-synced. Stopped what you're doing, and log out now to avoid item loss.");
+			//return 2;
 		}
 		else {
 			// Nothing in destination slot: split stack into two

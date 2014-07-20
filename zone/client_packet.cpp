@@ -2081,17 +2081,20 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	_log(INVENTORY__ERROR, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
+	_log(INVENTORY__SLOTS, "Moveitem from_slot: %i, to_slot: %i, number_in_stack: %i", mi->from_slot, mi->to_slot, mi->number_in_stack);
 
-	if(last_used_slot == mi->to_slot && last_used_slot != -1)
+	if(last_used_slot == mi->to_slot)
 	{
-		_log(INVENTORY__ERROR, "Last used slot: %i is equal to current to slot: %i", last_used_slot, mi->to_slot);
-		return;
+		if(eqmac_timer.GetRemainingTime() > 1 && eqmac_timer.Enabled())
+		{
+			_log(INVENTORY__ERROR, "WARNING: To slot equals last used slot (%i) and timer was not expired.", last_used_slot);
+			return;
+		}
 	}
 
 	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
-		if(mi->from_slot != mi->to_slot && (mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
+		if(mi->from_slot != mi->to_slot && (mi->from_slot > 0 && mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
 			char *detect = nullptr;
 			const ItemInst *itm_from = GetInv().GetItem(mi->from_slot);
@@ -2150,6 +2153,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	last_used_slot = mi->to_slot;
+	eqmac_timer.Start(130, true);
 	return;
 }
 
