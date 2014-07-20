@@ -30,6 +30,7 @@ public:
 	*/
 	Options() :
 		auto_account_create(false),
+		auto_account_activate(false),
 		Login_Fails(false),
 		Login_Good(false),
 		allow_unregistered(true),
@@ -51,6 +52,16 @@ public:
 	* Returns the value of auto_account_create.
 	*/
 	inline bool IsCreateOn() const { return auto_account_create; }
+
+	/**
+	* Sets allow_auto_account_activate.
+	*/
+	inline void AutoActivate(bool b) { auto_account_activate = b; }
+
+	/**
+	* Returns the value of auto_account_activate.
+	*/
+	inline bool IsActiveOn() const { return auto_account_activate; }
 
 	/**
 	* Sets logging of failed logins.
@@ -224,6 +235,7 @@ public:
 
 private:
 	bool auto_account_create;
+	bool auto_account_activate;
 	bool Login_Fails;
 	bool Login_Good;
 	bool allow_unregistered;

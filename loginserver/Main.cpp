@@ -92,6 +92,12 @@ int main()
 		server.options.AutoCreate(true);
 	}
 
+	//Parse auto account activation option.
+	if (server.config->GetVariable("options", "auto_account_activate").compare("TRUE") == 0)
+	{
+		server.options.AutoActivate(true);
+	}
+
 	//Parse failed access log option.
 	if (server.config->GetVariable("options", "failed_login_log").compare("TRUE") == 0)
 	{
