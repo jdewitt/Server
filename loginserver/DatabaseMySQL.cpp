@@ -253,38 +253,26 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 
 void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress)
 {
+	bool activate = 0;
 	if (!db)
 	{
 		return;
 	}
+	if (server.options.IsActiveOn())
+	{
+		activate = 1;
+	}
 	char tmpUN[1024];
 	mysql_real_escape_string(db, tmpUN, name.c_str(), name.length());
+	stringstream query(stringstream::in | stringstream::out);
+	query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
+	query << id << ", AccountName = '" << tmpUN << "', AccountPassword = sha('";
+	query << password << "'), AccountCreateDate = now(), LastLoginDate = now(), LastIPAddress = '";
+	query << LastIPAddress << "', client_unlock = '" << activate << "', created_by = '" << created_by << "'";
 
-	if (created_by == 1)
+	if (mysql_query(db, query.str().c_str()) != 0)
 	{
-		stringstream query(stringstream::in | stringstream::out);
-		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
-		query << id << ", AccountName = '" << tmpUN << "', AccountPassword = '";
-		query << password << "', AccountCreateDate = now(), created_by = '" << created_by;
-		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
-
-		if (mysql_query(db, query.str().c_str()) != 0)
-		{
-			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-		}
-	}
-	if (created_by == 2)
-	{
-		stringstream query(stringstream::in | stringstream::out);
-		query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
-		query << id << ", AccountName = '" << tmpUN << "', AccountPassword = sha('";
-		query << password << "'), AccountCreateDate = now(), created_by = '" << created_by;
-		query << "', LastIPAddress = '" << LastIPAddress << "', LastLoginDate = now()";
-
-		if (mysql_query(db, query.str().c_str()) != 0)
-		{
-			server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
-		}
+		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 

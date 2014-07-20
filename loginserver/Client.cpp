@@ -332,6 +332,13 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	string salt = server.options.GetSalt();
 
 	string userandpass = password + salt;
+	unsigned int enable;
+
+	if (server.db->GetStatusLSAccountTable(username, enable) == false)
+	{
+		FatalError("Account is not activated. Server is not allowing open logins at this time.");
+		return;
+	}
 
 	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
