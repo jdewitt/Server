@@ -87,7 +87,7 @@ public:
 	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress);
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress, std::string creationIP);
 
 	/**
 	* Updates the ip address of the world with account id = id

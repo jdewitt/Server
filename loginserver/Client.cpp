@@ -71,7 +71,7 @@ bool Client::Process()
 				{
 					server_log->Log(log_network, "Session ready received from client.");
 				}
-				Handle_SessionLogin((const char*)app->pBuffer, app->Size());
+				Handle_OSXLogin((const char*)app->pBuffer, app->Size());
 				break;
 			}
 		case OP_Login:
@@ -85,7 +85,7 @@ bool Client::Process()
 				{
 					server_log->Log(log_network, "Login received from client.");
 				}
-					Handle_OldLogin((const char*)app->pBuffer, app->Size());
+					Handle_PCLogin((const char*)app->pBuffer, app->Size());
 				break;
 			}
 		case OP_LoginComplete:
@@ -170,7 +170,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 	}
 }
 
-void Client::Handle_SessionLogin(const char* data, unsigned int size)
+void Client::Handle_OSXLogin(const char* data, unsigned int size)
 {
 	if(version != cv_old)
 	{
@@ -201,25 +201,19 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	char sha1hash[41];
 	in.s_addr = connection->GetRemoteIP();
 	bool result = false;
+	unsigned int enable;
+	string platform = "OSX";
 
 	string userandpass = password + salt;
 	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
-		
-		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
-		{
-			server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
-		}
+
+		Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "notexist");
 		if (server.options.IsCreateOn())
 		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
-			}
-			/*eventually add a unix time stamp calculator from last id that matches IP
-			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, username, userandpass, "", 2, string(inet_ntoa(in)));
+			Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "created");
+			server.db->UpdateLSAccountInfo(NULL, username, userandpass, "", 2, string(inet_ntoa(in)), string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -236,10 +230,7 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 		}
 		else
 		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, username, string(inet_ntoa(in)), time(nullptr), "Mac bad password");
-			}
+			Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "badpass");
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
 		}
@@ -249,10 +240,12 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	{
 		if(!sentsessioninfo)
 		{
-			if (server.options.IsLoggedOn())
+			if (server.db->GetStatusLSAccountTable(username, enable) == false)
 			{
-				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "OSX Logged in Success");
+				FatalError("Account is not activated. Server is not allowing open logins at this time.");
+				return;
 			}
+			Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "success");
 			server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 			GenerateKey();
 			account_id = d_account_id;
@@ -281,27 +274,9 @@ void Client::Handle_SessionLogin(const char* data, unsigned int size)
 	return;
 }
 
-void Client::FatalError(const char* message) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ClientError, strlen(message) + 1);
-	if (strlen(message) > 1) {
-		strcpy((char*)outapp->pBuffer, message);
-	}
-	connection->QueuePacket(outapp);
-	delete outapp;
-	return;
-}
-
-void Client::Handle_LoginComplete(const char* data, unsigned int size) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginComplete, 20);
-	outapp->pBuffer[0] = 1;
-	connection->QueuePacket(outapp);
-	delete outapp;
-	return;
-}
-
-void Client::Handle_OldLogin(const char* data, unsigned int size)
+void Client::Handle_PCLogin(const char* data, unsigned int size)
 {
-	if(status != cs_waiting_for_login)
+	if (status != cs_waiting_for_login)
 	{
 		server_log->Log(log_network_error, "Login received after already having logged in.");
 		return;
@@ -333,30 +308,17 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 
 	string userandpass = password + salt;
 	unsigned int enable;
+	string platform = "PC";
 
-	if (server.db->GetStatusLSAccountTable(username, enable) == false)
-	{
-		FatalError("Account is not activated. Server is not allowing open logins at this time.");
-		return;
-	}
-
-	if(server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
+	if (server.db->GetLoginDataFromAccountName(username, d_pass_hash, d_account_id) == false)
 	{
 		server_log->Log(log_client_error, "Error logging in, user %s does not exist in the database.", username.c_str());
-		
-		if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn())
-		{
-			server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Account not exist, Mac");
-		}
+
+		Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "notexist");
 		if (server.options.IsCreateOn())
 		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Account created, Mac");
-			}
-			/*eventually add a unix time stamp calculator from last id that matches IP
-			to limit account creations per time specified by an interval set in the ini.*/
-			server.db->UpdateLSAccountInfo(NULL, username.c_str(), userandpass.c_str(), "", 2, string(inet_ntoa(in)));
+			Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "created");
+			server.db->UpdateLSAccountInfo(NULL, username.c_str(), userandpass.c_str(), "", 1, string(inet_ntoa(in)), string(inet_ntoa(in)));
 			FatalError("Account did not exist so it was created. Hit connect again to login.");
 
 			return;
@@ -366,28 +328,27 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	else
 	{
 		sha1::calc(userandpass.c_str(), userandpass.length(), sha1pass);
-		sha1::toHexString(sha1pass,sha1hash);
-		if(d_pass_hash.compare((char*)sha1hash) == 0)
+		sha1::toHexString(sha1pass, sha1hash);
+		if (d_pass_hash.compare((char*)sha1hash) == 0)
 		{
 			result = true;
 		}
 		else
 		{
-			if (server.options.IsLoginFailsOn())
-			{
-				server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "Mac bad password");
-			}
+			Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "badpass");
 			server_log->Log(log_client_error, "%s", sha1hash);
 			result = false;
 		}
 	}
 
-	if(result)
+	if (result)
 	{
-		if (server.options.IsLoggedOn())
+		if (server.db->GetStatusLSAccountTable(username, enable) == false)
 		{
-			server.db->UpdateAccessLog(d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "PC Logged in Success");
+			FatalError("Account is not activated. Server is not allowing open logins at this time.");
+			return;
 		}
+		Logs(platform, d_account_id, username.c_str(), string(inet_ntoa(in)), time(nullptr), "success");
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
 		GenerateKey();
 		account_id = d_account_id;
@@ -405,6 +366,24 @@ void Client::Handle_OldLogin(const char* data, unsigned int size)
 	{
 		FatalError("Invalid username or password.");
 	}
+}
+
+void Client::FatalError(const char* message) {
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ClientError, strlen(message) + 1);
+	if (strlen(message) > 1) {
+		strcpy((char*)outapp->pBuffer, message);
+	}
+	connection->QueuePacket(outapp);
+	delete outapp;
+	return;
+}
+
+void Client::Handle_LoginComplete(const char* data, unsigned int size) {
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginComplete, 20);
+	outapp->pBuffer[0] = 1;
+	connection->QueuePacket(outapp);
+	delete outapp;
+	return;
 }
 
 void Client::Handle_Play(const char* data)
@@ -461,5 +440,26 @@ void Client::GenerateKey()
 
 		key.append((const char*)&key_selection[MakeRandomInt(0, 35)], 1);
 		count++;
+	}
+}
+
+void Client::Logs(std::string platform, unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason)
+{
+	// valid reason codes are: notexist, created, badpass, success
+	if (server.options.IsLoginFailsOn() && !server.options.IsCreateOn() && reason == "notexist")
+	{
+		server.db->UpdateAccessLog(account_id, account_name, IP, accessed, "Account not exist, " + platform);
+	}
+	if (server.options.IsLoginFailsOn() && server.options.IsCreateOn() && reason == "created")
+	{
+		server.db->UpdateAccessLog(account_id, account_name, IP, accessed, "Account created, " + platform);
+	}
+	if (server.options.IsLoginFailsOn() && reason == "badpass")
+	{
+		server.db->UpdateAccessLog(account_id, account_name, IP, accessed, "Bad password, " + platform);
+	}
+	if (server.options.IsLoggedOn() && reason == "success")
+	{
+		server.db->UpdateAccessLog(account_id, account_name, IP, accessed, "Logged in Success, " + platform);
 	}
 }

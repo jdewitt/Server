@@ -77,12 +77,12 @@ public:
 		/**
 	* Verifies login and send a reply for Mac clients.
 	*/
-	void Handle_SessionLogin(const char* data, unsigned int size);
+	void Handle_OSXLogin(const char* data, unsigned int size);
 
 	/**
 	* Verifies login and sends a reply for older client cryptos.
 	*/
-	void Handle_OldLogin(const char* data, unsigned int size);
+	void Handle_PCLogin(const char* data, unsigned int size);
 
 	/**
 	* Not sure what this is, old clients need it to continue.
@@ -113,6 +113,11 @@ public:
 	* Generates a random login key for the client during login.
 	*/
 	void GenerateKey();
+
+	/**
+	* Function for all database logging.
+	*/
+	void Logs(std::string platform, unsigned int account_id, std::string account_name, std::string IP, unsigned int accessed, std::string reason);
 
 	/**
 	* Gets the account id of this client.

@@ -251,7 +251,7 @@ void DatabaseMySQL::UpdateAccessLog(unsigned int account_id, std::string account
 	}
 }
 
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress)
+void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email, unsigned int created_by, std::string LastIPAddress, std::string creationIP)
 {
 	bool activate = 0;
 	if (!db)
@@ -268,7 +268,8 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 	query << "INSERT INTO " << server.options.GetAccountTable() << " SET LoginServerID = ";
 	query << id << ", AccountName = '" << tmpUN << "', AccountPassword = sha('";
 	query << password << "'), AccountCreateDate = now(), LastLoginDate = now(), LastIPAddress = '";
-	query << LastIPAddress << "', client_unlock = '" << activate << "', created_by = '" << created_by << "'";
+	query << LastIPAddress << "', client_unlock = '" << activate << "', created_by = '";
+	query << created_by << "', creationIP = '" << creationIP << "'";
 
 	if (mysql_query(db, query.str().c_str()) != 0)
 	{

@@ -66,7 +66,7 @@ void ClientManager::Process()
 	{
 		struct in_addr in;
 		in.s_addr = oldcur->GetRemoteIP();
-		server_log->Log(log_network, "New Old client connection from %s:%d", inet_ntoa(in), ntohs(oldcur->GetRemotePort()));
+		server_log->Log(log_network, "New client connection from %s:%d", inet_ntoa(in), ntohs(oldcur->GetRemotePort()));
 
 		oldcur->SetOpcodeManager(&old_ops);
 		Client *c = new Client(oldcur, cv_old);
