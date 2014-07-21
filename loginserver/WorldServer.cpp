@@ -246,7 +246,7 @@ bool WorldServer::Process()
 					name.assign(lsau->useraccount);
 					password.assign(lsau->userpassword);
 					email.assign(lsau->useremail);
-					server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email, NULL, "");
+					server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email, NULL, "", "");
 				}
 				break;
 			}
